@@ -14,7 +14,7 @@ class GRP_License {
     /**
      * License API endpoint
      */
-    const LICENSE_API_URL = 'https://yourwebsite.com/wp-json/grp-license/v1/';
+    const LICENSE_API_URL = 'https://reactwoo.com/wp-json/grp-license/v1/';
     
     /**
      * License statuses
@@ -358,7 +358,7 @@ class GRP_License {
      * Get upgrade URL
      */
     public function get_upgrade_url() {
-        return 'https://yourwebsite.com/google-reviews-plugin-pro/';
+        return 'https://reactwoo.com/google-reviews-plugin-pro/';
     }
     
     /**

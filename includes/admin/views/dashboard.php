@@ -100,7 +100,7 @@ if (!defined('ABSPATH')) {
                 <li>✓ <?php esc_html_e('Advanced Customization', 'google-reviews-plugin'); ?></li>
                 <li>✓ <?php esc_html_e('Analytics Dashboard', 'google-reviews-plugin'); ?></li>
             </ul>
-            <a href="https://yourwebsite.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank">
+            <a href="https://reactwoo.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank">
                 <?php esc_html_e('Upgrade Now', 'google-reviews-plugin'); ?>
             </a>
         </div>

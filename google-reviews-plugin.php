@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Google Reviews Plugin
- * Plugin URI: https://yourwebsite.com/google-reviews-plugin
+ * Plugin URI: https://reactwoo.com/google-reviews-plugin
  * Description: Display Google Business reviews on your WordPress site with beautiful widgets and shortcodes. Free and Pro versions available.
  * Version: 1.0.0
- * Author: Your Company
- * Author URI: https://yourwebsite.com
+ * Author: ReactWoo Ltd
+ * Author URI: https://reactwoo.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: google-reviews-plugin
