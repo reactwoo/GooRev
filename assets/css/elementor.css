@@ -1,0 +1,224 @@
+/* Google Reviews Plugin - Elementor Widget Styles */
+
+.elementor-widget-grp-reviews .grp-reviews {
+    font-family: inherit;
+}
+
+.elementor-widget-grp-reviews .grp-review {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.elementor-widget-grp-reviews .grp-review:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.elementor-widget-grp-reviews .grp-review-rating {
+    margin-bottom: 15px;
+}
+
+.elementor-widget-grp-reviews .grp-star {
+    color: #ffc107;
+    font-size: 18px;
+    margin-right: 2px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.elementor-widget-grp-reviews .grp-review-text {
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.elementor-widget-grp-reviews .grp-review-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.elementor-widget-grp-reviews .grp-review-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f0f0f0;
+}
+
+.elementor-widget-grp-reviews .grp-author-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.elementor-widget-grp-reviews .grp-review-date {
+    color: #666;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.elementor-widget-grp-reviews .grp-review-reply {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007cba;
+}
+
+.elementor-widget-grp-reviews .grp-reply-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
+}
+
+.elementor-widget-grp-reviews .grp-reply-text {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Carousel Styles */
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-wrapper {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-review-item {
+    flex: 0 0 100%;
+    padding: 0 10px;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-prev,
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+    font-size: 18px;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-prev:hover,
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-next:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-prev {
+    left: 10px;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-next {
+    right: 10px;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: #ccc;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-dot.active {
+    background: #007cba;
+}
+
+.elementor-widget-grp-reviews .grp-layout-carousel .grp-dot:hover {
+    background: #999;
+}
+
+/* List Layout */
+.elementor-widget-grp-reviews .grp-layout-list .grp-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* No Reviews */
+.elementor-widget-grp-reviews .grp-no-reviews {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 2px dashed #ddd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-prev,
+    .elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-next {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+    
+    .elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-prev {
+        left: 5px;
+    }
+    
+    .elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-next {
+        right: 5px;
+    }
+    
+    .elementor-widget-grp-reviews .grp-review {
+        padding: 15px;
+    }
+    
+    .elementor-widget-grp-reviews .grp-review-text {
+        font-size: 14px;
+    }
+    
+    .elementor-widget-grp-reviews .grp-review-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* Elementor Editor Styles */
+.elementor-editor .grp-reviews {
+    pointer-events: none;
+}
+
+.elementor-editor .grp-carousel-prev,
+.elementor-editor .grp-carousel-next {
+    pointer-events: none;
+}
+
+.elementor-editor .grp-dot {
+    pointer-events: none;
+}

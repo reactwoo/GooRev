@@ -1,0 +1,103 @@
+/* Google Reviews Plugin - Gutenberg Block Styles */
+
+.grp-gutenberg-block {
+    margin: 20px 0;
+}
+
+.grp-gutenberg-block .grp-review {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.grp-gutenberg-block .grp-review-rating {
+    margin-bottom: 15px;
+}
+
+.grp-gutenberg-block .grp-star {
+    color: #ffc107;
+    font-size: 18px;
+    margin-right: 2px;
+}
+
+.grp-gutenberg-block .grp-review-text {
+    color: #333;
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.grp-gutenberg-block .grp-review-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.grp-gutenberg-block .grp-review-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.grp-gutenberg-block .grp-author-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.grp-gutenberg-block .grp-review-date {
+    color: #666;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+/* Editor Styles */
+.grp-gutenberg-block-editor {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f9f9f9;
+}
+
+.grp-block-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.grp-block-header h3 {
+    margin: 0 0 10px 0;
+    color: #23282d;
+    font-size: 18px;
+}
+
+.grp-block-description {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Inspector Controls */
+.grp-hidden {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grp-gutenberg-block .grp-review {
+        padding: 15px;
+    }
+    
+    .grp-gutenberg-block .grp-review-text {
+        font-size: 14px;
+    }
+    
+    .grp-gutenberg-block .grp-review-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
