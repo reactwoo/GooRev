@@ -1,0 +1,68 @@
+{
+  "name": "google-reviews-plugin",
+  "version": "1.0.0",
+  "description": "Display Google Business reviews on your WordPress site with beautiful widgets and shortcodes.",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --mode=production",
+    "dev": "webpack --mode=development --watch",
+    "lint": "eslint assets/js/",
+    "lint:fix": "eslint assets/js/ --fix",
+    "sass": "sass assets/scss:assets/css --watch",
+    "sass:build": "sass assets/scss:assets/css --style=compressed",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "google-reviews",
+    "testimonials",
+    "ratings",
+    "google-my-business",
+    "shortcode",
+    "widget",
+    "elementor",
+    "gutenberg"
+  ],
+  "author": "ReactWoo Ltd <support@reactwoo.com>",
+  "license": "GPL-2.0-or-later",
+  "homepage": "https://reactwoo.com/google-reviews-plugin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/reactwoo/google-reviews-plugin.git"
+  },
+  "bugs": {
+    "url": "https://reactwoo.com/support"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "@wordpress/babel-preset-default": "^7.22.0",
+    "@wordpress/eslint-plugin": "^13.0.0",
+    "@wordpress/scripts": "^26.0.0",
+    "babel-loader": "^9.1.0",
+    "css-loader": "^6.8.0",
+    "eslint": "^8.42.0",
+    "eslint-config-wordpress": "^2.0.0",
+    "jest": "^29.5.0",
+    "mini-css-extract-plugin": "^2.7.0",
+    "sass": "^1.62.0",
+    "sass-loader": "^13.2.0",
+    "style-loader": "^3.3.0",
+    "webpack": "^5.84.0",
+    "webpack-cli": "^5.1.0"
+  },
+  "dependencies": {
+    "jquery": "^3.6.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  }
+}

@@ -1,0 +1,65 @@
+{
+    "name": "reactwoo/google-reviews-plugin",
+    "description": "Display Google Business reviews on your WordPress site with beautiful widgets and shortcodes.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "ReactWoo Ltd",
+            "email": "support@reactwoo.com",
+            "homepage": "https://reactwoo.com"
+        }
+    ],
+    "keywords": [
+        "wordpress",
+        "plugin",
+        "google-reviews",
+        "testimonials",
+        "ratings",
+        "google-my-business",
+        "shortcode",
+        "widget",
+        "elementor",
+        "gutenberg"
+    ],
+    "homepage": "https://reactwoo.com/google-reviews-plugin",
+    "support": {
+        "issues": "https://reactwoo.com/support",
+        "source": "https://github.com/reactwoo/google-reviews-plugin",
+        "docs": "https://reactwoo.com/docs/google-reviews-plugin"
+    },
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0",
+        "wp-coding-standards/wpcs": "^2.3",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ReactWoo\\GoogleReviews\\": "includes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ReactWoo\\GoogleReviews\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "phpcs": "phpcs --standard=WordPress includes/ assets/",
+        "phpcbf": "phpcbf --standard=WordPress includes/ assets/",
+        "phpcs:compatibility": "phpcs --standard=PHPCompatibilityWP includes/ assets/",
+        "lint": "find includes/ assets/ -name '*.php' -exec php -l {} \\;"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "extra": {
+        "wordpress-install-dir": "wp"
+    }
+}
