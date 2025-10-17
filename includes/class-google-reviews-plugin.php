@@ -105,6 +105,11 @@ class Google_Reviews_Plugin {
         // Initialize frontend
         if (!is_admin()) {
             $this->frontend = new GRP_Frontend();
+        } else {
+            // Initialize admin (adds menus, settings pages, assets)
+            if (class_exists('GRP_Admin')) {
+                $this->admin = new GRP_Admin();
+            }
         }
     }
     
