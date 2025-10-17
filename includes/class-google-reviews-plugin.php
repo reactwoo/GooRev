@@ -17,6 +17,18 @@ class Google_Reviews_Plugin {
     private static $instance = null;
     
     /**
+     * Plugin components
+     */
+    public $api;
+    public $reviews;
+    public $shortcode;
+    public $styles;
+    public $cache;
+    public $license;
+    public $frontend;
+    public $admin;
+    
+    /**
      * Get plugin instance
      */
     public static function get_instance() {
