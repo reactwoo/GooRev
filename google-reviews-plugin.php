@@ -38,8 +38,8 @@ require_once GRP_PLUGIN_DIR . 'includes/class-google-reviews-plugin.php';
 
 // Initialize the plugin
 function grp_init() {
-    $plugin = new Google_Reviews_Plugin();
-    $plugin->init();
+    // Use singleton accessor; constructor remains private
+    Google_Reviews_Plugin::get_instance();
 }
 add_action('plugins_loaded', 'grp_init');
 

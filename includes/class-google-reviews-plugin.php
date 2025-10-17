@@ -72,6 +72,8 @@ class Google_Reviews_Plugin {
      * Initialize hooks
      */
     private function init_hooks() {
+        // Defer initialization to WordPress hooks
+        add_action('init', array($this, 'load_textdomain'));
         add_action('init', array($this, 'init_components'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
@@ -111,7 +113,7 @@ class Google_Reviews_Plugin {
     /**
      * Load plugin textdomain
      */
-    private function load_textdomain() {
+    public function load_textdomain() {
         load_plugin_textdomain(
             'google-reviews-plugin',
             false,
