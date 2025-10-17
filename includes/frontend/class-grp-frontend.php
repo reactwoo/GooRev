@@ -23,8 +23,6 @@ class GRP_Frontend {
      */
     private function init_hooks() {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
-        add_action('wp_head', array($this, 'output_custom_css'));
-        add_action('wp_footer', array($this, 'output_custom_js'));
     }
     
     /**
@@ -60,6 +58,17 @@ class GRP_Frontend {
                 'error' => __('An error occurred. Please try again.', 'google-reviews-plugin'),
             )
         ));
+
+        // Attach custom CSS/JS using WP inline helpers (avoid echoing in head/footer)
+        $custom_css = get_option('grp_custom_css', '');
+        if (!empty($custom_css)) {
+            wp_add_inline_style('grp-frontend', $custom_css);
+        }
+
+        $custom_js = get_option('grp_custom_js', '');
+        if (!empty($custom_js)) {
+            wp_add_inline_script('grp-frontend', $custom_js);
+        }
     }
     
     /**
@@ -89,20 +98,10 @@ class GRP_Frontend {
     /**
      * Output custom CSS
      */
-    public function output_custom_css() {
-        $custom_css = get_option('grp_custom_css', '');
-        if (!empty($custom_css)) {
-            echo '<style type="text/css">' . $custom_css . '</style>';
-        }
-    }
+    public function output_custom_css() {}
     
     /**
      * Output custom JavaScript
      */
-    public function output_custom_js() {
-        $custom_js = get_option('grp_custom_js', '');
-        if (!empty($custom_js)) {
-            echo '<script type="text/javascript">' . $custom_js . '</script>';
-        }
-    }
+    public function output_custom_js() {}
 }

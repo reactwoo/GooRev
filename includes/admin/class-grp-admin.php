@@ -24,9 +24,11 @@ class GRP_Admin {
     private function init_hooks() {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_init', array($this, 'maybe_handle_oauth'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('wp_ajax_grp_test_connection', array($this, 'ajax_test_connection'));
         add_action('wp_ajax_grp_sync_reviews', array($this, 'ajax_sync_reviews'));
+        add_action('admin_post_grp_disconnect', array($this, 'handle_disconnect'));
     }
     
     /**
@@ -93,7 +95,16 @@ class GRP_Admin {
      * Register settings
      */
     public function register_settings() {
+        // Settings group
         register_setting('grp_settings', 'grp_settings');
+        // Individually stored options used throughout the plugin
+        register_setting('grp_settings', 'grp_google_client_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_google_client_secret', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_default_style', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
+        register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
+        register_setting('grp_settings', 'grp_custom_css', array('type' => 'string'));
+        register_setting('grp_settings', 'grp_custom_js', array('type' => 'string'));
         
         // Google API settings
         add_settings_section(
@@ -209,8 +220,87 @@ class GRP_Admin {
         
         $is_connected = $api->is_connected();
         $is_pro = $license->is_pro();
+
+        // Surface settings API notices
+        settings_errors();
+
+        // Provide OAuth controls
+        $auth_url = '';
+        $disconnect_url = wp_nonce_url(admin_url('admin-post.php?action=grp_disconnect'), 'grp_disconnect');
+        if (!$is_connected) {
+            $auth_url = $api->get_auth_url();
+            echo '<div class="notice notice-info"><p>' . esc_html__('Connect your Google account to start syncing reviews.', 'google-reviews-plugin') . '</p></div>'; 
+            echo '<p><a class="button button-primary" href="' . esc_url($auth_url) . '">' . esc_html__('Connect Google Account', 'google-reviews-plugin') . '</a></p>'; 
+        } else {
+            echo '<div class="notice notice-success"><p>' . esc_html__('Google account connected.', 'google-reviews-plugin') . '</p></div>';
+            echo '<p><a class="button" href="' . esc_url($disconnect_url) . '">' . esc_html__('Disconnect', 'google-reviews-plugin') . '</a></p>';
+        }
         
         include GRP_PLUGIN_DIR . 'includes/admin/views/settings.php';
+    }
+
+    /**
+     * Handle OAuth callback and notices
+     */
+    public function maybe_handle_oauth() {
+        if (!is_admin()) {
+            return;
+        }
+
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $page = isset($_GET['page']) ? sanitize_text_field(wp_unslash($_GET['page'])) : '';
+        $action = isset($_GET['action']) ? sanitize_text_field(wp_unslash($_GET['action'])) : '';
+
+        if ($page !== 'google-reviews-settings' || $action !== 'oauth_callback') {
+            return;
+        }
+
+        $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
+        $code = isset($_GET['code']) ? sanitize_text_field(wp_unslash($_GET['code'])) : '';
+        $error = isset($_GET['error']) ? sanitize_text_field(wp_unslash($_GET['error'])) : '';
+
+        if (!empty($error)) {
+            add_settings_error('grp_settings', 'grp_oauth_error', sprintf(__('OAuth error: %s', 'google-reviews-plugin'), $error), 'error');
+            return;
+        }
+
+        if (!$state || !wp_verify_nonce($state, 'grp_oauth_state')) {
+            add_settings_error('grp_settings', 'grp_oauth_state', __('Invalid OAuth state. Please try again.', 'google-reviews-plugin'), 'error');
+            return;
+        }
+
+        if (!$code) {
+            add_settings_error('grp_settings', 'grp_oauth_code', __('Missing authorization code.', 'google-reviews-plugin'), 'error');
+            return;
+        }
+
+        $api = new GRP_API();
+        $ok = $api->exchange_code_for_tokens($code);
+        if ($ok) {
+            add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
+        } else {
+            add_settings_error('grp_settings', 'grp_oauth_fail', __('Failed to exchange authorization code for tokens.', 'google-reviews-plugin'), 'error');
+        }
+    }
+
+    /**
+     * Disconnect handler
+     */
+    public function handle_disconnect() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+
+        check_admin_referer('grp_disconnect');
+
+        $api = new GRP_API();
+        $api->disconnect();
+
+        wp_safe_redirect(admin_url('admin.php?page=google-reviews-settings'));
+        exit;
     }
     
     /**
@@ -257,6 +347,15 @@ class GRP_Admin {
      */
     public function render_google_api_section() {
         echo '<p>' . __('Configure your Google My Business API credentials.', 'google-reviews-plugin') . '</p>';
+        echo '<p><a target="_blank" rel="noopener" href="https://console.cloud.google.com/">' . esc_html__('Open Google Cloud Console', 'google-reviews-plugin') . '</a></p>';
+        echo '<ol style="margin-left:20px;">'
+            . '<li>' . esc_html__('Create/select a GCP project', 'google-reviews-plugin') . '</li>'
+            . '<li>' . esc_html__('Enable Business Profile API', 'google-reviews-plugin') . '</li>'
+            . '<li>' . esc_html__('Configure OAuth consent screen', 'google-reviews-plugin') . '</li>'
+            . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application)', 'google-reviews-plugin') . '</li>'
+            . '<li>' . sprintf(esc_html__('Add Authorized redirect URI: %s', 'google-reviews-plugin'), esc_html(admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'))) . '</li>'
+            . '<li>' . esc_html__('Copy Client ID and Client Secret into the fields below', 'google-reviews-plugin') . '</li>'
+        . '</ol>';
     }
     
     /**
@@ -265,7 +364,9 @@ class GRP_Admin {
     public function render_client_id_field() {
         $value = get_option('grp_google_client_id', '');
         echo '<input type="text" name="grp_google_client_id" value="' . esc_attr($value) . '" class="regular-text" />';
-        echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID.', 'google-reviews-plugin') . '</p>';
+        echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID.', 'google-reviews-plugin') . ' '
+            . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Get it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
+            . '</p>';
     }
     
     /**
@@ -274,7 +375,9 @@ class GRP_Admin {
     public function render_client_secret_field() {
         $value = get_option('grp_google_client_secret', '');
         echo '<input type="password" name="grp_google_client_secret" value="' . esc_attr($value) . '" class="regular-text" />';
-        echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret.', 'google-reviews-plugin') . '</p>';
+        echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret.', 'google-reviews-plugin') . ' '
+            . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Find it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
+            . '</p>';
     }
     
     /**
