@@ -56,11 +56,9 @@ class Google_Reviews_Plugin {
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-license.php';
         
         // Admin classes
-        if (is_admin()) {
-            require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
-            require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-settings.php';
-            require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-dashboard.php';
-        }
+		if (is_admin()) {
+			require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
+		}
         
         // Frontend classes
         require_once GRP_PLUGIN_DIR . 'includes/frontend/class-grp-frontend.php';
