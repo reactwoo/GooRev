@@ -222,8 +222,14 @@
         // Remove existing notices
         $('.grp-notice').remove();
         
-        // Add new notice
-        $('.grp-admin h1').after($notice);
+        // Add new notice near a visible page header
+        var $header = $('.grp-settings h1, .grp-dashboard h1, .wrap h1').first();
+        if ($header.length) {
+            $header.after($notice);
+        } else {
+            // Fallback: prepend to body
+            $('body').prepend($notice);
+        }
         
         // Auto-hide after duration
         if (duration) {
