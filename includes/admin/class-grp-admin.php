@@ -192,6 +192,7 @@ class GRP_Admin {
                 'syncing_reviews' => __('Syncing reviews...', 'google-reviews-plugin'),
                 'sync_success' => __('Reviews synced successfully!', 'google-reviews-plugin'),
                 'sync_failed' => __('Failed to sync reviews.', 'google-reviews-plugin'),
+                'confirm_disconnect' => __('Are you sure you want to disconnect?', 'google-reviews-plugin'),
             )
         ));
     }

@@ -49,16 +49,16 @@
             var $button = $(this);
             var originalText = $button.text();
             
-            $button.prop('disabled', true).text(grp_admin_ajax.strings.testing_connection);
+            $button.prop('disabled', true).text(grp_admin.strings.testing_connection);
             
-            $.post(grp_admin_ajax.ajax_url, {
+            $.post(grp_admin.ajax_url, {
                 action: 'grp_test_connection',
-                nonce: grp_admin_ajax.nonce
+                nonce: grp_admin.nonce
             }, function(response) {
                 if (response.success) {
-                    showNotice('success', grp_admin_ajax.strings.connection_success);
+                    showNotice('success', grp_admin.strings.connection_success);
                 } else {
-                    showNotice('error', grp_admin_ajax.strings.connection_failed + ': ' + response.data);
+                    showNotice('error', grp_admin.strings.connection_failed + ': ' + response.data);
                 }
             }).always(function() {
                 $button.prop('disabled', false).text(originalText);
@@ -70,20 +70,20 @@
             var $button = $(this);
             var originalText = $button.text();
             
-            $button.prop('disabled', true).text(grp_admin_ajax.strings.syncing_reviews);
+            $button.prop('disabled', true).text(grp_admin.strings.syncing_reviews);
             
-            $.post(grp_admin_ajax.ajax_url, {
+            $.post(grp_admin.ajax_url, {
                 action: 'grp_sync_reviews',
-                nonce: grp_admin_ajax.nonce
+                nonce: grp_admin.nonce
             }, function(response) {
                 if (response.success) {
-                    showNotice('success', grp_admin_ajax.strings.sync_success);
+                    showNotice('success', grp_admin.strings.sync_success);
                     // Reload page to show updated reviews
                     setTimeout(function() {
                         location.reload();
                     }, 1000);
                 } else {
-                    showNotice('error', grp_admin_ajax.strings.sync_failed + ': ' + response.data);
+                    showNotice('error', grp_admin.strings.sync_failed + ': ' + response.data);
                 }
             }).always(function() {
                 $button.prop('disabled', false).text(originalText);
@@ -92,7 +92,7 @@
         
         // Disconnect button
         $('#grp-disconnect').on('click', function() {
-            if (confirm(grp_admin_ajax.strings.confirm_disconnect)) {
+            if (confirm(grp_admin.strings.confirm_disconnect)) {
                 // Add disconnect functionality here
                 showNotice('info', 'Disconnecting...');
                 setTimeout(function() {
@@ -108,9 +108,9 @@
             
             $button.prop('disabled', true).text('Clearing...');
             
-            $.post(grp_admin_ajax.ajax_url, {
+            $.post(grp_admin.ajax_url, {
                 action: 'grp_clear_cache',
-                nonce: grp_admin_ajax.nonce
+                nonce: grp_admin.nonce
             }, function(response) {
                 if (response.success) {
                     showNotice('success', 'Cache cleared successfully!');
@@ -132,9 +132,9 @@
             var $form = $(this).closest('form');
             var formData = $form.serialize();
             
-            $.post(grp_admin_ajax.ajax_url, {
+            $.post(grp_admin.ajax_url, {
                 action: 'grp_save_settings',
-                nonce: grp_admin_ajax.nonce,
+                nonce: grp_admin.nonce,
                 data: formData
             }, function(response) {
                 if (response.success) {
