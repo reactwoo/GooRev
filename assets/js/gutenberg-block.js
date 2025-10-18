@@ -98,7 +98,15 @@
             
             var layoutOptions = [
                 { label: i18n.__('Carousel', 'google-reviews-plugin'), value: 'carousel' },
-                { label: i18n.__('List', 'google-reviews-plugin'), value: 'list' }
+                { label: i18n.__('List', 'google-reviews-plugin'), value: 'list' },
+                { label: i18n.__('Grid', 'google-reviews-plugin'), value: 'grid' },
+                { label: i18n.__('Grid Carousel', 'google-reviews-plugin'), value: 'grid_carousel' }
+            ];
+
+            var themeOptions = [
+                { label: i18n.__('Light', 'google-reviews-plugin'), value: 'light' },
+                { label: i18n.__('Dark', 'google-reviews-plugin'), value: 'dark' },
+                { label: i18n.__('Auto', 'google-reviews-plugin'), value: 'auto' }
             ];
             
             var sortOptions = [
@@ -128,12 +136,56 @@
                             }
                         }),
                         el(SelectControl, {
+                            label: i18n.__('Theme', 'google-reviews-plugin'),
+                            value: attributes.theme || 'light',
+                            options: themeOptions,
+                            onChange: function(value) {
+                                setAttributes({ theme: value });
+                            }
+                        }),
+                        el(SelectControl, {
                             label: i18n.__('Layout', 'google-reviews-plugin'),
                             value: attributes.layout,
                             options: layoutOptions,
                             onChange: function(value) {
                                 setAttributes({ layout: value });
                             }
+                        }),
+                        el(RangeControl, {
+                            label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
+                            value: attributes.cols_desktop || 3,
+                            onChange: function(value) {
+                                setAttributes({ cols_desktop: value });
+                            },
+                            min: 1,
+                            max: 6
+                        }),
+                        el(RangeControl, {
+                            label: i18n.__('Columns (Tablet)', 'google-reviews-plugin'),
+                            value: attributes.cols_tablet || 2,
+                            onChange: function(value) {
+                                setAttributes({ cols_tablet: value });
+                            },
+                            min: 1,
+                            max: 4
+                        }),
+                        el(RangeControl, {
+                            label: i18n.__('Columns (Mobile)', 'google-reviews-plugin'),
+                            value: attributes.cols_mobile || 1,
+                            onChange: function(value) {
+                                setAttributes({ cols_mobile: value });
+                            },
+                            min: 1,
+                            max: 3
+                        }),
+                        el(RangeControl, {
+                            label: i18n.__('Gap (px)', 'google-reviews-plugin'),
+                            value: attributes.gap || 20,
+                            onChange: function(value) {
+                                setAttributes({ gap: value });
+                            },
+                            min: 0,
+                            max: 60
                         }),
                         el(RangeControl, {
                             label: i18n.__('Number of Reviews', 'google-reviews-plugin'),
@@ -204,7 +256,7 @@
                     el(PanelBody, { 
                         title: i18n.__('Carousel Options', 'google-reviews-plugin'), 
                         initialOpen: false,
-                        className: attributes.layout !== 'carousel' ? 'grp-hidden' : ''
+                        className: (attributes.layout !== 'carousel' && attributes.layout !== 'grid_carousel') ? 'grp-hidden' : ''
                     },
                         el(ToggleControl, {
                             label: i18n.__('Autoplay', 'google-reviews-plugin'),

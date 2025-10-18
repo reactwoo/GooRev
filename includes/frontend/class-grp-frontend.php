@@ -40,6 +40,10 @@ class GRP_Frontend {
             array(),
             GRP_PLUGIN_VERSION
         );
+
+        // Inject dynamic style variants (light/dark/auto) via inline CSS
+        $styles = new GRP_Styles();
+        wp_add_inline_style('grp-frontend', $styles->get_all_css());
         
         wp_enqueue_script(
             'grp-frontend',

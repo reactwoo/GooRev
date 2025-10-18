@@ -40,31 +40,31 @@ class GRP_Styles {
             'modern' => array(
                 'name' => __('Modern', 'google-reviews-plugin'),
                 'description' => __('Clean and contemporary design with subtle shadows', 'google-reviews-plugin'),
-                'variants' => array('light', 'dark'),
+                'variants' => array('light', 'dark', 'auto'),
                 'features' => array('shadows', 'rounded_corners', 'gradients')
             ),
             'classic' => array(
                 'name' => __('Classic', 'google-reviews-plugin'),
                 'description' => __('Traditional design with clean lines and professional look', 'google-reviews-plugin'),
-                'variants' => array('light', 'dark'),
+                'variants' => array('light', 'dark', 'auto'),
                 'features' => array('borders', 'clean_typography')
             ),
             'minimal' => array(
                 'name' => __('Minimal', 'google-reviews-plugin'),
                 'description' => __('Minimalist design focusing on content', 'google-reviews-plugin'),
-                'variants' => array('light', 'dark'),
+                'variants' => array('light', 'dark', 'auto'),
                 'features' => array('minimal_spacing', 'clean_typography')
             ),
             'corporate' => array(
                 'name' => __('Corporate', 'google-reviews-plugin'),
                 'description' => __('Professional business design with structured layout', 'google-reviews-plugin'),
-                'variants' => array('light', 'dark'),
+                'variants' => array('light', 'dark', 'auto'),
                 'features' => array('structured_layout', 'professional_colors')
             ),
             'creative' => array(
                 'name' => __('Creative', 'google-reviews-plugin'),
                 'description' => __('Artistic design with creative elements and animations', 'google-reviews-plugin'),
-                'variants' => array('light', 'dark'),
+                'variants' => array('light', 'dark', 'auto'),
                 'features' => array('animations', 'creative_elements', 'gradients')
             )
         );
@@ -92,40 +92,85 @@ class GRP_Styles {
         if (!$style) {
             return '';
         }
-        
+
         $css = '';
-        
+
+        // Define CSS variables for this style+variant
+        $css .= $this->get_variant_css_variables($style_name, $variant);
+
+        // Append structural CSS that relies on the variables
         switch ($style_name) {
             case 'modern':
-                $css = $this->get_modern_css($variant);
+                $css .= $this->get_modern_css();
                 break;
             case 'classic':
-                $css = $this->get_classic_css($variant);
+                $css .= $this->get_classic_css();
                 break;
             case 'minimal':
-                $css = $this->get_minimal_css($variant);
+                $css .= $this->get_minimal_css();
                 break;
             case 'corporate':
-                $css = $this->get_corporate_css($variant);
+                $css .= $this->get_corporate_css();
                 break;
             case 'creative':
-                $css = $this->get_creative_css($variant);
+                $css .= $this->get_creative_css();
                 break;
         }
-        
+
         return $css;
+    }
+
+    /**
+     * Get CSS variable definitions for a style/variant combination.
+     * Supports 'auto' using prefers-color-scheme to switch variables.
+     */
+    private function get_variant_css_variables($style_name, $variant) {
+        // Use generic light/dark palettes; can be customized per style later
+        $light = $this->get_variant_colors($style_name, 'light');
+        $dark = $this->get_variant_colors($style_name, 'dark');
+
+        if ($variant === 'auto') {
+            return "
+            .grp-style-{$style_name}.grp-theme-auto {
+                --grp-background: {$light['background']};
+                --grp-background_alt: {$light['background_alt']};
+                --grp-text: {$light['text']};
+                --grp-muted: {$light['muted']};
+                --grp-border: {$light['border']};
+            }
+            @media (prefers-color-scheme: dark) {
+                .grp-style-{$style_name}.grp-theme-auto {
+                    --grp-background: {$dark['background']};
+                    --grp-background_alt: {$dark['background_alt']};
+                    --grp-text: {$dark['text']};
+                    --grp-muted: {$dark['muted']};
+                    --grp-border: {$dark['border']};
+                }
+            }
+            ";
+        }
+
+        $colors = $variant === 'dark' ? $dark : $light;
+        $variant_class = "grp-theme-{$variant}";
+        return "
+        .grp-style-{$style_name}.{$variant_class} {
+            --grp-background: {$colors['background']};
+            --grp-background_alt: {$colors['background_alt']};
+            --grp-text: {$colors['text']};
+            --grp-muted: {$colors['muted']};
+            --grp-border: {$colors['border']};
+        }
+        ";
     }
     
     /**
      * Get modern style CSS
      */
-    private function get_modern_css($variant) {
-        $colors = $this->get_variant_colors('modern', $variant);
-        
+    private function get_modern_css() {
         return "
         .grp-style-modern .grp-review {
-            background: {$colors['background']};
-            border: 1px solid {$colors['border']};
+            background: var(--grp-background);
+            border: 1px solid var(--grp-border);
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
@@ -149,7 +194,7 @@ class GRP_Styles {
         }
         
         .grp-style-modern .grp-review-text {
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 16px;
             line-height: 1.6;
             margin-bottom: 15px;
@@ -170,11 +215,11 @@ class GRP_Styles {
         
         .grp-style-modern .grp-author-name {
             font-weight: 600;
-            color: {$colors['text']};
+            color: var(--grp-text);
         }
         
         .grp-style-modern .grp-review-date {
-            color: {$colors['muted']};
+            color: var(--grp-muted);
             font-size: 14px;
         }
         ";
@@ -183,13 +228,11 @@ class GRP_Styles {
     /**
      * Get classic style CSS
      */
-    private function get_classic_css($variant) {
-        $colors = $this->get_variant_colors('classic', $variant);
-        
+    private function get_classic_css() {
         return "
         .grp-style-classic .grp-review {
-            background: {$colors['background']};
-            border: 2px solid {$colors['border']};
+            background: var(--grp-background);
+            border: 2px solid var(--grp-border);
             border-radius: 4px;
             padding: 20px;
             margin-bottom: 20px;
@@ -206,7 +249,7 @@ class GRP_Styles {
         }
         
         .grp-style-classic .grp-review-text {
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 15px;
             line-height: 1.5;
             margin-bottom: 15px;
@@ -217,7 +260,7 @@ class GRP_Styles {
             display: flex;
             align-items: center;
             gap: 10px;
-            border-top: 1px solid {$colors['border']};
+            border-top: 1px solid var(--grp-border);
             padding-top: 15px;
         }
         
@@ -230,11 +273,11 @@ class GRP_Styles {
         
         .grp-style-classic .grp-author-name {
             font-weight: 500;
-            color: {$colors['text']};
+            color: var(--grp-text);
         }
         
         .grp-style-classic .grp-review-date {
-            color: {$colors['muted']};
+            color: var(--grp-muted);
             font-size: 13px;
         }
         ";
@@ -243,17 +286,15 @@ class GRP_Styles {
     /**
      * Get minimal style CSS
      */
-    private function get_minimal_css($variant) {
-        $colors = $this->get_variant_colors('minimal', $variant);
-        
+    private function get_minimal_css() {
         return "
         .grp-style-minimal .grp-review {
-            background: {$colors['background']};
+            background: var(--grp-background);
             border: none;
             border-radius: 0;
             padding: 15px 0;
             margin-bottom: 30px;
-            border-bottom: 1px solid {$colors['border']};
+            border-bottom: 1px solid var(--grp-border);
         }
         
         .grp-style-minimal .grp-review:last-child {
@@ -271,7 +312,7 @@ class GRP_Styles {
         }
         
         .grp-style-minimal .grp-review-text {
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 14px;
             line-height: 1.4;
             margin-bottom: 10px;
@@ -292,12 +333,12 @@ class GRP_Styles {
         
         .grp-style-minimal .grp-author-name {
             font-weight: 400;
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 14px;
         }
         
         .grp-style-minimal .grp-review-date {
-            color: {$colors['muted']};
+            color: var(--grp-muted);
             font-size: 12px;
         }
         ";
@@ -306,13 +347,11 @@ class GRP_Styles {
     /**
      * Get corporate style CSS
      */
-    private function get_corporate_css($variant) {
-        $colors = $this->get_variant_colors('corporate', $variant);
-        
+    private function get_corporate_css() {
         return "
         .grp-style-corporate .grp-review {
-            background: {$colors['background']};
-            border: 1px solid {$colors['border']};
+            background: var(--grp-background);
+            border: 1px solid var(--grp-border);
             border-radius: 6px;
             padding: 25px;
             margin-bottom: 20px;
@@ -341,7 +380,7 @@ class GRP_Styles {
         }
         
         .grp-style-corporate .grp-review-text {
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 15px;
             line-height: 1.6;
             margin-bottom: 20px;
@@ -358,17 +397,17 @@ class GRP_Styles {
             height: 45px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid {$colors['border']};
+            border: 2px solid var(--grp-border);
         }
         
         .grp-style-corporate .grp-author-name {
             font-weight: 600;
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 16px;
         }
         
         .grp-style-corporate .grp-review-date {
-            color: {$colors['muted']};
+            color: var(--grp-muted);
             font-size: 14px;
         }
         ";
@@ -377,12 +416,10 @@ class GRP_Styles {
     /**
      * Get creative style CSS
      */
-    private function get_creative_css($variant) {
-        $colors = $this->get_variant_colors('creative', $variant);
-        
+    private function get_creative_css() {
         return "
         .grp-style-creative .grp-review {
-            background: linear-gradient(135deg, {$colors['background']}, {$colors['background_alt']});
+            background: linear-gradient(135deg, var(--grp-background), var(--grp-background_alt));
             border: none;
             border-radius: 20px;
             padding: 25px;
@@ -417,7 +454,7 @@ class GRP_Styles {
         }
         
         .grp-style-creative .grp-review-text {
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 16px;
             line-height: 1.7;
             margin-bottom: 20px;
@@ -444,12 +481,12 @@ class GRP_Styles {
         
         .grp-style-creative .grp-author-name {
             font-weight: 700;
-            color: {$colors['text']};
+            color: var(--grp-text);
             font-size: 16px;
         }
         
         .grp-style-creative .grp-review-date {
-            color: {$colors['muted']};
+            color: var(--grp-muted);
             font-size: 14px;
         }
         
@@ -708,7 +745,7 @@ class GRP_Styles {
         .grp-review-reply {
             margin-top: 15px;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--grp-background_alt);
             border-radius: 8px;
             border-left: 4px solid #007cba;
         }
@@ -721,13 +758,13 @@ class GRP_Styles {
         }
         
         .grp-reply-text {
-            color: #666;
+            color: var(--grp-muted);
         }
         
         .grp-no-reviews {
             text-align: center;
             padding: 40px 20px;
-            color: #666;
+            color: var(--grp-muted);
         }
         ";
     }

@@ -45,9 +45,29 @@ class GRP_Gutenberg {
                     'type' => 'string',
                     'default' => 'modern',
                 ),
+                'theme' => array(
+                    'type' => 'string',
+                    'default' => 'light',
+                ),
                 'layout' => array(
                     'type' => 'string',
                     'default' => 'carousel',
+                ),
+                'cols_desktop' => array(
+                    'type' => 'number',
+                    'default' => 3,
+                ),
+                'cols_tablet' => array(
+                    'type' => 'number',
+                    'default' => 2,
+                ),
+                'cols_mobile' => array(
+                    'type' => 'number',
+                    'default' => 1,
+                ),
+                'gap' => array(
+                    'type' => 'number',
+                    'default' => 20,
                 ),
                 'count' => array(
                     'type' => 'number',
@@ -119,6 +139,10 @@ class GRP_Gutenberg {
             array('wp-edit-blocks'),
             GRP_PLUGIN_VERSION
         );
+
+        // Inline dynamic CSS variables for styles/variants in the editor
+        $styles = new GRP_Styles();
+        wp_add_inline_style('grp-gutenberg-block-editor', $styles->get_all_css());
         
         // Localize script
         wp_localize_script('grp-gutenberg-block', 'grp_gutenberg', array(
@@ -140,6 +164,10 @@ class GRP_Gutenberg {
             array(),
             GRP_PLUGIN_VERSION
         );
+
+        // Ensure dynamic CSS is available on frontend where block styles are loaded
+        $styles = new GRP_Styles();
+        wp_add_inline_style('grp-gutenberg-block', $styles->get_all_css());
     }
     
     /**
@@ -148,7 +176,12 @@ class GRP_Gutenberg {
     public function render_reviews_block($attributes) {
         $shortcode_atts = array(
             'style' => $attributes['style'],
+            'theme' => isset($attributes['theme']) ? $attributes['theme'] : 'light',
             'layout' => $attributes['layout'],
+            'cols_desktop' => isset($attributes['cols_desktop']) ? $attributes['cols_desktop'] : 3,
+            'cols_tablet' => isset($attributes['cols_tablet']) ? $attributes['cols_tablet'] : 2,
+            'cols_mobile' => isset($attributes['cols_mobile']) ? $attributes['cols_mobile'] : 1,
+            'gap' => isset($attributes['gap']) ? $attributes['gap'] : 20,
             'count' => $attributes['count'],
             'min_rating' => $attributes['min_rating'],
             'max_rating' => $attributes['max_rating'],

@@ -13,6 +13,13 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Editor preview helpers for grid */
+.grp-gutenberg-block .grp-layout-grid .grp-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grp-cols-desktop, 3), 1fr);
+    gap: var(--grp-gap, 20px);
+}
+
 .grp-gutenberg-block .grp-review-rating {
     margin-bottom: 15px;
 }
