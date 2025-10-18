@@ -8,6 +8,7 @@
     // Initialize when document is ready
     $(document).ready(function() {
         initCarousels();
+        initGridCarousels();
         initLazyLoading();
     });
     
@@ -200,6 +201,118 @@
         
         // Initialize
         updateCarousel();
+    }
+
+    /**
+     * Initialize grid carousels (multi-items per view)
+     */
+    function initGridCarousels() {
+        $('.grp-layout-grid_carousel').each(function() {
+            var $carousel = $(this);
+            var $track = $carousel.find('.grp-grid-carousel-track');
+            var $items = $carousel.find('.grp-review-item');
+            var $prev = $carousel.find('.grp-carousel-prev');
+            var $next = $carousel.find('.grp-carousel-next');
+            var $dots = $carousel.find('.grp-dot');
+
+            var options = $carousel.data('options') || {};
+            var colsDesktop = options.cols_desktop || 3;
+            var colsTablet = options.cols_tablet || 2;
+            var colsMobile = options.cols_mobile || 1;
+            var gap = options.gap || 20;
+
+            function getItemsPerView() {
+                var width = window.innerWidth;
+                if (width <= 640) return colsMobile;
+                if (width <= 1024) return colsTablet;
+                return colsDesktop;
+            }
+
+            function updateWidths() {
+                var perView = getItemsPerView();
+                var itemWidthPercent = (100 / perView);
+                $items.css({
+                    width: itemWidthPercent + '%',
+                    paddingLeft: (gap/2) + 'px',
+                    paddingRight: (gap/2) + 'px'
+                });
+            }
+
+            var currentPage = 0;
+            function getTotalPages() {
+                var perView = getItemsPerView();
+                return Math.max(1, Math.ceil($items.length / perView));
+            }
+
+            function updateTrack() {
+                var perView = getItemsPerView();
+                var translateX = -(currentPage * 100);
+                $track.css('transform', 'translateX(' + translateX + '%)');
+                // Dots
+                $dots.removeClass('active');
+                $dots.eq(currentPage).addClass('active');
+                // Arrows
+                var totalPages = getTotalPages();
+                $prev.prop('disabled', currentPage === 0);
+                $next.prop('disabled', currentPage === totalPages - 1);
+            }
+
+            function nextPage() {
+                var totalPages = getTotalPages();
+                currentPage = (currentPage + 1) % totalPages;
+                updateTrack();
+            }
+
+            function prevPage() {
+                var totalPages = getTotalPages();
+                currentPage = (currentPage - 1 + totalPages) % totalPages;
+                updateTrack();
+            }
+
+            // Build dots dynamically based on pages
+            function buildDots() {
+                var totalPages = getTotalPages();
+                var $dotsWrap = $carousel.find('.grp-carousel-dots');
+                if ($dotsWrap.length === 0) return;
+                $dotsWrap.empty();
+                for (var i = 0; i < totalPages; i++) {
+                    var $dot = $('<button class="grp-dot" data-index="' + i + '"></button>');
+                    if (i === 0) $dot.addClass('active');
+                    $dotsWrap.append($dot);
+                }
+                $dots = $carousel.find('.grp-dot');
+                $dots.on('click', function(e) {
+                    e.preventDefault();
+                    currentPage = parseInt($(this).data('index'), 10) || 0;
+                    updateTrack();
+                });
+            }
+
+            // Init
+            updateWidths();
+            buildDots();
+            updateTrack();
+
+            // Arrows
+            $next.on('click', function(e) { e.preventDefault(); nextPage(); });
+            $prev.on('click', function(e) { e.preventDefault(); prevPage(); });
+
+            // Autoplay
+            if (options.autoplay) {
+                var speed = options.speed || 5000;
+                var interval = setInterval(nextPage, speed);
+                $carousel.on('mouseenter', function(){ clearInterval(interval); });
+                $carousel.on('mouseleave', function(){ interval = setInterval(nextPage, speed); });
+            }
+
+            // Resize
+            $(window).on('resize', function() {
+                var prevPages = $dots.length;
+                updateWidths();
+                buildDots();
+                updateTrack();
+            });
+        });
     }
     
     /**

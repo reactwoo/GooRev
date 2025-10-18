@@ -89,6 +89,8 @@ Available parameters:
 * `style` - Review display style (modern, classic, minimal, corporate, creative)
 * `theme` - Theme variant (light, dark, auto)
 * `layout` - Display layout (carousel, list)
+* `cols_desktop`, `cols_tablet`, `cols_mobile` - Columns for grid/grid_carousel
+* `gap` - Gap between items in px for grid/grid_carousel
 * `count` - Number of reviews to display (1-50)
 * `min_rating` - Minimum star rating to display (1-5)
 * `max_rating` - Maximum star rating to display (1-5)
@@ -123,6 +125,10 @@ Available parameters:
 2. Click the "+" button to add a block
 3. Search for "Google Reviews"
 4. Add the block and configure the settings
+   - Theme: Light/Dark/Auto
+   - Layout: List/Carousel/Grid/Grid Carousel
+   - Columns: Desktop/Tablet/Mobile
+   - Gap: px spacing
 
 = Styling =
 

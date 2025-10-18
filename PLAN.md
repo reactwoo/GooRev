@@ -90,6 +90,11 @@ google-reviews-plugin/
 - [ ] WordPress widget development
 - [ ] Responsive CSS framework
 - - [ ] Custom CSS support
+  
+  Improvements (in progress):
+  - Grid and Grid Carousel layouts with responsive columns (desktop/tablet/mobile)
+  - Theme variants (light/dark/auto) via CSS variables and prefers-color-scheme
+  - Gutenberg and Elementor controls for theme and grid settings
 
 ### Phase 4: Page Builder Integration
 - [ ] Elementor widget development

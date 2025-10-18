@@ -92,7 +92,52 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 'options' => array(
                     'carousel' => __('Carousel', 'google-reviews-plugin'),
                     'list' => __('List', 'google-reviews-plugin'),
+                    'grid' => __('Grid', 'google-reviews-plugin'),
+                    'grid_carousel' => __('Grid Carousel', 'google-reviews-plugin'),
                 ),
+            )
+        );
+        $this->add_control(
+            'cols_desktop',
+            array(
+                'label' => __('Columns (Desktop)', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::NUMBER,
+                'default' => 3,
+                'min' => 1,
+                'max' => 6,
+            )
+        );
+
+        $this->add_control(
+            'cols_tablet',
+            array(
+                'label' => __('Columns (Tablet)', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::NUMBER,
+                'default' => 2,
+                'min' => 1,
+                'max' => 4,
+            )
+        );
+
+        $this->add_control(
+            'cols_mobile',
+            array(
+                'label' => __('Columns (Mobile)', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::NUMBER,
+                'default' => 1,
+                'min' => 1,
+                'max' => 3,
+            )
+        );
+
+        $this->add_control(
+            'gap',
+            array(
+                'label' => __('Gap (px)', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::NUMBER,
+                'default' => 20,
+                'min' => 0,
+                'max' => 60,
             )
         );
         
@@ -359,6 +404,10 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'style' => $settings['style'],
             'theme' => isset($settings['theme']) ? $settings['theme'] : 'light',
             'layout' => $settings['layout'],
+            'cols_desktop' => isset($settings['cols_desktop']) ? $settings['cols_desktop'] : 3,
+            'cols_tablet' => isset($settings['cols_tablet']) ? $settings['cols_tablet'] : 2,
+            'cols_mobile' => isset($settings['cols_mobile']) ? $settings['cols_mobile'] : 1,
+            'gap' => isset($settings['gap']) ? $settings['gap'] : 20,
             'count' => $settings['count'],
             'min_rating' => $settings['min_rating'],
             'max_rating' => $settings['max_rating'],

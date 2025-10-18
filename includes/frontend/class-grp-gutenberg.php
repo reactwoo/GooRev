@@ -53,6 +53,22 @@ class GRP_Gutenberg {
                     'type' => 'string',
                     'default' => 'carousel',
                 ),
+                'cols_desktop' => array(
+                    'type' => 'number',
+                    'default' => 3,
+                ),
+                'cols_tablet' => array(
+                    'type' => 'number',
+                    'default' => 2,
+                ),
+                'cols_mobile' => array(
+                    'type' => 'number',
+                    'default' => 1,
+                ),
+                'gap' => array(
+                    'type' => 'number',
+                    'default' => 20,
+                ),
                 'count' => array(
                     'type' => 'number',
                     'default' => 5,
@@ -162,6 +178,10 @@ class GRP_Gutenberg {
             'style' => $attributes['style'],
             'theme' => isset($attributes['theme']) ? $attributes['theme'] : 'light',
             'layout' => $attributes['layout'],
+            'cols_desktop' => isset($attributes['cols_desktop']) ? $attributes['cols_desktop'] : 3,
+            'cols_tablet' => isset($attributes['cols_tablet']) ? $attributes['cols_tablet'] : 2,
+            'cols_mobile' => isset($attributes['cols_mobile']) ? $attributes['cols_mobile'] : 1,
+            'gap' => isset($attributes['gap']) ? $attributes['gap'] : 20,
             'count' => $attributes['count'],
             'min_rating' => $attributes['min_rating'],
             'max_rating' => $attributes['max_rating'],

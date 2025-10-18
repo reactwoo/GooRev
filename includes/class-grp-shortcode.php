@@ -47,6 +47,10 @@ class GRP_Shortcode {
             'style' => 'modern',
             'theme' => 'light',
             'layout' => 'carousel',
+            'cols_desktop' => 3,
+            'cols_tablet' => 2,
+            'cols_mobile' => 1,
+            'gap' => 20,
             'count' => 5,
             'min_rating' => 1,
             'max_rating' => 5,
@@ -92,6 +96,10 @@ class GRP_Shortcode {
         // Render based on layout
         if ($atts['layout'] === 'carousel') {
             return $this->render_carousel($reviews, $atts, $instance_id);
+        } elseif ($atts['layout'] === 'grid') {
+            return $this->render_grid($reviews, $atts, $instance_id);
+        } elseif ($atts['layout'] === 'grid_carousel') {
+            return $this->render_grid_carousel($reviews, $atts, $instance_id);
         } else {
             return $this->render_list($reviews, $atts, $instance_id);
         }
@@ -201,6 +209,116 @@ class GRP_Shortcode {
         </div>
         <?php
         
+        return ob_get_clean();
+    }
+
+    /**
+     * Render grid layout
+     */
+    private function render_grid($reviews, $atts, $instance_id) {
+        $style_class = 'grp-style-' . sanitize_html_class($atts['style']);
+        $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
+        $layout_class = 'grp-layout-grid';
+        $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
+        $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
+
+        $classes = array_filter(array(
+            'grp-reviews',
+            $style_class,
+            $theme_class,
+            $layout_class,
+            $responsive_class,
+            $custom_class
+        ));
+
+        $class_string = implode(' ', $classes);
+
+        $style_inline = sprintf(
+            '--grp-cols-desktop:%d;--grp-cols-tablet:%d;--grp-cols-mobile:%d;--grp-gap:%dpx;',
+            intval($atts['cols_desktop']),
+            intval($atts['cols_tablet']),
+            intval($atts['cols_mobile']),
+            intval($atts['gap'])
+        );
+
+        ob_start();
+        ?>
+        <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>" style="<?php echo esc_attr($style_inline); ?>">
+            <div class="grp-reviews-grid">
+                <?php foreach ($reviews as $review): ?>
+                    <div class="grp-review-item">
+                        <?php echo $this->render_single_review($review, $atts); ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Render grid carousel layout (multi items per view)
+     */
+    private function render_grid_carousel($reviews, $atts, $instance_id) {
+        $style_class = 'grp-style-' . sanitize_html_class($atts['style']);
+        $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
+        $layout_class = 'grp-layout-grid_carousel';
+        $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
+        $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
+
+        $classes = array_filter(array(
+            'grp-reviews',
+            $style_class,
+            $theme_class,
+            $layout_class,
+            $responsive_class,
+            $custom_class
+        ));
+
+        $class_string = implode(' ', $classes);
+
+        $carousel_options = array(
+            'autoplay' => $atts['autoplay'],
+            'speed' => intval($atts['speed']),
+            'dots' => $atts['dots'],
+            'arrows' => $atts['arrows'],
+            'responsive' => $atts['responsive'],
+            'cols_desktop' => intval($atts['cols_desktop']),
+            'cols_tablet' => intval($atts['cols_tablet']),
+            'cols_mobile' => intval($atts['cols_mobile']),
+            'gap' => intval($atts['gap'])
+        );
+
+        ob_start();
+        ?>
+        <div id="<?php echo esc_attr($instance_id); ?>"
+             class="<?php echo esc_attr($class_string); ?>"
+             data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
+
+            <div class="grp-grid-carousel-viewport">
+                <div class="grp-grid-carousel-track">
+                    <?php foreach ($reviews as $index => $review): ?>
+                        <div class="grp-review-item" data-index="<?php echo $index; ?>">
+                            <?php echo $this->render_single_review($review, $atts); ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <?php if ($atts['arrows']): ?>
+                <button class="grp-carousel-prev" aria-label="<?php esc_attr_e('Previous reviews', 'google-reviews-plugin'); ?>">
+                    <span class="grp-arrow-left">‹</span>
+                </button>
+                <button class="grp-carousel-next" aria-label="<?php esc_attr_e('Next reviews', 'google-reviews-plugin'); ?>">
+                    <span class="grp-arrow-right">›</span>
+                </button>
+            <?php endif; ?>
+
+            <?php if ($atts['dots']): ?>
+                <div class="grp-carousel-dots"></div>
+            <?php endif; ?>
+        </div>
+        <?php
         return ob_get_clean();
     }
     

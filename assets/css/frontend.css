@@ -192,6 +192,39 @@
     gap: 20px;
 }
 
+/* Grid Layout */
+.grp-layout-grid .grp-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grp-cols-desktop, 3), 1fr);
+    gap: var(--grp-gap, 20px);
+}
+
+@media (max-width: 1024px) {
+    .grp-layout-grid .grp-reviews-grid {
+        grid-template-columns: repeat(var(--grp-cols-tablet, 2), 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-layout-grid .grp-reviews-grid {
+        grid-template-columns: repeat(var(--grp-cols-mobile, 1), 1fr);
+    }
+}
+
+/* Grid Carousel */
+.grp-layout-grid_carousel .grp-grid-carousel-viewport {
+    overflow: hidden;
+}
+
+.grp-layout-grid_carousel .grp-grid-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.grp-layout-grid_carousel .grp-review-item {
+    box-sizing: border-box;
+}
+
 /* Responsive Design */
 .grp-responsive .grp-review {
     margin-bottom: 15px;
