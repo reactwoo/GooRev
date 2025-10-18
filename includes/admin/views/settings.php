@@ -60,6 +60,21 @@ if (!defined('ABSPATH')) {
                 </p>
             </div>
             
+            <!-- Connection tools (visible when connected) -->
+            <?php if ($is_connected): ?>
+            <div class="grp-sidebar-card">
+                <h3><?php esc_html_e('Connection', 'google-reviews-plugin'); ?></h3>
+                <p>
+                    <button id="grp-test-connection" class="button">
+                        <?php esc_html_e('Test Connection', 'google-reviews-plugin'); ?>
+                    </button>
+                    <a id="grp-disconnect" href="<?php echo esc_url($disconnect_url); ?>" class="button">
+                        <?php esc_html_e('Disconnect', 'google-reviews-plugin'); ?>
+                    </a>
+                </p>
+            </div>
+            <?php endif; ?>
+
             <!-- Support -->
             <div class="grp-sidebar-card">
                 <h3><?php esc_html_e('Need Help?', 'google-reviews-plugin'); ?></h3>
@@ -135,33 +150,4 @@ if (!defined('ABSPATH')) {
 }
 </style>
 
-<script>
-jQuery(document).ready(function($) {
-    // Test connection
-    $('#grp-test-connection').on('click', function() {
-        var button = $(this);
-        button.prop('disabled', true).text('<?php esc_js_e('Testing...', 'google-reviews-plugin'); ?>');
-        
-        $.post(ajaxurl, {
-            action: 'grp_test_connection',
-            nonce: grp_admin.nonce
-        }, function(response) {
-            if (response.success) {
-                alert('<?php esc_js_e('Connection successful!', 'google-reviews-plugin'); ?>');
-            } else {
-                alert('<?php esc_js_e('Connection failed: ', 'google-reviews-plugin'); ?>' + response.data);
-            }
-        }).always(function() {
-            button.prop('disabled', false).text('<?php esc_js_e('Test Connection', 'google-reviews-plugin'); ?>');
-        });
-    });
-    
-    // Disconnect
-    $('#grp-disconnect').on('click', function() {
-        if (confirm('<?php esc_js_e('Are you sure you want to disconnect?', 'google-reviews-plugin'); ?>')) {
-            // Add disconnect functionality here
-            location.reload();
-        }
-    });
-});
-</script>
+<!-- Inline script removed in favor of centralized assets/js/admin.js wiring -->

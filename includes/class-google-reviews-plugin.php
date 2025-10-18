@@ -190,14 +190,18 @@ class Google_Reviews_Plugin {
             true
         );
         
-        // Localize script
-        wp_localize_script('grp-admin', 'grp_admin_ajax', array(
+        // Localize script — expose a single consistent object name
+        wp_localize_script('grp-admin', 'grp_admin', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('grp_admin_nonce'),
             'strings' => array(
-                'confirm_delete' => __('Are you sure you want to delete this item?', 'google-reviews-plugin'),
-                'saving' => __('Saving...', 'google-reviews-plugin'),
-                'saved' => __('Saved!', 'google-reviews-plugin'),
+                'testing_connection' => __('Testing connection...', 'google-reviews-plugin'),
+                'connection_success' => __('Connection successful!', 'google-reviews-plugin'),
+                'connection_failed' => __('Connection failed. Please check your credentials.', 'google-reviews-plugin'),
+                'syncing_reviews' => __('Syncing reviews...', 'google-reviews-plugin'),
+                'sync_success' => __('Reviews synced successfully!', 'google-reviews-plugin'),
+                'sync_failed' => __('Failed to sync reviews.', 'google-reviews-plugin'),
+                'confirm_disconnect' => __('Are you sure you want to disconnect?', 'google-reviews-plugin'),
             )
         ));
     }

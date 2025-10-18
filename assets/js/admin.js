@@ -14,6 +14,23 @@
      * Initialize admin functionality
      */
     function initAdmin() {
+        // Build a resilient config from localized data with sensible fallbacks
+        window.__grpAdminConfig = (function() {
+            var cfg = window.grp_admin || window.grp_admin_ajax || {};
+            cfg.ajax_url = cfg.ajax_url || (typeof window.ajaxurl !== 'undefined' ? window.ajaxurl : '');
+            cfg.nonce = cfg.nonce || '';
+            cfg.strings = cfg.strings || {
+                testing_connection: 'Testing connection...',
+                connection_success: 'Connection successful!',
+                connection_failed: 'Connection failed',
+                syncing_reviews: 'Syncing reviews...',
+                sync_success: 'Reviews synced successfully!',
+                sync_failed: 'Failed to sync reviews.',
+                confirm_disconnect: 'Are you sure you want to disconnect?'
+            };
+            return cfg;
+        })();
+
         initTabs();
         initButtons();
         initForms();
@@ -49,16 +66,16 @@
             var $button = $(this);
             var originalText = $button.text();
             
-            $button.prop('disabled', true).text(grp_admin.strings.testing_connection);
+            $button.prop('disabled', true).text(window.__grpAdminConfig.strings.testing_connection);
             
-            $.post(grp_admin.ajax_url, {
+            $.post(window.__grpAdminConfig.ajax_url, {
                 action: 'grp_test_connection',
-                nonce: grp_admin.nonce
+                nonce: window.__grpAdminConfig.nonce
             }, function(response) {
                 if (response.success) {
-                    showNotice('success', grp_admin.strings.connection_success);
+                    showNotice('success', window.__grpAdminConfig.strings.connection_success);
                 } else {
-                    showNotice('error', grp_admin.strings.connection_failed + ': ' + response.data);
+                    showNotice('error', window.__grpAdminConfig.strings.connection_failed + ': ' + response.data);
                 }
             }).always(function() {
                 $button.prop('disabled', false).text(originalText);
@@ -70,20 +87,20 @@
             var $button = $(this);
             var originalText = $button.text();
             
-            $button.prop('disabled', true).text(grp_admin.strings.syncing_reviews);
+            $button.prop('disabled', true).text(window.__grpAdminConfig.strings.syncing_reviews);
             
-            $.post(grp_admin.ajax_url, {
+            $.post(window.__grpAdminConfig.ajax_url, {
                 action: 'grp_sync_reviews',
-                nonce: grp_admin.nonce
+                nonce: window.__grpAdminConfig.nonce
             }, function(response) {
                 if (response.success) {
-                    showNotice('success', grp_admin.strings.sync_success);
+                    showNotice('success', window.__grpAdminConfig.strings.sync_success);
                     // Reload page to show updated reviews
                     setTimeout(function() {
                         location.reload();
                     }, 1000);
                 } else {
-                    showNotice('error', grp_admin.strings.sync_failed + ': ' + response.data);
+                    showNotice('error', window.__grpAdminConfig.strings.sync_failed + ': ' + response.data);
                 }
             }).always(function() {
                 $button.prop('disabled', false).text(originalText);
@@ -92,7 +109,7 @@
         
         // Disconnect button
         $('#grp-disconnect').on('click', function() {
-            if (confirm(grp_admin.strings.confirm_disconnect)) {
+            if (confirm(window.__grpAdminConfig.strings.confirm_disconnect)) {
                 // Add disconnect functionality here
                 showNotice('info', 'Disconnecting...');
                 setTimeout(function() {
@@ -222,8 +239,14 @@
         // Remove existing notices
         $('.grp-notice').remove();
         
-        // Add new notice
-        $('.grp-admin h1').after($notice);
+        // Add new notice near a visible page header
+        var $header = $('.grp-settings h1, .grp-dashboard h1, .wrap h1').first();
+        if ($header.length) {
+            $header.after($notice);
+        } else {
+            // Fallback: prepend to body
+            $('body').prepend($notice);
+        }
         
         // Auto-hide after duration
         if (duration) {
