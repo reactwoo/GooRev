@@ -83,10 +83,11 @@ Basic shortcode:
 `[google_reviews]`
 
 Advanced shortcode with options:
-`[google_reviews style="modern" layout="carousel" count="5" min_rating="4"]`
+`[google_reviews style="modern" theme="light" layout="carousel" count="5" min_rating="4"]`
 
 Available parameters:
 * `style` - Review display style (modern, classic, minimal, corporate, creative)
+* `theme` - Theme variant (light, dark, auto)
 * `layout` - Display layout (carousel, list)
 * `count` - Number of reviews to display (1-50)
 * `min_rating` - Minimum star rating to display (1-5)
@@ -132,7 +133,12 @@ The plugin includes 5+ pre-designed styles:
 * **Corporate** - Professional business design with structured layout
 * **Creative** - Artistic design with creative elements and animations
 
-Each style includes light and dark variants.
+Each style includes light, dark, and auto variants. Auto follows the user's OS/browser preference.
+
+Examples:
+`[google_reviews style="modern" theme="light" layout="list" count="3"]`
+`[google_reviews style="modern" theme="dark" layout="list" count="3"]`
+`[google_reviews style="modern" theme="auto" layout="list" count="3"]`
 
 = Custom CSS =
 

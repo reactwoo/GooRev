@@ -68,6 +68,20 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 'options' => $this->get_style_options(),
             )
         );
+
+        $this->add_control(
+            'theme',
+            array(
+                'label' => __('Theme', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => 'light',
+                'options' => array(
+                    'light' => __('Light', 'google-reviews-plugin'),
+                    'dark' => __('Dark', 'google-reviews-plugin'),
+                    'auto' => __('Auto', 'google-reviews-plugin'),
+                ),
+            )
+        );
         
         $this->add_control(
             'layout',
@@ -343,6 +357,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
         
         $shortcode_atts = array(
             'style' => $settings['style'],
+            'theme' => isset($settings['theme']) ? $settings['theme'] : 'light',
             'layout' => $settings['layout'],
             'count' => $settings['count'],
             'min_rating' => $settings['min_rating'],

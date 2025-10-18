@@ -100,6 +100,12 @@
                 { label: i18n.__('Carousel', 'google-reviews-plugin'), value: 'carousel' },
                 { label: i18n.__('List', 'google-reviews-plugin'), value: 'list' }
             ];
+
+            var themeOptions = [
+                { label: i18n.__('Light', 'google-reviews-plugin'), value: 'light' },
+                { label: i18n.__('Dark', 'google-reviews-plugin'), value: 'dark' },
+                { label: i18n.__('Auto', 'google-reviews-plugin'), value: 'auto' }
+            ];
             
             var sortOptions = [
                 { label: i18n.__('Newest First', 'google-reviews-plugin'), value: 'newest' },
@@ -125,6 +131,14 @@
                             options: styleOptions,
                             onChange: function(value) {
                                 setAttributes({ style: value });
+                            }
+                        }),
+                        el(SelectControl, {
+                            label: i18n.__('Theme', 'google-reviews-plugin'),
+                            value: attributes.theme || 'light',
+                            options: themeOptions,
+                            onChange: function(value) {
+                                setAttributes({ theme: value });
                             }
                         }),
                         el(SelectControl, {

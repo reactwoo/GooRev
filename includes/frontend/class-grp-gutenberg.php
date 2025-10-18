@@ -45,6 +45,10 @@ class GRP_Gutenberg {
                     'type' => 'string',
                     'default' => 'modern',
                 ),
+                'theme' => array(
+                    'type' => 'string',
+                    'default' => 'light',
+                ),
                 'layout' => array(
                     'type' => 'string',
                     'default' => 'carousel',
@@ -119,6 +123,10 @@ class GRP_Gutenberg {
             array('wp-edit-blocks'),
             GRP_PLUGIN_VERSION
         );
+
+        // Inline dynamic CSS variables for styles/variants in the editor
+        $styles = new GRP_Styles();
+        wp_add_inline_style('grp-gutenberg-block-editor', $styles->get_all_css());
         
         // Localize script
         wp_localize_script('grp-gutenberg-block', 'grp_gutenberg', array(
@@ -140,6 +148,10 @@ class GRP_Gutenberg {
             array(),
             GRP_PLUGIN_VERSION
         );
+
+        // Ensure dynamic CSS is available on frontend where block styles are loaded
+        $styles = new GRP_Styles();
+        wp_add_inline_style('grp-gutenberg-block', $styles->get_all_css());
     }
     
     /**
@@ -148,6 +160,7 @@ class GRP_Gutenberg {
     public function render_reviews_block($attributes) {
         $shortcode_atts = array(
             'style' => $attributes['style'],
+            'theme' => isset($attributes['theme']) ? $attributes['theme'] : 'light',
             'layout' => $attributes['layout'],
             'count' => $attributes['count'],
             'min_rating' => $attributes['min_rating'],

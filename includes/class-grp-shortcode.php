@@ -45,6 +45,7 @@ class GRP_Shortcode {
     public function render_shortcode($atts) {
         $atts = shortcode_atts(array(
             'style' => 'modern',
+            'theme' => 'light',
             'layout' => 'carousel',
             'count' => 5,
             'min_rating' => 1,
@@ -101,6 +102,7 @@ class GRP_Shortcode {
      */
     private function render_carousel($reviews, $atts, $instance_id) {
         $style_class = 'grp-style-' . sanitize_html_class($atts['style']);
+        $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
         $layout_class = 'grp-layout-carousel';
         $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
         $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
@@ -108,6 +110,7 @@ class GRP_Shortcode {
         $classes = array_filter(array(
             'grp-reviews',
             $style_class,
+            $theme_class,
             $layout_class,
             $responsive_class,
             $custom_class
@@ -169,6 +172,7 @@ class GRP_Shortcode {
      */
     private function render_list($reviews, $atts, $instance_id) {
         $style_class = 'grp-style-' . sanitize_html_class($atts['style']);
+        $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
         $layout_class = 'grp-layout-list';
         $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
         $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
@@ -176,6 +180,7 @@ class GRP_Shortcode {
         $classes = array_filter(array(
             'grp-reviews',
             $style_class,
+            $theme_class,
             $layout_class,
             $responsive_class,
             $custom_class
