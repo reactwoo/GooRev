@@ -94,6 +94,9 @@ class GRP_API {
                 update_option('grp_google_refresh_token', $this->refresh_token);
             }
             
+            // Try to auto-select a default account/location if not set yet
+            $this->ensure_default_location_selected();
+            
             return true;
         }
         
@@ -262,7 +265,82 @@ class GRP_API {
         if (is_wp_error($accounts)) {
             return $accounts;
         }
+        // If connection works, ensure defaults are selected for convenience
+        $this->ensure_default_location_selected();
         
+        return true;
+    }
+
+    /**
+     * Ensure default account and location are selected and saved to options.
+     * Returns true if both account and location are set after this call.
+     */
+    public function ensure_default_location_selected() {
+        $existing_account = get_option('grp_google_account_id', '');
+        $existing_location = get_option('grp_google_location_id', '');
+        if (!empty($existing_account) && !empty($existing_location)) {
+            return true;
+        }
+
+        $accounts_response = $this->get_accounts();
+        if (is_wp_error($accounts_response)) {
+            return false;
+        }
+
+        $accounts_list = array();
+        if (isset($accounts_response['accounts']) && is_array($accounts_response['accounts'])) {
+            $accounts_list = $accounts_response['accounts'];
+        } elseif (is_array($accounts_response)) {
+            $accounts_list = $accounts_response;
+        }
+
+        if (empty($accounts_list)) {
+            return false;
+        }
+
+        $first_account = $accounts_list[0];
+        $account_name = isset($first_account['name']) ? $first_account['name'] : (isset($first_account['accountName']) ? $first_account['accountName'] : '');
+        if (empty($account_name)) {
+            return false;
+        }
+
+        // Extract bare account ID from a name like "accounts/123456789"
+        $account_id = preg_replace('#^accounts/+#', '', $account_name);
+        update_option('grp_google_account_id', $account_id);
+
+        // Fetch locations for this account and pick the first active one
+        $locations_response = $this->get_locations($account_id);
+        if (is_wp_error($locations_response)) {
+            return false;
+        }
+
+        $locations_list = array();
+        if (isset($locations_response['locations']) && is_array($locations_response['locations'])) {
+            $locations_list = $locations_response['locations'];
+        } elseif (is_array($locations_response)) {
+            $locations_list = $locations_response;
+        }
+
+        if (empty($locations_list)) {
+            return false;
+        }
+
+        $first_location = $locations_list[0];
+        $location_name = isset($first_location['name']) ? $first_location['name'] : '';
+        if (empty($location_name)) {
+            return false;
+        }
+
+        // Extract bare location ID from a name like "accounts/123/locations/456"
+        if (preg_match('#/locations/([^/]+)$#', $location_name, $m)) {
+            $location_id = $m[1];
+        } else {
+            // Fallback: if API returns just the ID
+            $location_id = $location_name;
+        }
+
+        update_option('grp_google_location_id', $location_id);
+
         return true;
     }
 }

@@ -28,6 +28,17 @@ define('GRP_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('GRP_PLUGIN_VERSION', '1.0.0');
 define('GRP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
+// Provide a safe helper for inline JS translations (WP has no esc_js_e)
+if (!function_exists('esc_js_e')) {
+    /**
+     * Echo a translated string escaped for JavaScript contexts.
+     * Mirrors esc_html_e but uses esc_js under the hood.
+     */
+    function esc_js_e($text, $domain = 'default') {
+        echo esc_js(__($text, $domain));
+    }
+}
+
 // Check if we're in admin area
 if (is_admin()) {
     require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
