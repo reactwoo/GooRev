@@ -165,6 +165,20 @@
      * Initialize forms
      */
     function initForms() {
+        // Pro toggle enables/disables Client ID/Secret fields
+        function applyProToggle() {
+            var enabled = $('input[name="grp_enable_pro_features"]').is(':checked');
+            var $clientId = $('input[name="grp_google_client_id"]');
+            var $clientSecret = $('input[name="grp_google_client_secret"]');
+            $clientId.prop('disabled', !enabled);
+            $clientSecret.prop('disabled', !enabled);
+        }
+        $(document).on('change', 'input[name="grp_enable_pro_features"]', function() {
+            applyProToggle();
+        });
+        // Initialize on load
+        applyProToggle();
+
         // Auto-save form data
         $('.grp-auto-save').on('change', function() {
             var $form = $(this).closest('form');

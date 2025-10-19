@@ -61,6 +61,7 @@ class GRP_Uninstaller {
             'grp_google_refresh_token',
             'grp_google_account_id',
             'grp_google_location_id',
+            'grp_enable_pro_features',
             'grp_default_style',
             'grp_default_count',
             'grp_cache_duration',

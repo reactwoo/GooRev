@@ -255,7 +255,8 @@ class GRP_API {
                 // Rate limit handling – if Account Management has 0 QPM, prefer other bases
                 if ($status_code === 429) {
                     // Friendly guidance for the common 0 QPM case on Account Management
-                    $is_account_mgmt = (stripos((string) $service_host, 'mybusinessaccountmanagement.googleapis.com') !== false);
+                    $is_account_mgmt = (stripos((string) $service_host, 'mybusinessaccountmanagement.googleapis.com') !== false)
+                        || (stripos((string) $disabled_service, 'mybusinessaccountmanagement.googleapis.com') !== false);
                     $is_zero_quota = ($quota_limit_value === '0') || stripos($error_message, "quota_limit_value: '0'") !== false;
 
                     if ($is_account_mgmt && $is_zero_quota) {
