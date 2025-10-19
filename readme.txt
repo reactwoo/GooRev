@@ -1,6 +1,6 @@
 === Google Reviews Plugin ===
 Contributors: reactwoo
-Tags: google reviews, testimonials, ratings, business reviews, google my business, shortcode, widget, elementor, gutenberg
+Tags: google reviews, testimonials, ratings, business reviews, google business profile, google my business, shortcode, widget, elementor, gutenberg
 Requires at least: 5.0
 Tested up to: 6.4
 Requires PHP: 7.4
@@ -16,7 +16,7 @@ The Google Reviews Plugin allows you to easily display your Google Business revi
 
 = Key Features =
 
-* **Google My Business Integration** - Connect your Google Business account and sync reviews automatically
+* **Google Business Profile Integration** - Connect your Google Business Profile account and sync reviews automatically
 * **Multiple Display Styles** - Choose from 5+ pre-designed styles including Modern, Classic, Minimal, Corporate, and Creative
 * **Flexible Layouts** - Display reviews as a carousel or list with customizable options
 * **Page Builder Support** - Works with Elementor, Gutenberg, and other popular page builders
@@ -28,7 +28,7 @@ The Google Reviews Plugin allows you to easily display your Google Business revi
 
 = Free Version Features =
 
-* Connect to Google My Business API
+* Connect to Business Profile APIs (Business Profile, Business Information)
 * 5+ pre-designed styles with light/dark variants
 * Carousel and list layouts
 * Basic customization options
@@ -62,9 +62,14 @@ The Google Reviews Plugin allows you to easily display your Google Business revi
 
 1. **Google API Setup**:
    - Create a Google Cloud Project
-   - Enable the Google My Business API
+   - Enable the following Business Profile APIs in your project:
+     - Business Profile API (`businessprofile.googleapis.com`)
+     - Business Profile Business Information API (`mybusinessbusinessinformation.googleapis.com`)
+     - Business Profile Performance API (`businessprofileperformance.googleapis.com`)
    - Create OAuth 2.0 credentials
    - Add the redirect URI: `your-site.com/wp-admin/admin.php?page=google-reviews-settings&action=oauth_callback`
+   - Ensure the OAuth scope is granted: `https://www.googleapis.com/auth/business.manage`
+   - Reference: OAuth 2.0 scopes catalog `https://developers.google.com/identity/protocols/oauth2/scopes`
 
 2. **Connect Account**:
    - Enter your Client ID and Client Secret in the settings
@@ -161,7 +166,7 @@ You can add custom CSS in the Styles section of the admin panel to further custo
 **Connection failed:**
 - Verify your Client ID and Client Secret
 - Check if the redirect URI is correct
-- Ensure the Google My Business API is enabled
+- Ensure the required Business Profile APIs are enabled
 - Check your internet connection
 
 **Styling issues:**
@@ -172,17 +177,18 @@ You can add custom CSS in the Styles section of the admin panel to further custo
 
 = Frequently Asked Questions =
 
-= Do I need a Google My Business account? =
+= Do I need a Google Business Profile? =
 
-Yes, you need a Google My Business account with reviews to use this plugin.
+Yes, you need a Google Business Profile with reviews to use this plugin.
 
 = How do I get Google API credentials? =
 
 1. Go to the Google Cloud Console
 2. Create a new project or select an existing one
-3. Enable the Google My Business API
+3. Enable the Business Profile APIs (Business Profile, Business Information, Performance)
 4. Create OAuth 2.0 credentials
 5. Add the redirect URI provided in the plugin settings
+6. Ensure the scope `https://www.googleapis.com/auth/business.manage` is requested
 
 = Can I customize the appearance? =
 
@@ -216,7 +222,7 @@ For support, please visit our support portal at https://reactwoo.com/support or 
 
 = 1.0.0 =
 * Initial release
-* Google My Business API integration
+* Business Profile API integration
 * 5+ pre-designed styles
 * Carousel and list layouts
 * Shortcode and widget support
@@ -270,4 +276,4 @@ This plugin is licensed under the GPL v2 or later.
 
 == Privacy Policy ==
 
-This plugin connects to Google My Business API to fetch reviews. No personal data is stored or transmitted to third parties except for the necessary API calls to Google's servers.
+This plugin connects to Google's Business Profile APIs to fetch reviews. No personal data is stored or transmitted to third parties except for the necessary API calls to Google's servers.

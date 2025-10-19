@@ -11,9 +11,9 @@ A comprehensive WordPress plugin that allows website owners to display Google Bu
 
 ## Core Features & Functionality
 
-### 1. Google My Business Integration
-- **API Connection:** Secure OAuth 2.0 integration with Google My Business API
-- **Account Management:** Connect and manage multiple Google Business accounts
+### 1. Google Business Profile Integration
+- **API Connection:** Secure OAuth 2.0 integration with Google's Business Profile APIs
+- **Account Management:** Connect and manage multiple Google Business Profile accounts
 - **Review Synchronization:** Automatic and manual review syncing with caching
 - **Data Security:** Secure handling of API credentials and user data
 
@@ -55,7 +55,7 @@ google-reviews-plugin/
 ### Core Classes
 - **Google_Reviews_Plugin:** Main plugin class and initialization
 - **GRP_Admin:** Admin interface management
-- **GRP_API:** Google My Business API integration
+- **GRP_API:** Business Profile APIs integration
 - **GRP_Reviews:** Review data management and display
 - **GRP_Cache:** Caching system implementation
 - **GRP_Shortcode:** Shortcode functionality
@@ -79,7 +79,7 @@ google-reviews-plugin/
 
 ### Phase 2: API Integration & Data Management
 - [x] OAuth 2.0 authentication flow
-- [x] Google Business Profile API client implementation
+- [x] Business Profile API client implementation
 - [x] Review data synchronization system
 - [x] Caching mechanism for API responses
 - [x] Error handling improvements for disabled APIs and insufficient scopes
@@ -127,7 +127,7 @@ google-reviews-plugin/
 ## Free vs Pro Feature Matrix
 
 ### Free Version Features
-- Google My Business API connection
+- Business Profile API connection
 - 5+ pre-designed styles with light/dark variants
 - Carousel and list layouts
 - Basic customization options
@@ -160,8 +160,7 @@ google-reviews-plugin/
 - **PHP Version:** 7.4 or higher
 - **MySQL:** 5.6 or higher
 
-### External Dependencies
-- **Google My Business API:** For review data
+- **Business Profile APIs:** For review data (Business Profile, Business Information, Performance)
 - **OAuth 2.0:** For secure authentication
 - **WordPress REST API:** For AJAX functionality
 - **jQuery:** For frontend interactions
