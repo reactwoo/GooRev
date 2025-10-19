@@ -29,6 +29,9 @@ class GRP_Admin {
         add_action('wp_ajax_grp_test_connection', array($this, 'ajax_test_connection'));
         add_action('wp_ajax_grp_sync_reviews', array($this, 'ajax_sync_reviews'));
         add_action('admin_post_grp_disconnect', array($this, 'handle_disconnect'));
+        // New AJAX endpoints for accounts/locations selection
+        add_action('wp_ajax_grp_list_accounts', array($this, 'ajax_list_accounts'));
+        add_action('wp_ajax_grp_list_locations', array($this, 'ajax_list_locations'));
     }
     
     /**
@@ -100,6 +103,8 @@ class GRP_Admin {
         // Individually stored options used throughout the plugin
         register_setting('grp_settings', 'grp_google_client_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_google_client_secret', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_google_account_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_google_location_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_default_style', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
@@ -128,6 +133,30 @@ class GRP_Admin {
             array($this, 'render_client_secret_field'),
             'grp_settings',
             'grp_google_api'
+        );
+
+        // Business selection (account/location)
+        add_settings_section(
+            'grp_google_selection',
+            __('Business & Location', 'google-reviews-plugin'),
+            array($this, 'render_selection_section'),
+            'grp_settings'
+        );
+
+        add_settings_field(
+            'grp_google_account_id',
+            __('Account', 'google-reviews-plugin'),
+            array($this, 'render_account_select_field'),
+            'grp_settings',
+            'grp_google_selection'
+        );
+
+        add_settings_field(
+            'grp_google_location_id',
+            __('Location', 'google-reviews-plugin'),
+            array($this, 'render_location_select_field'),
+            'grp_settings',
+            'grp_google_selection'
         );
         
         // Display settings
@@ -185,6 +214,9 @@ class GRP_Admin {
         wp_localize_script('grp-admin', 'grp_admin', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('grp_admin_nonce'),
+            'is_connected' => (new GRP_API())->is_connected(),
+            'saved_account_id' => get_option('grp_google_account_id', ''),
+            'saved_location_id' => get_option('grp_google_location_id', ''),
             'strings' => array(
                 'testing_connection' => __('Testing connection...', 'google-reviews-plugin'),
                 'connection_success' => __('Connection successful!', 'google-reviews-plugin'),
@@ -193,6 +225,9 @@ class GRP_Admin {
                 'sync_success' => __('Reviews synced successfully!', 'google-reviews-plugin'),
                 'sync_failed' => __('Failed to sync reviews.', 'google-reviews-plugin'),
                 'confirm_disconnect' => __('Are you sure you want to disconnect?', 'google-reviews-plugin'),
+                'loading' => __('Loading...', 'google-reviews-plugin'),
+                'select_account' => __('Select an account', 'google-reviews-plugin'),
+                'select_location' => __('Select a location', 'google-reviews-plugin')
             )
         ));
     }
@@ -360,7 +395,6 @@ class GRP_Admin {
                     . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofile.googleapis.com/overview">' . esc_html__('Business Profile API', 'google-reviews-plugin') . '</a></li>'
                     . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessbusinessinformation.googleapis.com/overview">' . esc_html__('Business Profile Business Information API', 'google-reviews-plugin') . '</a></li>'
                     . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofileperformance.googleapis.com/overview">' . esc_html__('Business Profile Performance API', 'google-reviews-plugin') . '</a></li>'
-                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessaccountmanagement.googleapis.com/overview">' . esc_html__('Business Profile Account Management API (optional)', 'google-reviews-plugin') . '</a></li>'
                 . '</ul>'
             . '</li>'
             . '<li>' . esc_html__('Ensure billing is enabled for your project.', 'google-reviews-plugin') . '</li>'
@@ -379,6 +413,52 @@ class GRP_Admin {
             . '</p><p>'
             . esc_html__('Use OAuth 2.0 user consent with the Google account that owns/manages the Business Profile. Service accounts are not supported for these endpoints.', 'google-reviews-plugin')
             . '</p></div>';
+    }
+
+    /**
+     * Render selection section description
+     */
+    public function render_selection_section() {
+        $api = new GRP_API();
+        if (!$api->is_connected()) {
+            echo '<p>' . esc_html__('Connect your Google account first to select an account and location.', 'google-reviews-plugin') . '</p>';
+            return;
+        }
+        echo '<p>' . esc_html__('Select the Business Profile account and location to use for reviews.', 'google-reviews-plugin') . '</p>';
+    }
+
+    /**
+     * Render account select field
+     */
+    public function render_account_select_field() {
+        $api = new GRP_API();
+        $connected = $api->is_connected();
+        $saved = get_option('grp_google_account_id', '');
+        echo '<select id="grp-account-select" name="grp_google_account_id" ' . (!$connected ? 'disabled' : '') . ' class="regular-text">';
+        echo '<option value="">' . esc_html__('Loading accounts...', 'google-reviews-plugin') . '</option>';
+        if ($saved) {
+            echo '<option value="' . esc_attr($saved) . '" selected>' . esc_html($saved) . '</option>';
+        }
+        echo '</select> ';
+        echo '<button type="button" id="grp-refresh-accounts" class="button" ' . (!$connected ? 'disabled' : '') . '>' . esc_html__('Refresh', 'google-reviews-plugin') . '</button>';
+        if (!$connected) {
+            echo '<p class="description">' . esc_html__('You must connect your Google account before accounts can be listed.', 'google-reviews-plugin') . '</p>';
+        }
+    }
+
+    /**
+     * Render location select field
+     */
+    public function render_location_select_field() {
+        $api = new GRP_API();
+        $connected = $api->is_connected();
+        $saved = get_option('grp_google_location_id', '');
+        echo '<select id="grp-location-select" name="grp_google_location_id" ' . (!$connected ? 'disabled' : '') . ' class="regular-text">';
+        echo '<option value="">' . esc_html__('Select an account first', 'google-reviews-plugin') . '</option>';
+        if ($saved) {
+            echo '<option value="' . esc_attr($saved) . '" selected>' . esc_html($saved) . '</option>';
+        }
+        echo '</select>';
     }
     
     /**
@@ -468,6 +548,83 @@ class GRP_Admin {
         }
         
         wp_send_json_success(__('Connection successful!', 'google-reviews-plugin'));
+    }
+
+    /**
+     * AJAX: List GBP accounts for the connected user
+     */
+    public function ajax_list_accounts() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+        $api = new GRP_API();
+        if (!$api->is_connected()) {
+            wp_send_json_error(__('Not connected to Google', 'google-reviews-plugin'));
+        }
+        $resp = $api->get_accounts();
+        if (is_wp_error($resp)) {
+            wp_send_json_error($resp->get_error_message());
+        }
+        $accounts = array();
+        $list = array();
+        if (isset($resp['accounts']) && is_array($resp['accounts'])) {
+            $list = $resp['accounts'];
+        } elseif (is_array($resp)) {
+            $list = $resp;
+        }
+        foreach ($list as $acc) {
+            $name = isset($acc['name']) ? $acc['name'] : '';
+            $id = $name ? preg_replace('#^accounts/+?#', '', $name) : '';
+            $label = isset($acc['accountName']) ? $acc['accountName'] : ($name ?: $id);
+            if (!empty($id)) {
+                $accounts[] = array('id' => $id, 'label' => $label);
+            }
+        }
+        wp_send_json_success(array('accounts' => $accounts));
+    }
+
+    /**
+     * AJAX: List locations for a given account id
+     */
+    public function ajax_list_locations() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+        $account_id = isset($_POST['account_id']) ? sanitize_text_field(wp_unslash($_POST['account_id'])) : '';
+        if (empty($account_id)) {
+            wp_send_json_error(__('Missing account id', 'google-reviews-plugin'));
+        }
+        $api = new GRP_API();
+        if (!$api->is_connected()) {
+            wp_send_json_error(__('Not connected to Google', 'google-reviews-plugin'));
+        }
+        $resp = $api->get_locations($account_id);
+        if (is_wp_error($resp)) {
+            wp_send_json_error($resp->get_error_message());
+        }
+        $locations = array();
+        $list = array();
+        if (isset($resp['locations']) && is_array($resp['locations'])) {
+            $list = $resp['locations'];
+        } elseif (is_array($resp)) {
+            $list = $resp;
+        }
+        foreach ($list as $loc) {
+            $name = isset($loc['name']) ? $loc['name'] : '';
+            $loc_id = '';
+            if ($name && preg_match('#/locations/([^/]+)$#', $name, $m)) {
+                $loc_id = $m[1];
+            } elseif (!empty($name)) {
+                $loc_id = $name;
+            }
+            $label = isset($loc['title']) ? $loc['title'] : (isset($loc['locationName']) ? $loc['locationName'] : ($name ?: $loc_id));
+            if (!empty($loc_id)) {
+                $locations[] = array('id' => $loc_id, 'label' => $label);
+            }
+        }
+        wp_send_json_success(array('locations' => $locations));
     }
     
     /**

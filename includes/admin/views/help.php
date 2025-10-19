@@ -26,7 +26,11 @@ if (!defined('ABSPATH')) {
                         </li>
                         <li>
                             <strong><?php esc_html_e('Connect Your Account', 'google-reviews-plugin'); ?></strong>
-                            <p><?php esc_html_e('Click the "Connect Account" button to authorize the plugin.', 'google-reviews-plugin'); ?></p>
+                            <p><?php esc_html_e('Click the "Connect Google Account" button and approve access with the Google account that manages your Business Profile.', 'google-reviews-plugin'); ?></p>
+                        </li>
+                        <li>
+                            <strong><?php esc_html_e('Select Business & Location', 'google-reviews-plugin'); ?></strong>
+                            <p><?php esc_html_e('On the Settings page, select your Business Profile account and specific location to use.', 'google-reviews-plugin'); ?></p>
                         </li>
                         <li>
                             <strong><?php esc_html_e('Sync Reviews', 'google-reviews-plugin'); ?></strong>
@@ -201,7 +205,8 @@ if (!defined('ABSPATH')) {
                         <ul>
                             <li><?php esc_html_e('Verify your Client ID and Client Secret', 'google-reviews-plugin'); ?></li>
                             <li><?php esc_html_e('Check if the redirect URI is correct', 'google-reviews-plugin'); ?></li>
-                            <li><?php esc_html_e('Ensure the Google My Business API is enabled', 'google-reviews-plugin'); ?></li>
+                            <li><?php esc_html_e('Enable Business Profile APIs (businessprofile, businessinformation, performance) in Google Cloud', 'google-reviews-plugin'); ?></li>
+                            <li><?php esc_html_e('If quota is 0 QPM, request Business Profile API access approval from Google', 'google-reviews-plugin'); ?></li>
                             <li><?php esc_html_e('Check your internet connection', 'google-reviews-plugin'); ?></li>
                         </ul>
                     </div>
@@ -253,7 +258,11 @@ if (!defined('ABSPATH')) {
             <div class="grp-sidebar-card">
                 <h3><?php esc_html_e('Resources', 'google-reviews-plugin'); ?></h3>
                 <ul>
-                    <li><a href="https://developers.google.com/my-business" target="_blank"><?php esc_html_e('Google My Business API', 'google-reviews-plugin'); ?></a></li>
+                    <li><a href="https://developers.google.com/business-profile" target="_blank"><?php esc_html_e('Business Profile APIs overview', 'google-reviews-plugin'); ?></a></li>
+                    <li><a href="https://console.developers.google.com/apis/api/businessprofile.googleapis.com/overview" target="_blank"><?php esc_html_e('Business Profile API (enable)', 'google-reviews-plugin'); ?></a></li>
+                    <li><a href="https://console.developers.google.com/apis/api/mybusinessbusinessinformation.googleapis.com/overview" target="_blank"><?php esc_html_e('Business Information API (enable)', 'google-reviews-plugin'); ?></a></li>
+                    <li><a href="https://console.developers.google.com/apis/api/businessprofileperformance.googleapis.com/overview" target="_blank"><?php esc_html_e('Performance API (enable)', 'google-reviews-plugin'); ?></a></li>
+                    <li><a href="https://developers.google.com/my-business/content/prereqs" target="_blank"><?php esc_html_e('GBP API prerequisites & access request', 'google-reviews-plugin'); ?></a></li>
                     <li><a href="https://reactwoo.com/blog" target="_blank"><?php esc_html_e('Blog & Tutorials', 'google-reviews-plugin'); ?></a></li>
                     <li><a href="https://reactwoo.com/changelog" target="_blank"><?php esc_html_e('Changelog', 'google-reviews-plugin'); ?></a></li>
                 </ul>

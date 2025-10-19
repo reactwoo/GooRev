@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     
     <div class="grp-settings-container">
         <div class="grp-settings-main">
-            <form method="post" action="options.php">
+            <form method="post" action="options.php" class="grp-form">
                 <?php
                 settings_fields('grp_settings');
                 do_settings_sections('grp_settings');

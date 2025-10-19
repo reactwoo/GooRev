@@ -138,6 +138,22 @@
                 $button.prop('disabled', false).text(originalText);
             });
         });
+
+        // Populate accounts when connected
+        if (window.__grpAdminConfig.is_connected) {
+            populateAccounts();
+        }
+
+        // Refresh accounts list
+        $('#grp-refresh-accounts').on('click', function() {
+            populateAccounts(true);
+        });
+
+        // Load locations when account changes
+        $(document).on('change', '#grp-account-select', function() {
+            var accountId = $(this).val();
+            populateLocations(accountId, true);
+        });
     }
     
     /**
@@ -195,6 +211,78 @@
             if (!isValid) {
                 e.preventDefault();
                 showNotice('error', 'Please fix the errors below.');
+            }
+        });
+    }
+
+    // Fetch accounts via AJAX and populate the select
+    function populateAccounts(force) {
+        var $select = $('#grp-account-select');
+        if (!$select.length) return;
+        $select.prop('disabled', true).empty().append(
+            $('<option>').val('').text(window.__grpAdminConfig.strings.loading)
+        );
+        $.post(window.__grpAdminConfig.ajax_url, {
+            action: 'grp_list_accounts',
+            nonce: window.__grpAdminConfig.nonce
+        }, function(response) {
+            $select.empty();
+            if (response && response.success && response.data && response.data.accounts) {
+                $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_account));
+                response.data.accounts.forEach(function(acc) {
+                    var opt = $('<option>').val(acc.id).text(acc.label || acc.id);
+                    if (!force && window.__grpAdminConfig.saved_account_id === acc.id) {
+                        opt.attr('selected', 'selected');
+                    }
+                    $select.append(opt);
+                });
+                // Auto-populate locations if we have a saved account id
+                var accountId = $select.val() || window.__grpAdminConfig.saved_account_id;
+                if (accountId) {
+                    populateLocations(accountId, false);
+                } else {
+                    $('#grp-location-select').empty().append(
+                        $('<option>').val('').text(window.__grpAdminConfig.strings.select_location)
+                    ).prop('disabled', true);
+                }
+            } else {
+                $select.append($('<option>').val('').text('No accounts found'));
+            }
+        }).always(function() {
+            $select.prop('disabled', false);
+        });
+    }
+
+    // Fetch locations for an account and populate the select
+    function populateLocations(accountId, force) {
+        var $select = $('#grp-location-select');
+        if (!$select.length) return;
+        if (!accountId) {
+            $select.empty().append($('<option>').val('').text('Select an account first')).prop('disabled', true);
+            return;
+        }
+        $select.prop('disabled', true).empty().append(
+            $('<option>').val('').text(window.__grpAdminConfig.strings.loading)
+        );
+        $.post(window.__grpAdminConfig.ajax_url, {
+            action: 'grp_list_locations',
+            nonce: window.__grpAdminConfig.nonce,
+            account_id: accountId
+        }, function(response) {
+            $select.empty();
+            if (response && response.success && response.data && response.data.locations) {
+                $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_location));
+                response.data.locations.forEach(function(loc) {
+                    var opt = $('<option>').val(loc.id).text(loc.label || loc.id);
+                    if (!force && window.__grpAdminConfig.saved_location_id === loc.id) {
+                        opt.attr('selected', 'selected');
+                    }
+                    $select.append(opt);
+                });
+                $select.prop('disabled', false);
+            } else {
+                $select.append($('<option>').val('').text('No locations found'));
+                $select.prop('disabled', false);
             }
         });
     }
