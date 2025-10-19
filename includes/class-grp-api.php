@@ -95,9 +95,6 @@ class GRP_API {
                 update_option('grp_google_refresh_token', $this->refresh_token);
             }
             
-            // Try to auto-select a default account/location if not set yet
-            $this->ensure_default_location_selected();
-            
             return true;
         }
         
@@ -159,6 +156,8 @@ class GRP_API {
                 'headers' => $headers,
                 'timeout' => 30
             );
+            $method = strtoupper($method);
+            $args['method'] = $method;
             if ($data && $method === 'POST') {
                 $args['body'] = json_encode($data);
             }
@@ -176,6 +175,7 @@ class GRP_API {
 
             $status_code = wp_remote_retrieve_response_code($response);
             $body = wp_remote_retrieve_body($response);
+            $service_host = parse_url($base_url, PHP_URL_HOST);
 
             // If unauthorized, try to refresh token once and retry this call from the top
             if ($status_code === 401) {
@@ -199,6 +199,7 @@ class GRP_API {
                 $error_message = '';
                 $activation_url = '';
                 $disabled_service = '';
+                $quota_limit_value = '';
 
                 if (is_array($decoded) && isset($decoded['error'])) {
                     $err = $decoded['error'];
@@ -215,6 +216,9 @@ class GRP_API {
                                 }
                                 if (isset($detail['metadata']['service'])) {
                                     $disabled_service = $detail['metadata']['service'];
+                                }
+                                if (isset($detail['metadata']['quota_limit_value'])) {
+                                    $quota_limit_value = (string) $detail['metadata']['quota_limit_value'];
                                 }
                             }
                         }
@@ -248,6 +252,44 @@ class GRP_API {
                     );
                 }
 
+                // Rate limit handling – if Account Management has 0 QPM, prefer other bases
+                if ($status_code === 429) {
+                    // Friendly guidance for the common 0 QPM case on Account Management
+                    $is_account_mgmt = (stripos((string) $service_host, 'mybusinessaccountmanagement.googleapis.com') !== false);
+                    $is_zero_quota = ($quota_limit_value === '0') || stripos($error_message, "quota_limit_value: '0'") !== false;
+
+                    if ($is_account_mgmt && $is_zero_quota) {
+                        // Keep a helpful error to return if all bases fail, but try next base first
+                        $last_error = new WP_Error(
+                            'rate_limit_zero_quota',
+                            __(
+                                'Google project has 0 QPM for Business Profile Account Management API. Request GBP API access approval or enable the correct Business Profile APIs. Calls will fall back to other Business Profile endpoints where possible.',
+                                'google-reviews-plugin'
+                            )
+                        );
+                        // Try the next candidate base
+                        continue;
+                    }
+
+                    // Simple backoff-and-retry once for transient 429s
+                    $retry_after_header = wp_remote_retrieve_header($response, 'retry-after');
+                    $retry_ms = 0;
+                    if (!empty($retry_after_header)) {
+                        $retry_seconds = is_numeric($retry_after_header) ? (int) $retry_after_header : 1;
+                        $retry_ms = max(100, min(5000, $retry_seconds * 1000));
+                    } else {
+                        $retry_ms = rand(200, 600); // jitter
+                    }
+                    usleep($retry_ms * 1000);
+                    $retry_response = wp_remote_request($url, $args);
+                    if (!is_wp_error($retry_response)) {
+                        $retry_status = wp_remote_retrieve_response_code($retry_response);
+                        if ($retry_status < 400) {
+                            return json_decode(wp_remote_retrieve_body($retry_response), true);
+                        }
+                    }
+                }
+
                 // Default: return raw details for visibility
                 return new WP_Error('api_error', sprintf(__('API Error (%d): %s', 'google-reviews-plugin'), $status_code, $body));
             }
@@ -262,22 +304,20 @@ class GRP_API {
 
     /**
      * Determine which API base URLs to try for a given endpoint.
-     * We prioritize Account Management for account-scoped endpoints,
-     * and fall back to other Business Profile API hosts.
+     * Prefer modern Business Profile APIs only (no legacy Account Management).
      */
     private function get_base_candidates($endpoint) {
         $endpoint = ltrim($endpoint, '/');
-        $account_management = 'https://mybusinessaccountmanagement.googleapis.com/v1/';
         $business_profile = self::API_BASE_URL; // businessprofile.googleapis.com/v1
         $business_info = 'https://mybusinessbusinessinformation.googleapis.com/v1/';
 
-        // If endpoint clearly starts with accounts/, prefer account management first
+        // Prefer modern Business Profile hosts only
         if (strpos($endpoint, 'accounts') === 0) {
-            return array($account_management, $business_profile, $business_info);
+            return array($business_profile, $business_info);
         }
 
         // Generic order
-        return array($business_profile, $business_info, $account_management);
+        return array($business_profile, $business_info);
     }
     
     /**
@@ -358,8 +398,6 @@ class GRP_API {
         if (is_wp_error($accounts)) {
             return $accounts;
         }
-        // If connection works, ensure defaults are selected for convenience
-        $this->ensure_default_location_selected();
         
         return true;
     }
