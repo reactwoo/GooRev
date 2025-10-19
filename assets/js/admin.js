@@ -75,7 +75,12 @@
                 if (response.success) {
                     showNotice('success', window.__grpAdminConfig.strings.connection_success);
                 } else {
-                    showNotice('error', window.__grpAdminConfig.strings.connection_failed + ': ' + response.data);
+                    // Surface a cleaner message for common 429 zero-quota errors
+                    var msg = (response && response.data) ? String(response.data) : '';
+                    if (/quota exceeded|rate[_\- ]?limit|RESOURCE_EXHAUSTED|DefaultRequestsPerMinutePerProject|quota_limit_value.*0/i.test(msg)) {
+                        msg = 'Quota is 0 QPM for your project on a required Business Profile API. Please complete GBP API prerequisites and request access approval, then retry.';
+                    }
+                    showNotice('error', window.__grpAdminConfig.strings.connection_failed + ': ' + msg);
                 }
             }).always(function() {
                 $button.prop('disabled', false).text(originalText);
@@ -160,6 +165,20 @@
      * Initialize forms
      */
     function initForms() {
+        // Pro toggle enables/disables Client ID/Secret fields
+        function applyProToggle() {
+            var enabled = $('input[name="grp_enable_pro_features"]').is(':checked');
+            var $clientId = $('input[name="grp_google_client_id"]');
+            var $clientSecret = $('input[name="grp_google_client_secret"]');
+            $clientId.prop('disabled', !enabled);
+            $clientSecret.prop('disabled', !enabled);
+        }
+        $(document).on('change', 'input[name="grp_enable_pro_features"]', function() {
+            applyProToggle();
+        });
+        // Initialize on load
+        applyProToggle();
+
         // Auto-save form data
         $('.grp-auto-save').on('change', function() {
             var $form = $(this).closest('form');
@@ -227,7 +246,7 @@
             nonce: window.__grpAdminConfig.nonce
         }, function(response) {
             $select.empty();
-            if (response && response.success && response.data && response.data.accounts) {
+            if (response && response.success && response.data && response.data.accounts && response.data.accounts.length) {
                 $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_account));
                 response.data.accounts.forEach(function(acc) {
                     var opt = $('<option>').val(acc.id).text(acc.label || acc.id);
@@ -246,7 +265,13 @@
                     ).prop('disabled', true);
                 }
             } else {
-                $select.append($('<option>').val('').text('No accounts found'));
+                var err = (response && response.data) ? String(response.data) : '';
+                if (/quota exceeded|rate[_\- ]?limit|RESOURCE_EXHAUSTED|quota_limit_value.*0/i.test(err)) {
+                    err = 'No accounts found. Your Google project may have 0 QPM for Account Management. See Troubleshooting below.';
+                } else if (!err) {
+                    err = 'No accounts found';
+                }
+                $select.append($('<option>').val('').text(err));
             }
         }).always(function() {
             $select.prop('disabled', false);
@@ -270,7 +295,7 @@
             account_id: accountId
         }, function(response) {
             $select.empty();
-            if (response && response.success && response.data && response.data.locations) {
+            if (response && response.success && response.data && response.data.locations && response.data.locations.length) {
                 $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_location));
                 response.data.locations.forEach(function(loc) {
                     var opt = $('<option>').val(loc.id).text(loc.label || loc.id);
@@ -281,7 +306,13 @@
                 });
                 $select.prop('disabled', false);
             } else {
-                $select.append($('<option>').val('').text('No locations found'));
+                var err = (response && response.data) ? String(response.data) : '';
+                if (/quota exceeded|rate[_\- ]?limit|RESOURCE_EXHAUSTED|quota_limit_value.*0/i.test(err)) {
+                    err = 'No locations found. Your Google project may have 0 QPM or insufficient scopes. See Troubleshooting below.';
+                } else if (!err) {
+                    err = 'No locations found';
+                }
+                $select.append($('<option>').val('').text(err));
                 $select.prop('disabled', false);
             }
         });

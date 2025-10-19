@@ -118,21 +118,35 @@ class GRP_Admin {
             array($this, 'render_google_api_section'),
             'grp_settings'
         );
-        
+
+        // Pro/Advanced section (gated)
+        register_setting('grp_settings', 'grp_enable_pro_features', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
+        add_settings_section(
+            'grp_pro_settings',
+            __('Advanced (Pro)', 'google-reviews-plugin'),
+            array($this, 'render_pro_section'),
+            'grp_settings'
+        );
+        add_settings_field(
+            'grp_enable_pro_features',
+            __('Enable Pro features', 'google-reviews-plugin'),
+            array($this, 'render_pro_enable_field'),
+            'grp_settings',
+            'grp_pro_settings'
+        );
         add_settings_field(
             'grp_google_client_id',
             __('Client ID', 'google-reviews-plugin'),
             array($this, 'render_client_id_field'),
             'grp_settings',
-            'grp_google_api'
+            'grp_pro_settings'
         );
-        
         add_settings_field(
             'grp_google_client_secret',
             __('Client Secret', 'google-reviews-plugin'),
             array($this, 'render_client_secret_field'),
             'grp_settings',
-            'grp_google_api'
+            'grp_pro_settings'
         );
 
         // Business selection (account/location)
@@ -385,7 +399,7 @@ class GRP_Admin {
      * Render Google API section
      */
     public function render_google_api_section() {
-        echo '<p>' . __('Configure your Google Business Profile API credentials.', 'google-reviews-plugin') . '</p>';
+        echo '<p>' . __('Configure your Google Business Profile connection.', 'google-reviews-plugin') . '</p>';
         echo '<p><a target="_blank" rel="noopener" href="https://console.cloud.google.com/">' . esc_html__('Open Google Cloud Console', 'google-reviews-plugin') . '</a></p>';
         echo '<ol style="margin-left:20px;">'
             . '<li>' . esc_html__('Create/select a GCP project', 'google-reviews-plugin') . '</li>'
@@ -399,10 +413,10 @@ class GRP_Admin {
             . '</li>'
             . '<li>' . esc_html__('Ensure billing is enabled for your project.', 'google-reviews-plugin') . '</li>'
             . '<li>' . esc_html__('Configure OAuth consent screen', 'google-reviews-plugin') . '</li>'
-            . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application)', 'google-reviews-plugin') . '</li>'
+            . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application) if you plan to use your own credentials (Pro).', 'google-reviews-plugin') . '</li>'
             . '<li>' . sprintf(esc_html__('Add Authorized redirect URI: %s', 'google-reviews-plugin'), esc_html(admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'))) . '</li>'
             . '<li>' . sprintf(esc_html__('Ensure scope is granted: %s', 'google-reviews-plugin'), '<code>https://www.googleapis.com/auth/business.manage</code>') . '</li>'
-            . '<li>' . esc_html__('Copy Client ID and Client Secret into the fields below', 'google-reviews-plugin') . '</li>'
+            . '<li>' . esc_html__('For Pro users, enable the Pro section below to enter Client ID/Secret.', 'google-reviews-plugin') . '</li>'
         . '</ol>';
 
         echo '<div class="notice notice-info" style="margin-top:12px;"><p>'
@@ -413,6 +427,22 @@ class GRP_Admin {
             . '</p><p>'
             . esc_html__('Use OAuth 2.0 user consent with the Google account that owns/manages the Business Profile. Service accounts are not supported for these endpoints.', 'google-reviews-plugin')
             . '</p></div>';
+    }
+
+    /**
+     * Render Pro section description
+     */
+    public function render_pro_section() {
+        echo '<p>' . esc_html__('Optional advanced configuration for Pro plans. Enable to enter your own Google OAuth Client ID and Secret.', 'google-reviews-plugin') . '</p>';
+    }
+
+    /**
+     * Render Pro enable toggle
+     */
+    public function render_pro_enable_field() {
+        $enabled = (bool) get_option('grp_enable_pro_features', false);
+        echo '<label><input type="checkbox" name="grp_enable_pro_features" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html__('Enable Pro plan configuration on this site', 'google-reviews-plugin') . '</label>';
+        echo '<p class="description">' . esc_html__('When enabled, you can enter Client ID and Client Secret below.', 'google-reviews-plugin') . '</p>';
     }
 
     /**
@@ -466,7 +496,8 @@ class GRP_Admin {
      */
     public function render_client_id_field() {
         $value = get_option('grp_google_client_id', '');
-        echo '<input type="text" name="grp_google_client_id" value="' . esc_attr($value) . '" class="regular-text" />';
+        $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+        echo '<input type="text" name="grp_google_client_id" value="' . esc_attr($value) . '" class="regular-text" ' . ($pro_enabled ? '' : 'disabled') . ' />';
         echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID.', 'google-reviews-plugin') . ' '
             . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Get it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
             . '</p>';
@@ -477,7 +508,8 @@ class GRP_Admin {
      */
     public function render_client_secret_field() {
         $value = get_option('grp_google_client_secret', '');
-        echo '<input type="password" name="grp_google_client_secret" value="' . esc_attr($value) . '" class="regular-text" />';
+        $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+        echo '<input type="password" name="grp_google_client_secret" value="' . esc_attr($value) . '" class="regular-text" ' . ($pro_enabled ? '' : 'disabled') . ' />';
         echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret.', 'google-reviews-plugin') . ' '
             . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Find it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
             . '</p>';
