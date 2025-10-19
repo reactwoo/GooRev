@@ -12,14 +12,15 @@ if (!defined('ABSPATH')) {
 class GRP_API {
     
     /**
-     * Google My Business API base URL
+     * Business Profile API base URL (replaces deprecated My Business v4)
+     * Docs: businessprofile.googleapis.com/v1
      */
-    const API_BASE_URL = 'https://mybusiness.googleapis.com/v4/';
+    const API_BASE_URL = 'https://businessprofile.googleapis.com/v1/';
     
     /**
      * OAuth 2.0 endpoints
      */
-    const OAUTH_AUTH_URL = 'https://accounts.google.com/o/oauth2/auth';
+    const OAUTH_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
     const OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
     
     /**
@@ -144,54 +145,90 @@ class GRP_API {
             return new WP_Error('no_token', __('No access token available', 'google-reviews-plugin'));
         }
         
-        $headers = array(
-            'Authorization' => 'Bearer ' . $this->access_token,
-            'Content-Type' => 'application/json'
-        );
+        // Prepare candidates across the modern Business Profile APIs.
+        $base_candidates = $this->get_base_candidates($endpoint);
+        $last_error = null;
         
-        $args = array(
-            'headers' => $headers,
-            'timeout' => 30
-        );
-        
-        if ($data && $method === 'POST') {
-            $args['body'] = json_encode($data);
-        }
-        
-        $url = self::API_BASE_URL . ltrim($endpoint, '/');
-        
-        if ($method === 'GET' && $data) {
-            $url .= '?' . http_build_query($data);
-        }
-        
-        $response = wp_remote_request($url, $args);
-        
-        if (is_wp_error($response)) {
-            return $response;
-        }
-        
-        $status_code = wp_remote_retrieve_response_code($response);
-        $body = wp_remote_retrieve_body($response);
-        
-        // If unauthorized, try to refresh token
-        if ($status_code === 401) {
-            if ($this->refresh_access_token()) {
-                return $this->make_request($endpoint, $method, $data);
+        foreach ($base_candidates as $base_url) {
+            // Always build fresh args to include the latest token
+            $headers = array(
+                'Authorization' => 'Bearer ' . $this->access_token,
+                'Content-Type' => 'application/json'
+            );
+            $args = array(
+                'headers' => $headers,
+                'timeout' => 30
+            );
+            if ($data && $method === 'POST') {
+                $args['body'] = json_encode($data);
             }
-            return new WP_Error('unauthorized', __('Invalid or expired token', 'google-reviews-plugin'));
+
+            $url = rtrim($base_url, '/') . '/' . ltrim($endpoint, '/');
+            if ($method === 'GET' && $data) {
+                $url .= '?' . http_build_query($data);
+            }
+
+            $response = wp_remote_request($url, $args);
+            if (is_wp_error($response)) {
+                $last_error = $response;
+                continue;
+            }
+
+            $status_code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+
+            // If unauthorized, try to refresh token once and retry this call from the top
+            if ($status_code === 401) {
+                if ($this->refresh_access_token()) {
+                    return $this->make_request($endpoint, $method, $data);
+                }
+                return new WP_Error('unauthorized', __('Invalid or expired token', 'google-reviews-plugin'));
+            }
+
+            // 404 on this base – try the next candidate
+            if ($status_code === 404) {
+                $last_error = new WP_Error('not_found', sprintf(__('API endpoint not found on %s', 'google-reviews-plugin'), parse_url($base_url, PHP_URL_HOST)));
+                continue;
+            }
+
+            // Other 4xx/5xx – return immediately with details
+            if ($status_code >= 400) {
+                return new WP_Error('api_error', sprintf(__('API Error (%d): %s', 'google-reviews-plugin'), $status_code, $body));
+            }
+
+            // Success on this base
+            return json_decode($body, true);
         }
-        
-        if ($status_code >= 400) {
-            return new WP_Error('api_error', sprintf(__('API Error: %s', 'google-reviews-plugin'), $body));
+
+        // If we exhausted all bases, return the last error or a generic one
+        return $last_error ?: new WP_Error('api_error', __('API request failed on all known Business Profile endpoints.', 'google-reviews-plugin'));
+    }
+
+    /**
+     * Determine which API base URLs to try for a given endpoint.
+     * We prioritize Account Management for account-scoped endpoints,
+     * and fall back to other Business Profile API hosts.
+     */
+    private function get_base_candidates($endpoint) {
+        $endpoint = ltrim($endpoint, '/');
+        $account_management = 'https://mybusinessaccountmanagement.googleapis.com/v1/';
+        $business_profile = self::API_BASE_URL; // businessprofile.googleapis.com/v1
+        $business_info = 'https://mybusinessbusinessinformation.googleapis.com/v1/';
+
+        // If endpoint clearly starts with accounts/, prefer account management first
+        if (strpos($endpoint, 'accounts') === 0) {
+            return array($account_management, $business_profile, $business_info);
         }
-        
-        return json_decode($body, true);
+
+        // Generic order
+        return array($business_profile, $business_info, $account_management);
     }
     
     /**
      * Get account information
      */
     public function get_accounts() {
+        // Business Profile Account Management uses v1 accounts list
         return $this->make_request('accounts');
     }
     
@@ -210,7 +247,7 @@ class GRP_API {
             'pageSize' => $page_size,
             'orderBy' => 'updateTime desc'
         );
-        
+        // Reviews are available via Business Profile API
         return $this->make_request("accounts/{$account_id}/locations/{$location_id}/reviews", 'GET', $params);
     }
     
