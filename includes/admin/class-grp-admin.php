@@ -350,14 +350,22 @@ class GRP_Admin {
      * Render Google API section
      */
     public function render_google_api_section() {
-        echo '<p>' . __('Configure your Google My Business API credentials.', 'google-reviews-plugin') . '</p>';
+        echo '<p>' . __('Configure your Google Business Profile API credentials.', 'google-reviews-plugin') . '</p>';
         echo '<p><a target="_blank" rel="noopener" href="https://console.cloud.google.com/">' . esc_html__('Open Google Cloud Console', 'google-reviews-plugin') . '</a></p>';
         echo '<ol style="margin-left:20px;">'
             . '<li>' . esc_html__('Create/select a GCP project', 'google-reviews-plugin') . '</li>'
-            . '<li>' . esc_html__('Enable Business Profile API', 'google-reviews-plugin') . '</li>'
+            . '<li>'
+                . esc_html__('Enable the required Business Profile APIs:', 'google-reviews-plugin')
+                . '<ul style="margin-top:6px; list-style:disc; margin-left:20px;">'
+                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofile.googleapis.com/overview">' . esc_html__('Business Profile API', 'google-reviews-plugin') . '</a></li>'
+                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessaccountmanagement.googleapis.com/overview">' . esc_html__('Business Profile Account Management API', 'google-reviews-plugin') . '</a></li>'
+                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessbusinessinformation.googleapis.com/overview">' . esc_html__('Business Profile Business Information API', 'google-reviews-plugin') . '</a></li>'
+                . '</ul>'
+            . '</li>'
             . '<li>' . esc_html__('Configure OAuth consent screen', 'google-reviews-plugin') . '</li>'
             . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application)', 'google-reviews-plugin') . '</li>'
             . '<li>' . sprintf(esc_html__('Add Authorized redirect URI: %s', 'google-reviews-plugin'), esc_html(admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'))) . '</li>'
+            . '<li>' . sprintf(esc_html__('Ensure scope is granted: %s', 'google-reviews-plugin'), '<code>https://www.googleapis.com/auth/business.manage</code>') . '</li>'
             . '<li>' . esc_html__('Copy Client ID and Client Secret into the fields below', 'google-reviews-plugin') . '</li>'
         . '</ol>';
     }
