@@ -191,8 +191,64 @@ class GRP_API {
                 continue;
             }
 
-            // Other 4xx/5xx – return immediately with details
+            // Other 4xx/5xx – inspect and handle common cases more helpfully
             if ($status_code >= 400) {
+                $decoded = json_decode($body, true);
+                $error_reason = '';
+                $error_status = '';
+                $error_message = '';
+                $activation_url = '';
+                $disabled_service = '';
+
+                if (is_array($decoded) && isset($decoded['error'])) {
+                    $err = $decoded['error'];
+                    $error_message = isset($err['message']) ? $err['message'] : '';
+                    $error_status = isset($err['status']) ? $err['status'] : '';
+                    if (isset($err['details']) && is_array($err['details'])) {
+                        foreach ($err['details'] as $detail) {
+                            if (isset($detail['@type']) && $detail['@type'] === 'type.googleapis.com/google.rpc.ErrorInfo') {
+                                if (!empty($detail['reason'])) {
+                                    $error_reason = $detail['reason'];
+                                }
+                                if (isset($detail['metadata']['activationUrl'])) {
+                                    $activation_url = $detail['metadata']['activationUrl'];
+                                }
+                                if (isset($detail['metadata']['service'])) {
+                                    $disabled_service = $detail['metadata']['service'];
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // If this base is disabled at the project, try next base and remember guidance
+                if ($status_code === 403 && $error_reason === 'SERVICE_DISABLED') {
+                    // Save a rich error to fall back to if all bases fail
+                    $last_error = new WP_Error(
+                        'service_disabled',
+                        sprintf(
+                            /* translators: 1: service id, 2: activation url */
+                            __('Required Google API is disabled (%1$s). Enable it, then retry. %2$s', 'google-reviews-plugin'),
+                            $disabled_service ?: __('Unknown service', 'google-reviews-plugin'),
+                            $activation_url ? sprintf(__('Activation link: %s', 'google-reviews-plugin'), esc_url($activation_url)) : ''
+                        )
+                    );
+                    // Try the next candidate base URL
+                    continue;
+                }
+
+                // Common insufficient scope error – advise re-auth with correct scope
+                if ($status_code === 403 && ($error_reason === 'ACCESS_TOKEN_SCOPE_INSUFFICIENT' || stripos($error_message, 'insufficient permissions') !== false)) {
+                    return new WP_Error(
+                        'insufficient_scope',
+                        sprintf(
+                            __('API Error (403): Insufficient permissions. Please reconnect and ensure the OAuth scope %s is granted on the correct Google account.', 'google-reviews-plugin'),
+                            'https://www.googleapis.com/auth/business.manage'
+                        )
+                    );
+                }
+
+                // Default: return raw details for visibility
                 return new WP_Error('api_error', sprintf(__('API Error (%d): %s', 'google-reviews-plugin'), $status_code, $body));
             }
 
