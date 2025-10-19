@@ -358,16 +358,27 @@ class GRP_Admin {
                 . esc_html__('Enable the required Business Profile APIs:', 'google-reviews-plugin')
                 . '<ul style="margin-top:6px; list-style:disc; margin-left:20px;">'
                     . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofile.googleapis.com/overview">' . esc_html__('Business Profile API', 'google-reviews-plugin') . '</a></li>'
-                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessaccountmanagement.googleapis.com/overview">' . esc_html__('Business Profile Account Management API', 'google-reviews-plugin') . '</a></li>'
                     . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessbusinessinformation.googleapis.com/overview">' . esc_html__('Business Profile Business Information API', 'google-reviews-plugin') . '</a></li>'
+                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofileperformance.googleapis.com/overview">' . esc_html__('Business Profile Performance API', 'google-reviews-plugin') . '</a></li>'
+                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessaccountmanagement.googleapis.com/overview">' . esc_html__('Business Profile Account Management API (optional)', 'google-reviews-plugin') . '</a></li>'
                 . '</ul>'
             . '</li>'
+            . '<li>' . esc_html__('Ensure billing is enabled for your project.', 'google-reviews-plugin') . '</li>'
             . '<li>' . esc_html__('Configure OAuth consent screen', 'google-reviews-plugin') . '</li>'
             . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application)', 'google-reviews-plugin') . '</li>'
             . '<li>' . sprintf(esc_html__('Add Authorized redirect URI: %s', 'google-reviews-plugin'), esc_html(admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'))) . '</li>'
             . '<li>' . sprintf(esc_html__('Ensure scope is granted: %s', 'google-reviews-plugin'), '<code>https://www.googleapis.com/auth/business.manage</code>') . '</li>'
             . '<li>' . esc_html__('Copy Client ID and Client Secret into the fields below', 'google-reviews-plugin') . '</li>'
         . '</ol>';
+
+        echo '<div class="notice notice-info" style="margin-top:12px;"><p>'
+            . esc_html__('If you see "Requests per minute = 0" for a Business Profile API, your project is not yet approved for that API. Request access using the official prerequisites page (do not just request a quota increase).', 'google-reviews-plugin')
+            . ' <a target="_blank" rel="noopener" href="https://developers.google.com/my-business/content/prereqs">'
+            . esc_html__('Request Business Profile API access', 'google-reviews-plugin')
+            . '</a>.'
+            . '</p><p>'
+            . esc_html__('Use OAuth 2.0 user consent with the Google account that owns/manages the Business Profile. Service accounts are not supported for these endpoints.', 'google-reviews-plugin')
+            . '</p></div>';
     }
     
     /**
