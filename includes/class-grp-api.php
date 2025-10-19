@@ -95,9 +95,6 @@ class GRP_API {
                 update_option('grp_google_refresh_token', $this->refresh_token);
             }
             
-            // Try to auto-select a default account/location if not set yet
-            $this->ensure_default_location_selected();
-            
             return true;
         }
         
@@ -307,23 +304,20 @@ class GRP_API {
 
     /**
      * Determine which API base URLs to try for a given endpoint.
-     * We prioritize Account Management for account-scoped endpoints,
-     * and fall back to other Business Profile API hosts.
+     * Prefer modern Business Profile APIs only (no legacy Account Management).
      */
     private function get_base_candidates($endpoint) {
         $endpoint = ltrim($endpoint, '/');
-        $account_management = 'https://mybusinessaccountmanagement.googleapis.com/v1/';
         $business_profile = self::API_BASE_URL; // businessprofile.googleapis.com/v1
         $business_info = 'https://mybusinessbusinessinformation.googleapis.com/v1/';
 
-        // Prefer modern Business Profile hosts; de-prioritize legacy Account Management
-        // If endpoint clearly starts with accounts/, try the unified Business Profile first
+        // Prefer modern Business Profile hosts only
         if (strpos($endpoint, 'accounts') === 0) {
-            return array($business_profile, $business_info, $account_management);
+            return array($business_profile, $business_info);
         }
 
         // Generic order
-        return array($business_profile, $business_info, $account_management);
+        return array($business_profile, $business_info);
     }
     
     /**
@@ -404,8 +398,6 @@ class GRP_API {
         if (is_wp_error($accounts)) {
             return $accounts;
         }
-        // If connection works, ensure defaults are selected for convenience
-        $this->ensure_default_location_selected();
         
         return true;
     }
