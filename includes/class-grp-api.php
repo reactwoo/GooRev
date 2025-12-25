@@ -18,21 +18,25 @@ class GRP_API {
     const API_BASE_URL = 'https://businessprofile.googleapis.com/v1/';
     
     /**
-     * OAuth 2.0 endpoints
+     * OAuth 2.0 endpoints (for direct Google OAuth - used only with custom credentials)
      */
     const OAUTH_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
     const OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
     
     /**
-     * Default OAuth credentials for free tier
-     * These can be overridden via filter: grp_default_client_id, grp_default_client_secret
-     * Or set via constants: GRP_DEFAULT_CLIENT_ID, GRP_DEFAULT_CLIENT_SECRET
+     * API Server base URL for OAuth proxy
+     * Can be overridden via constant: GRP_API_SERVER_URL
+     * Or filter: grp_api_server_url
      */
-    private $default_client_id;
-    private $default_client_secret;
+    const DEFAULT_API_SERVER_URL = 'https://reactwoo.com/wp-json/grp-api/v1/';
     
     /**
-     * API credentials
+     * API Server endpoints
+     */
+    private $api_server_url;
+    
+    /**
+     * API credentials (only used when user provides custom credentials)
      */
     private $client_id;
     private $client_secret;
@@ -48,21 +52,14 @@ class GRP_API {
      * Constructor
      */
     public function __construct() {
-        // Get default credentials (can be set via constants or filter)
-        $this->default_client_id = defined('GRP_DEFAULT_CLIENT_ID') 
-            ? GRP_DEFAULT_CLIENT_ID 
-            : apply_filters('grp_default_client_id', '');
+        // Get API server URL (can be overridden via constant or filter)
+        $this->api_server_url = defined('GRP_API_SERVER_URL') 
+            ? GRP_API_SERVER_URL 
+            : apply_filters('grp_api_server_url', self::DEFAULT_API_SERVER_URL);
         
-        $this->default_client_secret = defined('GRP_DEFAULT_CLIENT_SECRET') 
-            ? GRP_DEFAULT_CLIENT_SECRET 
-            : apply_filters('grp_default_client_secret', '');
-        
-        // Use user-provided credentials if available, otherwise fall back to defaults
-        $user_client_id = get_option('grp_google_client_id', '');
-        $user_client_secret = get_option('grp_google_client_secret', '');
-        
-        $this->client_id = !empty($user_client_id) ? $user_client_id : $this->default_client_id;
-        $this->client_secret = !empty($user_client_secret) ? $user_client_secret : $this->default_client_secret;
+        // User-provided credentials (only used when custom credentials are enabled)
+        $this->client_id = get_option('grp_google_client_id', '');
+        $this->client_secret = get_option('grp_google_client_secret', '');
         
         $this->redirect_uri = admin_url('admin.php?page=google-reviews-settings&action=oauth_callback');
         
@@ -71,68 +68,158 @@ class GRP_API {
     }
     
     /**
-     * Check if using default credentials
+     * Check if using API server (free tier) or custom credentials
      */
-    public function is_using_default_credentials() {
+    public function is_using_api_server() {
         $user_client_id = get_option('grp_google_client_id', '');
-        return empty($user_client_id);
+        $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+        
+        // Use API server if no custom credentials are provided
+        return empty($user_client_id) || !$pro_enabled;
+    }
+    
+    /**
+     * Make request to API server
+     */
+    private function make_api_server_request($endpoint, $data = array()) {
+        $url = rtrim($this->api_server_url, '/') . '/' . ltrim($endpoint, '/');
+        
+        $response = wp_remote_post($url, array(
+            'body' => wp_json_encode($data),
+            'timeout' => 30,
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'X-Site-URL' => home_url(),
+                'X-Plugin-Version' => GRP_PLUGIN_VERSION
+            )
+        ));
+        
+        if (is_wp_error($response)) {
+            return $response;
+        }
+        
+        $body = wp_remote_retrieve_body($response);
+        $decoded = json_decode($body, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return new WP_Error('invalid_response', __('Invalid response from API server', 'google-reviews-plugin'));
+        }
+        
+        $status_code = wp_remote_retrieve_response_code($response);
+        if ($status_code >= 400) {
+            $error_message = isset($decoded['message']) ? $decoded['message'] : __('API server error', 'google-reviews-plugin');
+            return new WP_Error('api_server_error', $error_message);
+        }
+        
+        return $decoded;
     }
     
     /**
      * Get OAuth authorization URL
      */
     public function get_auth_url() {
-        if (empty($this->client_id)) {
-            return new WP_Error('no_client_id', __('OAuth Client ID is not configured. Please contact support or configure your own credentials.', 'google-reviews-plugin'));
+        $state = wp_create_nonce('grp_oauth_state');
+        
+        // Store state for validation
+        update_option('grp_oauth_state', $state);
+        
+        if ($this->is_using_api_server()) {
+            // Route through API server
+            $response = $this->make_api_server_request('oauth/auth-url', array(
+                'redirect_uri' => $this->redirect_uri,
+                'state' => $state
+            ));
+            
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            
+            return isset($response['auth_url']) ? $response['auth_url'] : new WP_Error('no_auth_url', __('Failed to get authorization URL from API server', 'google-reviews-plugin'));
+        } else {
+            // Use custom credentials - direct to Google
+            if (empty($this->client_id)) {
+                return new WP_Error('no_client_id', __('OAuth Client ID is not configured.', 'google-reviews-plugin'));
+            }
+            
+            $params = array(
+                'client_id' => $this->client_id,
+                'redirect_uri' => $this->redirect_uri,
+                'scope' => 'https://www.googleapis.com/auth/business.manage',
+                'response_type' => 'code',
+                'access_type' => 'offline',
+                'prompt' => 'consent',
+                'state' => $state
+            );
+            
+            return self::OAUTH_AUTH_URL . '?' . http_build_query($params);
         }
-        
-        $params = array(
-            'client_id' => $this->client_id,
-            'redirect_uri' => $this->redirect_uri,
-            'scope' => 'https://www.googleapis.com/auth/business.manage',
-            'response_type' => 'code',
-            'access_type' => 'offline',
-            'prompt' => 'consent',
-            'state' => wp_create_nonce('grp_oauth_state')
-        );
-        
-        return self::OAUTH_AUTH_URL . '?' . http_build_query($params);
     }
     
     /**
      * Exchange authorization code for tokens
      */
     public function exchange_code_for_tokens($code) {
-        $response = wp_remote_post(self::OAUTH_TOKEN_URL, array(
-            'body' => array(
-                'client_id' => $this->client_id,
-                'client_secret' => $this->client_secret,
+        if ($this->is_using_api_server()) {
+            // Route through API server
+            $response = $this->make_api_server_request('oauth/token', array(
                 'code' => $code,
-                'grant_type' => 'authorization_code',
                 'redirect_uri' => $this->redirect_uri
-            )
-        ));
-        
-        if (is_wp_error($response)) {
-            return false;
-        }
-        
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-        
-        if (isset($data['access_token'])) {
-            $this->access_token = $data['access_token'];
-            $this->refresh_token = isset($data['refresh_token']) ? $data['refresh_token'] : $this->refresh_token;
+            ));
             
-            update_option('grp_google_access_token', $this->access_token);
-            if ($this->refresh_token) {
-                update_option('grp_google_refresh_token', $this->refresh_token);
+            if (is_wp_error($response)) {
+                return false;
             }
             
-            return true;
+            if (isset($response['access_token'])) {
+                $this->access_token = $response['access_token'];
+                $this->refresh_token = isset($response['refresh_token']) ? $response['refresh_token'] : $this->refresh_token;
+                
+                update_option('grp_google_access_token', $this->access_token);
+                if ($this->refresh_token) {
+                    update_option('grp_google_refresh_token', $this->refresh_token);
+                }
+                
+                return true;
+            }
+            
+            return false;
+        } else {
+            // Use custom credentials - direct to Google
+            if (empty($this->client_id) || empty($this->client_secret)) {
+                return false;
+            }
+            
+            $response = wp_remote_post(self::OAUTH_TOKEN_URL, array(
+                'body' => array(
+                    'client_id' => $this->client_id,
+                    'client_secret' => $this->client_secret,
+                    'code' => $code,
+                    'grant_type' => 'authorization_code',
+                    'redirect_uri' => $this->redirect_uri
+                )
+            ));
+            
+            if (is_wp_error($response)) {
+                return false;
+            }
+            
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+            
+            if (isset($data['access_token'])) {
+                $this->access_token = $data['access_token'];
+                $this->refresh_token = isset($data['refresh_token']) ? $data['refresh_token'] : $this->refresh_token;
+                
+                update_option('grp_google_access_token', $this->access_token);
+                if ($this->refresh_token) {
+                    update_option('grp_google_refresh_token', $this->refresh_token);
+                }
+                
+                return true;
+            }
+            
+            return false;
         }
-        
-        return false;
     }
     
     /**
@@ -143,29 +230,60 @@ class GRP_API {
             return false;
         }
         
-        $response = wp_remote_post(self::OAUTH_TOKEN_URL, array(
-            'body' => array(
-                'client_id' => $this->client_id,
-                'client_secret' => $this->client_secret,
-                'refresh_token' => $this->refresh_token,
-                'grant_type' => 'refresh_token'
-            )
-        ));
-        
-        if (is_wp_error($response)) {
+        if ($this->is_using_api_server()) {
+            // Route through API server
+            $response = $this->make_api_server_request('oauth/refresh', array(
+                'refresh_token' => $this->refresh_token
+            ));
+            
+            if (is_wp_error($response)) {
+                return false;
+            }
+            
+            if (isset($response['access_token'])) {
+                $this->access_token = $response['access_token'];
+                update_option('grp_google_access_token', $this->access_token);
+                
+                // Update refresh token if provided
+                if (isset($response['refresh_token'])) {
+                    $this->refresh_token = $response['refresh_token'];
+                    update_option('grp_google_refresh_token', $this->refresh_token);
+                }
+                
+                return true;
+            }
+            
+            return false;
+        } else {
+            // Use custom credentials - direct to Google
+            if (empty($this->client_id) || empty($this->client_secret)) {
+                return false;
+            }
+            
+            $response = wp_remote_post(self::OAUTH_TOKEN_URL, array(
+                'body' => array(
+                    'client_id' => $this->client_id,
+                    'client_secret' => $this->client_secret,
+                    'refresh_token' => $this->refresh_token,
+                    'grant_type' => 'refresh_token'
+                )
+            ));
+            
+            if (is_wp_error($response)) {
+                return false;
+            }
+            
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+            
+            if (isset($data['access_token'])) {
+                $this->access_token = $data['access_token'];
+                update_option('grp_google_access_token', $this->access_token);
+                return true;
+            }
+            
             return false;
         }
-        
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-        
-        if (isset($data['access_token'])) {
-            $this->access_token = $data['access_token'];
-            update_option('grp_google_access_token', $this->access_token);
-            return true;
-        }
-        
-        return false;
     }
     
     /**

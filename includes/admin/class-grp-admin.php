@@ -284,8 +284,8 @@ class GRP_Admin {
                 echo '<p class="description">' . esc_html__('Please contact support or enable custom credentials in the Advanced section below.', 'google-reviews-plugin') . '</p>';
             } else {
                 $auth_url = $auth_url_result;
-                $using_defaults = $api->is_using_default_credentials();
-                if ($using_defaults) {
+                $using_api_server = $api->is_using_api_server();
+                if ($using_api_server) {
                     echo '<div class="notice notice-success"><p><strong>' . esc_html__('Easy Setup Available!', 'google-reviews-plugin') . '</strong> ' . esc_html__('Click below to connect using our pre-configured setup. No Google Cloud Project setup required!', 'google-reviews-plugin') . '</p></div>';
                 } else {
                     echo '<div class="notice notice-info"><p>' . esc_html__('Connect your Google account to start syncing reviews.', 'google-reviews-plugin') . '</p></div>';
@@ -340,6 +340,15 @@ class GRP_Admin {
             add_settings_error('grp_settings', 'grp_oauth_code', __('Missing authorization code.', 'google-reviews-plugin'), 'error');
             return;
         }
+
+        // Verify state matches stored state
+        $stored_state = get_option('grp_oauth_state', '');
+        if ($stored_state && $stored_state !== $state) {
+            add_settings_error('grp_settings', 'grp_oauth_state', __('Invalid OAuth state. Please try again.', 'google-reviews-plugin'), 'error');
+            delete_option('grp_oauth_state');
+            return;
+        }
+        delete_option('grp_oauth_state');
 
         $api = new GRP_API();
         $ok = $api->exchange_code_for_tokens($code);
@@ -411,11 +420,11 @@ class GRP_Admin {
      */
     public function render_google_api_section() {
         $api = new GRP_API();
-        $using_defaults = $api->is_using_default_credentials();
+        $using_api_server = $api->is_using_api_server();
         $license = new GRP_License();
         $is_pro = $license->is_pro();
         
-        if ($using_defaults && !$is_pro) {
+        if ($using_api_server && !$is_pro) {
             // Free tier with default credentials - simplified instructions
             echo '<div class="notice notice-success" style="margin-bottom:15px;"><p>';
             echo '<strong>' . esc_html__('Easy Setup Available!', 'google-reviews-plugin') . '</strong><br>';
@@ -556,7 +565,7 @@ class GRP_Admin {
         $value = get_option('grp_google_client_id', '');
         $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
         $api = new GRP_API();
-        $using_defaults = $api->is_using_default_credentials();
+        $using_api_server = $api->is_using_api_server();
         
         echo '<input type="text" name="grp_google_client_id" value="' . esc_attr($value) . '" class="regular-text" ' . ($pro_enabled ? '' : 'disabled') . ' />';
         
@@ -565,8 +574,8 @@ class GRP_Admin {
                 . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Get it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
                 . '</p>';
         } else {
-            if ($using_defaults) {
-                echo '<p class="description">' . esc_html__('Using default credentials. Enable the option above to use your own Client ID.', 'google-reviews-plugin') . '</p>';
+            if ($using_api_server) {
+                echo '<p class="description">' . esc_html__('Using API server for OAuth. Enable the option above to use your own Client ID.', 'google-reviews-plugin') . '</p>';
             } else {
                 echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID. Enable the option above first.', 'google-reviews-plugin') . '</p>';
             }
@@ -580,7 +589,7 @@ class GRP_Admin {
         $value = get_option('grp_google_client_secret', '');
         $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
         $api = new GRP_API();
-        $using_defaults = $api->is_using_default_credentials();
+        $using_api_server = $api->is_using_api_server();
         
         echo '<input type="password" name="grp_google_client_secret" value="' . esc_attr($value) . '" class="regular-text" ' . ($pro_enabled ? '' : 'disabled') . ' />';
         
@@ -589,8 +598,8 @@ class GRP_Admin {
                 . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Find it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
                 . '</p>';
         } else {
-            if ($using_defaults) {
-                echo '<p class="description">' . esc_html__('Using default credentials. Enable the option above to use your own Client Secret.', 'google-reviews-plugin') . '</p>';
+            if ($using_api_server) {
+                echo '<p class="description">' . esc_html__('Using API server for OAuth. Enable the option above to use your own Client Secret.', 'google-reviews-plugin') . '</p>';
             } else {
                 echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret. Enable the option above first.', 'google-reviews-plugin') . '</p>';
             }

@@ -21,18 +21,23 @@ This plugin allows WordPress site owners to:
 
 ## Architecture & License Structure
 
-### Free Tier (Minimal Load on Our API Server)
+### Free Tier (OAuth Proxy Through API Server)
 
-The **free version** uses our shared OAuth credentials for easy setup, with **minimal load on our API server**:
+The **free version** routes OAuth through our API server for easy setup, with **minimal load on our API server**:
 
-- **Shared OAuth Credentials**: Free users can use our pre-configured Google Cloud Project OAuth credentials (no setup required!)
+- **OAuth Proxy**: OAuth flow is routed through our API server (credentials stored securely on our server, not in the plugin)
 - **One-Click Connect**: Simply click "Connect Google Account" - no need to create your own Google Cloud Project
 - **Direct Google API Connection**: After OAuth, all API calls go directly from the WordPress site to Google's servers (`businessprofile.googleapis.com`)
 - **Optional Custom Credentials**: Free users can optionally use their own Google Cloud Project credentials if preferred
 - **Local Caching**: Reviews are cached locally in the WordPress database for performance
 - **No License Validation**: Free tier does not require license validation
 
-**Note**: The only connection to our servers is during the initial OAuth token exchange. All subsequent API calls go directly to Google.
+**Note**: Our API server only handles:
+- OAuth authorization URL generation (one-time during setup)
+- OAuth token exchange (one-time during setup)
+- Token refresh (periodic, when access token expires)
+
+All Google Business Profile API calls go directly from WordPress to Google's servers.
 
 **Free Tier Features:**
 - Connect to Business Profile APIs (using user's own credentials)
@@ -79,13 +84,13 @@ The **Pro version** connects to our license server for validation:
 
 ```
 Free Tier:
-WordPress Site → OAuth Token Exchange (reactwoo.com) [one-time during setup]
-WordPress Site → Google Business Profile APIs (direct) [all subsequent calls]
+WordPress Site → API Server (reactwoo.com) [OAuth proxy - auth URL, token exchange, refresh]
+WordPress Site → Google Business Profile APIs (direct) [all API calls after authentication]
 
 Pro Tier:
 WordPress Site → License Server (reactwoo.com) [for validation only]
-WordPress Site → OAuth Token Exchange (reactwoo.com or user's project) [one-time during setup]
-WordPress Site → Google Business Profile APIs (direct) [all subsequent calls]
+WordPress Site → API Server (reactwoo.com) [OAuth proxy - optional, can use custom credentials]
+WordPress Site → Google Business Profile APIs (direct) [all API calls after authentication]
 ```
 
 ### License System
@@ -102,6 +107,22 @@ The license system (`GRP_License` class) handles:
 - `activate` - Activate a license key
 - `deactivate` - Deactivate a license key
 - `check` - Check license status
+
+### OAuth Proxy System
+
+The OAuth proxy system (`GRP_API` class) routes OAuth through our API server:
+- OAuth credentials are stored securely on our server (not in the plugin)
+- Free tier automatically uses API server for OAuth
+- Pro tier can use API server or custom credentials
+
+**API Server Endpoint:** `https://reactwoo.com/wp-json/grp-api/v1/`
+
+**OAuth Proxy Actions:**
+- `oauth/auth-url` - Get Google OAuth authorization URL
+- `oauth/token` - Exchange authorization code for access token
+- `oauth/refresh` - Refresh expired access token
+
+See `API_SERVER_ENDPOINTS.md` for detailed endpoint documentation.
 
 ### Google API Integration
 
@@ -222,29 +243,45 @@ This plugin is licensed under the GPL v2 or later.
 
 ## Configuration
 
-### Setting Default OAuth Credentials
+### API Server Setup
 
-To provide default OAuth credentials for free tier users, you can set them via:
+The plugin routes OAuth through your API server by default. This can be:
+- A separate Node.js service on cPanel (recommended for cost savings)
+- Your existing EC2 server
+- A serverless function (AWS Lambda, Vercel, etc.)
 
-**Option 1: PHP Constants** (in wp-config.php or a mu-plugin):
+To configure the API server URL:
+
+**Option 1: PHP Constant** (in wp-config.php or a mu-plugin):
 ```php
-define('GRP_DEFAULT_CLIENT_ID', 'your-client-id-here');
-define('GRP_DEFAULT_CLIENT_SECRET', 'your-client-secret-here');
+define('GRP_API_SERVER_URL', 'https://your-api-server.com/wp-json/grp-api/v1/');
 ```
 
-**Option 2: WordPress Filters** (in theme functions.php or a plugin):
+**Option 2: WordPress Filter** (in theme functions.php or a plugin):
 ```php
-add_filter('grp_default_client_id', function() {
-    return 'your-client-id-here';
-});
-
-add_filter('grp_default_client_secret', function() {
-    return 'your-client-secret-here';
+add_filter('grp_api_server_url', function() {
+    return 'https://your-api-server.com/wp-json/grp-api/v1/';
 });
 ```
+
+### Implementing API Server Endpoints
+
+You need to implement three REST API endpoints on your server:
+
+1. **POST /oauth/auth-url** - Generate Google OAuth authorization URL
+2. **POST /oauth/token** - Exchange authorization code for access token
+3. **POST /oauth/refresh** - Refresh expired access token
+
+See `API_SERVER_ENDPOINTS.md` for complete endpoint documentation, request/response formats, and example implementations.
+
+**For cost optimization and deployment options**, see:
+- `LOAD_ANALYSIS.md` - Load assessment and cost comparison
+- `CPANEL_NODEJS_SETUP.md` - Step-by-step guide for deploying on cPanel (recommended for cost savings)
+- `MULTIPLE_NODEJS_APPS.md` - Guide for running multiple Node.js apps (WooAliAI, Google Reviews, Geo Elementor) on the same cPanel account
 
 **Important**: 
-- The OAuth redirect URI must be configured in your Google Cloud Console as: `https://yoursite.com/wp-admin/admin.php?page=google-reviews-settings&action=oauth_callback`
+- Store Google OAuth credentials securely on your server (environment variables, secure vault, etc.)
+- The OAuth redirect URI must be configured in your Google Cloud Console
 - Your Google Cloud Project must have the Business Profile APIs enabled and approved
 - The OAuth consent screen must be configured
 
