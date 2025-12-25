@@ -434,9 +434,9 @@ jQuery(document).ready(function($) {
             style: style
         }, function(response) {
             if (response.success) {
-                alert('<?php esc_js_e('Default style updated!', 'google-reviews-plugin'); ?>');
+                alert('<?php esc_js('Default style updated!', 'google-reviews-plugin'); ?>');
             } else {
-                alert('<?php esc_js_e('Failed to update style.', 'google-reviews-plugin'); ?>');
+                alert('<?php esc_js('Failed to update style.', 'google-reviews-plugin'); ?>');
             }
         });
     });
@@ -451,16 +451,16 @@ jQuery(document).ready(function($) {
             css: css
         }, function(response) {
             if (response.success) {
-                alert('<?php esc_js_e('Custom CSS saved!', 'google-reviews-plugin'); ?>');
+                alert('<?php esc_js('Custom CSS saved!', 'google-reviews-plugin'); ?>');
             } else {
-                alert('<?php esc_js_e('Failed to save CSS.', 'google-reviews-plugin'); ?>');
+                alert('<?php esc_js('Failed to save CSS.', 'google-reviews-plugin'); ?>');
             }
         });
     });
     
     // Reset CSS
     $('#grp-reset-css').on('click', function() {
-        if (confirm('<?php esc_js_e('Are you sure you want to reset the custom CSS?', 'google-reviews-plugin'); ?>')) {
+        if (confirm('<?php esc_js('Are you sure you want to reset the custom CSS?', 'google-reviews-plugin'); ?>')) {
             $('#grp-custom-css').val('');
         }
     });
@@ -477,9 +477,9 @@ jQuery(document).ready(function($) {
             data: formData
         }, function(response) {
             if (response.success) {
-                alert('<?php esc_js_e('Settings saved!', 'google-reviews-plugin'); ?>');
+                alert('<?php esc_js('Settings saved!', 'google-reviews-plugin'); ?>');
             } else {
-                alert('<?php esc_js_e('Failed to save settings.', 'google-reviews-plugin'); ?>');
+                alert('<?php esc_js('Failed to save settings.', 'google-reviews-plugin'); ?>');
             }
         });
     });
