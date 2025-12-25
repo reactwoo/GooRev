@@ -278,9 +278,20 @@ class GRP_Admin {
         $auth_url = '';
         $disconnect_url = wp_nonce_url(admin_url('admin-post.php?action=grp_disconnect'), 'grp_disconnect');
         if (!$is_connected) {
-            $auth_url = $api->get_auth_url();
-            echo '<div class="notice notice-info"><p>' . esc_html__('Connect your Google account to start syncing reviews.', 'google-reviews-plugin') . '</p></div>'; 
-            echo '<p><a class="button button-primary" href="' . esc_url($auth_url) . '">' . esc_html__('Connect Google Account', 'google-reviews-plugin') . '</a></p>'; 
+            $auth_url_result = $api->get_auth_url();
+            if (is_wp_error($auth_url_result)) {
+                echo '<div class="notice notice-error"><p><strong>' . esc_html__('Configuration Error', 'google-reviews-plugin') . ':</strong> ' . esc_html($auth_url_result->get_error_message()) . '</p></div>';
+                echo '<p class="description">' . esc_html__('Please contact support or enable custom credentials in the Advanced section below.', 'google-reviews-plugin') . '</p>';
+            } else {
+                $auth_url = $auth_url_result;
+                $using_defaults = $api->is_using_default_credentials();
+                if ($using_defaults) {
+                    echo '<div class="notice notice-success"><p><strong>' . esc_html__('Easy Setup Available!', 'google-reviews-plugin') . '</strong> ' . esc_html__('Click below to connect using our pre-configured setup. No Google Cloud Project setup required!', 'google-reviews-plugin') . '</p></div>';
+                } else {
+                    echo '<div class="notice notice-info"><p>' . esc_html__('Connect your Google account to start syncing reviews.', 'google-reviews-plugin') . '</p></div>';
+                }
+                echo '<p><a class="button button-primary" href="' . esc_url($auth_url) . '">' . esc_html__('Connect Google Account', 'google-reviews-plugin') . '</a></p>';
+            }
         } else {
             echo '<div class="notice notice-success"><p>' . esc_html__('Google account connected.', 'google-reviews-plugin') . '</p></div>';
             echo '<p>'
@@ -399,41 +410,76 @@ class GRP_Admin {
      * Render Google API section
      */
     public function render_google_api_section() {
-        echo '<p>' . __('Configure your Google Business Profile connection.', 'google-reviews-plugin') . '</p>';
-        echo '<p><a target="_blank" rel="noopener" href="https://console.cloud.google.com/">' . esc_html__('Open Google Cloud Console', 'google-reviews-plugin') . '</a></p>';
-        echo '<ol style="margin-left:20px;">'
-            . '<li>' . esc_html__('Create/select a GCP project', 'google-reviews-plugin') . '</li>'
-            . '<li>'
-                . esc_html__('Enable the required Business Profile APIs:', 'google-reviews-plugin')
-                . '<ul style="margin-top:6px; list-style:disc; margin-left:20px;">'
-                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofile.googleapis.com/overview">' . esc_html__('Business Profile API', 'google-reviews-plugin') . '</a></li>'
-                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessbusinessinformation.googleapis.com/overview">' . esc_html__('Business Profile Business Information API', 'google-reviews-plugin') . '</a></li>'
-                    . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofileperformance.googleapis.com/overview">' . esc_html__('Business Profile Performance API', 'google-reviews-plugin') . '</a></li>'
-                . '</ul>'
-            . '</li>'
-            . '<li>' . esc_html__('Ensure billing is enabled for your project.', 'google-reviews-plugin') . '</li>'
-            . '<li>' . esc_html__('Configure OAuth consent screen', 'google-reviews-plugin') . '</li>'
-            . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application) if you plan to use your own credentials (Pro).', 'google-reviews-plugin') . '</li>'
-            . '<li>' . sprintf(esc_html__('Add Authorized redirect URI: %s', 'google-reviews-plugin'), esc_html(admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'))) . '</li>'
-            . '<li>' . sprintf(esc_html__('Ensure scope is granted: %s', 'google-reviews-plugin'), '<code>https://www.googleapis.com/auth/business.manage</code>') . '</li>'
-            . '<li>' . esc_html__('For Pro users, enable the Pro section below to enter Client ID/Secret.', 'google-reviews-plugin') . '</li>'
-        . '</ol>';
-
-        echo '<div class="notice notice-info" style="margin-top:12px;"><p>'
-            . esc_html__('If you see "Requests per minute = 0" for a Business Profile API, your project is not yet approved for that API. Request access using the official prerequisites page (do not just request a quota increase).', 'google-reviews-plugin')
-            . ' <a target="_blank" rel="noopener" href="https://developers.google.com/my-business/content/prereqs">'
-            . esc_html__('Request Business Profile API access', 'google-reviews-plugin')
-            . '</a>.'
-            . '</p><p>'
-            . esc_html__('Use OAuth 2.0 user consent with the Google account that owns/manages the Business Profile. Service accounts are not supported for these endpoints.', 'google-reviews-plugin')
-            . '</p></div>';
+        $api = new GRP_API();
+        $using_defaults = $api->is_using_default_credentials();
+        $license = new GRP_License();
+        $is_pro = $license->is_pro();
+        
+        if ($using_defaults && !$is_pro) {
+            // Free tier with default credentials - simplified instructions
+            echo '<div class="notice notice-success" style="margin-bottom:15px;"><p>';
+            echo '<strong>' . esc_html__('Easy Setup Available!', 'google-reviews-plugin') . '</strong><br>';
+            echo esc_html__('You can connect to Google Business Profile using our pre-configured setup. No need to create your own Google Cloud project!', 'google-reviews-plugin');
+            echo '</p></div>';
+            
+            echo '<p>' . __('Simply click "Connect Google Account" below to get started. You\'ll be asked to authorize the plugin to access your Google Business Profile reviews.', 'google-reviews-plugin') . '</p>';
+            
+            echo '<div class="notice notice-info" style="margin-top:12px;"><p>';
+            echo '<strong>' . esc_html__('Using Your Own Credentials?', 'google-reviews-plugin') . '</strong><br>';
+            echo esc_html__('Pro users can optionally use their own Google Cloud Project credentials for more control. Enable the "Advanced (Pro)" section below to enter custom Client ID and Secret.', 'google-reviews-plugin');
+            echo '</p></div>';
+        } else {
+            // Pro tier or custom credentials - show full instructions
+            echo '<p>' . __('Configure your Google Business Profile connection.', 'google-reviews-plugin') . '</p>';
+            
+            if (!$is_pro) {
+                echo '<p><a target="_blank" rel="noopener" href="https://console.cloud.google.com/">' . esc_html__('Open Google Cloud Console', 'google-reviews-plugin') . '</a></p>';
+                echo '<ol style="margin-left:20px;">'
+                    . '<li>' . esc_html__('Create/select a GCP project', 'google-reviews-plugin') . '</li>'
+                    . '<li>'
+                        . esc_html__('Enable the required Business Profile APIs:', 'google-reviews-plugin')
+                        . '<ul style="margin-top:6px; list-style:disc; margin-left:20px;">'
+                            . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofile.googleapis.com/overview">' . esc_html__('Business Profile API', 'google-reviews-plugin') . '</a></li>'
+                            . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/mybusinessbusinessinformation.googleapis.com/overview">' . esc_html__('Business Profile Business Information API', 'google-reviews-plugin') . '</a></li>'
+                            . '<li><a target="_blank" rel="noopener" href="https://console.developers.google.com/apis/api/businessprofileperformance.googleapis.com/overview">' . esc_html__('Business Profile Performance API', 'google-reviews-plugin') . '</a></li>'
+                        . '</ul>'
+                    . '</li>'
+                    . '<li>' . esc_html__('Ensure billing is enabled for your project.', 'google-reviews-plugin') . '</li>'
+                    . '<li>' . esc_html__('Configure OAuth consent screen', 'google-reviews-plugin') . '</li>'
+                    . '<li>' . esc_html__('Create OAuth 2.0 Client (Web application)', 'google-reviews-plugin') . '</li>'
+                    . '<li>' . sprintf(esc_html__('Add Authorized redirect URI: %s', 'google-reviews-plugin'), esc_html(admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'))) . '</li>'
+                    . '<li>' . sprintf(esc_html__('Ensure scope is granted: %s', 'google-reviews-plugin'), '<code>https://www.googleapis.com/auth/business.manage</code>') . '</li>'
+                . '</ol>';
+            }
+            
+            echo '<div class="notice notice-info" style="margin-top:12px;"><p>';
+            if ($is_pro) {
+                echo esc_html__('Pro users can use either the default setup (no configuration needed) or their own Google Cloud Project credentials for more control.', 'google-reviews-plugin');
+            } else {
+                echo esc_html__('If you see "Requests per minute = 0" for a Business Profile API, your project is not yet approved for that API. Request access using the official prerequisites page (do not just request a quota increase).', 'google-reviews-plugin')
+                    . ' <a target="_blank" rel="noopener" href="https://developers.google.com/my-business/content/prereqs">'
+                    . esc_html__('Request Business Profile API access', 'google-reviews-plugin')
+                    . '</a>.';
+            }
+            echo '</p><p>';
+            echo esc_html__('Use OAuth 2.0 user consent with the Google account that owns/manages the Business Profile. Service accounts are not supported for these endpoints.', 'google-reviews-plugin');
+            echo '</p></div>';
+        }
     }
 
     /**
      * Render Pro section description
      */
     public function render_pro_section() {
-        echo '<p>' . esc_html__('Optional advanced configuration for Pro plans. Enable to enter your own Google OAuth Client ID and Secret.', 'google-reviews-plugin') . '</p>';
+        $license = new GRP_License();
+        $is_pro = $license->is_pro();
+        
+        if ($is_pro) {
+            echo '<p>' . esc_html__('Optional: Use your own Google Cloud Project credentials instead of the default setup. This gives you more control over API quotas and usage.', 'google-reviews-plugin') . '</p>';
+        } else {
+            echo '<p>' . esc_html__('Optional advanced configuration. Enable to enter your own Google OAuth Client ID and Secret if you prefer to use your own Google Cloud Project.', 'google-reviews-plugin') . '</p>';
+            echo '<p class="description">' . esc_html__('Note: Free users can use the default setup without entering credentials. This option is for users who want to use their own Google Cloud Project.', 'google-reviews-plugin') . '</p>';
+        }
     }
 
     /**
@@ -441,8 +487,20 @@ class GRP_Admin {
      */
     public function render_pro_enable_field() {
         $enabled = (bool) get_option('grp_enable_pro_features', false);
-        echo '<label><input type="checkbox" name="grp_enable_pro_features" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html__('Enable Pro plan configuration on this site', 'google-reviews-plugin') . '</label>';
-        echo '<p class="description">' . esc_html__('When enabled, you can enter Client ID and Client Secret below.', 'google-reviews-plugin') . '</p>';
+        $license = new GRP_License();
+        $is_pro = $license->is_pro();
+        
+        $label = $is_pro 
+            ? __('Use custom Google Cloud credentials', 'google-reviews-plugin')
+            : __('Use my own Google Cloud Project credentials', 'google-reviews-plugin');
+        
+        echo '<label><input type="checkbox" name="grp_enable_pro_features" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html($label) . '</label>';
+        
+        if ($is_pro) {
+            echo '<p class="description">' . esc_html__('When enabled, you can enter your own Client ID and Client Secret below. Leave disabled to use the default setup.', 'google-reviews-plugin') . '</p>';
+        } else {
+            echo '<p class="description">' . esc_html__('When enabled, you can enter Client ID and Client Secret below. Free users can use the default setup without enabling this option.', 'google-reviews-plugin') . '</p>';
+        }
     }
 
     /**
@@ -497,10 +555,22 @@ class GRP_Admin {
     public function render_client_id_field() {
         $value = get_option('grp_google_client_id', '');
         $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+        $api = new GRP_API();
+        $using_defaults = $api->is_using_default_credentials();
+        
         echo '<input type="text" name="grp_google_client_id" value="' . esc_attr($value) . '" class="regular-text" ' . ($pro_enabled ? '' : 'disabled') . ' />';
-        echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID.', 'google-reviews-plugin') . ' '
-            . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Get it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
-            . '</p>';
+        
+        if ($pro_enabled) {
+            echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID.', 'google-reviews-plugin') . ' '
+                . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Get it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
+                . '</p>';
+        } else {
+            if ($using_defaults) {
+                echo '<p class="description">' . esc_html__('Using default credentials. Enable the option above to use your own Client ID.', 'google-reviews-plugin') . '</p>';
+            } else {
+                echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client ID. Enable the option above first.', 'google-reviews-plugin') . '</p>';
+            }
+        }
     }
     
     /**
@@ -509,10 +579,22 @@ class GRP_Admin {
     public function render_client_secret_field() {
         $value = get_option('grp_google_client_secret', '');
         $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+        $api = new GRP_API();
+        $using_defaults = $api->is_using_default_credentials();
+        
         echo '<input type="password" name="grp_google_client_secret" value="' . esc_attr($value) . '" class="regular-text" ' . ($pro_enabled ? '' : 'disabled') . ' />';
-        echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret.', 'google-reviews-plugin') . ' '
-            . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Find it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
-            . '</p>';
+        
+        if ($pro_enabled) {
+            echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret.', 'google-reviews-plugin') . ' '
+                . '<a target="_blank" rel="noopener" href="https://console.cloud.google.com/apis/credentials">' . esc_html__('Find it in Google Cloud Console → Credentials', 'google-reviews-plugin') . '</a>'
+                . '</p>';
+        } else {
+            if ($using_defaults) {
+                echo '<p class="description">' . esc_html__('Using default credentials. Enable the option above to use your own Client Secret.', 'google-reviews-plugin') . '</p>';
+            } else {
+                echo '<p class="description">' . __('Enter your Google OAuth 2.0 Client Secret. Enable the option above first.', 'google-reviews-plugin') . '</p>';
+            }
+        }
     }
     
     /**

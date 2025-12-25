@@ -24,6 +24,14 @@ class GRP_API {
     const OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token';
     
     /**
+     * Default OAuth credentials for free tier
+     * These can be overridden via filter: grp_default_client_id, grp_default_client_secret
+     * Or set via constants: GRP_DEFAULT_CLIENT_ID, GRP_DEFAULT_CLIENT_SECRET
+     */
+    private $default_client_id;
+    private $default_client_secret;
+    
+    /**
      * API credentials
      */
     private $client_id;
@@ -40,8 +48,22 @@ class GRP_API {
      * Constructor
      */
     public function __construct() {
-        $this->client_id = get_option('grp_google_client_id', '');
-        $this->client_secret = get_option('grp_google_client_secret', '');
+        // Get default credentials (can be set via constants or filter)
+        $this->default_client_id = defined('GRP_DEFAULT_CLIENT_ID') 
+            ? GRP_DEFAULT_CLIENT_ID 
+            : apply_filters('grp_default_client_id', '');
+        
+        $this->default_client_secret = defined('GRP_DEFAULT_CLIENT_SECRET') 
+            ? GRP_DEFAULT_CLIENT_SECRET 
+            : apply_filters('grp_default_client_secret', '');
+        
+        // Use user-provided credentials if available, otherwise fall back to defaults
+        $user_client_id = get_option('grp_google_client_id', '');
+        $user_client_secret = get_option('grp_google_client_secret', '');
+        
+        $this->client_id = !empty($user_client_id) ? $user_client_id : $this->default_client_id;
+        $this->client_secret = !empty($user_client_secret) ? $user_client_secret : $this->default_client_secret;
+        
         $this->redirect_uri = admin_url('admin.php?page=google-reviews-settings&action=oauth_callback');
         
         $this->access_token = get_option('grp_google_access_token', '');
@@ -49,9 +71,21 @@ class GRP_API {
     }
     
     /**
+     * Check if using default credentials
+     */
+    public function is_using_default_credentials() {
+        $user_client_id = get_option('grp_google_client_id', '');
+        return empty($user_client_id);
+    }
+    
+    /**
      * Get OAuth authorization URL
      */
     public function get_auth_url() {
+        if (empty($this->client_id)) {
+            return new WP_Error('no_client_id', __('OAuth Client ID is not configured. Please contact support or configure your own credentials.', 'google-reviews-plugin'));
+        }
+        
         $params = array(
             'client_id' => $this->client_id,
             'redirect_uri' => $this->redirect_uri,
