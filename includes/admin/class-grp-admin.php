@@ -119,11 +119,11 @@ class GRP_Admin {
             'grp_settings'
         );
 
-        // Pro/Advanced section (gated)
+        // Enterprise/Custom credentials section (gated)
         register_setting('grp_settings', 'grp_enable_pro_features', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
         add_settings_section(
             'grp_pro_settings',
-            __('Advanced (Pro)', 'google-reviews-plugin'),
+            __('Enterprise: Custom Google Credentials', 'google-reviews-plugin'),
             array($this, 'render_pro_section'),
             'grp_settings'
         );
@@ -480,15 +480,18 @@ class GRP_Admin {
      * Render Pro section description
      */
     public function render_pro_section() {
+        $api = new GRP_API();
+        $using_api_server = $api->is_using_api_server();
         $license = new GRP_License();
         $is_pro = $license->is_pro();
         
-        if ($is_pro) {
-            echo '<p>' . esc_html__('Optional: Use your own Google Cloud Project credentials instead of the default setup. This gives you more control over API quotas and usage.', 'google-reviews-plugin') . '</p>';
-        } else {
-            echo '<p>' . esc_html__('Optional advanced configuration. Enable to enter your own Google OAuth Client ID and Secret if you prefer to use your own Google Cloud Project.', 'google-reviews-plugin') . '</p>';
-            echo '<p class="description">' . esc_html__('Note: Free users can use the default setup without entering credentials. This option is for users who want to use their own Google Cloud Project.', 'google-reviews-plugin') . '</p>';
-        }
+        echo '<div class="notice notice-info" style="margin-bottom: 15px;"><p>';
+        echo '<strong>' . esc_html__('Default Setup Recommended', 'google-reviews-plugin') . '</strong><br>';
+        echo esc_html__('By default, the plugin uses our API server for OAuth. No Google Cloud Project setup required! Simply click "Connect Google Account" to get started.', 'google-reviews-plugin');
+        echo '</p></div>';
+        
+        echo '<p>' . esc_html__('This section is only for enterprise users who want to use their own Google Cloud Project credentials for maximum control over API quotas and usage.', 'google-reviews-plugin') . '</p>';
+        echo '<p class="description">' . esc_html__('Note: You do not need to configure this section unless you specifically want to use your own Google Cloud Project. The default setup works for both free and Pro users.', 'google-reviews-plugin') . '</p>';
     }
 
     /**
@@ -496,20 +499,19 @@ class GRP_Admin {
      */
     public function render_pro_enable_field() {
         $enabled = (bool) get_option('grp_enable_pro_features', false);
-        $license = new GRP_License();
-        $is_pro = $license->is_pro();
         
-        $label = $is_pro 
-            ? __('Use custom Google Cloud credentials', 'google-reviews-plugin')
-            : __('Use my own Google Cloud Project credentials', 'google-reviews-plugin');
+        $label = __('Use my own Google Cloud Project credentials', 'google-reviews-plugin');
         
         echo '<label><input type="checkbox" name="grp_enable_pro_features" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html($label) . '</label>';
         
-        if ($is_pro) {
-            echo '<p class="description">' . esc_html__('When enabled, you can enter your own Client ID and Client Secret below. Leave disabled to use the default setup.', 'google-reviews-plugin') . '</p>';
-        } else {
-            echo '<p class="description">' . esc_html__('When enabled, you can enter Client ID and Client Secret below. Free users can use the default setup without enabling this option.', 'google-reviews-plugin') . '</p>';
-        }
+        echo '<p class="description">' . esc_html__('When enabled, you can enter your own Client ID and Client Secret below. Leave disabled to use the default setup (recommended for most users).', 'google-reviews-plugin') . '</p>';
+        echo '<p class="description"><strong>' . esc_html__('Why use custom credentials?', 'google-reviews-plugin') . '</strong><br>';
+        echo esc_html__('Enterprise users may want to use their own Google Cloud Project to:', 'google-reviews-plugin');
+        echo '<ul style="margin-left: 20px; margin-top: 5px;">';
+        echo '<li>' . esc_html__('Have full control over API quotas', 'google-reviews-plugin') . '</li>';
+        echo '<li>' . esc_html__('Monitor usage in their own Google Cloud Console', 'google-reviews-plugin') . '</li>';
+        echo '<li>' . esc_html__('Use their organization\'s existing Google Cloud Project', 'google-reviews-plugin') . '</li>';
+        echo '</ul></p>';
     }
 
     /**

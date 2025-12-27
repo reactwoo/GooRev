@@ -35,11 +35,8 @@ if (!defined('ABSPATH')) {
                             <div class="grp-faq-content">
                                 <ul>
                                     <li><?php esc_html_e('Ensure you connected with the Google account that owns/manages the Business Profile.', 'google-reviews-plugin'); ?></li>
-                                    <li><?php esc_html_e('Confirm the required Business Profile APIs are enabled in your Google Cloud project.', 'google-reviews-plugin'); ?></li>
-                                    <li><?php esc_html_e('If your project shows 0 QPM for Account Management API, request Business Profile API access approval from Google (not a quota increase).', 'google-reviews-plugin'); ?>
-                                        <a href="https://developers.google.com/my-business/content/prereqs" target="_blank" rel="noopener"><?php esc_html_e('Request access', 'google-reviews-plugin'); ?></a>
-                                    </li>
-                                    <li><?php esc_html_e('Click Refresh next to the Account selector after approval.', 'google-reviews-plugin'); ?></li>
+                                    <li><?php esc_html_e('Click Refresh next to the Account selector to reload accounts.', 'google-reviews-plugin'); ?></li>
+                                    <li><?php esc_html_e('If using custom credentials, confirm the required Business Profile APIs are enabled in your Google Cloud project.', 'google-reviews-plugin'); ?></li>
                                 </ul>
                             </div>
                         </details>
@@ -51,22 +48,16 @@ if (!defined('ABSPATH')) {
                                 <ul>
                                     <li><?php esc_html_e('Verify the selected account actually has locations in Google Business Profile.', 'google-reviews-plugin'); ?></li>
                                     <li><?php esc_html_e('Try another account if you manage multiple organizations.', 'google-reviews-plugin'); ?></li>
-                                    <li><?php esc_html_e('Ensure the Business Information API is enabled on your project.', 'google-reviews-plugin'); ?></li>
                                 </ul>
                             </div>
                         </details>
                     </div>
                     <div class="grp-faq-item">
                         <details>
-                            <summary><?php esc_html_e('Connection failed: Quota exceeded (429, RESOURCE_EXHAUSTED)', 'google-reviews-plugin'); ?></summary>
+                            <summary><?php esc_html_e('Do I need to create a Google Cloud Project?', 'google-reviews-plugin'); ?></summary>
                             <div class="grp-faq-content">
-                                <p><?php esc_html_e('This commonly happens when your Google Cloud project has 0 requests per minute for the Business Profile Account Management API.', 'google-reviews-plugin'); ?></p>
-                                <ul>
-                                    <li><?php esc_html_e('Do not request a simple quota increase. Instead, complete the Business Profile API prerequisites and request access.', 'google-reviews-plugin'); ?>
-                                        <a href="https://developers.google.com/my-business/content/prereqs" target="_blank" rel="noopener"><?php esc_html_e('Follow Google’s prerequisites', 'google-reviews-plugin'); ?></a>
-                                    </li>
-                                    <li><?php esc_html_e('After approval, wait a few minutes and test the connection again.', 'google-reviews-plugin'); ?></li>
-                                </ul>
+                                <p><?php esc_html_e('No! By default, the plugin uses our API server for OAuth. Simply click "Connect Google Account" to get started.', 'google-reviews-plugin'); ?></p>
+                                <p><?php esc_html_e('Custom Google Cloud credentials are only needed if you want to use your own project for enterprise-level control over API quotas and usage.', 'google-reviews-plugin'); ?></p>
                             </div>
                         </details>
                     </div>
@@ -74,7 +65,8 @@ if (!defined('ABSPATH')) {
                         <details>
                             <summary><?php esc_html_e('Where do I enter Client ID and Client Secret?', 'google-reviews-plugin'); ?></summary>
                             <div class="grp-faq-content">
-                                <p><?php esc_html_e('Client ID/Secret are part of the Advanced (Pro) section below. Enable the Pro configuration checkbox to unlock those fields and save your credentials.', 'google-reviews-plugin'); ?></p>
+                                <p><?php esc_html_e('Client ID/Secret are only needed if you want to use your own Google Cloud Project. They are in the "Enterprise: Custom Google Credentials" section below.', 'google-reviews-plugin'); ?></p>
+                                <p><?php esc_html_e('Most users do not need to configure this - the default setup works without any credentials.', 'google-reviews-plugin'); ?></p>
                             </div>
                         </details>
                     </div>
@@ -86,19 +78,41 @@ if (!defined('ABSPATH')) {
             <!-- License Section -->
             <div class="grp-sidebar-card">
                 <h3><?php esc_html_e('License', 'google-reviews-plugin'); ?></h3>
+                <?php
+                $license = new GRP_License();
+                $license_key = $license->get_license_key();
+                $license_status = $license->get_license_status();
+                ?>
                 <?php if ($is_pro): ?>
                     <div class="grp-license-status">
                         <span class="grp-status-connected">✓ <?php esc_html_e('Pro License Active', 'google-reviews-plugin'); ?></span>
                     </div>
                     <p><?php esc_html_e('You have access to all Pro features.', 'google-reviews-plugin'); ?></p>
+                    <form method="post" action="" style="margin-top: 15px;">
+                        <?php wp_nonce_field('grp_license_nonce'); ?>
+                        <input type="hidden" name="grp_license_action" value="deactivate">
+                        <button type="submit" class="button" onclick="return confirm('<?php esc_attr_e('Are you sure you want to deactivate your license?', 'google-reviews-plugin'); ?>');">
+                            <?php esc_html_e('Deactivate License', 'google-reviews-plugin'); ?>
+                        </button>
+                    </form>
                 <?php else: ?>
                     <div class="grp-license-status">
                         <span class="grp-status-disconnected">✗ <?php esc_html_e('Free Version', 'google-reviews-plugin'); ?></span>
                     </div>
-                    <p><?php esc_html_e('Upgrade to Pro for advanced features.', 'google-reviews-plugin'); ?></p>
-                    <a href="https://reactwoo.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank">
-                        <?php esc_html_e('Upgrade to Pro', 'google-reviews-plugin'); ?>
-                    </a>
+                    <p><?php esc_html_e('Enter your license key to unlock Pro features.', 'google-reviews-plugin'); ?></p>
+                    <form method="post" action="" style="margin-top: 15px;">
+                        <?php wp_nonce_field('grp_license_nonce'); ?>
+                        <input type="hidden" name="grp_license_action" value="activate">
+                        <input type="text" name="grp_license_key" value="<?php echo esc_attr($license_key); ?>" placeholder="<?php esc_attr_e('Enter license key', 'google-reviews-plugin'); ?>" class="regular-text" style="width: 100%; margin-bottom: 10px;" />
+                        <button type="submit" class="button button-primary" style="width: 100%;">
+                            <?php esc_html_e('Activate License', 'google-reviews-plugin'); ?>
+                        </button>
+                    </form>
+                    <p style="margin-top: 10px; font-size: 12px;">
+                        <a href="https://reactwoo.com/google-reviews-plugin-pro/" target="_blank">
+                            <?php esc_html_e('Get a license →', 'google-reviews-plugin'); ?>
+                        </a>
+                    </p>
                 <?php endif; ?>
             </div>
             
@@ -106,8 +120,8 @@ if (!defined('ABSPATH')) {
             <div class="grp-sidebar-card">
                 <h3><?php esc_html_e('Quick Start', 'google-reviews-plugin'); ?></h3>
                 <ol>
-                    <li><?php esc_html_e('Configure Google API credentials', 'google-reviews-plugin'); ?></li>
                     <li><?php esc_html_e('Connect your Google Business account', 'google-reviews-plugin'); ?></li>
+                    <li><?php esc_html_e('Select your business location', 'google-reviews-plugin'); ?></li>
                     <li><?php esc_html_e('Sync your reviews', 'google-reviews-plugin'); ?></li>
                     <li><?php esc_html_e('Add shortcode to your pages', 'google-reviews-plugin'); ?></li>
                 </ol>
