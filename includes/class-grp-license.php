@@ -203,9 +203,21 @@ class GRP_License {
         
         // Convert data to JSON
         // License server expects: licenseKey (or license_key), domain, pluginVersion (or plugin_version), pluginSlug (or plugin_slug)
+        // Extract domain from URL (remove protocol and path)
+        $site_url = $data['site_url'] ?? $data['domain'] ?? home_url();
+        $domain = $site_url;
+        if (preg_match('#^https?://([^/]+)#', $site_url, $matches)) {
+            $domain = $matches[1];
+        } elseif (strpos($site_url, '://') === false && strpos($site_url, '/') === false) {
+            // Already a domain
+            $domain = $site_url;
+        }
+        // Remove www. prefix if present (optional, but cleaner)
+        $domain = preg_replace('#^www\.#', '', $domain);
+        
         $request_data = array(
             'licenseKey' => $data['license_key'] ?? $data['licenseKey'] ?? '',
-            'domain' => $data['site_url'] ?? $data['domain'] ?? home_url(),
+            'domain' => $domain,
             'pluginVersion' => $data['plugin_version'] ?? $data['pluginVersion'] ?? GRP_PLUGIN_VERSION,
             'pluginSlug' => $data['plugin_slug'] ?? $data['pluginSlug'] ?? 'goorev'
         );
