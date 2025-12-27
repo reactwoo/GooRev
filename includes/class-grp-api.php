@@ -124,14 +124,50 @@ class GRP_API {
             return $response;
         }
         
+        $status_code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
-        $decoded = json_decode($body, true);
         
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return new WP_Error('invalid_response', __('Invalid response from API server', 'google-reviews-plugin'));
+        // Handle empty response
+        if (empty($body)) {
+            if ($status_code >= 400) {
+                return new WP_Error('api_server_error', sprintf(
+                    __('API server returned error status %d with no response body. Please check the cloud server is running.', 'google-reviews-plugin'),
+                    $status_code
+                ));
+            }
+            return new WP_Error('empty_response', __('Empty response from API server. Please check the cloud server is running.', 'google-reviews-plugin'));
         }
         
-        $status_code = wp_remote_retrieve_response_code($response);
+        // Try to decode JSON
+        $decoded = json_decode($body, true);
+        
+        // If JSON decode failed, check if it's an HTML error page or other format
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Check if it's HTML (likely an error page)
+            if (stripos($body, '<html') !== false || stripos($body, '<!DOCTYPE') !== false) {
+                // Extract title or first meaningful text
+                if (preg_match('/<title[^>]*>(.*?)<\/title>/is', $body, $matches)) {
+                    $error_title = trim(strip_tags($matches[1]));
+                } else {
+                    $error_title = __('HTML error page', 'google-reviews-plugin');
+                }
+                return new WP_Error('html_response', sprintf(
+                    __('API server returned HTML instead of JSON (Status: %d). This usually means the endpoint doesn\'t exist or the server is misconfigured. Error: %s', 'google-reviews-plugin'),
+                    $status_code,
+                    esc_html($error_title)
+                ));
+            }
+            
+            // Provide more details about the JSON error
+            $json_error = json_last_error_msg();
+            $body_preview = strlen($body) > 200 ? substr($body, 0, 200) . '...' : $body;
+            return new WP_Error('invalid_response', sprintf(
+                __('Invalid JSON response from API server (Status: %d, Error: %s). Response preview: %s', 'google-reviews-plugin'),
+                $status_code,
+                $json_error,
+                esc_html($body_preview)
+            ));
+        }
         
         // Handle 401 - JWT token expired, try to refresh
         if ($status_code === 401) {
