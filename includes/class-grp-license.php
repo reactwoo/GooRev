@@ -76,7 +76,8 @@ class GRP_License {
         $response = $this->make_license_request('activate', array(
             'license_key' => $license_key,
             'site_url' => home_url(),
-            'plugin_version' => GRP_PLUGIN_VERSION
+            'plugin_version' => GRP_PLUGIN_VERSION,
+            'plugin_slug' => 'goorev'
         ));
         
         if (is_wp_error($response)) {
@@ -109,7 +110,8 @@ class GRP_License {
         
         $response = $this->make_license_request('deactivate', array(
             'license_key' => $license_key,
-            'site_url' => home_url()
+            'site_url' => home_url(),
+            'plugin_slug' => 'goorev'
         ));
         
         // Always deactivate locally, even if remote request fails
@@ -134,7 +136,8 @@ class GRP_License {
         
         $response = $this->make_license_request('check', array(
             'license_key' => $license_key,
-            'site_url' => home_url()
+            'site_url' => home_url(),
+            'plugin_slug' => 'goorev'
         ));
         
         if (is_wp_error($response)) {
