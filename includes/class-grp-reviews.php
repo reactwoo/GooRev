@@ -227,6 +227,9 @@ class GRP_Reviews {
             return new WP_Error('no_location', __('No location selected', 'google-reviews-plugin'));
         }
         
+        // Clean location_id - remove any prefixes (should already be clean, but ensure it)
+        $location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+        
         $reviews_data = $this->api->get_reviews($account_id, $location_id, 100);
         
         if (is_wp_error($reviews_data)) {

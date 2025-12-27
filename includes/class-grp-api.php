@@ -1062,10 +1062,13 @@ class GRP_API {
         if (preg_match('#/locations/([^/]+)$#', $location_name, $m)) {
             $location_id = $m[1];
         } else {
-            // Fallback: if API returns just the ID
-            $location_id = $location_name;
+            // Fallback: if API returns just the ID, clean it
+            $location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_name);
         }
 
+        // Ensure location_id is clean (no prefixes)
+        $location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+        
         update_option('grp_google_location_id', $location_id);
 
         return true;

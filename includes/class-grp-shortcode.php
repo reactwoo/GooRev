@@ -93,6 +93,11 @@ class GRP_Shortcode {
                 $account_id = get_option('grp_google_account_id', '');
                 $location_id = get_option('grp_google_location_id', '');
                 
+                // Clean location_id - remove any prefixes
+                if (!empty($location_id)) {
+                    $location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+                }
+                
                 if (!empty($account_id) && !empty($location_id)) {
                     $api_reviews_data = $this->reviews->get_reviews(array(
                         'account_id' => $account_id,

@@ -104,7 +104,7 @@ class GRP_Admin {
         register_setting('grp_settings', 'grp_google_client_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_google_client_secret', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_google_account_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
-        register_setting('grp_settings', 'grp_google_location_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_google_location_id', array('type' => 'string', 'sanitize_callback' => array($this, 'sanitize_location_id')));
         register_setting('grp_settings', 'grp_default_style', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
@@ -869,8 +869,12 @@ class GRP_Admin {
             if ($name && preg_match('#/locations/([^/]+)$#', $name, $m)) {
                 $loc_id = $m[1];
             } elseif (!empty($name)) {
-                $loc_id = $name;
+                // Clean the name - remove any prefixes
+                $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $name);
             }
+            // Ensure loc_id is clean (no prefixes)
+            $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_id);
+            
             $label = isset($loc['title']) ? $loc['title'] : (isset($loc['locationName']) ? $loc['locationName'] : ($name ?: $loc_id));
             if (!empty($loc_id)) {
                 $locations[] = array('id' => $loc_id, 'label' => $label);
@@ -897,5 +901,15 @@ class GRP_Admin {
         }
         
         wp_send_json_success(__('Reviews synced successfully!', 'google-reviews-plugin'));
+    }
+    
+    /**
+     * Sanitize location ID - remove any prefixes
+     */
+    public function sanitize_location_id($value) {
+        $sanitized = sanitize_text_field($value);
+        // Remove any location resource name prefixes
+        $sanitized = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $sanitized);
+        return $sanitized;
     }
 }
