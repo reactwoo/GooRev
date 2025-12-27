@@ -279,17 +279,55 @@ class GRP_Admin {
         $disconnect_url = wp_nonce_url(admin_url('admin-post.php?action=grp_disconnect'), 'grp_disconnect');
         if (!$is_connected) {
             $auth_url_result = $api->get_auth_url();
+            $using_api_server = $api->is_using_api_server();
+            
             if (is_wp_error($auth_url_result)) {
+                // Show error but still provide connect button if possible
                 echo '<div class="notice notice-error"><p><strong>' . esc_html__('Configuration Error', 'google-reviews-plugin') . ':</strong> ' . esc_html($auth_url_result->get_error_message()) . '</p></div>';
-                echo '<p class="description">' . esc_html__('Please contact support or enable custom credentials in the Advanced section below.', 'google-reviews-plugin') . '</p>';
+                
+                // If using API server and it failed, suggest checking server or using custom credentials
+                if ($using_api_server) {
+                    echo '<div class="notice notice-warning"><p>';
+                    echo esc_html__('The cloud server may be unavailable. You can:', 'google-reviews-plugin');
+                    echo '<ul style="margin-left: 20px; margin-top: 10px;">';
+                    echo '<li>' . esc_html__('Wait a moment and try again', 'google-reviews-plugin') . '</li>';
+                    echo '<li>' . esc_html__('Enable custom credentials in the Enterprise section below to use your own Google Cloud Project', 'google-reviews-plugin') . '</li>';
+                    echo '</ul>';
+                    echo '</p></div>';
+                } else {
+                    echo '<p class="description">' . esc_html__('Please check your Google Cloud credentials in the Enterprise section below.', 'google-reviews-plugin') . '</p>';
+                }
+                
+                // Still try to show connect button if we can generate a URL (for custom credentials)
+                if (!$using_api_server) {
+                    $client_id = get_option('grp_google_client_id', '');
+                    $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+                    if ($pro_enabled && !empty($client_id)) {
+                        // Try direct Google OAuth URL
+                        $state = wp_create_nonce('grp_oauth_state');
+                        update_option('grp_oauth_state', $state);
+                        $auth_url = add_query_arg(array(
+                            'client_id' => $client_id,
+                            'redirect_uri' => admin_url('admin.php?page=google-reviews-settings&action=oauth_callback'),
+                            'scope' => 'https://www.googleapis.com/auth/business.manage',
+                            'response_type' => 'code',
+                            'access_type' => 'offline',
+                            'prompt' => 'consent',
+                            'state' => $state
+                        ), 'https://accounts.google.com/o/oauth2/v2/auth');
+                    }
+                }
             } else {
                 $auth_url = $auth_url_result;
-                $using_api_server = $api->is_using_api_server();
                 if ($using_api_server) {
                     echo '<div class="notice notice-success"><p><strong>' . esc_html__('Easy Setup Available!', 'google-reviews-plugin') . '</strong> ' . esc_html__('Click below to connect using our pre-configured setup. No Google Cloud Project setup required!', 'google-reviews-plugin') . '</p></div>';
                 } else {
                     echo '<div class="notice notice-info"><p>' . esc_html__('Connect your Google account to start syncing reviews.', 'google-reviews-plugin') . '</p></div>';
                 }
+            }
+            
+            // Always show connect button if we have a URL
+            if (!empty($auth_url)) {
                 echo '<p><a class="button button-primary" href="' . esc_url($auth_url) . '">' . esc_html__('Connect Google Account', 'google-reviews-plugin') . '</a></p>';
             }
         } else {
