@@ -49,6 +49,11 @@ class GRP_API {
     private $refresh_token;
     
     /**
+     * Last error for debugging
+     */
+    private $last_error = null;
+    
+    /**
      * Constructor
      */
     public function __construct() {
@@ -746,6 +751,13 @@ class GRP_API {
 
         // Generic order
         return array($business_profile, $business_info);
+    }
+    
+    /**
+     * Get last error (for debugging)
+     */
+    public function get_last_error() {
+        return $this->last_error;
     }
     
     /**
