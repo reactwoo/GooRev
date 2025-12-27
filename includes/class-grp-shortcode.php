@@ -78,13 +78,37 @@ class GRP_Shortcode {
         $atts['arrows'] = filter_var($atts['arrows'], FILTER_VALIDATE_BOOLEAN);
         $atts['responsive'] = filter_var($atts['responsive'], FILTER_VALIDATE_BOOLEAN);
         
-        // Get reviews
+        // Get reviews from database first
         $reviews = $this->reviews->get_stored_reviews(array(
             'limit' => intval($atts['count']),
             'min_rating' => intval($atts['min_rating']),
             'max_rating' => intval($atts['max_rating']),
             'sort_by' => sanitize_text_field($atts['sort_by'])
         ));
+        
+        // If no reviews in database, try fetching directly from API as fallback
+        if (empty($reviews)) {
+            $api = new GRP_API();
+            if ($api->is_connected()) {
+                $account_id = get_option('grp_google_account_id', '');
+                $location_id = get_option('grp_google_location_id', '');
+                
+                if (!empty($account_id) && !empty($location_id)) {
+                    $api_reviews_data = $this->reviews->get_reviews(array(
+                        'account_id' => $account_id,
+                        'location_id' => $location_id,
+                        'limit' => intval($atts['count']),
+                        'min_rating' => intval($atts['min_rating']),
+                        'max_rating' => intval($atts['max_rating']),
+                        'sort_by' => sanitize_text_field($atts['sort_by'])
+                    ));
+                    
+                    if (!is_wp_error($api_reviews_data) && !empty($api_reviews_data)) {
+                        $reviews = $api_reviews_data;
+                    }
+                }
+            }
+        }
         
         if (empty($reviews)) {
             return $this->render_no_reviews_message();

@@ -878,11 +878,14 @@ class GRP_API {
      * Get reviews for a location
      */
     public function get_reviews($account_id, $location_id, $page_size = 50) {
+        // Clean location_id - remove 'locations/' prefix if present
+        $clean_location_id = preg_replace('#^locations/?#', '', $location_id);
+        
         // Pro users must use cloud server
         if ($this->is_using_api_server()) {
             $response = $this->make_api_server_request('reviews', array(
                 'account_id' => $account_id,
-                'location_id' => $location_id,
+                'location_id' => $clean_location_id,
                 'page_size' => $page_size
             ), 'GET');
             if (is_wp_error($response)) {
@@ -900,18 +903,21 @@ class GRP_API {
             'pageSize' => $page_size,
             'orderBy' => 'updateTime desc'
         );
-        return $this->make_request("accounts/{$account_id}/locations/{$location_id}/reviews", 'GET', $params);
+        return $this->make_request("accounts/{$account_id}/locations/{$clean_location_id}/reviews", 'GET', $params);
     }
     
     /**
      * Get specific review
      */
     public function get_review($account_id, $location_id, $review_id) {
+        // Clean location_id - remove 'locations/' prefix if present
+        $clean_location_id = preg_replace('#^locations/?#', '', $location_id);
+        
         // Pro users must use cloud server
         if ($this->is_using_api_server()) {
             $response = $this->make_api_server_request('review', array(
                 'account_id' => $account_id,
-                'location_id' => $location_id,
+                'location_id' => $clean_location_id,
                 'review_id' => $review_id
             ), 'GET');
             if (is_wp_error($response)) {
@@ -925,18 +931,20 @@ class GRP_API {
         }
         
         // Free tier with custom credentials - direct API call
-        return $this->make_request("accounts/{$account_id}/locations/{$location_id}/reviews/{$review_id}");
+        return $this->make_request("accounts/{$account_id}/locations/{$clean_location_id}/reviews/{$review_id}");
     }
     
     /**
      * Reply to a review
      */
     public function reply_to_review($account_id, $location_id, $review_id, $comment) {
+        // Clean location_id - remove 'locations/' prefix if present
+        $clean_location_id = preg_replace('#^locations/?#', '', $location_id);
         // Pro users must use cloud server
         if ($this->is_using_api_server()) {
             $response = $this->make_api_server_request('review/reply', array(
                 'account_id' => $account_id,
-                'location_id' => $location_id,
+                'location_id' => $clean_location_id,
                 'review_id' => $review_id,
                 'comment' => $comment
             ));
@@ -951,7 +959,7 @@ class GRP_API {
             'comment' => $comment
         );
         return $this->make_request(
-            "accounts/{$account_id}/locations/{$location_id}/reviews/{$review_id}/reply",
+            "accounts/{$account_id}/locations/{$clean_location_id}/reviews/{$review_id}/reply",
             'POST',
             $data
         );
