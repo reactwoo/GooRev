@@ -14,7 +14,7 @@ class GRP_License {
     /**
      * License API endpoint
      */
-    const LICENSE_API_URL = 'https://license.reactwoo.com/api/v1/license/';
+    const LICENSE_API_URL = 'https://license.reactwoo.com/';
     
     /**
      * License statuses
@@ -88,20 +88,21 @@ class GRP_License {
             update_option('grp_license_key', $license_key);
             update_option('grp_license_status', self::STATUS_VALID);
             
-            // Store license data including JWT token
+            // License server returns: { success: true, accessToken, refreshToken, expires_at }
             $license_data = array(
                 'accessToken' => $response['accessToken'] ?? $response['access_token'] ?? '',
                 'refreshToken' => $response['refreshToken'] ?? $response['refresh_token'] ?? '',
                 'packageType' => $response['packageType'] ?? $response['package_type'] ?? '',
                 'pluginSlug' => $response['pluginSlug'] ?? $response['plugin_slug'] ?? 'goorev',
                 'expires_at' => $response['expires_at'] ?? $response['expires_in'] ?? null,
-                'license_id' => $response['license']['id'] ?? null
+                'license_id' => $response['license']['id'] ?? $response['licenseId'] ?? null
             );
             update_option('grp_license_data', $license_data);
             
             // Store JWT token separately for API requests
-            if (!empty($license_data['accessToken'])) {
-                update_option('grp_license_jwt_token', $license_data['accessToken']);
+            $jwt_token = $response['accessToken'] ?? $response['access_token'] ?? '';
+            if (!empty($jwt_token)) {
+                update_option('grp_license_jwt_token', $jwt_token);
             }
             
             // Schedule license check
@@ -187,10 +188,13 @@ class GRP_License {
      * Make license API request
      */
     private function make_license_request($action, $data) {
-        // Map action to license server endpoint
+        // License server uses direct routes:
+        // - /activate (POST) - for activation (validates and returns tokens)
+        // - /deactivate (POST) - for deactivation
+        // - For check, we use activate endpoint which validates the license
         $endpoint_map = array(
             'activate' => 'activate',
-            'check' => 'validate',
+            'check' => 'activate', // Use activate endpoint to validate
             'deactivate' => 'deactivate'
         );
         
@@ -198,7 +202,15 @@ class GRP_License {
         $url = self::LICENSE_API_URL . $endpoint;
         
         // Convert data to JSON
-        $body = wp_json_encode($data);
+        // License server expects: licenseKey (or license_key), domain, pluginVersion (or plugin_version), pluginSlug (or plugin_slug)
+        $request_data = array(
+            'licenseKey' => $data['license_key'] ?? $data['licenseKey'] ?? '',
+            'domain' => $data['site_url'] ?? $data['domain'] ?? home_url(),
+            'pluginVersion' => $data['plugin_version'] ?? $data['pluginVersion'] ?? GRP_PLUGIN_VERSION,
+            'pluginSlug' => $data['plugin_slug'] ?? $data['pluginSlug'] ?? 'goorev'
+        );
+        
+        $body = wp_json_encode($request_data);
         
         $response = wp_remote_post($url, array(
             'body' => $body,
@@ -231,26 +243,38 @@ class GRP_License {
             return new WP_Error('license_server_error', $error_message);
         }
         
-        // For activate endpoint, wrap response in success structure
+        // License server response format:
+        // - /activate returns: { success: true, accessToken, refreshToken, expires_at }
+        // - /deactivate returns: { success: true, message: '...' }
+        // - For check, we'll use activate endpoint which validates and returns tokens
+        
         if ($action === 'activate') {
-            return array(
-                'success' => true,
-                'data' => $decoded
-            );
+            // Response already has success: true and tokens
+            return $decoded;
         }
         
-        // For check/validate endpoint
+        // For check action, use activate endpoint to validate
         if ($action === 'check') {
-            return array(
-                'success' => isset($decoded['valid']) ? $decoded['valid'] : false,
-                'status' => isset($decoded['valid']) && $decoded['valid'] ? self::STATUS_VALID : self::STATUS_INVALID,
-                'data' => $decoded
-            );
+            // Use activate endpoint which validates the license
+            // If it returns success, license is valid
+            if (isset($decoded['success']) && $decoded['success']) {
+                return array(
+                    'success' => true,
+                    'status' => self::STATUS_VALID,
+                    'data' => $decoded
+                );
+            } else {
+                return array(
+                    'success' => false,
+                    'status' => self::STATUS_INVALID,
+                    'data' => $decoded
+                );
+            }
         }
         
-        // For deactivate, just return success
+        // For deactivate, response already has success
         if ($action === 'deactivate') {
-            return array('success' => true);
+            return $decoded;
         }
         
         return $decoded;
