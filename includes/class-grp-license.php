@@ -187,7 +187,15 @@ class GRP_License {
      * Make license API request
      */
     private function make_license_request($action, $data) {
-        $url = self::LICENSE_API_URL . $action;
+        // Map action to license server endpoint
+        $endpoint_map = array(
+            'activate' => 'activate',
+            'check' => 'validate',
+            'deactivate' => 'deactivate'
+        );
+        
+        $endpoint = $endpoint_map[$action] ?? $action;
+        $url = self::LICENSE_API_URL . $endpoint;
         
         // Convert data to JSON
         $body = wp_json_encode($data);
@@ -205,14 +213,47 @@ class GRP_License {
             return $response;
         }
         
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
+        $response_body = wp_remote_retrieve_body($response);
+        $status_code = wp_remote_retrieve_response_code($response);
+        
+        $decoded = json_decode($response_body, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
             return new WP_Error('invalid_response', __('Invalid response from license server', 'google-reviews-plugin'));
         }
         
-        return $data;
+        // Handle error responses
+        if ($status_code >= 400) {
+            $error_message = isset($decoded['error']) ? $decoded['error'] : __('License server error', 'google-reviews-plugin');
+            if (isset($decoded['details'])) {
+                $error_message .= ': ' . $decoded['details'];
+            }
+            return new WP_Error('license_server_error', $error_message);
+        }
+        
+        // For activate endpoint, wrap response in success structure
+        if ($action === 'activate') {
+            return array(
+                'success' => true,
+                'data' => $decoded
+            );
+        }
+        
+        // For check/validate endpoint
+        if ($action === 'check') {
+            return array(
+                'success' => isset($decoded['valid']) ? $decoded['valid'] : false,
+                'status' => isset($decoded['valid']) && $decoded['valid'] ? self::STATUS_VALID : self::STATUS_INVALID,
+                'data' => $decoded
+            );
+        }
+        
+        // For deactivate, just return success
+        if ($action === 'deactivate') {
+            return array('success' => true);
+        }
+        
+        return $decoded;
     }
     
     /**
