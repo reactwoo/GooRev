@@ -361,49 +361,81 @@ class GRP_Admin {
         }
 
         $state = isset($_GET['state']) ? sanitize_text_field(wp_unslash($_GET['state'])) : '';
-        $code = isset($_GET['code']) ? sanitize_text_field(wp_unslash($_GET['code'])) : '';
+        $oauth_success = isset($_GET['oauth_success']) ? sanitize_text_field(wp_unslash($_GET['oauth_success'])) : '';
+        $oauth_error = isset($_GET['oauth_error']) ? sanitize_text_field(wp_unslash($_GET['oauth_error'])) : '';
         $error = isset($_GET['error']) ? sanitize_text_field(wp_unslash($_GET['error'])) : '';
-
-        if (!empty($error)) {
-            add_settings_error('grp_settings', 'grp_oauth_error', sprintf(__('OAuth error: %s', 'google-reviews-plugin'), $error), 'error');
-            return;
-        }
-
-        if (!$state || !wp_verify_nonce($state, 'grp_oauth_state')) {
-            add_settings_error('grp_settings', 'grp_oauth_state', __('Invalid OAuth state. Please try again.', 'google-reviews-plugin'), 'error');
-            return;
-        }
-
-        if (!$code) {
-            add_settings_error('grp_settings', 'grp_oauth_code', __('Missing authorization code.', 'google-reviews-plugin'), 'error');
-            return;
-        }
 
         // Verify state matches stored state
         $stored_state = get_option('grp_oauth_state', '');
-        if ($stored_state && $stored_state !== $state) {
-            add_settings_error('grp_settings', 'grp_oauth_state', __('Invalid OAuth state. Please try again.', 'google-reviews-plugin'), 'error');
-            delete_option('grp_oauth_state');
+        if (empty($stored_state) || $stored_state !== $state) {
+            add_settings_error('grp_settings', 'grp_oauth_state_mismatch', __('Invalid OAuth state. Please try connecting again.', 'google-reviews-plugin'), 'error');
             return;
         }
-        delete_option('grp_oauth_state');
 
-        $api = new GRP_API();
-        $ok = $api->exchange_code_for_tokens($code);
-        if ($ok) {
-            add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
-        } else {
-            // Get more detailed error message if available
-            $error_msg = __('Failed to exchange authorization code for tokens.', 'google-reviews-plugin');
-            
-            // Check if there's a more specific error from the API
-            $last_error = $api->get_last_error();
-            if ($last_error && is_wp_error($last_error)) {
-                $error_msg = $last_error->get_error_message();
-            }
-            
-            add_settings_error('grp_settings', 'grp_oauth_fail', $error_msg, 'error');
+        // Handle OAuth error from cloud server redirect
+        if (!empty($oauth_error) || !empty($error)) {
+            $error_message = !empty($error) ? urldecode($error) : __('OAuth authentication failed.', 'google-reviews-plugin');
+            delete_option('grp_oauth_state');
+            add_settings_error('grp_settings', 'grp_oauth_error', sprintf(__('OAuth error: %s', 'google-reviews-plugin'), $error_message), 'error');
+            return;
         }
+
+        // Handle OAuth success - retrieve tokens from cloud server
+        if (!empty($oauth_success) && !empty($state)) {
+            $api = new GRP_API();
+            
+            // Retrieve tokens from cloud server using state
+            $tokens = $api->retrieve_oauth_tokens($state);
+            
+            if (is_wp_error($tokens)) {
+                delete_option('grp_oauth_state');
+                add_settings_error('grp_settings', 'grp_oauth_fail', $tokens->get_error_message(), 'error');
+            } elseif (isset($tokens['access_token'])) {
+                // Store tokens
+                update_option('grp_google_access_token', $tokens['access_token']);
+                if (isset($tokens['refresh_token'])) {
+                    update_option('grp_google_refresh_token', $tokens['refresh_token']);
+                }
+                
+                // Clear stored state
+                delete_option('grp_oauth_state');
+                
+                add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
+            } else {
+                delete_option('grp_oauth_state');
+                add_settings_error('grp_settings', 'grp_oauth_fail', __('Failed to retrieve OAuth tokens. Please try connecting again.', 'google-reviews-plugin'), 'error');
+            }
+            return;
+        }
+
+        // Legacy flow: Direct code exchange (for backward compatibility with custom credentials)
+        $code = isset($_GET['code']) ? sanitize_text_field(wp_unslash($_GET['code'])) : '';
+        if (!empty($code)) {
+            // Clear stored state
+            delete_option('grp_oauth_state');
+
+            $api = new GRP_API();
+            $ok = $api->exchange_code_for_tokens($code);
+            if ($ok) {
+                add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
+            } else {
+                // Get more detailed error message if available
+                $error_msg = __('Failed to exchange authorization code for tokens.', 'google-reviews-plugin');
+                
+                // Check if there's a more specific error from the API
+                $last_error = $api->get_last_error();
+                if ($last_error && is_wp_error($last_error)) {
+                    $error_msg = $last_error->get_error_message();
+                }
+                
+                add_settings_error('grp_settings', 'grp_oauth_fail', $error_msg, 'error');
+            }
+            return;
+        }
+
+        // No code and no success - something went wrong
+        delete_option('grp_oauth_state');
+        add_settings_error('grp_settings', 'grp_oauth_no_code', __('No authorization code or success signal received.', 'google-reviews-plugin'), 'error');
     }
 
     /**

@@ -357,7 +357,47 @@ class GRP_API {
     }
     
     /**
-     * Exchange authorization code for tokens
+     * Retrieve OAuth tokens from cloud server using state
+     * Called after OAuth callback redirects back to WordPress
+     */
+    public function retrieve_oauth_tokens($state) {
+        if (!$this->is_using_api_server()) {
+            return new WP_Error('not_using_api_server', __('This method is only available when using the API server.', 'google-reviews-plugin'));
+        }
+
+        $response = $this->make_api_server_request('oauth/tokens', array(
+            'state' => $state
+        ), 'GET');
+
+        if (is_wp_error($response)) {
+            $this->last_error = $response;
+            return $response;
+        }
+
+        if (isset($response['success']) && !$response['success']) {
+            $error_msg = isset($response['message']) ? $response['message'] : 'Unknown error from API server';
+            $this->last_error = new WP_Error('oauth_failed', $error_msg);
+            return $this->last_error;
+        }
+
+        if (isset($response['access_token'])) {
+            $this->access_token = $response['access_token'];
+            $this->refresh_token = isset($response['refresh_token']) ? $response['refresh_token'] : $this->refresh_token;
+
+            update_option('grp_google_access_token', $this->access_token);
+            if ($this->refresh_token) {
+                update_option('grp_google_refresh_token', $this->refresh_token);
+            }
+
+            return $response;
+        }
+
+        $this->last_error = new WP_Error('no_access_token', __('Access token not found in response.', 'google-reviews-plugin'));
+        return $this->last_error;
+    }
+
+    /**
+     * Exchange authorization code for tokens (legacy method - kept for backward compatibility)
      */
     public function exchange_code_for_tokens($code) {
         if ($this->is_using_api_server()) {
