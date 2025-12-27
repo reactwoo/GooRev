@@ -95,9 +95,23 @@ class GRP_API {
             'X-Plugin-Version' => GRP_PLUGIN_VERSION
         );
         
-        // Add JWT token if available (required for cloud server authentication)
+        // Add JWT token if available (required for cloud server authentication when license is active)
         if (!empty($jwt_token)) {
             $headers['Authorization'] = 'Bearer ' . $jwt_token;
+        } else {
+            // If no token and license is active, this is a problem
+            $license_status = $license->get_license_status();
+            if ($license_status === 'valid') {
+                // License is active but no token - try to refresh
+                if (!$this->refresh_jwt_token()) {
+                    return new WP_Error('no_jwt_token', __('License is active but authentication token is missing. Please reactivate your license.', 'google-reviews-plugin'));
+                }
+                // Retry with new token
+                $jwt_token = $license->get_jwt_token();
+                if (!empty($jwt_token)) {
+                    $headers['Authorization'] = 'Bearer ' . $jwt_token;
+                }
+            }
         }
         
         $response = wp_remote_post($url, array(
@@ -118,12 +132,63 @@ class GRP_API {
         }
         
         $status_code = wp_remote_retrieve_response_code($response);
+        
+        // Handle 401 - JWT token expired, try to refresh
+        if ($status_code === 401) {
+            // Try to refresh the JWT token
+            $refreshed = $this->refresh_jwt_token();
+            if ($refreshed) {
+                // Retry the request with new token
+                return $this->make_api_server_request($endpoint, $data);
+            }
+            // Get more details about the error
+            $error_detail = isset($decoded['message']) ? $decoded['message'] : (isset($decoded['error']) ? $decoded['error'] : '');
+            $error_msg = __('Invalid or expired license token.', 'google-reviews-plugin');
+            if (!empty($error_detail)) {
+                $error_msg .= ' ' . $error_detail;
+            } else {
+                $error_msg .= ' ' . __('Please reactivate your license.', 'google-reviews-plugin');
+            }
+            return new WP_Error('unauthorized', $error_msg);
+        }
+        
         if ($status_code >= 400) {
             $error_message = isset($decoded['message']) ? $decoded['message'] : __('API server error', 'google-reviews-plugin');
+            if (isset($decoded['error'])) {
+                if (is_array($decoded['error'])) {
+                    $error_message = implode(', ', $decoded['error']);
+                } else {
+                    $error_message = $decoded['error'];
+                }
+            }
             return new WP_Error('api_server_error', $error_message);
         }
         
         return $decoded;
+    }
+    
+    /**
+     * Refresh JWT token from license server
+     */
+    private function refresh_jwt_token() {
+        $license = new GRP_License();
+        $license_key = $license->get_license_key();
+        
+        if (empty($license_key)) {
+            return false;
+        }
+        
+        // Use license check to refresh the token (this calls /activate endpoint which returns new token)
+        $result = $license->check_license_status();
+        
+        if ($result) {
+            // Token should be updated by check_license_status
+            // Verify token was actually updated
+            $new_token = $license->get_jwt_token();
+            return !empty($new_token);
+        }
+        
+        return false;
     }
     
     /**
