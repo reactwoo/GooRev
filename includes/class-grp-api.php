@@ -28,7 +28,7 @@ class GRP_API {
      * Can be overridden via constant: GRP_API_SERVER_URL
      * Or filter: grp_api_server_url
      */
-    const DEFAULT_API_SERVER_URL = 'https://reactwoo.com/wp-json/grp-api/v1/';
+    const DEFAULT_API_SERVER_URL = 'https://cloud.reactwoo.com/grp-api/v1/';
     
     /**
      * API Server endpoints
@@ -84,14 +84,26 @@ class GRP_API {
     private function make_api_server_request($endpoint, $data = array()) {
         $url = rtrim($this->api_server_url, '/') . '/' . ltrim($endpoint, '/');
         
+        // Get JWT token from license
+        $license = new GRP_License();
+        $jwt_token = $license->get_jwt_token();
+        
+        $headers = array(
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+            'X-Site-URL' => home_url(),
+            'X-Plugin-Version' => GRP_PLUGIN_VERSION
+        );
+        
+        // Add JWT token if available (required for cloud server authentication)
+        if (!empty($jwt_token)) {
+            $headers['Authorization'] = 'Bearer ' . $jwt_token;
+        }
+        
         $response = wp_remote_post($url, array(
             'body' => wp_json_encode($data),
             'timeout' => 30,
-            'headers' => array(
-                'Content-Type' => 'application/json',
-                'X-Site-URL' => home_url(),
-                'X-Plugin-Version' => GRP_PLUGIN_VERSION
-            )
+            'headers' => $headers
         ));
         
         if (is_wp_error($response)) {

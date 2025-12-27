@@ -14,7 +14,7 @@ class GRP_License {
     /**
      * License API endpoint
      */
-    const LICENSE_API_URL = 'https://reactwoo.com/wp-json/grp-license/v1/';
+    const LICENSE_API_URL = 'https://license.reactwoo.com/api/v1/license/';
     
     /**
      * License statuses
@@ -87,7 +87,22 @@ class GRP_License {
         if ($response['success']) {
             update_option('grp_license_key', $license_key);
             update_option('grp_license_status', self::STATUS_VALID);
-            update_option('grp_license_data', $response['data']);
+            
+            // Store license data including JWT token
+            $license_data = array(
+                'accessToken' => $response['accessToken'] ?? $response['access_token'] ?? '',
+                'refreshToken' => $response['refreshToken'] ?? $response['refresh_token'] ?? '',
+                'packageType' => $response['packageType'] ?? $response['package_type'] ?? '',
+                'pluginSlug' => $response['pluginSlug'] ?? $response['plugin_slug'] ?? 'goorev',
+                'expires_at' => $response['expires_at'] ?? $response['expires_in'] ?? null,
+                'license_id' => $response['license']['id'] ?? null
+            );
+            update_option('grp_license_data', $license_data);
+            
+            // Store JWT token separately for API requests
+            if (!empty($license_data['accessToken'])) {
+                update_option('grp_license_jwt_token', $license_data['accessToken']);
+            }
             
             // Schedule license check
             $this->schedule_license_check();
@@ -145,9 +160,20 @@ class GRP_License {
         }
         
         if ($response['success']) {
-            $status = $response['data']['status'] ?? self::STATUS_INVALID;
+            // License server returns status in response
+            $status = $response['status'] ?? $response['data']['status'] ?? self::STATUS_INVALID;
             update_option('grp_license_status', $status);
-            update_option('grp_license_data', $response['data']);
+            
+            // Update license data if provided
+            if (isset($response['data'])) {
+                update_option('grp_license_data', $response['data']);
+            }
+            
+            // Update JWT token if provided
+            if (isset($response['accessToken']) || isset($response['access_token'])) {
+                $token = $response['accessToken'] ?? $response['access_token'];
+                update_option('grp_license_jwt_token', $token);
+            }
             
             return $status === self::STATUS_VALID;
         }
@@ -163,11 +189,15 @@ class GRP_License {
     private function make_license_request($action, $data) {
         $url = self::LICENSE_API_URL . $action;
         
+        // Convert data to JSON
+        $body = wp_json_encode($data);
+        
         $response = wp_remote_post($url, array(
-            'body' => $data,
+            'body' => $body,
             'timeout' => 30,
             'headers' => array(
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
             )
         ));
         
@@ -333,11 +363,18 @@ class GRP_License {
     }
     
     /**
+     * Get JWT token
+     */
+    public function get_jwt_token() {
+        return get_option('grp_license_jwt_token', '');
+    }
+    
+    /**
      * Get license expiration date
      */
     public function get_license_expiration() {
         $license_data = $this->get_license_data();
-        return $license_data['expires'] ?? null;
+        return $license_data['expires_at'] ?? $license_data['expires'] ?? null;
     }
     
     /**
