@@ -364,12 +364,30 @@ class GRP_Admin {
         $oauth_success = isset($_GET['oauth_success']) ? sanitize_text_field(wp_unslash($_GET['oauth_success'])) : '';
         $oauth_error = isset($_GET['oauth_error']) ? sanitize_text_field(wp_unslash($_GET['oauth_error'])) : '';
         $error = isset($_GET['error']) ? sanitize_text_field(wp_unslash($_GET['error'])) : '';
+        $code = isset($_GET['code']) ? sanitize_text_field(wp_unslash($_GET['code'])) : '';
 
-        // Verify state matches stored state
-        $stored_state = get_option('grp_oauth_state', '');
-        if (empty($stored_state) || $stored_state !== $state) {
-            add_settings_error('grp_settings', 'grp_oauth_state_mismatch', __('Invalid OAuth state. Please try connecting again.', 'google-reviews-plugin'), 'error');
+        // Only process OAuth callback if we have OAuth-related parameters
+        // This prevents state validation errors when just viewing the settings page
+        if (empty($oauth_success) && empty($oauth_error) && empty($error) && empty($code)) {
             return;
+        }
+
+        // Verify state matches stored state (only if we have a state parameter and we're processing OAuth)
+        // Skip state validation if we already have tokens (connection already successful)
+        if (!empty($state) && (!empty($oauth_success) || !empty($code))) {
+            $stored_state = get_option('grp_oauth_state', '');
+            // If state doesn't exist but we already have tokens, skip validation (already connected)
+            if (empty($stored_state)) {
+                $existing_token = get_option('grp_google_access_token', '');
+                if (!empty($existing_token)) {
+                    // Already connected, skip OAuth flow
+                    return;
+                }
+            }
+            if (empty($stored_state) || $stored_state !== $state) {
+                add_settings_error('grp_settings', 'grp_oauth_state_mismatch', __('Invalid OAuth state. Please try connecting again.', 'google-reviews-plugin'), 'error');
+                return;
+            }
         }
 
         // Handle OAuth error from cloud server redirect
@@ -409,7 +427,6 @@ class GRP_Admin {
         }
 
         // Legacy flow: Direct code exchange (for backward compatibility with custom credentials)
-        $code = isset($_GET['code']) ? sanitize_text_field(wp_unslash($_GET['code'])) : '';
         if (!empty($code)) {
             // Clear stored state
             delete_option('grp_oauth_state');
