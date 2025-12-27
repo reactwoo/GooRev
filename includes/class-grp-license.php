@@ -332,10 +332,16 @@ class GRP_License {
                 break;
                 
             case 'check':
-                $this->check_license_status();
-                add_action('admin_notices', function() {
-                    echo '<div class="notice notice-info"><p>' . esc_html__('License status checked.', 'google-reviews-plugin') . '</p></div>';
-                });
+                $result = $this->check_license_status();
+                if ($result) {
+                    add_action('admin_notices', function() {
+                        echo '<div class="notice notice-success"><p>' . esc_html__('License token refreshed successfully!', 'google-reviews-plugin') . '</p></div>';
+                    });
+                } else {
+                    add_action('admin_notices', function() {
+                        echo '<div class="notice notice-error"><p>' . esc_html__('Failed to refresh license token. Please reactivate your license.', 'google-reviews-plugin') . '</p></div>';
+                    });
+                }
                 break;
         }
     }

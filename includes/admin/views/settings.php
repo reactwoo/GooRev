@@ -90,8 +90,15 @@ if (!defined('ABSPATH')) {
                     <p><?php esc_html_e('You have access to all Pro features.', 'google-reviews-plugin'); ?></p>
                     <form method="post" action="" style="margin-top: 15px;">
                         <?php wp_nonce_field('grp_license_nonce'); ?>
+                        <input type="hidden" name="grp_license_action" value="check">
+                        <button type="submit" class="button" style="width: 100%; margin-bottom: 5px;">
+                            <?php esc_html_e('Refresh Token', 'google-reviews-plugin'); ?>
+                        </button>
+                    </form>
+                    <form method="post" action="" style="margin-top: 5px;">
+                        <?php wp_nonce_field('grp_license_nonce'); ?>
                         <input type="hidden" name="grp_license_action" value="deactivate">
-                        <button type="submit" class="button" onclick="return confirm('<?php esc_attr_e('Are you sure you want to deactivate your license?', 'google-reviews-plugin'); ?>');">
+                        <button type="submit" class="button" onclick="return confirm('<?php esc_attr_e('Are you sure you want to deactivate your license?', 'google-reviews-plugin'); ?>');" style="width: 100%;">
                             <?php esc_html_e('Deactivate License', 'google-reviews-plugin'); ?>
                         </button>
                     </form>

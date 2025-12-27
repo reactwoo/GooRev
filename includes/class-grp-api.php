@@ -135,20 +135,22 @@ class GRP_API {
         
         // Handle 401 - JWT token expired, try to refresh
         if ($status_code === 401) {
+            // Get error details first
+            $error_detail = isset($decoded['message']) ? $decoded['message'] : (isset($decoded['error']) ? $decoded['error'] : '');
+            
             // Try to refresh the JWT token
             $refreshed = $this->refresh_jwt_token();
             if ($refreshed) {
                 // Retry the request with new token
                 return $this->make_api_server_request($endpoint, $data);
             }
-            // Get more details about the error
-            $error_detail = isset($decoded['message']) ? $decoded['message'] : (isset($decoded['error']) ? $decoded['error'] : '');
+            
+            // If refresh failed, provide helpful error message
             $error_msg = __('Invalid or expired license token.', 'google-reviews-plugin');
             if (!empty($error_detail)) {
                 $error_msg .= ' ' . $error_detail;
-            } else {
-                $error_msg .= ' ' . __('Please reactivate your license.', 'google-reviews-plugin');
             }
+            $error_msg .= ' ' . __('Please click "Deactivate License" and then reactivate it to get a new token.', 'google-reviews-plugin');
             return new WP_Error('unauthorized', $error_msg);
         }
         
