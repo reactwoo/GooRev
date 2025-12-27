@@ -393,7 +393,16 @@ class GRP_Admin {
         if ($ok) {
             add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
         } else {
-            add_settings_error('grp_settings', 'grp_oauth_fail', __('Failed to exchange authorization code for tokens.', 'google-reviews-plugin'), 'error');
+            // Get more detailed error message if available
+            $error_msg = __('Failed to exchange authorization code for tokens.', 'google-reviews-plugin');
+            
+            // Check if there's a more specific error from the API
+            $last_error = $api->get_last_error();
+            if ($last_error && is_wp_error($last_error)) {
+                $error_msg = $last_error->get_error_message();
+            }
+            
+            add_settings_error('grp_settings', 'grp_oauth_fail', $error_msg, 'error');
         }
     }
 
@@ -500,8 +509,13 @@ class GRP_Admin {
             }
             
             echo '<div class="notice notice-info" style="margin-top:12px;"><p>';
-            if ($is_pro) {
-                echo esc_html__('Pro users can use either the default setup (no configuration needed) or their own Google Cloud Project credentials for more control.', 'google-reviews-plugin');
+            $license = new GRP_License();
+            $is_enterprise = $license->is_enterprise();
+            
+            if ($is_enterprise) {
+                echo esc_html__('Enterprise licenses can use custom Google Cloud credentials to bypass the cloud server, or use the default setup (no configuration needed).', 'google-reviews-plugin');
+            } elseif ($is_pro) {
+                echo esc_html__('Pro users must use the default setup (cloud server). Enterprise licenses can use custom credentials for more control.', 'google-reviews-plugin');
             } else {
                 echo esc_html__('If you see "Requests per minute = 0" for a Business Profile API, your project is not yet approved for that API. Request access using the official prerequisites page (do not just request a quota increase).', 'google-reviews-plugin')
                     . ' <a target="_blank" rel="noopener" href="https://developers.google.com/my-business/content/prereqs">'
@@ -536,20 +550,46 @@ class GRP_Admin {
      * Render Pro enable toggle
      */
     public function render_pro_enable_field() {
-        $enabled = (bool) get_option('grp_enable_pro_features', false);
+        $license = new GRP_License();
+        $is_enterprise = $license->is_enterprise();
+        $has_license = $license->has_license();
         
-        $label = __('Use my own Google Cloud Project credentials', 'google-reviews-plugin');
-        
-        echo '<label><input type="checkbox" name="grp_enable_pro_features" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html($label) . '</label>';
-        
-        echo '<p class="description">' . esc_html__('When enabled, you can enter your own Client ID and Client Secret below. Leave disabled to use the default setup (recommended for most users).', 'google-reviews-plugin') . '</p>';
-        echo '<p class="description"><strong>' . esc_html__('Why use custom credentials?', 'google-reviews-plugin') . '</strong><br>';
-        echo esc_html__('Enterprise users may want to use their own Google Cloud Project to:', 'google-reviews-plugin');
-        echo '<ul style="margin-left: 20px; margin-top: 5px;">';
-        echo '<li>' . esc_html__('Have full control over API quotas', 'google-reviews-plugin') . '</li>';
-        echo '<li>' . esc_html__('Monitor usage in their own Google Cloud Console', 'google-reviews-plugin') . '</li>';
-        echo '<li>' . esc_html__('Use their organization\'s existing Google Cloud Project', 'google-reviews-plugin') . '</li>';
-        echo '</ul></p>';
+        // Only Enterprise can use custom credentials
+        if ($is_enterprise) {
+            $enabled = (bool) get_option('grp_enable_pro_features', false);
+            $label = __('Use my own Google Cloud Project credentials', 'google-reviews-plugin');
+            
+            echo '<label><input type="checkbox" name="grp_enable_pro_features" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html($label) . '</label>';
+            echo '<p class="description">' . esc_html__('Enterprise licenses can use custom Google Cloud credentials to bypass the cloud server. When enabled, you can enter your own Client ID and Client Secret below.', 'google-reviews-plugin') . '</p>';
+            echo '<p class="description"><strong>' . esc_html__('Why use custom credentials?', 'google-reviews-plugin') . '</strong><br>';
+            echo esc_html__('Enterprise users may want to use their own Google Cloud Project to:', 'google-reviews-plugin');
+            echo '<ul style="margin-left: 20px; margin-top: 5px;">';
+            echo '<li>' . esc_html__('Have full control over API quotas', 'google-reviews-plugin') . '</li>';
+            echo '<li>' . esc_html__('Monitor usage in their own Google Cloud Console', 'google-reviews-plugin') . '</li>';
+            echo '<li>' . esc_html__('Use their organization\'s existing Google Cloud Project', 'google-reviews-plugin') . '</li>';
+            echo '</ul></p>';
+        } else {
+            // Free and Pro users
+            if ($has_license) {
+                $is_free = $license->is_free();
+                if ($is_free) {
+                    echo '<p class="description"><strong>' . esc_html__('Free License Active', 'google-reviews-plugin') . '</strong><br>';
+                    echo esc_html__('Free licenses use the cloud server for easy setup. You can also enter your own Google Cloud credentials below to use direct API calls. Upgrade to Enterprise for full control.', 'google-reviews-plugin') . '</p>';
+                } else {
+                    echo '<p class="description"><strong>' . esc_html__('Pro License Active', 'google-reviews-plugin') . '</strong><br>';
+                    echo esc_html__('Pro licenses must use the cloud server. Upgrade to Enterprise to use custom Google Cloud credentials.', 'google-reviews-plugin') . '</p>';
+                }
+            } else {
+                // No license - WordPress.org compliant: Allow custom credentials
+                echo '<p class="description"><strong>' . esc_html__('Setup Options', 'google-reviews-plugin') . '</strong><br>';
+                echo esc_html__('You can use this plugin in two ways:', 'google-reviews-plugin') . '</p>';
+                echo '<ul style="margin-left: 20px; margin-top: 5px;">';
+                echo '<li><strong>' . esc_html__('Option 1 (Recommended):', 'google-reviews-plugin') . '</strong> ' . esc_html__('Activate a free license to use our cloud server (no Google Cloud setup required).', 'google-reviews-plugin') . '</li>';
+                echo '<li><strong>' . esc_html__('Option 2:', 'google-reviews-plugin') . '</strong> ' . esc_html__('Enter your own Google Cloud credentials below to use direct API calls (requires Google Cloud Project setup).', 'google-reviews-plugin') . '</li>';
+                echo '</ul>';
+                echo '<p class="description">' . esc_html__('Pro and Enterprise licenses unlock advanced features. Enterprise licenses can use custom credentials to bypass the cloud server.', 'google-reviews-plugin') . '</p>';
+            }
+        }
     }
 
     /**

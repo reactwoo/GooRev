@@ -62,11 +62,63 @@ class GRP_License {
     }
     
     /**
-     * Check if pro version is active
+     * Check if any valid license is active (free, pro, or enterprise)
      */
-    public function is_pro() {
+    public function has_license() {
         $status = $this->get_license_status();
         return $status === self::STATUS_VALID;
+    }
+    
+    /**
+     * Check if pro version is active (pro or enterprise)
+     */
+    public function is_pro() {
+        if (!$this->has_license()) {
+            return false;
+        }
+        
+        $license_data = $this->get_license_data();
+        $package_type = $license_data['packageType'] ?? $license_data['package_type'] ?? '';
+        
+        // Free licenses are not "pro"
+        $package_type_lower = strtolower($package_type);
+        if (in_array($package_type_lower, array('free', 'goorev-free', 'basic'))) {
+            return false;
+        }
+        
+        // Pro or Enterprise are both "pro" tier
+        return true;
+    }
+    
+    /**
+     * Check if free license is active
+     */
+    public function is_free() {
+        if (!$this->has_license()) {
+            return false;
+        }
+        
+        $license_data = $this->get_license_data();
+        $package_type = $license_data['packageType'] ?? $license_data['package_type'] ?? '';
+        
+        // Check for free package type
+        $package_type_lower = strtolower($package_type);
+        return in_array($package_type_lower, array('free', 'goorev-free', 'basic'));
+    }
+    
+    /**
+     * Check if enterprise version is active
+     */
+    public function is_enterprise() {
+        if (!$this->is_pro()) {
+            return false;
+        }
+        
+        $license_data = $this->get_license_data();
+        $package_type = $license_data['packageType'] ?? $license_data['package_type'] ?? '';
+        
+        // Check for enterprise package type
+        return in_array(strtolower($package_type), array('enterprise', 'goorev-enterprise', 'enterprise'));
     }
     
     /**

@@ -71,22 +71,71 @@ class GRP_API {
      * Check if using API server (free tier) or custom credentials
      */
     public function is_using_api_server() {
-        $user_client_id = get_option('grp_google_client_id', '');
-        $pro_enabled = (bool) get_option('grp_enable_pro_features', false);
+        $license = new GRP_License();
+        $has_license = $license->has_license();
+        $is_pro = $license->is_pro();
+        $is_enterprise = $license->is_enterprise();
+        $is_free = $license->is_free();
         
-        // Use API server if no custom credentials are provided
-        return empty($user_client_id) || !$pro_enabled;
+        // Enterprise users can use custom credentials to bypass cloud server
+        if ($is_enterprise) {
+            $user_client_id = get_option('grp_google_client_id', '');
+            // If Enterprise has custom credentials, they can bypass cloud server
+            if (!empty($user_client_id)) {
+                return false;
+            }
+            // Otherwise, Enterprise uses cloud server
+            return true;
+        }
+        
+        // Pro users MUST use cloud server - cannot bypass
+        if ($is_pro) {
+            return true;
+        }
+        
+        // Free users: Can use cloud server (if they have a free license) OR custom credentials
+        // WordPress.org compliance: Free version works without registration
+        if ($is_free) {
+            // Free license active - use cloud server
+            return true;
+        }
+        
+        // No license: Check if user has custom credentials
+        // If yes, allow direct API calls (WordPress.org compliant - no registration required)
+        // If no, suggest cloud server (but don't require license for basic functionality)
+        $user_client_id = get_option('grp_google_client_id', '');
+        if (!empty($user_client_id)) {
+            // User has custom credentials - allow direct API calls (no license needed)
+            return false;
+        }
+        
+        // No license and no custom credentials: 
+        // For WordPress.org compliance, we allow them to proceed but they'll need either:
+        // 1. Custom credentials (their own Google Cloud Project)
+        // 2. Free license (optional, for easier cloud server access)
+        // Default to cloud server attempt, but it will fail without license
+        // This allows the plugin to work, but guides users to either setup
+        return true;
     }
     
     /**
      * Make request to API server
      */
-    private function make_api_server_request($endpoint, $data = array()) {
+    private function make_api_server_request($endpoint, $data = array(), $method = 'POST') {
         $url = rtrim($this->api_server_url, '/') . '/' . ltrim($endpoint, '/');
         
         // Get JWT token from license
         $license = new GRP_License();
         $jwt_token = $license->get_jwt_token();
+        
+        // Add access token to data if available (for Google API calls)
+        if ($this->access_token) {
+            $data['access_token'] = $this->access_token;
+            // Also include refresh token and expiry if available
+            if ($this->refresh_token) {
+                $data['refresh_token'] = $this->refresh_token;
+            }
+        }
         
         $headers = array(
             'Content-Type' => 'application/json',
@@ -114,11 +163,24 @@ class GRP_API {
             }
         }
         
-        $response = wp_remote_post($url, array(
-            'body' => wp_json_encode($data),
+        // Determine HTTP method
+        $http_method = strtoupper($method);
+        
+        $args = array(
+            'headers' => $headers,
             'timeout' => 30,
-            'headers' => $headers
-        ));
+            'method' => $http_method
+        );
+        
+        // For GET requests, add data as query parameters
+        if ($http_method === 'GET' && !empty($data)) {
+            $url .= '?' . http_build_query($data);
+        } else {
+            // For POST/PUT/etc, add data as JSON body
+            $args['body'] = wp_json_encode($data);
+        }
+        
+        $response = wp_remote_request($url, $args);
         
         if (is_wp_error($response)) {
             return $response;
@@ -174,11 +236,19 @@ class GRP_API {
             // Get error details first
             $error_detail = isset($decoded['message']) ? $decoded['message'] : (isset($decoded['error']) ? $decoded['error'] : '');
             
+            // For OAuth token exchange, don't retry - the code might be expired
+            if (strpos($endpoint, 'oauth/token') !== false) {
+                return new WP_Error('oauth_failed', sprintf(
+                    __('OAuth token exchange failed: %s. The authorization code may have expired. Please try connecting again.', 'google-reviews-plugin'),
+                    $error_detail
+                ));
+            }
+            
             // Try to refresh the JWT token
             $refreshed = $this->refresh_jwt_token();
             if ($refreshed) {
                 // Retry the request with new token
-                return $this->make_api_server_request($endpoint, $data);
+                return $this->make_api_server_request($endpoint, $data, $method);
             }
             
             // If refresh failed, provide helpful error message
@@ -188,6 +258,17 @@ class GRP_API {
             }
             $error_msg .= ' ' . __('Please click "Deactivate License" and then reactivate it to get a new token.', 'google-reviews-plugin');
             return new WP_Error('unauthorized', $error_msg);
+        }
+        
+        // Handle 400 - Bad request (common for OAuth errors)
+        if ($status_code === 400) {
+            $error_detail = isset($decoded['message']) ? $decoded['message'] : (isset($decoded['error']) ? $decoded['error'] : '');
+            if (strpos($endpoint, 'oauth/token') !== false || strpos($endpoint, 'oauth/') !== false) {
+                return new WP_Error('oauth_failed', sprintf(
+                    __('OAuth error: %s. Please check that the redirect URI matches and try connecting again.', 'google-reviews-plugin'),
+                    $error_detail
+                ));
+            }
         }
         
         if ($status_code >= 400) {
@@ -279,9 +360,24 @@ class GRP_API {
             $response = $this->make_api_server_request('oauth/token', array(
                 'code' => $code,
                 'redirect_uri' => $this->redirect_uri
-            ));
+            ), 'POST');
             
             if (is_wp_error($response)) {
+                // Store error for retrieval
+                $this->last_error = $response;
+                // Log the error for debugging
+                error_log('GRP OAuth Token Exchange Error: ' . $response->get_error_message());
+                if ($response->get_error_data()) {
+                    error_log('GRP OAuth Error Data: ' . print_r($response->get_error_data(), true));
+                }
+                return false;
+            }
+            
+            // Check if response has success flag
+            if (isset($response['success']) && !$response['success']) {
+                $error_msg = isset($response['message']) ? $response['message'] : 'Unknown error from API server';
+                $this->last_error = new WP_Error('oauth_failed', $error_msg);
+                error_log('GRP OAuth Token Exchange Failed: ' . $error_msg);
                 return false;
             }
             
@@ -297,6 +393,8 @@ class GRP_API {
                 return true;
             }
             
+            // Log if access_token is missing
+            error_log('GRP OAuth Token Exchange: access_token missing in response. Response: ' . print_r($response, true));
             return false;
         } else {
             // Use custom credentials - direct to Google
@@ -403,8 +501,52 @@ class GRP_API {
     
     /**
      * Make API request
+     * 
+     * IMPORTANT (WordPress.org compliant):
+     * - Free users WITHOUT license: Can use custom credentials (no registration required)
+     * - Free users WITH license: Can use cloud server (optional, for easier setup)
+     * - Pro users: MUST use cloud server (license required)
+     * - Enterprise users: CAN use custom credentials OR cloud server
+     * 
+     * This method is for:
+     * - Free users with custom credentials (no license needed - WordPress.org compliant)
+     * - Enterprise tier with custom credentials
+     * - Internal use when routing through cloud server
      */
     private function make_request($endpoint, $method = 'GET', $data = null) {
+        $license = new GRP_License();
+        $has_license = $license->has_license();
+        $is_pro = $license->is_pro();
+        $is_enterprise = $license->is_enterprise();
+        $is_free = $license->is_free();
+        
+        // Pro users (non-Enterprise) cannot make direct API calls - must use cloud server
+        if ($is_pro && !$is_enterprise) {
+            return new WP_Error('cloud_server_required', __('Pro licenses must use the cloud server. Enterprise licenses can use custom credentials to bypass the cloud server.', 'google-reviews-plugin'));
+        }
+        
+        // Free users with license should use cloud server, but allow direct calls if they have custom credentials
+        // This is for WordPress.org compliance - free version works without registration
+        if ($is_free) {
+            // Free license active - prefer cloud server, but allow custom credentials
+            $user_client_id = get_option('grp_google_client_id', '');
+            if (empty($user_client_id)) {
+                // No custom credentials - should use cloud server
+                return new WP_Error('cloud_server_required', __('Free licenses use the cloud server. Enter your Google Cloud credentials below to use direct API calls instead.', 'google-reviews-plugin'));
+            }
+            // Has custom credentials - allow direct API calls (WordPress.org compliant)
+        }
+        
+        // No license: Allow direct API calls if custom credentials provided (WordPress.org compliant)
+        // This allows the plugin to work without requiring registration
+        if (!$has_license) {
+            $user_client_id = get_option('grp_google_client_id', '');
+            if (empty($user_client_id)) {
+                return new WP_Error('credentials_required', __('Please either activate a free license (for cloud server access) or enter your Google Cloud credentials below to use direct API calls.', 'google-reviews-plugin'));
+            }
+            // Has custom credentials - allow direct API calls (no license needed - WordPress.org compliant)
+        }
+        
         if (!$this->access_token) {
             return new WP_Error('no_token', __('No access token available', 'google-reviews-plugin'));
         }
@@ -558,8 +700,26 @@ class GRP_API {
                     }
                 }
 
-                // Default: return raw details for visibility
-                return new WP_Error('api_error', sprintf(__('API Error (%d): %s', 'google-reviews-plugin'), $status_code, $body));
+                // Default: return detailed error message
+                $error_msg = '';
+                if (!empty($error_message)) {
+                    $error_msg = $error_message;
+                } elseif (!empty($error_reason)) {
+                    $error_msg = $error_reason;
+                } elseif (is_array($decoded) && isset($decoded['error'])) {
+                    if (is_string($decoded['error'])) {
+                        $error_msg = $decoded['error'];
+                    } elseif (is_array($decoded['error']) && isset($decoded['error']['message'])) {
+                        $error_msg = $decoded['error']['message'];
+                    }
+                }
+                
+                if (empty($error_msg)) {
+                    // Fallback to showing first 200 chars of body
+                    $error_msg = substr($body, 0, 200);
+                }
+                
+                return new WP_Error('api_error', sprintf(__('API Error (%d): %s', 'google-reviews-plugin'), $status_code, $error_msg));
             }
 
             // Success on this base
@@ -590,28 +750,104 @@ class GRP_API {
     
     /**
      * Get account information
+     * 
+     * Note: Free users can access this for basic setup (single location)
      */
     public function get_accounts() {
-        // Business Profile Account Management uses v1 accounts list
+        // Pro/Enterprise users must use cloud server (if not Enterprise with custom credentials)
+        if ($this->is_using_api_server()) {
+            $response = $this->make_api_server_request('accounts');
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            return $response;
+        }
+        
+        // Free tier or Enterprise with custom credentials - direct API call
         return $this->make_request('accounts');
     }
     
     /**
      * Get locations for an account
+     * 
+     * Note: Free users can access this but should be limited to first location only
      */
     public function get_locations($account_id) {
-        return $this->make_request("accounts/{$account_id}/locations");
+        $license = new GRP_License();
+        $is_pro = $license->is_pro();
+        
+        // Clean account_id - remove 'accounts/' prefix if present
+        $clean_account_id = preg_replace('#^accounts/?#', '', $account_id);
+        
+        // Pro/Enterprise users must use cloud server (if not Enterprise with custom credentials)
+        if ($this->is_using_api_server()) {
+            $response = $this->make_api_server_request('locations', array(
+                'account_id' => $clean_account_id
+            ), 'GET');
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            
+            // Handle response format
+            $locations = isset($response['locations']) ? $response['locations'] : $response;
+            
+            // Free users: Limit to first location only
+            if (!$is_pro && is_array($locations) && count($locations) > 0) {
+                $locations = array_slice($locations, 0, 1);
+            }
+            
+            // Return in expected format
+            if (isset($response['locations'])) {
+                return array('locations' => $locations);
+            }
+            return $locations;
+        }
+        
+        // Free tier or Enterprise with custom credentials - direct API call
+        $params = array(
+            'readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri'
+        );
+        $response = $this->make_request("accounts/{$clean_account_id}/locations", 'GET', $params);
+        
+        // Free users: Limit to first location only
+        if (!$is_pro && !is_wp_error($response)) {
+            if (isset($response['locations']) && is_array($response['locations'])) {
+                $response['locations'] = array_slice($response['locations'], 0, 1);
+            } elseif (is_array($response) && !isset($response['locations'])) {
+                // If response is direct array of locations
+                $response = array_slice($response, 0, 1);
+            }
+        }
+        
+        return $response;
     }
     
     /**
      * Get reviews for a location
      */
     public function get_reviews($account_id, $location_id, $page_size = 50) {
+        // Pro users must use cloud server
+        if ($this->is_using_api_server()) {
+            $response = $this->make_api_server_request('reviews', array(
+                'account_id' => $account_id,
+                'location_id' => $location_id,
+                'page_size' => $page_size
+            ), 'GET');
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            // Handle response format
+            if (isset($response['reviews'])) {
+                return $response['reviews'];
+            }
+            return $response;
+        }
+        
+        // Free tier with custom credentials - direct API call
         $params = array(
             'pageSize' => $page_size,
             'orderBy' => 'updateTime desc'
         );
-        // Reviews are available via Business Profile API
         return $this->make_request("accounts/{$account_id}/locations/{$location_id}/reviews", 'GET', $params);
     }
     
@@ -619,6 +855,24 @@ class GRP_API {
      * Get specific review
      */
     public function get_review($account_id, $location_id, $review_id) {
+        // Pro users must use cloud server
+        if ($this->is_using_api_server()) {
+            $response = $this->make_api_server_request('review', array(
+                'account_id' => $account_id,
+                'location_id' => $location_id,
+                'review_id' => $review_id
+            ), 'GET');
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            // Handle response format
+            if (isset($response['review'])) {
+                return $response['review'];
+            }
+            return $response;
+        }
+        
+        // Free tier with custom credentials - direct API call
         return $this->make_request("accounts/{$account_id}/locations/{$location_id}/reviews/{$review_id}");
     }
     
@@ -626,10 +880,24 @@ class GRP_API {
      * Reply to a review
      */
     public function reply_to_review($account_id, $location_id, $review_id, $comment) {
+        // Pro users must use cloud server
+        if ($this->is_using_api_server()) {
+            $response = $this->make_api_server_request('review/reply', array(
+                'account_id' => $account_id,
+                'location_id' => $location_id,
+                'review_id' => $review_id,
+                'comment' => $comment
+            ));
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            return $response;
+        }
+        
+        // Free tier with custom credentials - direct API call
         $data = array(
             'comment' => $comment
         );
-        
         return $this->make_request(
             "accounts/{$account_id}/locations/{$location_id}/reviews/{$review_id}/reply",
             'POST',
