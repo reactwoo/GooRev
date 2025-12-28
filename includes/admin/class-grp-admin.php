@@ -94,16 +94,28 @@ class GRP_Admin {
             array($this, 'render_help_page')
         );
         
-        // Add WooCommerce Integration submenu (only if WooCommerce is active)
-        if (class_exists('WooCommerce')) {
-            add_submenu_page(
-                'google-reviews',
-                __('WooCommerce Integration', 'google-reviews-plugin'),
-                __('WooCommerce Integration', 'google-reviews-plugin'),
-                'manage_options',
-                'google-reviews-woocommerce',
-                array($this, 'render_woocommerce_page')
-            );
+        add_submenu_page(
+            'google-reviews',
+            __('Addons', 'google-reviews-plugin'),
+            __('Addons', 'google-reviews-plugin'),
+            'manage_options',
+            'google-reviews-addons',
+            array($this, 'render_addons_page')
+        );
+        
+        // Add WooCommerce Integration submenu only if addon is enabled
+        if (class_exists('GRP_Addons')) {
+            $addons = GRP_Addons::get_instance();
+            if ($addons->is_addon_enabled('woocommerce')) {
+                add_submenu_page(
+                    'google-reviews',
+                    __('WooCommerce Integration', 'google-reviews-plugin'),
+                    __('WooCommerce Integration', 'google-reviews-plugin'),
+                    'manage_options',
+                    'google-reviews-woocommerce',
+                    array($this, 'render_woocommerce_page')
+                );
+            }
         }
     }
     
@@ -548,6 +560,13 @@ class GRP_Admin {
         $is_pro = $license->is_pro();
         
         include GRP_PLUGIN_DIR . 'includes/admin/views/help.php';
+    }
+    
+    /**
+     * Render Addons page
+     */
+    public function render_addons_page() {
+        require_once GRP_PLUGIN_DIR . 'includes/admin/views/addons.php';
     }
     
     /**

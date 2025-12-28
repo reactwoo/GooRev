@@ -66,8 +66,9 @@ class Google_Reviews_Plugin {
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-styles.php';
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-cache.php';
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-license.php';
+        require_once GRP_PLUGIN_DIR . 'includes/class-grp-addons.php';
         
-        // WooCommerce integration (if WooCommerce is active)
+        // WooCommerce integration (load class so it can hook into addon actions)
         if (class_exists('WooCommerce')) {
             require_once GRP_PLUGIN_DIR . 'includes/class-grp-woocommerce.php';
         }
@@ -119,8 +120,11 @@ class Google_Reviews_Plugin {
         // Initialize license manager
         $this->license = new GRP_License();
         
-        // Initialize WooCommerce integration (if WooCommerce is active)
-        if (class_exists('WooCommerce')) {
+        // Initialize addons manager (must be initialized before addons)
+        $addons = GRP_Addons::get_instance();
+        
+        // Initialize WooCommerce integration (class handles addon enable check internally)
+        if (class_exists('WooCommerce') && class_exists('GRP_WooCommerce')) {
             GRP_WooCommerce::get_instance();
         }
         

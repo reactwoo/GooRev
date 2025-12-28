@@ -152,11 +152,7 @@ class GRP_Activator {
             wp_schedule_event(time(), 'daily', 'grp_check_license');
         }
         
-        // Schedule review invites sending (if WooCommerce is active)
-        if (class_exists('WooCommerce')) {
-            if (!wp_next_scheduled('grp_send_review_invites')) {
-                wp_schedule_event(time(), 'hourly', 'grp_send_review_invites');
-            }
-        }
+        // Note: Review invites cron is scheduled when WooCommerce addon is enabled
+        // See GRP_WooCommerce::handle_addon_enabled()
     }
 }

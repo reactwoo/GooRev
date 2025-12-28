@@ -31,13 +31,48 @@ class GRP_WooCommerce {
      * Constructor
      */
     private function __construct() {
+        // Hook into addon enable/disable actions
+        add_action('grp_addon_enabled', array($this, 'handle_addon_enabled'));
+        add_action('grp_addon_disabled', array($this, 'handle_addon_disabled'));
+        
         $this->init_hooks();
+    }
+    
+    /**
+     * Handle addon enabled action
+     */
+    public function handle_addon_enabled($slug) {
+        if ($slug === 'woocommerce') {
+            // Schedule cron event when addon is enabled
+            if (!wp_next_scheduled('grp_send_review_invites')) {
+                wp_schedule_event(time(), 'hourly', 'grp_send_review_invites');
+            }
+        }
+    }
+    
+    /**
+     * Handle addon disabled action
+     */
+    public function handle_addon_disabled($slug) {
+        if ($slug === 'woocommerce') {
+            // Unschedule cron event when addon is disabled
+            $timestamp = wp_next_scheduled('grp_send_review_invites');
+            if ($timestamp) {
+                wp_unschedule_event($timestamp, 'grp_send_review_invites');
+            }
+        }
     }
     
     /**
      * Initialize hooks
      */
     private function init_hooks() {
+        // Check if addon is enabled (this check is also done at class load, but double-check here)
+        $addons = GRP_Addons::get_instance();
+        if (!$addons->is_addon_enabled('woocommerce')) {
+            return;
+        }
+        
         // Check if WooCommerce is active and integration is enabled
         if (!$this->is_woocommerce_active() || !$this->is_integration_enabled()) {
             return;
@@ -74,9 +109,18 @@ class GRP_WooCommerce {
     
     /**
      * Check if integration is enabled
+     * Now checks addon enabled state instead of separate option
      */
     public function is_integration_enabled() {
-        return (bool) get_option('grp_wc_integration_enabled', false);
+        // Check addon enabled state (primary check)
+        $addons = GRP_Addons::get_instance();
+        if (!$addons->is_addon_enabled('woocommerce')) {
+            return false;
+        }
+        
+        // Also check legacy option for backwards compatibility
+        // This allows users who had it enabled before addon system to continue
+        return (bool) get_option('grp_wc_integration_enabled', true);
     }
     
     /**
