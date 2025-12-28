@@ -776,11 +776,154 @@ if (!class_exists('GRP_License')) {
 .grp-modal-footer {
     padding: 15px 25px;
     border-top: 1px solid #ddd;
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .grp-modal-footer .button {
-    margin-left: 10px;
+    margin: 0;
+    padding: 8px 16px;
+    white-space: nowrap;
+    min-width: auto;
+}
+
+/* Customizer Modal Styles */
+.grp-customizer-modal-content {
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.grp-customizer-body {
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(90vh - 150px);
+}
+
+.grp-customizer-tabs {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.grp-customizer-tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.grp-customizer-tab-btn:hover {
+    color: #2271b1;
+}
+
+.grp-customizer-tab-btn.active {
+    color: #2271b1;
+    border-bottom-color: #2271b1;
+}
+
+.grp-customizer-tab-content {
+    display: none;
+}
+
+.grp-customizer-tab-content.active {
+    display: block;
+}
+
+.grp-customizer-tab-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+.grp-customizer-control {
+    margin-bottom: 25px;
+}
+
+.grp-customizer-control label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
+}
+
+.grp-customizer-control .grp-value-display {
+    font-weight: normal;
+    color: #2271b1;
+    margin-left: 8px;
+}
+
+.grp-color-control {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.grp-color-control .grp-color-input {
+    width: 60px;
+    height: 40px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.grp-color-control .grp-color-text {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.grp-font-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+}
+
+.grp-range-input {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.grp-range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2271b1;
+    cursor: pointer;
+}
+
+.grp-range-input::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2271b1;
+    cursor: pointer;
+    border: none;
 }
 </style>
 
@@ -935,22 +1078,306 @@ jQuery(document).ready(function($) {
         });
     });
     
-    // Customize button for Pro users (opens CSS editor section with scroll)
+    // Customize button for Pro users - open visual style customizer modal
     $('.grp-customize-style:not(.grp-pro-feature)').on('click', function(e) {
         e.preventDefault();
-        // For now, scroll to the CSS editor and highlight it
-        // In the future, this can open a visual style customizer modal
-        if ($('#grp-custom-css').length) {
-            $('html, body').animate({
-                scrollTop: $('#grp-custom-css').offset().top - 100
-            }, 500);
-            $('#grp-custom-css').focus().css('border-color', '#2271b1');
-            setTimeout(function() {
-                $('#grp-custom-css').css('border-color', '');
-            }, 2000);
-        } else {
-            alert('<?php esc_js_e('CSS Editor is available in the sidebar. Use it to customize your styles.', 'google-reviews-plugin'); ?>');
+        var style = $(this).data('style');
+        var styleName = $(this).closest('.grp-style-card').find('h3').text();
+        
+        // Load existing custom CSS values if any
+        var existingCss = $('#grp-custom-css').val() || '';
+        
+        // Create customizer modal
+        var customizerModalHtml = '<div class="grp-modal-overlay" id="grp-customizer-modal">' +
+            '<div class="grp-modal-content grp-customizer-modal-content">' +
+            '<div class="grp-modal-header">' +
+            '<h2><?php esc_js_e('Customize', 'google-reviews-plugin'); ?> ' + styleName + '</h2>' +
+            '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
+            '</div>' +
+            '<div class="grp-modal-body grp-customizer-body">' +
+            '<div class="grp-customizer-tabs">' +
+            '<button class="grp-customizer-tab-btn active" data-tab="colors"><?php esc_js_e('Colors', 'google-reviews-plugin'); ?></button>' +
+            '<button class="grp-customizer-tab-btn" data-tab="typography"><?php esc_js_e('Typography', 'google-reviews-plugin'); ?></button>' +
+            '<button class="grp-customizer-tab-btn" data-tab="spacing"><?php esc_js_e('Spacing', 'google-reviews-plugin'); ?></button>' +
+            '</div>' +
+            
+            // Colors Tab
+            '<div class="grp-customizer-tab-content active" data-tab="colors">' +
+            '<h3><?php esc_js_e('Color Settings', 'google-reviews-plugin'); ?></h3>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Text Color', 'google-reviews-plugin'); ?></label>' +
+            '<div class="grp-color-control">' +
+            '<input type="color" id="grp-custom-text-color" class="grp-color-input" value="#111827">' +
+            '<input type="text" class="grp-color-text" value="#111827" placeholder="#111827">' +
+            '</div>' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Background Color', 'google-reviews-plugin'); ?></label>' +
+            '<div class="grp-color-control">' +
+            '<input type="color" id="grp-custom-bg-color" class="grp-color-input" value="#FFFFFF">' +
+            '<input type="text" class="grp-color-text" value="#FFFFFF" placeholder="#FFFFFF">' +
+            '</div>' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Star Color', 'google-reviews-plugin'); ?></label>' +
+            '<div class="grp-color-control">' +
+            '<input type="color" id="grp-custom-star-color" class="grp-color-input" value="#FBBC05">' +
+            '<input type="text" class="grp-color-text" value="#FBBC05" placeholder="#FBBC05">' +
+            '</div>' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Accent Color', 'google-reviews-plugin'); ?></label>' +
+            '<div class="grp-color-control">' +
+            '<input type="color" id="grp-custom-accent-color" class="grp-color-input" value="#4285F4">' +
+            '<input type="text" class="grp-color-text" value="#4285F4" placeholder="#4285F4">' +
+            '</div>' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Border Color', 'google-reviews-plugin'); ?></label>' +
+            '<div class="grp-color-control">' +
+            '<input type="color" id="grp-custom-border-color" class="grp-color-input" value="#D1D5DB">' +
+            '<input type="text" class="grp-color-text" value="#D1D5DB" placeholder="#D1D5DB">' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            
+            // Typography Tab
+            '<div class="grp-customizer-tab-content" data-tab="typography">' +
+            '<h3><?php esc_js_e('Typography Settings', 'google-reviews-plugin'); ?></h3>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Body Font Family', 'google-reviews-plugin'); ?></label>' +
+            '<select id="grp-custom-body-font" class="grp-font-select">' +
+            '<option value=""><?php esc_js_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>' +
+            '<option value="Inter, sans-serif">Inter</option>' +
+            '<option value="Roboto, sans-serif">Roboto</option>' +
+            '<option value="Open Sans, sans-serif">Open Sans</option>' +
+            '<option value="Lato, sans-serif">Lato</option>' +
+            '<option value="Montserrat, sans-serif">Montserrat</option>' +
+            '<option value="Poppins, sans-serif">Poppins</option>' +
+            '<option value="Playfair Display, serif">Playfair Display</option>' +
+            '<option value="Georgia, serif">Georgia</option>' +
+            '<option value="Merriweather, serif">Merriweather</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Name Font Family', 'google-reviews-plugin'); ?></label>' +
+            '<select id="grp-custom-name-font" class="grp-font-select">' +
+            '<option value=""><?php esc_js_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>' +
+            '<option value="Inter, sans-serif">Inter</option>' +
+            '<option value="Roboto, sans-serif">Roboto</option>' +
+            '<option value="Open Sans, sans-serif">Open Sans</option>' +
+            '<option value="Playfair Display, serif">Playfair Display</option>' +
+            '<option value="Georgia, serif">Georgia</option>' +
+            '<option value="Merriweather, serif">Merriweather</option>' +
+            '</select>' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Body Font Size', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-body-font-size-value">15px</span></label>' +
+            '<input type="range" id="grp-custom-body-font-size" class="grp-range-input" min="10" max="24" value="15" step="1">' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Name Font Size', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-name-font-size-value">14px</span></label>' +
+            '<input type="range" id="grp-custom-name-font-size" class="grp-range-input" min="10" max="20" value="14" step="1">' +
+            '</div>' +
+            '</div>' +
+            
+            // Spacing Tab
+            '<div class="grp-customizer-tab-content" data-tab="spacing">' +
+            '<h3><?php esc_js_e('Spacing Settings', 'google-reviews-plugin'); ?></h3>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Border Radius', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-border-radius-value">8px</span></label>' +
+            '<input type="range" id="grp-custom-border-radius" class="grp-range-input" min="0" max="30" value="8" step="1">' +
+            '</div>' +
+            '<div class="grp-customizer-control">' +
+            '<label><?php esc_js_e('Padding', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-padding-value">20px</span></label>' +
+            '<input type="range" id="grp-custom-padding" class="grp-range-input" min="10" max="50" value="20" step="2">' +
+            '</div>' +
+            '</div>' +
+            
+            '</div>' +
+            '<div class="grp-modal-footer">' +
+            '<button class="button grp-preview-css"><?php esc_js_e('Preview CSS', 'google-reviews-plugin'); ?></button>' +
+            '<button class="button button-primary grp-save-customizations" data-style="' + style + '"><?php esc_js_e('Save Customizations', 'google-reviews-plugin'); ?></button>' +
+            '<button class="button grp-modal-close"><?php esc_js_e('Cancel', 'google-reviews-plugin'); ?></button>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+        
+        $('body').append(customizerModalHtml);
+        $('#grp-customizer-modal').css('display', 'flex');
+        
+        // Function to generate CSS from form values (must be defined before use)
+        function generateCustomCss(style) {
+            var css = '/* Custom styles for ' + styleName + ' style - Generated on ' + new Date().toLocaleDateString() + ' */\n\n';
+            css += '.grp-style-' + style + ' .grp-review {\n';
+            
+            var bgColor = $('#grp-custom-bg-color').val();
+            if (bgColor && bgColor !== '#FFFFFF') {
+                css += '    background-color: ' + bgColor + ' !important;\n';
+            }
+            
+            var borderColor = $('#grp-custom-border-color').val();
+            if (borderColor && borderColor !== '#D1D5DB') {
+                css += '    border-color: ' + borderColor + ' !important;\n';
+            }
+            
+            var borderRadius = $('#grp-custom-border-radius').val();
+            if (borderRadius && borderRadius !== '8') {
+                css += '    border-radius: ' + borderRadius + 'px !important;\n';
+            }
+            
+            var padding = $('#grp-custom-padding').val();
+            if (padding && padding !== '20') {
+                css += '    padding: ' + padding + 'px !important;\n';
+            }
+            
+            css += '}\n\n';
+            
+            css += '.grp-style-' + style + ' .grp-review-text,\n';
+            css += '.grp-style-' + style + ' .grp-author-name {\n';
+            var textColor = $('#grp-custom-text-color').val();
+            if (textColor && textColor !== '#111827') {
+                css += '    color: ' + textColor + ' !important;\n';
+            }
+            var bodyFont = $('#grp-custom-body-font').val();
+            if (bodyFont) {
+                css += '    font-family: ' + bodyFont + ' !important;\n';
+            }
+            var bodyFontSize = $('#grp-custom-body-font-size').val();
+            if (bodyFontSize && bodyFontSize !== '15') {
+                css += '    font-size: ' + bodyFontSize + 'px !important;\n';
+            }
+            css += '}\n\n';
+            
+            css += '.grp-style-' + style + ' .grp-author-name {\n';
+            var nameFont = $('#grp-custom-name-font').val();
+            if (nameFont) {
+                css += '    font-family: ' + nameFont + ' !important;\n';
+            }
+            var nameFontSize = $('#grp-custom-name-font-size').val();
+            if (nameFontSize && nameFontSize !== '14') {
+                css += '    font-size: ' + nameFontSize + 'px !important;\n';
+            }
+            css += '}\n\n';
+            
+            css += '.grp-style-' + style + ' .grp-star {\n';
+            var starColor = $('#grp-custom-star-color').val();
+            if (starColor && starColor !== '#FBBC05') {
+                css += '    color: ' + starColor + ' !important;\n';
+            }
+            css += '}\n\n';
+            
+            var accentColor = $('#grp-custom-accent-color').val();
+            if (accentColor && accentColor !== '#4285F4') {
+                css += '.grp-style-' + style + ' .grp-review {\n';
+                css += '    --grp-accent: ' + accentColor + ';\n';
+                css += '}\n';
+            }
+            
+            return css;
         }
+        
+        // Color input sync
+        $(document).off('input change', '#grp-customizer-modal .grp-color-input');
+        $(document).on('input change', '#grp-customizer-modal .grp-color-input', function() {
+            $(this).siblings('.grp-color-text').val($(this).val());
+        });
+        
+        $(document).off('input change', '#grp-customizer-modal .grp-color-text');
+        $(document).on('input change', '#grp-customizer-modal .grp-color-text', function() {
+            var val = $(this).val();
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                $(this).siblings('.grp-color-input').val(val);
+            }
+        });
+        
+        // Range input value display
+        $(document).off('input', '#grp-customizer-modal .grp-range-input');
+        $(document).on('input', '#grp-customizer-modal .grp-range-input', function() {
+            var value = $(this).val();
+            var unit = $(this).attr('id').includes('font-size') ? 'px' : 'px';
+            $(this).closest('.grp-customizer-control').find('.grp-value-display').text(value + unit);
+        });
+        
+        // Tab switching
+        $(document).off('click', '#grp-customizer-modal .grp-customizer-tab-btn');
+        $(document).on('click', '#grp-customizer-modal .grp-customizer-tab-btn', function() {
+            var tab = $(this).data('tab');
+            $('#grp-customizer-modal .grp-customizer-tab-btn').removeClass('active');
+            $(this).addClass('active');
+            $('#grp-customizer-modal .grp-customizer-tab-content').removeClass('active');
+            $('#grp-customizer-modal .grp-customizer-tab-content[data-tab="' + tab + '"]').addClass('active');
+        });
+        
+        // Generate and save CSS
+        $(document).off('click', '#grp-customizer-modal .grp-save-customizations');
+        $(document).on('click', '#grp-customizer-modal .grp-save-customizations', function() {
+            var style = $(this).data('style');
+            var css = generateCustomCss(style);
+            
+            $.post(ajaxurl, {
+                action: 'grp_save_custom_css',
+                nonce: grp_admin.nonce,
+                css: css
+            }, function(response) {
+                if (response.success) {
+                    // Update the CSS textarea if it exists
+                    if ($('#grp-custom-css').length) {
+                        $('#grp-custom-css').val(css);
+                    }
+                    alert('<?php esc_js_e('Customizations saved successfully!', 'google-reviews-plugin'); ?>');
+                    $('#grp-customizer-modal').hide().remove();
+                } else {
+                    alert('<?php esc_js_e('Failed to save customizations.', 'google-reviews-plugin'); ?>');
+                }
+            });
+        });
+        
+        // Preview CSS
+        $(document).off('click', '#grp-customizer-modal .grp-preview-css');
+        $(document).on('click', '#grp-customizer-modal .grp-preview-css', function() {
+            var style = $(this).siblings('.grp-save-customizations').data('style');
+            var css = generateCustomCss(style);
+            
+            var previewModalHtml = '<div class="grp-modal-overlay" id="grp-css-preview-modal">' +
+                '<div class="grp-modal-content" style="max-width: 800px;">' +
+                '<div class="grp-modal-header">' +
+                '<h2><?php esc_js_e('Generated CSS Preview', 'google-reviews-plugin'); ?></h2>' +
+                '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
+                '</div>' +
+                '<div class="grp-modal-body">' +
+                '<textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px;">' + css + '</textarea>' +
+                '</div>' +
+                '<div class="grp-modal-footer">' +
+                '<button class="button grp-modal-close"><?php esc_js_e('Close', 'google-reviews-plugin'); ?></button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            
+            $('body').append(previewModalHtml);
+            $('#grp-css-preview-modal').show();
+            
+            // Close preview modal
+            $(document).off('click', '#grp-css-preview-modal .grp-modal-close, #grp-css-preview-modal');
+            $(document).on('click', '#grp-css-preview-modal .grp-modal-close, #grp-css-preview-modal', function(e) {
+                if ($(e.target).is('#grp-css-preview-modal') || $(e.target).hasClass('grp-modal-close')) {
+                    $('#grp-css-preview-modal').hide().remove();
+                }
+            });
+        });
+        
+        // Close modal
+        $(document).off('click', '#grp-customizer-modal .grp-modal-close, #grp-customizer-modal');
+        $(document).on('click', '#grp-customizer-modal .grp-modal-close, #grp-customizer-modal', function(e) {
+            if ($(e.target).is('#grp-customizer-modal') || $(e.target).hasClass('grp-modal-close')) {
+                $('#grp-customizer-modal').hide().remove();
+            }
+        });
+        
+        $(document).off('click', '#grp-customizer-modal .grp-modal-content');
+        $(document).on('click', '#grp-customizer-modal .grp-modal-content', function(e) {
+            e.stopPropagation();
+        });
     });
     
     // Customize button - show Pro upgrade modal for free users
@@ -1018,7 +1445,7 @@ jQuery(document).ready(function($) {
         
         $.post(ajaxurl, {
             action: 'grp_save_custom_css',
-            nonce: grp_admin.nonce,
+            nonce: '<?php echo wp_create_nonce('grp_admin_nonce'); ?>',
             css: css
         }, function(response) {
             if (response.success) {

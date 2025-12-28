@@ -32,6 +32,7 @@ class GRP_Admin {
         // New AJAX endpoints for accounts/locations selection
         add_action('wp_ajax_grp_list_accounts', array($this, 'ajax_list_accounts'));
         add_action('wp_ajax_grp_list_locations', array($this, 'ajax_list_locations'));
+        add_action('wp_ajax_grp_save_custom_css', array($this, 'ajax_save_custom_css'));
     }
     
     /**
@@ -959,6 +960,28 @@ class GRP_Admin {
             }
         }
         wp_send_json_success(array('locations' => $locations));
+    }
+    
+    /**
+     * AJAX handler for saving custom CSS
+     */
+    public function ajax_save_custom_css() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions.', 'google-reviews-plugin')));
+            return;
+        }
+        
+        $css = isset($_POST['css']) ? wp_strip_all_tags($_POST['css']) : '';
+        
+        // Save custom CSS
+        update_option('grp_custom_css', $css);
+        
+        wp_send_json_success(array(
+            'message' => __('Custom CSS saved successfully.', 'google-reviews-plugin'),
+            'css' => $css
+        ));
     }
     
     /**
