@@ -54,6 +54,11 @@ class GRP_API {
     private $last_error = null;
     
     /**
+     * Retry counter to prevent infinite retry loops
+     */
+    private $retry_count = 0;
+    
+    /**
      * Constructor
      */
     public function __construct() {
@@ -127,6 +132,16 @@ class GRP_API {
      * Make request to API server
      */
     private function make_api_server_request($endpoint, $data = array(), $method = 'POST') {
+        // Reset retry count at start of new request
+        $this->retry_count = 0;
+        
+        return $this->make_api_server_request_internal($endpoint, $data, $method);
+    }
+    
+    /**
+     * Internal method for API server requests (used by retry logic)
+     */
+    private function make_api_server_request_internal($endpoint, $data = array(), $method = 'POST') {
         $url = rtrim($this->api_server_url, '/') . '/' . ltrim($endpoint, '/');
         
         // Get JWT token from license
@@ -173,8 +188,10 @@ class GRP_API {
         
         $args = array(
             'headers' => $headers,
-            'timeout' => 30,
-            'method' => $http_method
+            'timeout' => 15, // Reduced from 30 to prevent long timeouts
+            'method' => $http_method,
+            'redirection' => 5,
+            'httpversion' => '1.1'
         );
         
         // For GET requests, add data as query parameters
@@ -255,11 +272,17 @@ class GRP_API {
                 ));
             }
             
-            // Try to refresh the JWT token
-            $refreshed = $this->refresh_jwt_token();
-            if ($refreshed) {
-                // Retry the request with new token
-                return $this->make_api_server_request($endpoint, $data, $method);
+            // Try to refresh the JWT token (but limit retries to prevent infinite loops)
+            if ($this->retry_count < 1) {
+                $this->retry_count++;
+                $refreshed = $this->refresh_jwt_token();
+                if ($refreshed) {
+                    // Retry the request with new token (only once, using internal method to avoid resetting retry_count)
+                    $result = $this->make_api_server_request_internal($endpoint, $data, $method);
+                    $this->retry_count = 0; // Reset on success
+                    return $result;
+                }
+                $this->retry_count = 0; // Reset on failure
             }
             
             // If refresh failed, provide helpful error message
@@ -614,7 +637,7 @@ class GRP_API {
             );
             $args = array(
                 'headers' => $headers,
-                'timeout' => 30
+                'timeout' => 15 // Reduced to prevent long timeouts
             );
             $method = strtoupper($method);
             $args['method'] = $method;
