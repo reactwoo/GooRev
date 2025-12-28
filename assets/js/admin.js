@@ -241,6 +241,12 @@
         $select.prop('disabled', true).empty().append(
             $('<option>').val('').text(window.__grpAdminConfig.strings.loading)
         );
+        // Prevent multiple simultaneous requests
+        if ($select.data('loading')) {
+            return;
+        }
+        $select.data('loading', true);
+        
         $.post(window.__grpAdminConfig.ajax_url, {
             action: 'grp_list_accounts',
             nonce: window.__grpAdminConfig.nonce
@@ -275,6 +281,7 @@
             }
         }).always(function() {
             $select.prop('disabled', false);
+            $select.data('loading', false);
         });
     }
 
@@ -286,6 +293,13 @@
             $select.empty().append($('<option>').val('').text('Select an account first')).prop('disabled', true);
             return;
         }
+        
+        // Prevent multiple simultaneous requests
+        if ($select.data('loading')) {
+            return;
+        }
+        $select.data('loading', true);
+        
         $select.prop('disabled', true).empty().append(
             $('<option>').val('').text(window.__grpAdminConfig.strings.loading)
         );
@@ -315,6 +329,8 @@
                 $select.append($('<option>').val('').text(err));
                 $select.prop('disabled', false);
             }
+        }).always(function() {
+            $select.data('loading', false);
         });
     }
     

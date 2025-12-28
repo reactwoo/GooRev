@@ -236,6 +236,12 @@ class GRP_API {
             ));
         }
         
+        // Handle 429 - Rate limit error
+        if ($status_code === 429) {
+            $error_message = isset($decoded['message']) ? $decoded['message'] : __('Google API rate limit exceeded. Please wait a moment and try again.', 'google-reviews-plugin');
+            return new WP_Error('rate_limit', $error_message);
+        }
+        
         // Handle 401 - JWT token expired, try to refresh
         if ($status_code === 401) {
             // Get error details first
