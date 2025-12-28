@@ -29,17 +29,19 @@ if (!class_exists('GRP_License')) {
                 $license = new GRP_License();
                 $is_pro = $license->is_pro();
                 foreach ($available_styles as $key => $style): 
-                    // Hide Creative template for free users (Pro-only)
-                    if ($key === 'creative' && !$is_pro) {
-                        continue;
-                    }
                     // Determine preview structure based on style
                     $is_corporate = ($key === 'corporate');
                     $is_creative = ($key === 'creative');
                     $is_modern = ($key === 'modern');
                     $gradient = $is_creative ? ['blue', 'red', 'yellow', 'green', 'purple'][array_rand(['blue', 'red', 'yellow', 'green', 'purple'])] : '';
+                    $is_creative_pro_only = ($is_creative && !$is_pro);
                 ?>
-                    <div class="grp-style-card" data-style="<?php echo esc_attr($key); ?>">
+                    <div class="grp-style-card<?php echo $is_creative_pro_only ? ' grp-pro-only-template' : ''; ?>" data-style="<?php echo esc_attr($key); ?>">
+                        <?php if ($is_creative_pro_only): ?>
+                            <div class="grp-pro-template-banner">
+                                <span class="grp-pro-badge-large"><?php esc_html_e('Pro Only', 'google-reviews-plugin'); ?></span>
+                            </div>
+                        <?php endif; ?>
                         <div class="grp-style-preview grp-style-<?php echo esc_attr($key); ?> grp-theme-light">
                             <?php if ($is_corporate): ?>
                                 <!-- Corporate style with header/footer -->
@@ -175,10 +177,19 @@ if (!class_exists('GRP_License')) {
                             </div>
                             
                             <div class="grp-style-actions">
-                                <button class="button button-primary grp-use-style" 
-                                        data-style="<?php echo esc_attr($key); ?>">
-                                    <?php esc_html_e('Use This Style', 'google-reviews-plugin'); ?>
-                                </button>
+                                <?php if ($is_creative_pro_only): ?>
+                                    <button class="button button-primary grp-use-style grp-pro-feature" 
+                                            data-style="<?php echo esc_attr($key); ?>"
+                                            title="<?php esc_attr_e('Creative style is a Pro feature. Upgrade to unlock.', 'google-reviews-plugin'); ?>">
+                                        <?php esc_html_e('Use This Style', 'google-reviews-plugin'); ?>
+                                        <span class="grp-pro-badge"><?php esc_html_e('Pro', 'google-reviews-plugin'); ?></span>
+                                    </button>
+                                <?php else: ?>
+                                    <button class="button button-primary grp-use-style" 
+                                            data-style="<?php echo esc_attr($key); ?>">
+                                        <?php esc_html_e('Use This Style', 'google-reviews-plugin'); ?>
+                                    </button>
+                                <?php endif; ?>
                                 <?php
                                 $license = new GRP_License();
                                 $is_pro = $license->is_pro();
@@ -330,6 +341,31 @@ if (!class_exists('GRP_License')) {
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+}
+
+.grp-style-card.grp-pro-only-template {
+    opacity: 0.95;
+}
+
+.grp-pro-template-banner {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.grp-pro-badge-large {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 
 .grp-style-card:hover {
@@ -982,6 +1018,64 @@ jQuery(document).ready(function($) {
     // Use style - show usage modal
     $('.grp-use-style').on('click', function(e) {
         e.preventDefault();
+        var $btn = $(this);
+        
+        // Check if this is a Pro-only feature button
+        if ($btn.hasClass('grp-pro-feature')) {
+            var style = $btn.data('style');
+            var styleName = $btn.closest('.grp-style-card').find('h3').text();
+            
+            // Show upgrade modal for Pro-only templates
+            var upgradeModalHtml = '<div class="grp-modal-overlay" id="grp-upgrade-modal">' +
+                '<div class="grp-modal-content grp-upgrade-modal-content">' +
+                '<div class="grp-modal-header">' +
+                '<h2><?php esc_js_e('Upgrade to Pro', 'google-reviews-plugin'); ?></h2>' +
+                '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
+                '</div>' +
+                '<div class="grp-modal-body">' +
+                '<p class="grp-modal-intro"><?php esc_js_e('The', 'google-reviews-plugin'); ?> <strong>' + styleName + '</strong> <?php esc_js_e('style is available in the Pro version.', 'google-reviews-plugin'); ?></p>' +
+                '<div class="grp-upgrade-features">' +
+                '<h3><?php esc_js_e('With Pro, you get:', 'google-reviews-plugin'); ?></h3>' +
+                '<ul>' +
+                '<li>✓ <?php esc_js_e('Creative Style Template', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Advanced Gradient Customizer', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Google Fonts Integration', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Visual Style Customizer with live preview', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Custom CSS Editor', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Color Overrides (text, background, accent, stars)', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Typography Controls (font sizes, font families)', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Advanced Spacing & Layout Controls', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Multiple Locations Support', 'google-reviews-plugin'); ?></li>' +
+                '<li>✓ <?php esc_js_e('Priority Support', 'google-reviews-plugin'); ?></li>' +
+                '</ul>' +
+                '</div>' +
+                '</div>' +
+                '<div class="grp-modal-footer">' +
+                '<a href="https://reactwoo.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank"><?php esc_js_e('Upgrade to Pro', 'google-reviews-plugin'); ?></a>' +
+                '<button class="button grp-modal-close"><?php esc_js_e('Maybe Later', 'google-reviews-plugin'); ?></button>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+            
+            $('body').append(upgradeModalHtml);
+            $('#grp-upgrade-modal').css('display', 'flex');
+            
+            // Close upgrade modal
+            $(document).off('click', '#grp-upgrade-modal .grp-modal-close, #grp-upgrade-modal');
+            $(document).on('click', '#grp-upgrade-modal .grp-modal-close, #grp-upgrade-modal', function(e) {
+                if ($(e.target).is('#grp-upgrade-modal') || $(e.target).hasClass('grp-modal-close')) {
+                    $('#grp-upgrade-modal').remove();
+                }
+            });
+            
+            $(document).off('click', '#grp-upgrade-modal .grp-modal-content');
+            $(document).on('click', '#grp-upgrade-modal .grp-modal-content', function(e) {
+                e.stopPropagation();
+            });
+            
+            return;
+        }
+        
         var style = $(this).data('style');
         var styleName = $(this).closest('.grp-style-card').find('h3').text();
         var shortcode = '[google_reviews style="' + style + '"]';
