@@ -43,7 +43,7 @@ class GRP_WooCommerce {
             return;
         }
         
-        // Only proceed if Pro license is active
+        // Only proceed if Pro or Enterprise license is active
         $license = new GRP_License();
         if (!$license->is_pro()) {
             return;
@@ -184,7 +184,8 @@ class GRP_WooCommerce {
         $scheduled_at = current_time('mysql', true);
         $scheduled_at = date('Y-m-d H:i:s', strtotime($scheduled_at . " +{$delay_days} days"));
         
-        $place_id = get_option('grp_gbp_place_id_default', '');
+        // Get place_id from connected location
+        $place_id = $this->get_place_id_from_location();
         $location_id = get_option('grp_google_location_id', '');
         
         $data = array(
@@ -264,7 +265,24 @@ class GRP_WooCommerce {
      * Send invite email
      */
     private function send_invite_email($invite, $order) {
+        // Get place_id from invite or fetch from location if not stored
         $place_id = $invite->place_id;
+        if (empty($place_id)) {
+            $place_id = $this->get_place_id_from_location();
+            // Update invite with place_id if we found it
+            if (!empty($place_id)) {
+                global $wpdb;
+                $table = $wpdb->prefix . 'grp_review_invites';
+                $wpdb->update(
+                    $table,
+                    array('place_id' => $place_id),
+                    array('id' => $invite->id),
+                    array('%s'),
+                    array('%d')
+                );
+            }
+        }
+        
         if (empty($place_id)) {
             grp_debug_log('Cannot send invite: place_id is empty', array('invite_id' => $invite->id));
             return false;
@@ -580,6 +598,50 @@ Thanks again!
      */
     private function get_compliance_disclaimer() {
         return __('\n---\nNote: The discount code is provided as a thank-you for taking the time to leave a review, regardless of the review content or rating. We value all honest feedback.', 'google-reviews-plugin');
+    }
+    
+    /**
+     * Get place_id from connected Google Business Profile location
+     */
+    private function get_place_id_from_location() {
+        $location_id = get_option('grp_google_location_id', '');
+        $account_id = get_option('grp_google_account_id', '');
+        
+        if (empty($location_id) || empty($account_id)) {
+            return '';
+        }
+        
+        // Try to get place_id from stored location data or fetch from API
+        $api = new GRP_API();
+        if (!$api->is_connected()) {
+            return '';
+        }
+        
+        // Get location details from API
+        $locations = $api->get_locations($account_id);
+        if (is_wp_error($locations)) {
+            grp_debug_log('Failed to get locations for place_id', array('error' => $locations->get_error_message()));
+            return '';
+        }
+        
+        $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
+        
+        // Find the matching location
+        $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+        foreach ($locations_list as $location) {
+            $loc_name = $location['name'] ?? '';
+            $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
+            
+            if ($loc_id === $clean_location_id || $loc_name === $location_id) {
+                // Check for placeId in various possible field names
+                $place_id = $location['placeId'] ?? $location['place_id'] ?? $location['storeCode'] ?? '';
+                if (!empty($place_id)) {
+                    return $place_id;
+                }
+            }
+        }
+        
+        return '';
     }
 }
 

@@ -561,11 +561,11 @@ class GRP_Admin {
             return;
         }
         
-        // Check Pro license
+        // Check Pro/Enterprise license
         $license = new GRP_License();
         if (!$license->is_pro()) {
             echo '<div class="wrap"><h1>' . esc_html__('WooCommerce Integration', 'google-reviews-plugin') . '</h1>';
-            echo '<div class="notice notice-error"><p>' . esc_html__('This feature requires a Pro license. Please upgrade to use the WooCommerce integration.', 'google-reviews-plugin') . '</p></div></div>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('This feature requires a Pro or Enterprise license. Please upgrade to use the WooCommerce integration.', 'google-reviews-plugin') . '</p></div></div>';
             return;
         }
         
