@@ -119,11 +119,50 @@ class GRP_Reviews {
      * Process single review
      */
     private function process_single_review($review) {
+        // Extract rating - handle multiple possible field names and formats
+        $rating = 0;
+        
+        // Try different possible field names
+        $rating_value = null;
+        if (isset($review['starRating'])) {
+            $rating_value = $review['starRating'];
+        } elseif (isset($review['rating'])) {
+            $rating_value = $review['rating'];
+        } elseif (isset($review['star_rating'])) {
+            $rating_value = $review['star_rating'];
+        }
+        
+        if ($rating_value !== null) {
+            if (is_numeric($rating_value)) {
+                $rating = (int) $rating_value;
+            } elseif (is_string($rating_value)) {
+                // Handle enum format like "FIVE", "FOUR", etc.
+                $rating_map = array(
+                    'ONE' => 1,
+                    'TWO' => 2,
+                    'THREE' => 3,
+                    'FOUR' => 4,
+                    'FIVE' => 5,
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5
+                );
+                $rating = isset($rating_map[strtoupper($rating_value)]) ? $rating_map[strtoupper($rating_value)] : 0;
+            }
+        }
+        
+        // Ensure rating is between 1 and 5
+        if ($rating < 1 || $rating > 5) {
+            $rating = 0; // Keep as 0 if invalid
+        }
+        
         $processed = array(
             'id' => $review['reviewId'] ?? '',
             'author_name' => $review['reviewer']['displayName'] ?? '',
             'author_photo' => $review['reviewer']['profilePhotoUrl'] ?? '',
-            'rating' => $review['starRating'] ?? 0,
+            'rating' => $rating,
             'text' => $review['comment'] ?? '',
             'time' => $review['createTime'] ?? '',
             'update_time' => $review['updateTime'] ?? '',
@@ -206,6 +245,9 @@ class GRP_Reviews {
      * Generate stars HTML
      */
     private function generate_stars_html($rating) {
+        // Ensure rating is valid (1-5)
+        $rating = max(0, min(5, (int) $rating));
+        
         $stars = '';
         $full_stars = floor($rating);
         $half_star = ($rating - $full_stars) >= 0.5;
@@ -291,13 +333,52 @@ class GRP_Reviews {
         }
         
         foreach ($reviews_list as $review) {
+            // Extract rating - handle multiple possible field names and formats
+            $rating = 0;
+            
+            // Try different possible field names (Google API v4 uses 'starRating')
+            $rating_value = null;
+            if (isset($review['starRating'])) {
+                $rating_value = $review['starRating'];
+            } elseif (isset($review['rating'])) {
+                $rating_value = $review['rating'];
+            } elseif (isset($review['star_rating'])) {
+                $rating_value = $review['star_rating'];
+            }
+            
+            if ($rating_value !== null) {
+                if (is_numeric($rating_value)) {
+                    $rating = (int) $rating_value;
+                } elseif (is_string($rating_value)) {
+                    // Handle enum format like "FIVE", "FOUR", etc.
+                    $rating_map = array(
+                        'ONE' => 1,
+                        'TWO' => 2,
+                        'THREE' => 3,
+                        'FOUR' => 4,
+                        'FIVE' => 5,
+                        '1' => 1,
+                        '2' => 2,
+                        '3' => 3,
+                        '4' => 4,
+                        '5' => 5
+                    );
+                    $rating = isset($rating_map[strtoupper($rating_value)]) ? $rating_map[strtoupper($rating_value)] : 0;
+                }
+            }
+            
+            // Ensure rating is between 1 and 5
+            if ($rating < 1 || $rating > 5) {
+                $rating = 0; // Invalid rating
+            }
+            
             $wpdb->insert(
                 $table_name,
                 array(
                     'review_id' => $review['reviewId'] ?? '',
                     'author_name' => $review['reviewer']['displayName'] ?? '',
                     'author_photo' => $review['reviewer']['profilePhotoUrl'] ?? '',
-                    'rating' => $review['starRating'] ?? 0,
+                    'rating' => $rating,
                     'text' => $review['comment'] ?? '',
                     'time' => $review['createTime'] ?? '',
                     'update_time' => $review['updateTime'] ?? '',
