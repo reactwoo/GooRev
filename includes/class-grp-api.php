@@ -840,7 +840,8 @@ class GRP_API {
         // Pro/Enterprise users must use cloud server (if not Enterprise with custom credentials)
         if ($this->is_using_api_server()) {
             $response = $this->make_api_server_request('locations', array(
-                'account_id' => $clean_account_id
+                'account_id' => $clean_account_id,
+                'readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri,placeId'
             ), 'GET');
             if (is_wp_error($response)) {
                 return $response;
@@ -863,7 +864,7 @@ class GRP_API {
         
         // Free tier or Enterprise with custom credentials - direct API call
         $params = array(
-            'readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri'
+            'readMask' => 'name,title,storefrontAddress,phoneNumbers,websiteUri,placeId'
         );
         $response = $this->make_request("accounts/{$clean_account_id}/locations", 'GET', $params);
         

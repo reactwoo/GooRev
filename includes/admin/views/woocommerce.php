@@ -65,19 +65,67 @@ $location_id = get_option('grp_google_location_id', '');
 $account_id = get_option('grp_google_account_id', '');
 $location_name = '';
 $place_id_display = '';
+$api_error = '';
 
 if ($is_connected && !empty($location_id) && !empty($account_id)) {
-    $locations = $api->get_locations($account_id);
-    if (!is_wp_error($locations)) {
-        $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
-        $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
-        foreach ($locations_list as $loc) {
-            $loc_name = $loc['name'] ?? '';
-            $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
-            if ($loc_id === $clean_location_id || $loc_name === $location_id) {
-                $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
-                $place_id_display = $loc['placeId'] ?? $loc['place_id'] ?? $loc['storeCode'] ?? '';
-                break;
+    // Try to get from stored option first to avoid API calls
+    $place_id_display = get_option('grp_gbp_place_id_default', '');
+    
+    // If not stored, try to fetch from API (but don't fail if rate limited)
+    if (empty($place_id_display)) {
+        $locations = $api->get_locations($account_id);
+        if (is_wp_error($locations)) {
+            $api_error = $locations->get_error_message();
+            grp_debug_log('Failed to get locations for place_id display', array('error' => $api_error));
+        } else {
+            $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
+            $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+            foreach ($locations_list as $loc) {
+                $loc_name = $loc['name'] ?? '';
+                $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
+                
+                // Match by ID (handle both numeric and resource name formats)
+                $matches = ($loc_id === $clean_location_id || 
+                           $loc_name === $location_id || 
+                           $loc_id === $location_id ||
+                           (is_numeric($clean_location_id) && $loc_id === $clean_location_id) ||
+                           (is_numeric($location_id) && $loc_id === $location_id));
+                
+                if ($matches) {
+                    $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
+                    
+                    // Try various field names for placeId (storeCode is NOT a placeId)
+                    $place_id_display = '';
+                    if (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                        $place_id_display = $loc['placeId'];
+                    } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
+                        $place_id_display = $loc['place_id'];
+                    } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
+                        $place_id_display = $loc['storefrontAddress']['placeId'];
+                    }
+                    
+                    // Store for future use
+                    if (!empty($place_id_display)) {
+                        update_option('grp_gbp_place_id_default', $place_id_display);
+                    }
+                    break;
+                }
+            }
+        }
+    } else {
+        // We have stored place_id, try to get location name
+        $locations = $api->get_locations($account_id);
+        if (!is_wp_error($locations)) {
+            $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
+            $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+            foreach ($locations_list as $loc) {
+                $loc_name = $loc['name'] ?? '';
+                $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
+                $matches = ($loc_id === $clean_location_id || $loc_name === $location_id || $loc_id === $location_id);
+                if ($matches) {
+                    $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
+                    break;
+                }
             }
         }
     }
@@ -85,7 +133,7 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
 ?>
 
 <div class="wrap">
-    <h1><?php echo esc_html__('WooCommerce Integration', 'google-reviews-plugin'); ?></h1>
+    <h1><?php echo esc_html__('WooCommerce', 'google-reviews-plugin'); ?></h1>
     
     <nav class="nav-tab-wrapper">
         <a href="?page=google-reviews-woocommerce&tab=settings" class="nav-tab <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'settings') ? 'nav-tab-active' : ''; ?>">
@@ -195,6 +243,13 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                             <th scope="row"><?php esc_html_e('Connected Location', 'google-reviews-plugin'); ?></th>
                             <td>
                                 <strong><?php echo esc_html($location_name ?: $location_id); ?></strong>
+                                <?php if (!empty($api_error)): ?>
+                                    <p class="description" style="color: #d63638; margin-top: 8px;">
+                                        <strong><?php esc_html_e('API Error:', 'google-reviews-plugin'); ?></strong> <?php echo esc_html($api_error); ?>
+                                        <br>
+                                        <?php esc_html_e('Rate limit encountered. Using cached Place ID if available.', 'google-reviews-plugin'); ?>
+                                    </p>
+                                <?php endif; ?>
                                 <?php if (!empty($place_id_display)): ?>
                                     <br>
                                     <code style="margin-top: 5px; display: inline-block; padding: 4px 8px; background: #f0f0f0; border-radius: 3px;"><?php echo esc_html($place_id_display); ?></code>
@@ -203,7 +258,9 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                                     </p>
                                 <?php else: ?>
                                     <p class="description" style="color: #d63638; margin-top: 8px;">
-                                        <?php esc_html_e('Place ID not found in location data. Please ensure your location is properly connected and has a Place ID assigned in Google Business Profile.', 'google-reviews-plugin'); ?>
+                                        <?php esc_html_e('Place ID not found. The Place ID may not be available in the API response, or the API request was rate limited. You may need to manually enter the Place ID if review links are not working.', 'google-reviews-plugin'); ?>
+                                        <br>
+                                        <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank"><?php esc_html_e('How to find your Place ID', 'google-reviews-plugin'); ?></a>
                                     </p>
                                 <?php endif; ?>
                             </td>

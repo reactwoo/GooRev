@@ -661,28 +661,68 @@ Thanks again!
             return '';
         }
         
-        // Get location details from API
+        // Check for cached place_id first to avoid API calls
+        $cached_place_id = get_option('grp_gbp_place_id_default', '');
+        if (!empty($cached_place_id)) {
+            // Still try to refresh, but return cached if API fails
+        }
+        
+        // Get location details from API (may need to request placeId field explicitly)
+        // Note: We may get rate limited, so this might fail
         $locations = $api->get_locations($account_id);
         if (is_wp_error($locations)) {
             grp_debug_log('Failed to get locations for place_id', array('error' => $locations->get_error_message()));
+            // If rate limited or error, return cached place_id if available
+            if ($locations->get_error_code() === 'rate_limit' && !empty($cached_place_id)) {
+                return $cached_place_id;
+            }
             return '';
         }
         
         $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
         
         // Find the matching location
+        // Handle location_id being just the numeric ID or full resource name
         $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
         foreach ($locations_list as $location) {
             $loc_name = $location['name'] ?? '';
             $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
             
-            if ($loc_id === $clean_location_id || $loc_name === $location_id) {
+            // Match by ID (could be numeric or full resource name)
+            // Location ID might be just numeric (8665157816876917094) or full resource name
+            $matches = ($loc_id === $clean_location_id || 
+                       $loc_name === $location_id || 
+                       $loc_id === $location_id ||
+                       (is_numeric($clean_location_id) && $loc_id === $clean_location_id) ||
+                       (is_numeric($location_id) && $loc_id === $location_id));
+            
+            if ($matches) {
                 // Check for placeId in various possible field names
-                $place_id = $location['placeId'] ?? $location['place_id'] ?? $location['storeCode'] ?? '';
+                // Google API returns it as 'placeId' (camelCase)
+                $place_id = '';
+                if (isset($location['placeId']) && !empty($location['placeId'])) {
+                    $place_id = $location['placeId'];
+                } elseif (isset($location['place_id']) && !empty($location['place_id'])) {
+                    $place_id = $location['place_id'];
+                }
+                
+                // StoreCode is NOT a placeId - don't use it
+                // Also check if it's nested in storefrontAddress (unlikely but check)
+                if (empty($place_id) && isset($location['storefrontAddress']['placeId'])) {
+                    $place_id = $location['storefrontAddress']['placeId'];
+                }
+                
                 if (!empty($place_id)) {
+                    // Store it for future use to avoid API calls
+                    update_option('grp_gbp_place_id_default', $place_id);
                     return $place_id;
                 }
             }
+        }
+        
+        // If we didn't find place_id but have cached one, return that
+        if (!empty($cached_place_id)) {
+            return $cached_place_id;
         }
         
         return '';
