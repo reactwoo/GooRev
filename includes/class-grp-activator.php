@@ -82,6 +82,37 @@ class GRP_Activator {
         ) $charset_collate;";
         
         dbDelta($sql_locations);
+        
+        // Review invites table (for WooCommerce integration)
+        $invites_table = $wpdb->prefix . 'grp_review_invites';
+        
+        $sql_invites = "CREATE TABLE $invites_table (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            order_id bigint(20) NOT NULL,
+            user_id bigint(20) DEFAULT NULL,
+            email varchar(255) NOT NULL,
+            location_id varchar(255) DEFAULT NULL,
+            place_id varchar(255) DEFAULT NULL,
+            invite_status enum('scheduled','sent','clicked','rewarded','cancelled','failed') DEFAULT 'scheduled',
+            scheduled_at datetime NOT NULL,
+            sent_at datetime DEFAULT NULL,
+            clicked_at datetime DEFAULT NULL,
+            coupon_id bigint(20) DEFAULT NULL,
+            coupon_code varchar(100) DEFAULT NULL,
+            rewarded_at datetime DEFAULT NULL,
+            meta longtext DEFAULT NULL,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY order_id (order_id),
+            KEY user_id (user_id),
+            KEY email (email),
+            KEY invite_status (invite_status),
+            KEY scheduled_at (scheduled_at),
+            KEY coupon_code (coupon_code)
+        ) $charset_collate;";
+        
+        dbDelta($sql_invites);
     }
     
     /**
@@ -119,6 +150,13 @@ class GRP_Activator {
         // Schedule license check
         if (!wp_next_scheduled('grp_check_license')) {
             wp_schedule_event(time(), 'daily', 'grp_check_license');
+        }
+        
+        // Schedule review invites sending (if WooCommerce is active)
+        if (class_exists('WooCommerce')) {
+            if (!wp_next_scheduled('grp_send_review_invites')) {
+                wp_schedule_event(time(), 'hourly', 'grp_send_review_invites');
+            }
         }
     }
 }

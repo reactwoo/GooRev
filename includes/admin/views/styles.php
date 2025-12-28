@@ -963,6 +963,7 @@ if (!class_exists('GRP_License')) {
 
 .grp-range-input {
     width: 100%;
+    max-width: 400px;
     height: 6px;
     border-radius: 3px;
     background: #ddd;

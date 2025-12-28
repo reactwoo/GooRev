@@ -93,6 +93,18 @@ class GRP_Admin {
             'google-reviews-help',
             array($this, 'render_help_page')
         );
+        
+        // Add WooCommerce Integration submenu (only if WooCommerce is active)
+        if (class_exists('WooCommerce')) {
+            add_submenu_page(
+                'google-reviews',
+                __('WooCommerce Integration', 'google-reviews-plugin'),
+                __('WooCommerce Integration', 'google-reviews-plugin'),
+                'manage_options',
+                'google-reviews-woocommerce',
+                array($this, 'render_woocommerce_page')
+            );
+        }
     }
     
     /**
@@ -536,6 +548,28 @@ class GRP_Admin {
         $is_pro = $license->is_pro();
         
         include GRP_PLUGIN_DIR . 'includes/admin/views/help.php';
+    }
+    
+    /**
+     * Render WooCommerce integration page
+     */
+    public function render_woocommerce_page() {
+        // Check if WooCommerce is active
+        if (!class_exists('WooCommerce')) {
+            echo '<div class="wrap"><h1>' . esc_html__('WooCommerce Integration', 'google-reviews-plugin') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('WooCommerce is not active. Please install and activate WooCommerce to use this feature.', 'google-reviews-plugin') . '</p></div></div>';
+            return;
+        }
+        
+        // Check Pro license
+        $license = new GRP_License();
+        if (!$license->is_pro()) {
+            echo '<div class="wrap"><h1>' . esc_html__('WooCommerce Integration', 'google-reviews-plugin') . '</h1>';
+            echo '<div class="notice notice-error"><p>' . esc_html__('This feature requires a Pro license. Please upgrade to use the WooCommerce integration.', 'google-reviews-plugin') . '</p></div></div>';
+            return;
+        }
+        
+        require_once GRP_PLUGIN_DIR . 'includes/admin/views/woocommerce.php';
     }
     
     /**

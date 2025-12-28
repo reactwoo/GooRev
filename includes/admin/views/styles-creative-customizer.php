@@ -31,16 +31,17 @@ window.openCreativeCustomizer = function(style, styleName) {
         '<option value="radial"><?php esc_js_e('Radial', 'google-reviews-plugin'); ?></option>' +
         '</select>' +
         '</div>' +
-        '<div class="grp-customizer-control">' +
-        '<label><?php esc_js_e('Gradient Direction', 'google-reviews-plugin'); ?></label>' +
-        '<select id="grp-creative-gradient-direction" class="grp-font-select">' +
-        '<option value="to right"><?php esc_js_e('To Right', 'google-reviews-plugin'); ?></option>' +
-        '<option value="to left"><?php esc_js_e('To Left', 'google-reviews-plugin'); ?></option>' +
-        '<option value="to bottom"><?php esc_js_e('To Bottom', 'google-reviews-plugin'); ?></option>' +
-        '<option value="to top"><?php esc_js_e('To Top', 'google-reviews-plugin'); ?></option>' +
-        '<option value="135deg"><?php esc_js_e('Diagonal (135deg)', 'google-reviews-plugin'); ?></option>' +
-        '<option value="45deg"><?php esc_js_e('Diagonal (45deg)', 'google-reviews-plugin'); ?></option>' +
-        '</select>' +
+        '<div class="grp-customizer-control" id="grp-gradient-angle-control">' +
+        '<label><?php esc_js_e('Gradient Angle', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-gradient-angle-value">90deg</span></label>' +
+        '<input type="range" id="grp-creative-gradient-angle" class="grp-range-input" min="0" max="360" value="90" step="1">' +
+        '</div>' +
+        '<div class="grp-customizer-control" id="grp-gradient-start-position-control">' +
+        '<label><?php esc_js_e('Start Position', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-gradient-start-position-value">0%</span></label>' +
+        '<input type="range" id="grp-creative-gradient-start-position" class="grp-range-input" min="0" max="100" value="0" step="1">' +
+        '</div>' +
+        '<div class="grp-customizer-control" id="grp-gradient-end-position-control">' +
+        '<label><?php esc_js_e('End Position', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-gradient-end-position-value">100%</span></label>' +
+        '<input type="range" id="grp-creative-gradient-end-position" class="grp-range-input" min="0" max="100" value="100" step="1">' +
         '</div>' +
         '<div class="grp-customizer-control">' +
         '<label><?php esc_js_e('Start Color', 'google-reviews-plugin'); ?></label>' +
@@ -108,6 +109,10 @@ window.openCreativeCustomizer = function(style, styleName) {
         '<div class="grp-customizer-tab-content" data-tab="effects">' +
         '<h3><?php esc_js_e('Visual Effects', 'google-reviews-plugin'); ?></h3>' +
         '<div class="grp-customizer-control">' +
+        '<label><?php esc_js_e('Avatar Size', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-creative-avatar-size-value">80px</span></label>' +
+        '<input type="range" id="grp-creative-avatar-size" class="grp-range-input" min="40" max="120" value="80" step="4">' +
+        '</div>' +
+        '<div class="grp-customizer-control">' +
         '<label><?php esc_js_e('Quote Mark Size', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-creative-quote-size-value">48px</span></label>' +
         '<input type="range" id="grp-creative-quote-size" class="grp-range-input" min="32" max="80" value="48" step="4">' +
         '</div>' +
@@ -136,20 +141,43 @@ window.openCreativeCustomizer = function(style, styleName) {
     // Gradient preview update function
     function updateGradientPreview() {
         var type = $('#grp-creative-gradient-type').val();
-        var direction = $('#grp-creative-gradient-direction').val();
+        var angle = $('#grp-creative-gradient-angle').val();
+        var startPos = $('#grp-creative-gradient-start-position').val();
+        var endPos = $('#grp-creative-gradient-end-position').val();
         var start = $('#grp-creative-gradient-start').val();
         var end = $('#grp-creative-gradient-end').val();
-        var gradient = type === 'radial' 
-            ? 'radial-gradient(circle, ' + start + ', ' + end + ')' 
-            : 'linear-gradient(' + direction + ', ' + start + ', ' + end + ')';
+        var gradient;
+        
+        if (type === 'radial') {
+            gradient = 'radial-gradient(circle, ' + start + ' ' + startPos + '%, ' + end + ' ' + endPos + '%)';
+        } else {
+            gradient = 'linear-gradient(' + angle + 'deg, ' + start + ' ' + startPos + '%, ' + end + ' ' + endPos + '%)';
+        }
+        
         $('#grp-gradient-preview').css('background', gradient);
     }
     
+    // Show/hide gradient controls based on type
+    function toggleGradientControls() {
+        var type = $('#grp-creative-gradient-type').val();
+        if (type === 'radial') {
+            $('#grp-gradient-angle-control').hide();
+        } else {
+            $('#grp-gradient-angle-control').show();
+        }
+    }
+    
+    // Initialize gradient controls visibility
+    toggleGradientControls();
+    
     // Color input sync and gradient preview
-    $(document).off('input change', '#grp-creative-customizer-modal .grp-color-input, #grp-creative-customizer-modal #grp-creative-gradient-type, #grp-creative-customizer-modal #grp-creative-gradient-direction');
-    $(document).on('input change', '#grp-creative-customizer-modal .grp-color-input, #grp-creative-customizer-modal #grp-creative-gradient-type, #grp-creative-customizer-modal #grp-creative-gradient-direction', function() {
+    $(document).off('input change', '#grp-creative-customizer-modal .grp-color-input, #grp-creative-customizer-modal #grp-creative-gradient-type, #grp-creative-customizer-modal #grp-creative-gradient-angle, #grp-creative-customizer-modal #grp-creative-gradient-start-position, #grp-creative-customizer-modal #grp-creative-gradient-end-position');
+    $(document).on('input change', '#grp-creative-customizer-modal .grp-color-input, #grp-creative-customizer-modal #grp-creative-gradient-type, #grp-creative-customizer-modal #grp-creative-gradient-angle, #grp-creative-customizer-modal #grp-creative-gradient-start-position, #grp-creative-customizer-modal #grp-creative-gradient-end-position', function() {
         if ($(this).hasClass('grp-color-input')) {
             $(this).siblings('.grp-color-text').val($(this).val());
+        }
+        if ($(this).attr('id') === 'grp-creative-gradient-type') {
+            toggleGradientControls();
         }
         updateGradientPreview();
     });
@@ -167,7 +195,16 @@ window.openCreativeCustomizer = function(style, styleName) {
     $(document).off('input', '#grp-creative-customizer-modal .grp-range-input');
     $(document).on('input', '#grp-creative-customizer-modal .grp-range-input', function() {
         var value = $(this).val();
+        var id = $(this).attr('id');
         var unit = 'px';
+        
+        // Handle different units for different controls
+        if (id === 'grp-creative-gradient-angle') {
+            unit = 'deg';
+        } else if (id === 'grp-creative-gradient-start-position' || id === 'grp-creative-gradient-end-position') {
+            unit = '%';
+        }
+        
         $(this).closest('.grp-customizer-control').find('.grp-value-display').text(value + unit);
     });
     
@@ -187,12 +224,18 @@ window.openCreativeCustomizer = function(style, styleName) {
         
         // Gradient
         var gradientType = $('#grp-creative-gradient-type').val();
-        var gradientDirection = $('#grp-creative-gradient-direction').val();
+        var gradientAngle = $('#grp-creative-gradient-angle').val();
+        var gradientStartPos = $('#grp-creative-gradient-start-position').val();
+        var gradientEndPos = $('#grp-creative-gradient-end-position').val();
         var gradientStart = $('#grp-creative-gradient-start').val();
         var gradientEnd = $('#grp-creative-gradient-end').val();
-        var gradient = gradientType === 'radial' 
-            ? 'radial-gradient(circle, ' + gradientStart + ', ' + gradientEnd + ')' 
-            : 'linear-gradient(' + gradientDirection + ', ' + gradientStart + ', ' + gradientEnd + ')';
+        var gradient;
+        
+        if (gradientType === 'radial') {
+            gradient = 'radial-gradient(circle, ' + gradientStart + ' ' + gradientStartPos + '%, ' + gradientEnd + ' ' + gradientEndPos + '%)';
+        } else {
+            gradient = 'linear-gradient(' + gradientAngle + 'deg, ' + gradientStart + ' ' + gradientStartPos + '%, ' + gradientEnd + ' ' + gradientEndPos + '%)';
+        }
         
         css += '.grp-style-' + style + ' .grp-review {\n';
         css += '    background: ' + gradient + ' !important;\n';
@@ -236,6 +279,14 @@ window.openCreativeCustomizer = function(style, styleName) {
         }
         
         // Effects
+        var avatarSize = $('#grp-creative-avatar-size').val();
+        if (avatarSize && avatarSize !== '80') {
+            css += '.grp-style-' + style + ' .grp-review-avatar img {\n';
+            css += '    width: ' + avatarSize + 'px !important;\n';
+            css += '    height: ' + avatarSize + 'px !important;\n';
+            css += '}\n\n';
+        }
+        
         var quoteSize = $('#grp-creative-quote-size').val();
         if (quoteSize && quoteSize !== '48') {
             css += '.grp-style-' + style + ' .grp-review-quote {\n';

@@ -67,6 +67,11 @@ class Google_Reviews_Plugin {
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-cache.php';
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-license.php';
         
+        // WooCommerce integration (if WooCommerce is active)
+        if (class_exists('WooCommerce')) {
+            require_once GRP_PLUGIN_DIR . 'includes/class-grp-woocommerce.php';
+        }
+        
         // Admin classes
 		if (is_admin()) {
 			require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
@@ -113,6 +118,11 @@ class Google_Reviews_Plugin {
         
         // Initialize license manager
         $this->license = new GRP_License();
+        
+        // Initialize WooCommerce integration (if WooCommerce is active)
+        if (class_exists('WooCommerce')) {
+            GRP_WooCommerce::get_instance();
+        }
         
         // Initialize frontend
         if (!is_admin()) {
