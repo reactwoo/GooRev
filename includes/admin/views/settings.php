@@ -18,9 +18,49 @@ if (!defined('ABSPATH')) {
             <form method="post" action="options.php" class="grp-form">
                 <?php
                 settings_fields('grp_settings');
-                do_settings_sections('grp_settings');
+                
+                // Get all settings sections
+                global $wp_settings_sections, $wp_settings_fields;
+                $page = 'grp_settings';
+                
+                if (isset($wp_settings_sections[$page])) {
+                    foreach ((array) $wp_settings_sections[$page] as $section) {
+                        // Check if this is the Enterprise credentials section
+                        if ($section['id'] === 'grp_enterprise_credentials') {
+                            // Wrap Enterprise section in grp-settings-section div
+                            echo '<div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">';
+                        }
+                        
+                        // Render section title
+                        if ($section['title']) {
+                            if ($section['id'] === 'grp_enterprise_credentials') {
+                                echo '<h2 class="grp-section-title" style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;">' . esc_html($section['title']) . '</h2>';
+                            } else {
+                                echo "<h2>{$section['title']}</h2>\n";
+                            }
+                        }
+                        
+                        // Render section description
+                        if ($section['callback']) {
+                            call_user_func($section['callback'], $section);
+                        }
+                        
+                        // Render fields
+                        if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) {
+                            continue;
+                        }
+                        
+                        echo '<table class="form-table" role="presentation">';
+                        do_settings_fields($page, $section['id']);
+                        echo '</table>';
+                        
+                        // Close Enterprise section wrapper
+                        if ($section['id'] === 'grp_enterprise_credentials') {
+                            echo '</div>';
+                        }
+                    }
+                }
                 ?>
-                <!-- Sections and fields are rendered by do_settings_sections('grp_settings') above -->
                 
                 <?php submit_button(); ?>
             </form>
