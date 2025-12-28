@@ -152,13 +152,13 @@
         // Refresh accounts list (force refresh, bypasses cache)
         $('#grp-refresh-accounts').on('click', function() {
             var $btn = $(this);
+            // Prevent multiple simultaneous refreshes
+            if ($btn.data('refreshing')) {
+                return;
+            }
             // Disable button temporarily to prevent double-clicks
-            $btn.prop('disabled', true).text('Refreshing...');
+            $btn.prop('disabled', true).text('Refreshing...').data('refreshing', true).data('was-refreshing', true);
             populateAccounts(true);
-            // Re-enable after a delay (will be re-enabled when response comes back)
-            setTimeout(function() {
-                $btn.prop('disabled', false).text('Refresh');
-            }, 5000);
         });
 
         // Load locations when account changes
@@ -269,14 +269,27 @@
                     }
                     $select.append(opt);
                 });
-                // Auto-populate locations if we have a saved account id
-                var accountId = $select.val() || window.__grpAdminConfig.saved_account_id;
-                if (accountId) {
-                    populateLocations(accountId, false);
+                // Only auto-populate locations if this was NOT a force refresh
+                // On force refresh, we want to avoid making multiple simultaneous API calls
+                // User can manually change the account dropdown if they want to refresh locations
+                if (!force) {
+                    var accountId = $select.val() || window.__grpAdminConfig.saved_account_id;
+                    if (accountId) {
+                        populateLocations(accountId, false);
+                    } else {
+                        $('#grp-location-select').empty().append(
+                            $('<option>').val('').text(window.__grpAdminConfig.strings.select_location)
+                        ).prop('disabled', true);
+                    }
                 } else {
-                    $('#grp-location-select').empty().append(
-                        $('<option>').val('').text(window.__grpAdminConfig.strings.select_location)
-                    ).prop('disabled', true);
+                    // On force refresh, just enable the location dropdown but don't auto-load
+                    // This prevents making 2 simultaneous API calls which can trigger rate limits
+                    $('#grp-location-select').prop('disabled', false);
+                    if ($('#grp-location-select').find('option').length <= 1) {
+                        $('#grp-location-select').empty().append(
+                            $('<option>').val('').text(window.__grpAdminConfig.strings.select_location)
+                        );
+                    }
                 }
             } else {
                 var err = (response && response.data) ? String(response.data) : '';
@@ -290,6 +303,11 @@
         }).always(function() {
             $select.prop('disabled', false);
             $select.data('loading', false);
+            // Re-enable refresh button if it was disabled by a refresh action
+            var $refreshBtn = $('#grp-refresh-accounts');
+            if ($refreshBtn.data('was-refreshing')) {
+                $refreshBtn.prop('disabled', false).text('Refresh').removeData('was-refreshing').removeData('refreshing');
+            }
         });
     }
 
