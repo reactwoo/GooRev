@@ -741,9 +741,10 @@ class GRP_Admin {
         $connected = $api->is_connected();
         $saved = get_option('grp_google_account_id', '');
         echo '<select id="grp-account-select" name="grp_google_account_id" ' . (!$connected ? 'disabled' : '') . ' class="regular-text">';
-        echo '<option value="">' . esc_html__('Loading accounts...', 'google-reviews-plugin') . '</option>';
         if ($saved) {
             echo '<option value="' . esc_attr($saved) . '" selected>' . esc_html($saved) . '</option>';
+        } else {
+            echo '<option value="">' . esc_html__('Click Refresh to load accounts', 'google-reviews-plugin') . '</option>';
         }
         echo '</select> ';
         echo '<button type="button" id="grp-refresh-accounts" class="button" ' . (!$connected ? 'disabled' : '') . '>' . esc_html__('Refresh', 'google-reviews-plugin') . '</button>';
@@ -942,12 +943,33 @@ class GRP_Admin {
         if (!current_user_can('manage_options')) {
             wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
         }
+        
+        // Check if this is a forced refresh
+        $force = isset($_POST['force']) && (int) $_POST['force'] === 1;
+        
+        // Check for cached accounts first (cache for 10 minutes - accounts don't change often)
+        // Skip cache if force refresh is requested
+        if (!$force) {
+            $cache_key = 'grp_accounts_list';
+            $cached_accounts = get_transient($cache_key);
+            if ($cached_accounts !== false) {
+                wp_send_json_success(array('accounts' => $cached_accounts, 'cached' => true));
+            }
+        }
+        
         $api = new GRP_API();
         if (!$api->is_connected()) {
             wp_send_json_error(__('Not connected to Google', 'google-reviews-plugin'));
         }
         $resp = $api->get_accounts();
         if (is_wp_error($resp)) {
+            // If rate limited, try to return cached data even if expired
+            if ($resp->get_error_code() === 'rate_limit') {
+                $stale_cache = get_option('grp_accounts_cache_stale', false);
+                if ($stale_cache !== false) {
+                    wp_send_json_success(array('accounts' => $stale_cache, 'cached' => true, 'stale' => true));
+                }
+            }
             wp_send_json_error($resp->get_error_message());
         }
         $accounts = array();
@@ -965,6 +987,12 @@ class GRP_Admin {
                 $accounts[] = array('id' => $id, 'label' => $label);
             }
         }
+        
+        // Cache accounts for 10 minutes
+        set_transient($cache_key, $accounts, 10 * MINUTE_IN_SECONDS);
+        // Also store as persistent cache for fallback during rate limits
+        update_option('grp_accounts_cache_stale', $accounts);
+        
         wp_send_json_success(array('accounts' => $accounts));
     }
 
@@ -980,12 +1008,35 @@ class GRP_Admin {
         if (empty($account_id)) {
             wp_send_json_error(__('Missing account id', 'google-reviews-plugin'));
         }
+        
+        // Check if this is a forced refresh
+        $force = isset($_POST['force']) && (int) $_POST['force'] === 1;
+        
+        // Check for cached locations first (cache for 5 minutes to reduce API calls)
+        // Skip cache if force refresh is requested
+        if (!$force) {
+            $cache_key = 'grp_locations_' . md5($account_id);
+            $cached_locations = get_transient($cache_key);
+            if ($cached_locations !== false) {
+                wp_send_json_success(array('locations' => $cached_locations, 'cached' => true));
+            }
+        } else {
+            $cache_key = 'grp_locations_' . md5($account_id);
+        }
+        
         $api = new GRP_API();
         if (!$api->is_connected()) {
             wp_send_json_error(__('Not connected to Google', 'google-reviews-plugin'));
         }
         $resp = $api->get_locations($account_id);
         if (is_wp_error($resp)) {
+            // If rate limited, try to return cached data even if expired
+            if ($resp->get_error_code() === 'rate_limit') {
+                $stale_cache = get_option('grp_locations_cache_' . md5($account_id), false);
+                if ($stale_cache !== false) {
+                    wp_send_json_success(array('locations' => $stale_cache, 'cached' => true, 'stale' => true));
+                }
+            }
             wp_send_json_error($resp->get_error_message());
         }
         $locations = array();
@@ -1012,6 +1063,12 @@ class GRP_Admin {
                 $locations[] = array('id' => $loc_id, 'label' => $label);
             }
         }
+        
+        // Cache locations for 5 minutes
+        set_transient($cache_key, $locations, 5 * MINUTE_IN_SECONDS);
+        // Also store as persistent cache for fallback during rate limits
+        update_option('grp_locations_cache_' . md5($account_id), $locations);
+        
         wp_send_json_success(array('locations' => $locations));
     }
     

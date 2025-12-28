@@ -144,14 +144,21 @@
             });
         });
 
-        // Populate accounts when connected
-        if (window.__grpAdminConfig.is_connected) {
-            populateAccounts();
-        }
+        // DO NOT auto-populate accounts on page load to prevent API spam
+        // Users must click "Refresh" button to load accounts/locations
+        // This prevents rate limiting from automatic API calls on every page load
+        // If accounts/locations are already saved, they will be shown in the select fields from PHP
 
-        // Refresh accounts list
+        // Refresh accounts list (force refresh, bypasses cache)
         $('#grp-refresh-accounts').on('click', function() {
+            var $btn = $(this);
+            // Disable button temporarily to prevent double-clicks
+            $btn.prop('disabled', true).text('Refreshing...');
             populateAccounts(true);
+            // Re-enable after a delay (will be re-enabled when response comes back)
+            setTimeout(function() {
+                $btn.prop('disabled', false).text('Refresh');
+            }, 5000);
         });
 
         // Load locations when account changes
@@ -249,7 +256,8 @@
         
         $.post(window.__grpAdminConfig.ajax_url, {
             action: 'grp_list_accounts',
-            nonce: window.__grpAdminConfig.nonce
+            nonce: window.__grpAdminConfig.nonce,
+            force: force ? 1 : 0
         }, function(response) {
             $select.empty();
             if (response && response.success && response.data && response.data.accounts && response.data.accounts.length) {
@@ -298,7 +306,14 @@
         if ($select.data('loading')) {
             return;
         }
+        
+        // If not forcing and we already have options for this account, don't reload
+        if (!force && $select.data('last-account-id') === accountId && $select.find('option').length > 1) {
+            return;
+        }
+        
         $select.data('loading', true);
+        $select.data('last-account-id', accountId);
         
         $select.prop('disabled', true).empty().append(
             $('<option>').val('').text(window.__grpAdminConfig.strings.loading)
@@ -306,7 +321,8 @@
         $.post(window.__grpAdminConfig.ajax_url, {
             action: 'grp_list_locations',
             nonce: window.__grpAdminConfig.nonce,
-            account_id: accountId
+            account_id: accountId,
+            force: force ? 1 : 0
         }, function(response) {
             $select.empty();
             if (response && response.success && response.data && response.data.locations && response.data.locations.length) {
