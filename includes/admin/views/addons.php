@@ -68,7 +68,14 @@ $is_pro = $license->is_pro();
                                 </span>
                             <?php endif; ?>
                         </h2>
-                        <?php if ($addon['requires_pro']): ?>
+                        <?php 
+                        $requires_enterprise = !empty($addon['requires_enterprise']) && $addon['requires_enterprise'];
+                        $requires_pro = !empty($addon['requires_pro']) && $addon['requires_pro'];
+                        if ($requires_enterprise): ?>
+                            <span class="grp-addon-badge-enterprise" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; font-weight: 600; display: inline-block; margin-top: 5px;">
+                                <?php esc_html_e('Enterprise', 'google-reviews-plugin'); ?>
+                            </span>
+                        <?php elseif ($requires_pro): ?>
                             <span class="grp-addon-badge-pro" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; font-weight: 600; display: inline-block; margin-top: 5px;">
                                 <?php esc_html_e('Pro / Enterprise', 'google-reviews-plugin'); ?>
                             </span>
