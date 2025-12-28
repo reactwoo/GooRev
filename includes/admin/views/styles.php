@@ -25,7 +25,14 @@ if (!class_exists('GRP_License')) {
     <div class="grp-styles-container">
         <div class="grp-styles-main">
             <div class="grp-styles-grid">
-                <?php foreach ($available_styles as $key => $style): 
+                <?php 
+                $license = new GRP_License();
+                $is_pro = $license->is_pro();
+                foreach ($available_styles as $key => $style): 
+                    // Hide Creative template for free users (Pro-only)
+                    if ($key === 'creative' && !$is_pro) {
+                        continue;
+                    }
                     // Determine preview structure based on style
                     $is_corporate = ($key === 'corporate');
                     $is_creative = ($key === 'creative');
@@ -806,7 +813,8 @@ if (!class_exists('GRP_License')) {
 }
 
 /* Customizer Modal Styles */
-.grp-customizer-modal-content {
+.grp-customizer-modal-content,
+.grp-creative-customizer-modal-content {
     max-width: 900px;
     width: 90%;
     max-height: 90vh;
@@ -946,6 +954,7 @@ if (!class_exists('GRP_License')) {
 }
 </style>
 
+<?php include GRP_PLUGIN_DIR . 'includes/admin/views/styles-creative-customizer.php'; ?>
 <script>
 jQuery(document).ready(function($) {
     // Variant switching
@@ -1103,10 +1112,16 @@ jQuery(document).ready(function($) {
         var style = $(this).data('style');
         var styleName = $(this).closest('.grp-style-card').find('h3').text();
         
+        // Check if this is Creative style - use advanced customizer
+        if (style === 'creative') {
+            openCreativeCustomizer(style, styleName);
+            return;
+        }
+        
         // Load existing custom CSS values if any
         var existingCss = $('#grp-custom-css').val() || '';
         
-        // Create customizer modal
+        // Create standard customizer modal
         var customizerModalHtml = '<div class="grp-modal-overlay" id="grp-customizer-modal">' +
             '<div class="grp-modal-content grp-customizer-modal-content">' +
             '<div class="grp-modal-header">' +
