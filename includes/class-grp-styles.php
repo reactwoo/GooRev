@@ -255,9 +255,12 @@ class GRP_Styles {
      * Design: High-end SaaS / startup feel. Glassmorphism, subtle motion, dark-mode first.
      */
     private function get_modern_css() {
+        $use_theme_font = (bool) get_option('grp_use_theme_font', false);
+        $font_family = $use_theme_font ? 'inherit' : "'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        
         return "
         .grp-style-modern .grp-reviews {
-            font-family: 'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: {$font_family};
             background: var(--grp-background);
         }
         
@@ -375,9 +378,13 @@ class GRP_Styles {
      * Design: Timeless, familiar, trustworthy. Works well for local businesses and traditional brands.
      */
     private function get_classic_css() {
+        $use_theme_font = (bool) get_option('grp_use_theme_font', false);
+        $font_family_base = $use_theme_font ? 'inherit' : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        $font_family_name = $use_theme_font ? 'inherit' : "'Georgia', 'Merriweather', 'Playfair Display', serif";
+        
         return "
         .grp-style-classic .grp-reviews {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: {$font_family_base};
             background: var(--grp-background);
         }
         
@@ -406,7 +413,7 @@ class GRP_Styles {
             font-size: 15px;
             line-height: 1.6;
             margin-bottom: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: {$font_family_base};
         }
         
         .grp-style-classic .grp-review-meta {
@@ -440,7 +447,7 @@ class GRP_Styles {
             font-weight: 600;
             color: var(--grp-text, #111827);
             font-size: 15px;
-            font-family: 'Georgia', 'Merriweather', 'Playfair Display', serif;
+            font-family: {$font_family_name};
             line-height: 1.4;
         }
         
@@ -458,9 +465,12 @@ class GRP_Styles {
      * Design: Clean, neutral, content-first. Native to modern SaaS dashboards.
      */
     private function get_minimal_css() {
+        $use_theme_font = (bool) get_option('grp_use_theme_font', false);
+        $font_family = $use_theme_font ? 'inherit' : "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif";
+        
         return "
         .grp-style-minimal .grp-reviews {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            font-family: {$font_family};
         }
         
         .grp-style-minimal .grp-review {
@@ -541,9 +551,12 @@ class GRP_Styles {
      * Design: Trust, authority, professionalism. Ideal for B2B, finance, legal, engineering.
      */
     private function get_corporate_css() {
+        $use_theme_font = (bool) get_option('grp_use_theme_font', false);
+        $font_family = $use_theme_font ? 'inherit' : "'IBM Plex Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        
         return "
         .grp-style-corporate .grp-reviews {
-            font-family: 'IBM Plex Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: {$font_family};
             background: var(--grp-background);
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -665,9 +678,13 @@ class GRP_Styles {
      * Design: Personality-forward, eye-catching, social-proof driven. Great for agencies, creatives, ecommerce.
      */
     private function get_creative_css() {
+        $use_theme_font = (bool) get_option('grp_use_theme_font', false);
+        $font_family = $use_theme_font ? 'inherit' : "'Poppins', 'DM Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        $quote_font_family = $use_theme_font ? 'inherit' : 'Georgia, serif';
+        
         return "
         .grp-style-creative .grp-reviews {
-            font-family: 'Poppins', 'DM Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: {$font_family};
         }
         
         .grp-style-creative .grp-review {
@@ -715,7 +732,7 @@ class GRP_Styles {
             position: absolute;
             top: 20px;
             left: 25px;
-            font-family: Georgia, serif;
+            font-family: {$quote_font_family};
         }
         
         .grp-style-creative .grp-review-rating {
@@ -1129,9 +1146,12 @@ class GRP_Styles {
      * Get base CSS
      */
     private function get_base_css() {
+        $use_theme_font = (bool) get_option('grp_use_theme_font', false);
+        $font_family = $use_theme_font ? 'inherit' : "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+        
         return "
         .grp-reviews {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: {$font_family};
         }
         
         .grp-review {

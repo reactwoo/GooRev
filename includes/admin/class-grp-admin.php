@@ -109,6 +109,7 @@ class GRP_Admin {
         register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_enable_debug_logging', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
+        register_setting('grp_settings', 'grp_use_theme_font', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
         register_setting('grp_settings', 'grp_custom_css', array('type' => 'string'));
         register_setting('grp_settings', 'grp_custom_js', array('type' => 'string'));
         
@@ -194,6 +195,14 @@ class GRP_Admin {
             'grp_default_count',
             __('Default Review Count', 'google-reviews-plugin'),
             array($this, 'render_default_count_field'),
+            'grp_settings',
+            'grp_display'
+        );
+        
+        add_settings_field(
+            'grp_use_theme_font',
+            __('Use Theme Font', 'google-reviews-plugin'),
+            array($this, 'render_use_theme_font_field'),
             'grp_settings',
             'grp_display'
         );
@@ -757,6 +766,15 @@ class GRP_Admin {
      */
     public function render_display_section() {
         echo '<p>' . __('Configure default display settings for reviews.', 'google-reviews-plugin') . '</p>';
+    }
+    
+    /**
+     * Render use theme font field
+     */
+    public function render_use_theme_font_field() {
+        $enabled = (bool) get_option('grp_use_theme_font', false);
+        echo '<label><input type="checkbox" name="grp_use_theme_font" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html__('Use theme font family instead of template fonts', 'google-reviews-plugin') . '</label>';
+        echo '<p class="description">' . __('When enabled, reviews will inherit your theme\'s font family instead of using the template-defined fonts. This helps maintain consistency with your site\'s typography.', 'google-reviews-plugin') . '</p>';
     }
     
     /**
