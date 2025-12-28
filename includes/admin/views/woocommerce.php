@@ -68,11 +68,13 @@ $place_id_display = '';
 $api_error = '';
 
 if ($is_connected && !empty($location_id) && !empty($account_id)) {
-    // Try to get from stored option first to avoid API calls
+    // Try to get from stored options first to avoid API calls
     $place_id_display = get_option('grp_gbp_place_id_default', '');
+    $location_name = get_option('grp_gbp_location_name', '');
     
-    // If not stored, try to fetch from API (but don't fail if rate limited)
-    if (empty($place_id_display)) {
+    // Only make API call if we don't have both place_id and location name cached
+    // This prevents unnecessary API calls on every page load
+    if (empty($place_id_display) || empty($location_name)) {
         $locations = $api->get_locations($account_id);
         if (is_wp_error($locations)) {
             $api_error = $locations->get_error_message();
@@ -92,38 +94,29 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                            (is_numeric($location_id) && $loc_id === $location_id));
                 
                 if ($matches) {
-                    $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
-                    
-                    // Try various field names for placeId (storeCode is NOT a placeId)
-                    $place_id_display = '';
-                    if (isset($loc['placeId']) && !empty($loc['placeId'])) {
-                        $place_id_display = $loc['placeId'];
-                    } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
-                        $place_id_display = $loc['place_id'];
-                    } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
-                        $place_id_display = $loc['storefrontAddress']['placeId'];
+                    // Get location name if not cached
+                    if (empty($location_name)) {
+                        $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
+                        if (!empty($location_name)) {
+                            update_option('grp_gbp_location_name', $location_name);
+                        }
                     }
                     
-                    // Store for future use
-                    if (!empty($place_id_display)) {
-                        update_option('grp_gbp_place_id_default', $place_id_display);
+                    // Get placeId if not cached
+                    if (empty($place_id_display)) {
+                        if (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                            $place_id_display = $loc['placeId'];
+                        } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
+                            $place_id_display = $loc['place_id'];
+                        } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
+                            $place_id_display = $loc['storefrontAddress']['placeId'];
+                        }
+                        
+                        // Store for future use
+                        if (!empty($place_id_display)) {
+                            update_option('grp_gbp_place_id_default', $place_id_display);
+                        }
                     }
-                    break;
-                }
-            }
-        }
-    } else {
-        // We have stored place_id, try to get location name
-        $locations = $api->get_locations($account_id);
-        if (!is_wp_error($locations)) {
-            $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
-            $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
-            foreach ($locations_list as $loc) {
-                $loc_name = $loc['name'] ?? '';
-                $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
-                $matches = ($loc_id === $clean_location_id || $loc_name === $location_id || $loc_id === $location_id);
-                if ($matches) {
-                    $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
                     break;
                 }
             }

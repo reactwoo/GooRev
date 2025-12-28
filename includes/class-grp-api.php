@@ -986,6 +986,9 @@ class GRP_API {
         delete_option('grp_google_refresh_token');
         delete_option('grp_google_account_id');
         delete_option('grp_google_location_id');
+        // Clear cached location data
+        delete_option('grp_gbp_place_id_default');
+        delete_option('grp_gbp_location_name');
         
         $this->access_token = '';
         $this->refresh_token = '';
