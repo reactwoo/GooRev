@@ -71,7 +71,18 @@ class GRP_Reviews {
             return $reviews_data;
         }
         
-        $reviews = $this->process_reviews($reviews_data, $args);
+        // Normalize the response format - extract reviews array if needed
+        $reviews_list = array();
+        if (isset($reviews_data['reviews']) && is_array($reviews_data['reviews'])) {
+            $reviews_list = $reviews_data['reviews'];
+        } elseif (is_array($reviews_data) && isset($reviews_data[0]) && isset($reviews_data[0]['reviewId'])) {
+            // If it's already an array of reviews
+            $reviews_list = $reviews_data;
+        }
+        
+        // Process reviews - process_reviews expects {'reviews': [...]}
+        $normalized_data = array('reviews' => $reviews_list);
+        $reviews = $this->process_reviews($normalized_data, $args);
         
         // Cache the results
         $this->cache->set($cache_key, $reviews, $args['cache_duration']);
@@ -236,8 +247,18 @@ class GRP_Reviews {
             return $reviews_data;
         }
         
+        // Store reviews in database - normalize the response format first
+        // The API might return {reviews: [...]} or just [...]
+        $normalized_data = array();
+        if (isset($reviews_data['reviews']) && is_array($reviews_data['reviews'])) {
+            $normalized_data['reviews'] = $reviews_data['reviews'];
+        } elseif (is_array($reviews_data)) {
+            // If it's already an array of reviews, wrap it
+            $normalized_data['reviews'] = $reviews_data;
+        }
+        
         // Store reviews in database
-        $this->store_reviews($reviews_data);
+        $this->store_reviews($normalized_data);
         
         // Clear cache
         $this->cache->clear('grp_reviews_');
@@ -256,11 +277,20 @@ class GRP_Reviews {
         // Clear existing reviews
         $wpdb->query("DELETE FROM {$table_name}");
         
-        if (!isset($reviews_data['reviews']) || !is_array($reviews_data['reviews'])) {
+        // Handle different response formats
+        $reviews_list = array();
+        if (isset($reviews_data['reviews']) && is_array($reviews_data['reviews'])) {
+            $reviews_list = $reviews_data['reviews'];
+        } elseif (is_array($reviews_data) && isset($reviews_data[0]) && isset($reviews_data[0]['reviewId'])) {
+            // If it's already an array of reviews
+            $reviews_list = $reviews_data;
+        }
+        
+        if (empty($reviews_list)) {
             return;
         }
         
-        foreach ($reviews_data['reviews'] as $review) {
+        foreach ($reviews_list as $review) {
             $wpdb->insert(
                 $table_name,
                 array(

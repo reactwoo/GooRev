@@ -897,10 +897,9 @@ class GRP_API {
             if (is_wp_error($response)) {
                 return $response;
             }
-            // Handle response format
-            if (isset($response['reviews'])) {
-                return $response['reviews'];
-            }
+            // The cloud server returns {success: true, reviews: [...]}
+            // Return it as-is for sync_reviews to handle
+            // For other callers, they should check for 'reviews' key
             return $response;
         }
         
