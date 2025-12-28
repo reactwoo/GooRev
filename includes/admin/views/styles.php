@@ -621,6 +621,167 @@ if (!class_exists('GRP_License')) {
         flex-direction: column;
     }
 }
+
+/* Usage Modal Styles */
+.grp-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100000;
+    overflow-y: auto;
+}
+
+.grp-modal-content {
+    background: #fff;
+    margin: 50px auto;
+    max-width: 700px;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.grp-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grp-modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.grp-modal-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grp-modal-close:hover {
+    color: #000;
+}
+
+.grp-modal-body {
+    padding: 25px;
+}
+
+.grp-modal-intro {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.grp-usage-tabs {
+    display: flex;
+    border-bottom: 2px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.grp-tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.grp-tab-btn:hover {
+    color: #2271b1;
+}
+
+.grp-tab-btn.active {
+    color: #2271b1;
+    border-bottom-color: #2271b1;
+}
+
+.grp-tab-content {
+    display: none;
+}
+
+.grp-tab-content.active {
+    display: block;
+}
+
+.grp-tab-content h3 {
+    margin-top: 0;
+    font-size: 16px;
+}
+
+.grp-tab-content ol {
+    margin-left: 20px;
+}
+
+.grp-tab-content li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.grp-code-block {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+    position: relative;
+}
+
+.grp-code-block code {
+    display: block;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #333;
+    word-break: break-all;
+    margin-bottom: 10px;
+}
+
+.grp-code-block.grp-code-example {
+    background: #fff8e1;
+    border-color: #ffc107;
+}
+
+.grp-code-block .grp-copy-shortcode {
+    margin-top: 10px;
+}
+
+.grp-code-block .grp-copy-shortcode.copied {
+    background: #46b450;
+}
+
+.grp-tab-content .description {
+    font-size: 13px;
+    color: #666;
+    font-style: italic;
+    margin-top: -5px;
+}
+
+.grp-modal-footer {
+    padding: 15px 25px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+
+.grp-modal-footer .button {
+    margin-left: 10px;
+}
 </style>
 
 <script>
@@ -648,11 +809,11 @@ jQuery(document).ready(function($) {
     });
     
     // Use style - show usage modal
-    $('.grp-use-style').on('click', function() {
+    $('.grp-use-style').on('click', function(e) {
+        e.preventDefault();
         var style = $(this).data('style');
         var styleName = $(this).closest('.grp-style-card').find('h3').text();
-            var shortcode = '[google_reviews style="' + style + '"]';
-            var ajaxUrl = typeof grp_admin !== 'undefined' ? grp_admin.ajax_url : ajaxurl;
+        var shortcode = '[google_reviews style="' + style + '"]';
         
         // Create and show modal
         var modalHtml = '<div class="grp-modal-overlay" id="grp-use-style-modal">' +
@@ -713,15 +874,13 @@ jQuery(document).ready(function($) {
             '</div>';
         
         $('body').append(modalHtml);
-        $('#grp-use-style-modal').fadeIn(200);
+        $('#grp-use-style-modal').show();
         
         // Close modal handlers (use delegated events since modal is dynamically added)
         $(document).off('click', '#grp-use-style-modal .grp-modal-close');
         $(document).on('click', '#grp-use-style-modal .grp-modal-close', function(e) {
             e.preventDefault();
-            $('#grp-use-style-modal').fadeOut(200, function() {
-                $(this).remove();
-            });
+            $('#grp-use-style-modal').hide().remove();
         });
         
         // Close on overlay click (but not on modal content)
@@ -776,6 +935,24 @@ jQuery(document).ready(function($) {
         });
     });
     
+    // Customize button for Pro users (opens CSS editor section with scroll)
+    $('.grp-customize-style:not(.grp-pro-feature)').on('click', function(e) {
+        e.preventDefault();
+        // For now, scroll to the CSS editor and highlight it
+        // In the future, this can open a visual style customizer modal
+        if ($('#grp-custom-css').length) {
+            $('html, body').animate({
+                scrollTop: $('#grp-custom-css').offset().top - 100
+            }, 500);
+            $('#grp-custom-css').focus().css('border-color', '#2271b1');
+            setTimeout(function() {
+                $('#grp-custom-css').css('border-color', '');
+            }, 2000);
+        } else {
+            alert('<?php esc_js_e('CSS Editor is available in the sidebar. Use it to customize your styles.', 'google-reviews-plugin'); ?>');
+        }
+    });
+    
     // Customize button - show Pro upgrade modal for free users
     $('.grp-customize-style.grp-pro-feature').on('click', function(e) {
         e.preventDefault();
@@ -811,15 +988,13 @@ jQuery(document).ready(function($) {
             '</div>';
         
         $('body').append(upgradeModalHtml);
-        $('#grp-upgrade-modal').fadeIn(200);
+        $('#grp-upgrade-modal').show();
         
         // Close modal handlers
         $(document).off('click', '#grp-upgrade-modal .grp-modal-close');
         $(document).on('click', '#grp-upgrade-modal .grp-modal-close', function(e) {
             e.preventDefault();
-            $('#grp-upgrade-modal').fadeOut(200, function() {
-                $(this).remove();
-            });
+            $('#grp-upgrade-modal').hide().remove();
         });
         
         $(document).off('click', '#grp-upgrade-modal');
