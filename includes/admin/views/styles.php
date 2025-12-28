@@ -637,10 +637,16 @@ if (!class_exists('GRP_License')) {
 
 .grp-modal-content {
     background: #fff;
-    margin: 50px auto;
+    margin: auto;
     max-width: 700px;
+    width: 90%;
     border-radius: 4px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
 }
 
 .grp-modal-header {
@@ -649,6 +655,7 @@ if (!class_exists('GRP_License')) {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .grp-modal-header h2 {
@@ -677,6 +684,10 @@ if (!class_exists('GRP_License')) {
 
 .grp-modal-body {
     padding: 25px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .grp-modal-intro {
@@ -781,6 +792,8 @@ if (!class_exists('GRP_License')) {
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    flex-shrink: 0;
+    margin-top: auto;
 }
 
 .grp-modal-footer .button {
@@ -788,20 +801,24 @@ if (!class_exists('GRP_License')) {
     padding: 8px 16px;
     white-space: nowrap;
     min-width: auto;
+    box-sizing: border-box;
 }
 
 /* Customizer Modal Styles */
 .grp-customizer-modal-content {
-    max-width: 700px;
+    max-width: 900px;
+    width: 90%;
     max-height: 90vh;
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .grp-customizer-body {
     overflow-y: auto;
     flex: 1;
-    max-height: calc(90vh - 150px);
+    min-height: 0;
+    padding: 0;
 }
 
 .grp-customizer-tabs {
@@ -1017,7 +1034,7 @@ jQuery(document).ready(function($) {
             '</div>';
         
         $('body').append(modalHtml);
-        $('#grp-use-style-modal').show();
+        $('#grp-use-style-modal').css('display', 'flex');
         
         // Close modal handlers (use delegated events since modal is dynamically added)
         $(document).off('click', '#grp-use-style-modal .grp-modal-close');
@@ -1339,23 +1356,22 @@ jQuery(document).ready(function($) {
             var style = $(this).siblings('.grp-save-customizations').data('style');
             var css = generateCustomCss(style);
             
-            var previewModalHtml = '<div class="grp-modal-overlay" id="grp-css-preview-modal">' +
-                '<div class="grp-modal-content" style="max-width: 800px;">' +
+            var previewModalHtml = '<div class="grp-modal-overlay" id="grp-css-preview-modal" style="display: flex;">' +
+                '<div class="grp-modal-content" style="max-width: 900px; width: 90%; display: flex; flex-direction: column; max-height: 90vh;">' +
                 '<div class="grp-modal-header">' +
                 '<h2><?php esc_js_e('Generated CSS Preview', 'google-reviews-plugin'); ?></h2>' +
                 '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
                 '</div>' +
-                '<div class="grp-modal-body">' +
-                '<textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px;">' + css + '</textarea>' +
+                '<div class="grp-modal-body" style="flex: 1; min-height: 0; overflow-y: auto;">' +
+                '<textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: none;">' + css + '</textarea>' +
                 '</div>' +
-                '<div class="grp-modal-footer">' +
+                '<div class="grp-modal-footer" style="flex-shrink: 0;">' +
                 '<button class="button grp-modal-close"><?php esc_js_e('Close', 'google-reviews-plugin'); ?></button>' +
                 '</div>' +
                 '</div>' +
                 '</div>';
             
             $('body').append(previewModalHtml);
-            $('#grp-css-preview-modal').show();
             
             // Close preview modal
             $(document).off('click', '#grp-css-preview-modal .grp-modal-close, #grp-css-preview-modal');
