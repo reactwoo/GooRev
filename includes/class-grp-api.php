@@ -417,10 +417,10 @@ class GRP_API {
                 // Store error for retrieval
                 $this->last_error = $response;
                 // Log the error for debugging
-                error_log('GRP OAuth Token Exchange Error: ' . $response->get_error_message());
-                if ($response->get_error_data()) {
-                    error_log('GRP OAuth Error Data: ' . print_r($response->get_error_data(), true));
-                }
+                grp_debug_log('OAuth Token Exchange Error', array(
+                    'error_message' => $response->get_error_message(),
+                    'error_data' => $response->get_error_data()
+                ));
                 return false;
             }
             
@@ -428,7 +428,7 @@ class GRP_API {
             if (isset($response['success']) && !$response['success']) {
                 $error_msg = isset($response['message']) ? $response['message'] : 'Unknown error from API server';
                 $this->last_error = new WP_Error('oauth_failed', $error_msg);
-                error_log('GRP OAuth Token Exchange Failed: ' . $error_msg);
+                grp_debug_log('OAuth Token Exchange Failed', $error_msg);
                 return false;
             }
             
@@ -445,7 +445,7 @@ class GRP_API {
             }
             
             // Log if access_token is missing
-            error_log('GRP OAuth Token Exchange: access_token missing in response. Response: ' . print_r($response, true));
+            grp_debug_log('OAuth Token Exchange: access_token missing in response', $response);
             return false;
         } else {
             // Use custom credentials - direct to Google

@@ -108,6 +108,7 @@ class GRP_Admin {
         register_setting('grp_settings', 'grp_default_style', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
+        register_setting('grp_settings', 'grp_enable_debug_logging', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
         register_setting('grp_settings', 'grp_custom_css', array('type' => 'string'));
         register_setting('grp_settings', 'grp_custom_js', array('type' => 'string'));
         
@@ -211,6 +212,22 @@ class GRP_Admin {
             array($this, 'render_cache_duration_field'),
             'grp_settings',
             'grp_cache'
+        );
+        
+        // Debug settings
+        add_settings_section(
+            'grp_debug',
+            __('Debug Settings', 'google-reviews-plugin'),
+            array($this, 'render_debug_section'),
+            'grp_settings'
+        );
+        
+        add_settings_field(
+            'grp_enable_debug_logging',
+            __('Enable Debug Logging', 'google-reviews-plugin'),
+            array($this, 'render_debug_logging_field'),
+            'grp_settings',
+            'grp_debug'
         );
     }
     
@@ -780,6 +797,49 @@ class GRP_Admin {
         $value = get_option('grp_cache_duration', 3600);
         echo '<input type="number" name="grp_cache_duration" value="' . esc_attr($value) . '" min="300" max="86400" />';
         echo '<p class="description">' . __('How long to cache reviews (in seconds).', 'google-reviews-plugin') . '</p>';
+    }
+    
+    /**
+     * Render debug section description
+     */
+    public function render_debug_section() {
+        echo '<p>' . __('Configure debug logging settings. When enabled, detailed error and debug information will be logged to WordPress debug.log.', 'google-reviews-plugin') . '</p>';
+    }
+    
+    /**
+     * Render debug logging field
+     */
+    public function render_debug_logging_field() {
+        $enabled = (bool) get_option('grp_enable_debug_logging', false);
+        $debug_log_path = '';
+        
+        if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+            if (defined('WP_DEBUG_LOG_FILE')) {
+                $debug_log_path = WP_DEBUG_LOG_FILE;
+            } else {
+                $debug_log_path = WP_CONTENT_DIR . '/debug.log';
+            }
+        }
+        
+        echo '<label><input type="checkbox" name="grp_enable_debug_logging" value="1" ' . checked(true, $enabled, false) . ' /> ' . esc_html__('Enable debug logging to debug.log', 'google-reviews-plugin') . '</label>';
+        echo '<p class="description">' . __('When enabled, detailed error messages and debug information will be logged. This should only be enabled when troubleshooting issues.', 'google-reviews-plugin') . '</p>';
+        
+        if ($enabled && !empty($debug_log_path)) {
+            $log_exists = file_exists($debug_log_path);
+            $log_size = $log_exists ? size_format(filesize($debug_log_path)) : '';
+            echo '<p class="description" style="margin-top: 10px;">';
+            echo '<strong>' . esc_html__('Debug Log Location:', 'google-reviews-plugin') . '</strong> ';
+            echo '<code>' . esc_html($debug_log_path) . '</code>';
+            if ($log_exists) {
+                echo ' <span style="color: #666;">(' . esc_html__('Size:', 'google-reviews-plugin') . ' ' . esc_html($log_size) . ')</span>';
+            }
+            echo '</p>';
+        } elseif ($enabled) {
+            echo '<p class="description" style="margin-top: 10px; color: #d63638;">';
+            echo '<strong>' . esc_html__('Warning:', 'google-reviews-plugin') . '</strong> ';
+            echo esc_html__('WP_DEBUG_LOG is not enabled in wp-config.php. Add define(\'WP_DEBUG_LOG\', true); to enable debug logging.', 'google-reviews-plugin');
+            echo '</p>';
+        }
     }
     
     /**

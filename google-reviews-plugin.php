@@ -39,6 +39,40 @@ if (!function_exists('esc_js_e')) {
     }
 }
 
+/**
+ * Debug logging helper function
+ * Only logs if debug logging is enabled in settings
+ *
+ * @param string $message The message to log
+ * @param mixed $data Optional data to log (will be printed with print_r)
+ * @return void
+ */
+if (!function_exists('grp_debug_log')) {
+    function grp_debug_log($message, $data = null) {
+        // Check if debug logging is enabled
+        $debug_enabled = (bool) get_option('grp_enable_debug_logging', false);
+        
+        if (!$debug_enabled) {
+            return;
+        }
+        
+        // Ensure WP_DEBUG_LOG is enabled
+        if (!defined('WP_DEBUG_LOG') || !WP_DEBUG_LOG) {
+            return;
+        }
+        
+        // Format the log message
+        $log_message = '[GRP Debug] ' . $message;
+        
+        if ($data !== null) {
+            $log_message .= ' | Data: ' . print_r($data, true);
+        }
+        
+        // Log to WordPress debug.log
+        error_log($log_message);
+    }
+}
+
 // Check if we're in admin area
 if (is_admin()) {
     require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
