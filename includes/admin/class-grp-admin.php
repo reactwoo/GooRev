@@ -33,6 +33,8 @@ class GRP_Admin {
         add_action('wp_ajax_grp_list_accounts', array($this, 'ajax_list_accounts'));
         add_action('wp_ajax_grp_list_locations', array($this, 'ajax_list_locations'));
         add_action('wp_ajax_grp_save_custom_css', array($this, 'ajax_save_custom_css'));
+        add_action('admin_post_grp_export_invites_csv', array($this, 'export_invites_csv'));
+        add_action('admin_post_grp_export_invites_xls', array($this, 'export_invites_xls'));
     }
     
     /**
@@ -146,36 +148,6 @@ class GRP_Admin {
             'grp_settings'
         );
 
-        // Enterprise/Custom credentials section (gated)
-        register_setting('grp_settings', 'grp_enable_pro_features', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
-        add_settings_section(
-            'grp_pro_settings',
-            __('Enterprise: Custom Google Credentials', 'google-reviews-plugin'),
-            array($this, 'render_pro_section'),
-            'grp_settings'
-        );
-        add_settings_field(
-            'grp_enable_pro_features',
-            __('Enable Pro features', 'google-reviews-plugin'),
-            array($this, 'render_pro_enable_field'),
-            'grp_settings',
-            'grp_pro_settings'
-        );
-        add_settings_field(
-            'grp_google_client_id',
-            __('Client ID', 'google-reviews-plugin'),
-            array($this, 'render_client_id_field'),
-            'grp_settings',
-            'grp_pro_settings'
-        );
-        add_settings_field(
-            'grp_google_client_secret',
-            __('Client Secret', 'google-reviews-plugin'),
-            array($this, 'render_client_secret_field'),
-            'grp_settings',
-            'grp_pro_settings'
-        );
-
         // Business selection (account/location)
         add_settings_section(
             'grp_google_selection',
@@ -262,6 +234,36 @@ class GRP_Admin {
             array($this, 'render_debug_logging_field'),
             'grp_settings',
             'grp_debug'
+        );
+        
+        // Enterprise/Custom credentials section (moved to bottom as Enterprise feature)
+        register_setting('grp_settings', 'grp_enable_pro_features', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
+        add_settings_section(
+            'grp_enterprise_credentials',
+            __('Enterprise: Custom Google Credentials', 'google-reviews-plugin'),
+            array($this, 'render_pro_section'),
+            'grp_settings'
+        );
+        add_settings_field(
+            'grp_enable_pro_features',
+            __('Enable Custom Credentials', 'google-reviews-plugin'),
+            array($this, 'render_pro_enable_field'),
+            'grp_settings',
+            'grp_enterprise_credentials'
+        );
+        add_settings_field(
+            'grp_google_client_id',
+            __('Client ID', 'google-reviews-plugin'),
+            array($this, 'render_client_id_field'),
+            'grp_settings',
+            'grp_enterprise_credentials'
+        );
+        add_settings_field(
+            'grp_google_client_secret',
+            __('Client Secret', 'google-reviews-plugin'),
+            array($this, 'render_client_secret_field'),
+            'grp_settings',
+            'grp_enterprise_credentials'
         );
     }
     
@@ -661,18 +663,8 @@ class GRP_Admin {
      * Render Pro section description
      */
     public function render_pro_section() {
-        $api = new GRP_API();
-        $using_api_server = $api->is_using_api_server();
-        $license = new GRP_License();
-        $is_pro = $license->is_pro();
-        
-        echo '<div class="notice notice-info" style="margin-bottom: 15px;"><p>';
-        echo '<strong>' . esc_html__('Default Setup Recommended', 'google-reviews-plugin') . '</strong><br>';
-        echo esc_html__('By default, the plugin uses our API server for OAuth. No Google Cloud Project setup required! Simply click "Connect Google Account" to get started.', 'google-reviews-plugin');
-        echo '</p></div>';
-        
-        echo '<p>' . esc_html__('This section is only for enterprise users who want to use their own Google Cloud Project credentials for maximum control over API quotas and usage.', 'google-reviews-plugin') . '</p>';
-        echo '<p class="description">' . esc_html__('Note: You do not need to configure this section unless you specifically want to use your own Google Cloud Project. The default setup works for both free and Pro users.', 'google-reviews-plugin') . '</p>';
+        echo '<p>' . __('This section is only for Enterprise users who want to use their own Google Cloud Project credentials for maximum control over API quotas and usage.', 'google-reviews-plugin') . '</p>';
+        echo '<p class="description">' . __('<strong>Note:</strong> You do not need to configure this section unless you specifically want to use your own Google Cloud Project. The default setup works for both free and Pro users.', 'google-reviews-plugin') . '</p>';
     }
 
     /**
@@ -1070,6 +1062,190 @@ class GRP_Admin {
         update_option('grp_locations_cache_' . md5($account_id), $locations);
         
         wp_send_json_success(array('locations' => $locations));
+    }
+    
+    /**
+     * Export review invites to CSV
+     */
+    public function export_invites_csv() {
+        check_admin_referer('grp_export_invites');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+
+        global $wpdb;
+        $table = $wpdb->prefix . 'grp_review_invites';
+        
+        // Get filter parameters
+        $date_from = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '';
+        $date_to = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
+        $status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+        
+        // Build query
+        $where = array('1=1');
+        $prepare_values = array();
+        
+        if (!empty($date_from)) {
+            $where[] = 'created_at >= %s';
+            $prepare_values[] = $date_from . ' 00:00:00';
+        }
+        if (!empty($date_to)) {
+            $where[] = 'created_at <= %s';
+            $prepare_values[] = $date_to . ' 23:59:59';
+        }
+        if (!empty($status)) {
+            $where[] = 'invite_status = %s';
+            $prepare_values[] = $status;
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        $query = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY created_at DESC";
+        
+        if (!empty($prepare_values)) {
+            $query = $wpdb->prepare($query, $prepare_values);
+        }
+        
+        $invites = $wpdb->get_results($query);
+        
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename=review-invites-' . date('Y-m-d') . '.csv');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Output BOM for UTF-8
+        echo "\xEF\xBB\xBF";
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // CSV headers
+        $headers = array(
+            __('ID', 'google-reviews-plugin'),
+            __('Order ID', 'google-reviews-plugin'),
+            __('Email', 'google-reviews-plugin'),
+            __('Status', 'google-reviews-plugin'),
+            __('Scheduled At', 'google-reviews-plugin'),
+            __('Sent At', 'google-reviews-plugin'),
+            __('Clicked At', 'google-reviews-plugin'),
+            __('Coupon Code', 'google-reviews-plugin'),
+            __('Rewarded At', 'google-reviews-plugin'),
+            __('Created At', 'google-reviews-plugin'),
+        );
+        fputcsv($output, $headers);
+        
+        // CSV rows
+        foreach ($invites as $invite) {
+            $row = array(
+                $invite->id,
+                $invite->order_id,
+                $invite->email,
+                $invite->invite_status,
+                $invite->scheduled_at ?: '',
+                $invite->sent_at ?: '',
+                $invite->clicked_at ?: '',
+                $invite->coupon_code ?: '',
+                $invite->rewarded_at ?: '',
+                $invite->created_at,
+            );
+            fputcsv($output, $row);
+        }
+        
+        fclose($output);
+        exit;
+    }
+    
+    /**
+     * Export review invites to XLS (Excel/Google Sheets compatible)
+     */
+    public function export_invites_xls() {
+        check_admin_referer('grp_export_invites');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+        
+        global $wpdb;
+        $table = $wpdb->prefix . 'grp_review_invites';
+        
+        // Get filter parameters
+        $date_from = isset($_GET['date_from']) ? sanitize_text_field($_GET['date_from']) : '';
+        $date_to = isset($_GET['date_to']) ? sanitize_text_field($_GET['date_to']) : '';
+        $status = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+        
+        // Build query
+        $where = array('1=1');
+        $prepare_values = array();
+        
+        if (!empty($date_from)) {
+            $where[] = 'created_at >= %s';
+            $prepare_values[] = $date_from . ' 00:00:00';
+        }
+        if (!empty($date_to)) {
+            $where[] = 'created_at <= %s';
+            $prepare_values[] = $date_to . ' 23:59:59';
+        }
+        if (!empty($status)) {
+            $where[] = 'invite_status = %s';
+            $prepare_values[] = $status;
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        $query = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY created_at DESC";
+        
+        if (!empty($prepare_values)) {
+            $query = $wpdb->prepare($query, $prepare_values);
+        }
+        
+        $invites = $wpdb->get_results($query);
+        
+        // Set headers for XLS download (Excel/Google Sheets compatible TSV format)
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename=review-invites-' . date('Y-m-d') . '.xls');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Output BOM for UTF-8
+        echo "\xEF\xBB\xBF";
+        
+        // XLS headers (tab-separated)
+        $headers = array(
+            __('ID', 'google-reviews-plugin'),
+            __('Order ID', 'google-reviews-plugin'),
+            __('Email', 'google-reviews-plugin'),
+            __('Status', 'google-reviews-plugin'),
+            __('Scheduled At', 'google-reviews-plugin'),
+            __('Sent At', 'google-reviews-plugin'),
+            __('Clicked At', 'google-reviews-plugin'),
+            __('Coupon Code', 'google-reviews-plugin'),
+            __('Rewarded At', 'google-reviews-plugin'),
+            __('Created At', 'google-reviews-plugin'),
+        );
+        echo implode("\t", $headers) . "\n";
+        
+        // XLS rows
+        foreach ($invites as $invite) {
+            $row = array(
+                $invite->id,
+                $invite->order_id,
+                $invite->email,
+                $invite->invite_status,
+                $invite->scheduled_at ?: '',
+                $invite->sent_at ?: '',
+                $invite->clicked_at ?: '',
+                $invite->coupon_code ?: '',
+                $invite->rewarded_at ?: '',
+                $invite->created_at,
+            );
+            // Escape tabs and newlines in cell values
+            $row = array_map(function($cell) {
+                return str_replace(array("\t", "\n", "\r"), array(' ', ' ', ' '), $cell);
+            }, $row);
+            echo implode("\t", $row) . "\n";
+        }
+        
+        exit;
     }
     
     /**

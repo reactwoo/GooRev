@@ -58,10 +58,44 @@ $stats_query = "SELECT
 $stats = $wpdb->get_row($stats_query);
 
 $click_rate = $stats->sent > 0 ? ($stats->clicked / $stats->sent * 100) : 0;
+
+// Build export URLs with current filters
+$export_csv_url = admin_url('admin-post.php?action=grp_export_invites_csv');
+$export_xls_url = admin_url('admin-post.php?action=grp_export_invites_xls');
+if ($date_from) {
+    $export_csv_url .= '&date_from=' . urlencode($date_from);
+    $export_xls_url .= '&date_from=' . urlencode($date_from);
+}
+if ($date_to) {
+    $export_csv_url .= '&date_to=' . urlencode($date_to);
+    $export_xls_url .= '&date_to=' . urlencode($date_to);
+}
+if ($status_filter) {
+    $export_csv_url .= '&status=' . urlencode($status_filter);
+    $export_xls_url .= '&status=' . urlencode($status_filter);
+}
+$export_csv_url = wp_nonce_url($export_csv_url, 'grp_export_invites');
+$export_xls_url = wp_nonce_url($export_xls_url, 'grp_export_invites');
 ?>
 
 <div class="wrap">
     <h1><?php esc_html_e('Review Invites', 'google-reviews-plugin'); ?></h1>
+    
+    <!-- Export buttons -->
+    <div style="margin: 20px 0; display: flex; gap: 10px; align-items: center;">
+        <span style="font-weight: 600;"><?php esc_html_e('Export:', 'google-reviews-plugin'); ?></span>
+        <a href="<?php echo esc_url($export_csv_url); ?>" class="button">
+            <span class="dashicons dashicons-media-spreadsheet" style="vertical-align: middle; margin-right: 5px;"></span>
+            <?php esc_html_e('CSV', 'google-reviews-plugin'); ?>
+        </a>
+        <a href="<?php echo esc_url($export_xls_url); ?>" class="button">
+            <span class="dashicons dashicons-media-spreadsheet" style="vertical-align: middle; margin-right: 5px;"></span>
+            <?php esc_html_e('Excel/Google Sheets', 'google-reviews-plugin'); ?>
+        </a>
+        <span class="description" style="margin-left: 10px;">
+            <?php esc_html_e('Exports will include all records matching current filters', 'google-reviews-plugin'); ?>
+        </span>
+    </div>
     
     <!-- Statistics -->
     <div class="grp-invites-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 20px 0;">
