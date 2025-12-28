@@ -2,6 +2,9 @@
 // Advanced customizer function for Creative style - Defined globally so it can be called from event handlers
 // This function is loaded separately to keep the code organized
 window.openCreativeCustomizer = function(style, styleName) {
+    // Ensure jQuery is available
+    var $ = jQuery;
+    
     // Remove existing modal if any
     $('#grp-creative-customizer-modal').remove();
     
