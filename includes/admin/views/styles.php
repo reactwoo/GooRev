@@ -670,12 +670,13 @@ if (!class_exists('GRP_License')) {
     line-height: 1;
     cursor: pointer;
     color: #666;
-    padding: 0;
-    width: 30px;
-    height: 30px;
+    padding: 5px;
+    min-width: 30px;
+    min-height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 .grp-modal-close:hover {
@@ -851,6 +852,7 @@ if (!class_exists('GRP_License')) {
 
 .grp-customizer-tab-content {
     display: none;
+    padding: 20px 25px;
 }
 
 .grp-customizer-tab-content.active {
