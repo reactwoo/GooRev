@@ -1,18 +1,7 @@
-<?php
-/**
- * Advanced Creative Style Customizer JavaScript
- * This is included in styles.php for Creative style customization
- * 
- * @package Google_Reviews_Plugin
- */
-
-// This file contains the JavaScript function for Creative style customizer
-// It's included inline in styles.php to keep the code organized
-?>
-
 <script>
 // Advanced customizer function for Creative style - Defined globally so it can be called from event handlers
-function openCreativeCustomizer(style, styleName) {
+// This function is loaded separately to keep the code organized
+window.openCreativeCustomizer = function(style, styleName) {
     // Remove existing modal if any
     $('#grp-creative-customizer-modal').remove();
     
@@ -332,6 +321,6 @@ function openCreativeCustomizer(style, styleName) {
     $(document).on('click', '#grp-creative-customizer-modal .grp-modal-content', function(e) {
         e.stopPropagation();
     });
-}
+};
 </script>
 

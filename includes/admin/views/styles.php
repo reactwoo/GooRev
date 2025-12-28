@@ -990,7 +990,6 @@ if (!class_exists('GRP_License')) {
 }
 </style>
 
-<?php include GRP_PLUGIN_DIR . 'includes/admin/views/styles-creative-customizer.php'; ?>
 <script>
 jQuery(document).ready(function($) {
     // Variant switching
@@ -1208,7 +1207,12 @@ jQuery(document).ready(function($) {
         
         // Check if this is Creative style - use advanced customizer
         if (style === 'creative') {
-            openCreativeCustomizer(style, styleName);
+            if (typeof window.openCreativeCustomizer === 'function') {
+                window.openCreativeCustomizer(style, styleName);
+            } else {
+                console.error('openCreativeCustomizer function not found. File may not be loaded.');
+                alert('<?php esc_js_e('Creative customizer is not available. Please refresh the page.', 'google-reviews-plugin'); ?>');
+            }
             return;
         }
         
@@ -1610,3 +1614,18 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
+
+<?php
+// Include Creative customizer JavaScript function
+// This must be included after the jQuery ready wrapper so the function is globally available
+$creative_customizer_file = __DIR__ . '/styles-creative-customizer.php';
+if (file_exists($creative_customizer_file)) {
+    include $creative_customizer_file;
+} else {
+    // Fallback path
+    $creative_customizer_file = GRP_PLUGIN_DIR . 'includes/admin/views/styles-creative-customizer.php';
+    if (file_exists($creative_customizer_file)) {
+        include $creative_customizer_file;
+    }
+}
+?>
