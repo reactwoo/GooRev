@@ -671,7 +671,22 @@ class GRP_Styles {
      * Output admin CSS
      */
     public function output_admin_css() {
-        echo '<style type="text/css">
+        // Get base CSS
+        $css = $this->get_base_css();
+        
+        // Add all style CSS for previews (all variants so switcher works)
+        foreach ($this->styles as $style_name => $style_data) {
+            foreach ($style_data['variants'] as $variant) {
+                $css .= $this->get_style_css($style_name, $variant);
+            }
+        }
+        
+        // Add admin-specific styles for previews
+        $css .= "
+        .grp-style-preview {
+            padding: 20px;
+            margin: 10px 0;
+        }
         .grp-admin-preview {
             max-width: 400px;
             margin: 20px 0;
@@ -679,7 +694,9 @@ class GRP_Styles {
         .grp-admin-preview .grp-review {
             margin-bottom: 15px;
         }
-        </style>';
+        ";
+        
+        echo '<style type="text/css">' . $css . '</style>';
     }
     
     /**

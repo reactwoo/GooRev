@@ -18,8 +18,8 @@ if (!defined('ABSPATH')) {
             <div class="grp-styles-grid">
                 <?php foreach ($available_styles as $key => $style): ?>
                     <div class="grp-style-card" data-style="<?php echo esc_attr($key); ?>">
-                        <div class="grp-style-preview">
-                            <div class="grp-preview-review grp-style-<?php echo esc_attr($key); ?>">
+                        <div class="grp-style-preview grp-style-<?php echo esc_attr($key); ?> grp-theme-light">
+                            <div class="grp-review">
                                 <div class="grp-review-rating">
                                     <span class="grp-star grp-star-full">★</span>
                                     <span class="grp-star grp-star-full">★</span>
@@ -419,9 +419,9 @@ jQuery(document).ready(function($) {
         $card.find('.grp-variant-btn').removeClass('active');
         $btn.addClass('active');
         
-        // Update preview
-        var $preview = $card.find('.grp-preview-review');
-        $preview.removeClass('grp-light grp-dark').addClass('grp-' + variant);
+        // Update preview with theme class
+        var $preview = $card.find('.grp-style-preview');
+        $preview.removeClass('grp-theme-light grp-theme-dark grp-theme-auto').addClass('grp-theme-' + variant);
     });
     
     // Use style
