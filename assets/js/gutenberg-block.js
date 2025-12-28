@@ -290,6 +290,97 @@
                                 setAttributes({ arrows: value });
                             }
                         })
+                    ),
+                    
+                    el(PanelBody, { 
+                        title: i18n.__('Style Customization', 'google-reviews-plugin'), 
+                        initialOpen: false
+                    },
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                i18n.__('Text Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.custom_text_color || '',
+                                onChange: function(value) {
+                                    setAttributes({ custom_text_color: value });
+                                },
+                                placeholder: '#111827'
+                            })
+                        ),
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                i18n.__('Card Background Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.custom_background_color || '',
+                                onChange: function(value) {
+                                    setAttributes({ custom_background_color: value });
+                                },
+                                placeholder: '#FFFFFF'
+                            })
+                        ),
+                        (attributes.style === 'classic' || attributes.style === 'corporate') ? el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                i18n.__('Border Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.custom_border_color || '',
+                                onChange: function(value) {
+                                    setAttributes({ custom_border_color: value });
+                                },
+                                placeholder: '#D1D5DB'
+                            })
+                        ) : null,
+                        (attributes.style === 'modern' || attributes.style === 'corporate' || attributes.style === 'minimal') ? el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                i18n.__('Accent Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.custom_accent_color || '',
+                                onChange: function(value) {
+                                    setAttributes({ custom_accent_color: value });
+                                },
+                                placeholder: '#4285F4'
+                            })
+                        ) : null,
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                i18n.__('Star Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.custom_star_color || '',
+                                onChange: function(value) {
+                                    setAttributes({ custom_star_color: value });
+                                },
+                                placeholder: '#FBBC05'
+                            })
+                        ),
+                        el(RangeControl, {
+                            label: i18n.__('Body Text Size (px)', 'google-reviews-plugin'),
+                            value: attributes.custom_font_size || 15,
+                            onChange: function(value) {
+                                setAttributes({ custom_font_size: value });
+                            },
+                            min: 10,
+                            max: 24,
+                            step: 1
+                        }),
+                        el(RangeControl, {
+                            label: i18n.__('Name Text Size (px)', 'google-reviews-plugin'),
+                            value: attributes.custom_name_font_size || 14,
+                            onChange: function(value) {
+                                setAttributes({ custom_name_font_size: value });
+                            },
+                            min: 10,
+                            max: 20,
+                            step: 1
+                        })
                     )
                 ),
                 

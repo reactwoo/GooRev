@@ -16,30 +16,121 @@ if (!defined('ABSPATH')) {
     <div class="grp-styles-container">
         <div class="grp-styles-main">
             <div class="grp-styles-grid">
-                <?php foreach ($available_styles as $key => $style): ?>
+                <?php foreach ($available_styles as $key => $style): 
+                    // Determine preview structure based on style
+                    $is_corporate = ($key === 'corporate');
+                    $is_creative = ($key === 'creative');
+                    $is_modern = ($key === 'modern');
+                    $gradient = $is_creative ? ['blue', 'red', 'yellow', 'green', 'purple'][array_rand(['blue', 'red', 'yellow', 'green', 'purple'])] : '';
+                ?>
                     <div class="grp-style-card" data-style="<?php echo esc_attr($key); ?>">
                         <div class="grp-style-preview grp-style-<?php echo esc_attr($key); ?> grp-theme-light">
-                            <div class="grp-review">
-                                <div class="grp-review-rating">
-                                    <span class="grp-star grp-star-full">★</span>
-                                    <span class="grp-star grp-star-full">★</span>
-                                    <span class="grp-star grp-star-full">★</span>
-                                    <span class="grp-star grp-star-full">★</span>
-                                    <span class="grp-star grp-star-full">★</span>
-                                </div>
-                                <div class="grp-review-text">
-                                    <?php esc_html_e('This is a sample review to demonstrate the style. The review text will appear here with proper formatting and styling.', 'google-reviews-plugin'); ?>
-                                </div>
-                                <div class="grp-review-meta">
-                                    <div class="grp-review-avatar">
-                                        <img src="https://via.placeholder.com/40x40/007cba/ffffff?text=U" alt="User">
+                            <?php if ($is_corporate): ?>
+                                <!-- Corporate style with header/footer -->
+                                <div class="grp-review">
+                                    <div class="grp-review-header">
+                                        <span class="grp-review-header-text"><?php esc_html_e('Google Reviews', 'google-reviews-plugin'); ?></span>
+                                        <svg class="grp-google-logo" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                        </svg>
                                     </div>
-                                    <div class="grp-review-author">
-                                        <span class="grp-author-name"><?php esc_html_e('John Doe', 'google-reviews-plugin'); ?></span>
+                                    <div class="grp-review-content">
+                                        <div class="grp-review-rating" style="text-align: right;">
+                                            <span class="grp-star grp-star-full">★</span>
+                                            <span class="grp-star grp-star-full">★</span>
+                                            <span class="grp-star grp-star-full">★</span>
+                                            <span class="grp-star grp-star-full">★</span>
+                                            <span class="grp-star grp-star-full">★</span>
+                                        </div>
+                                        <div class="grp-review-text">
+                                            <?php esc_html_e('This is a sample review to demonstrate the style. The review text will appear here with proper formatting and styling.', 'google-reviews-plugin'); ?>
+                                        </div>
+                                        <div class="grp-review-meta">
+                                            <div class="grp-review-avatar">
+                                                <img src="https://i.pravatar.cc/40?img=12" alt="User" style="display: block; width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                            </div>
+                                            <div class="grp-author-name"><?php esc_html_e('John Doe', 'google-reviews-plugin'); ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="grp-review-footer">
                                         <span class="grp-review-date"><?php echo date('M j, Y'); ?></span>
+                                        <span class="grp-verified-badge"><?php esc_html_e('Verified', 'google-reviews-plugin'); ?></span>
                                     </div>
                                 </div>
-                            </div>
+                            <?php elseif ($is_creative): ?>
+                                <!-- Creative style with gradient and quote -->
+                                <div class="grp-review" data-gradient="<?php echo esc_attr($gradient); ?>">
+                                    <div class="grp-review-quote">"</div>
+                                    <div class="grp-review-rating" style="text-align: center;">
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                    </div>
+                                    <div class="grp-review-text">
+                                        <?php esc_html_e('This is a sample review to demonstrate the style. The review text will appear here with proper formatting and styling.', 'google-reviews-plugin'); ?>
+                                    </div>
+                                    <div class="grp-review-meta">
+                                        <div class="grp-review-avatar">
+                                            <img src="https://i.pravatar.cc/80?img=12" alt="User" style="display: block; width: 80px; height: 80px; border-radius: 50%; object-fit: cover;">
+                                        </div>
+                                        <div class="grp-review-author">
+                                            <span class="grp-author-name"><?php esc_html_e('John Doe', 'google-reviews-plugin'); ?></span>
+                                            <span class="grp-review-date"><?php echo date('M j, Y'); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php elseif ($is_modern): ?>
+                                <!-- Modern style with overlapping avatar -->
+                                <div class="grp-review">
+                                    <div class="grp-review-avatar">
+                                        <img src="https://i.pravatar.cc/48?img=12" alt="User" style="display: block; width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                                    </div>
+                                    <div class="grp-review-rating">
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                    </div>
+                                    <div class="grp-review-text">
+                                        <?php esc_html_e('This is a sample review to demonstrate the style. The review text will appear here with proper formatting and styling.', 'google-reviews-plugin'); ?>
+                                    </div>
+                                    <div class="grp-review-meta">
+                                        <div class="grp-review-author">
+                                            <span class="grp-author-name"><?php esc_html_e('John Doe', 'google-reviews-plugin'); ?></span>
+                                            <span class="grp-review-date"><?php echo date('M j, Y'); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <!-- Default structure for Minimal and Classic -->
+                                <div class="grp-review">
+                                    <div class="grp-review-rating">
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                        <span class="grp-star grp-star-full">★</span>
+                                    </div>
+                                    <div class="grp-review-text">
+                                        <?php esc_html_e('This is a sample review to demonstrate the style. The review text will appear here with proper formatting and styling.', 'google-reviews-plugin'); ?>
+                                    </div>
+                                    <div class="grp-review-meta">
+                                        <div class="grp-review-avatar">
+                                            <img src="https://i.pravatar.cc/40?img=12" alt="User" style="display: block; width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                                        </div>
+                                        <div class="grp-review-author">
+                                            <span class="grp-author-name"><?php esc_html_e('John Doe', 'google-reviews-plugin'); ?></span>
+                                            <span class="grp-review-date"><?php echo date('M j, Y'); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         
                         <div class="grp-style-info">
@@ -208,6 +299,14 @@ if (!defined('ABSPATH')) {
 .grp-preview-review {
     max-width: 300px;
     margin: 0 auto;
+}
+
+.grp-style-preview .grp-review-avatar img {
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
 }
 
 .grp-style-info {
@@ -422,6 +521,13 @@ jQuery(document).ready(function($) {
         // Update preview with theme class
         var $preview = $card.find('.grp-style-preview');
         $preview.removeClass('grp-theme-light grp-theme-dark grp-theme-auto').addClass('grp-theme-' + variant);
+        
+        // For creative style, add random gradient data attribute
+        if ($preview.hasClass('grp-style-creative')) {
+            var gradients = ['blue', 'red', 'yellow', 'green', 'purple'];
+            var randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+            $preview.find('.grp-review').attr('data-gradient', randomGradient);
+        }
     });
     
     // Use style

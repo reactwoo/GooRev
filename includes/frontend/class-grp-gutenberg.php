@@ -117,6 +117,53 @@ class GRP_Gutenberg {
                     'type' => 'boolean',
                     'default' => true,
                 ),
+                'theme' => array(
+                    'type' => 'string',
+                    'default' => 'light',
+                ),
+                'cols_desktop' => array(
+                    'type' => 'number',
+                    'default' => 3,
+                ),
+                'cols_tablet' => array(
+                    'type' => 'number',
+                    'default' => 2,
+                ),
+                'cols_mobile' => array(
+                    'type' => 'number',
+                    'default' => 1,
+                ),
+                'gap' => array(
+                    'type' => 'number',
+                    'default' => 20,
+                ),
+                'custom_text_color' => array(
+                    'type' => 'string',
+                ),
+                'custom_background_color' => array(
+                    'type' => 'string',
+                ),
+                'custom_border_color' => array(
+                    'type' => 'string',
+                ),
+                'custom_accent_color' => array(
+                    'type' => 'string',
+                ),
+                'custom_star_color' => array(
+                    'type' => 'string',
+                ),
+                'custom_font_size' => array(
+                    'type' => 'number',
+                ),
+                'custom_name_font_size' => array(
+                    'type' => 'number',
+                ),
+                'body_font_family' => array(
+                    'type' => 'string',
+                ),
+                'name_font_family' => array(
+                    'type' => 'string',
+                ),
             ),
         ));
     }
@@ -174,6 +221,37 @@ class GRP_Gutenberg {
      * Render reviews block
      */
     public function render_reviews_block($attributes) {
+        // Build custom CSS for style overrides
+        $custom_css = '';
+        if (!empty($attributes['custom_text_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-review-text, .grp-gutenberg-block .grp-author-name { color: ' . esc_attr($attributes['custom_text_color']) . ' !important; }';
+        }
+        if (!empty($attributes['custom_background_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-review { background-color: ' . esc_attr($attributes['custom_background_color']) . ' !important; }';
+        }
+        if (!empty($attributes['custom_border_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-review { border-color: ' . esc_attr($attributes['custom_border_color']) . ' !important; }';
+        }
+        if (!empty($attributes['custom_star_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-star { color: ' . esc_attr($attributes['custom_star_color']) . ' !important; }';
+        }
+        if (!empty($attributes['custom_font_size'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-review-text { font-size: ' . intval($attributes['custom_font_size']) . 'px !important; }';
+        }
+        if (!empty($attributes['custom_name_font_size'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-author-name { font-size: ' . intval($attributes['custom_name_font_size']) . 'px !important; }';
+        }
+        if (!empty($attributes['body_font_family'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-review-text { font-family: ' . esc_attr($attributes['body_font_family']) . ' !important; }';
+        }
+        if (!empty($attributes['name_font_family'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-author-name { font-family: ' . esc_attr($attributes['name_font_family']) . ' !important; }';
+        }
+        
+        if (!empty($custom_css)) {
+            $custom_css = '<style type="text/css">' . $custom_css . '</style>';
+        }
+        
         $shortcode_atts = array(
             'style' => $attributes['style'],
             'theme' => isset($attributes['theme']) ? $attributes['theme'] : 'light',
@@ -198,7 +276,7 @@ class GRP_Gutenberg {
         );
         
         $shortcode = new GRP_Shortcode();
-        return $shortcode->render_shortcode($shortcode_atts);
+        return $custom_css . $shortcode->render_shortcode($shortcode_atts);
     }
     
     /**

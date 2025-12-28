@@ -130,13 +130,38 @@ class GRP_Styles {
         $dark = $this->get_variant_colors($style_name, 'dark');
 
         if ($variant === 'auto') {
-            return "
+            $css_vars = "
             .grp-style-{$style_name}.grp-theme-auto {
                 --grp-background: {$light['background']};
                 --grp-background_alt: {$light['background_alt']};
                 --grp-text: {$light['text']};
                 --grp-muted: {$light['muted']};
                 --grp-border: {$light['border']};
+        ";
+            if (isset($light['star'])) {
+                $css_vars .= "
+                --grp-star: {$light['star']};
+        ";
+            }
+            if (isset($light['accent'])) {
+                $css_vars .= "
+                --grp-accent: {$light['accent']};
+        ";
+            }
+            if (isset($light['card_background'])) {
+                $css_vars .= "
+                --grp-card_background: {$light['card_background']};
+        ";
+            }
+            if (isset($light['gradient_blue'])) {
+                $css_vars .= "
+                --grp-gradient_blue: {$light['gradient_blue']};
+                --grp-gradient_red: {$light['gradient_red']};
+                --grp-gradient_yellow: {$light['gradient_yellow']};
+                --grp-gradient_green: {$light['gradient_green']};
+        ";
+            }
+            $css_vars .= "
             }
             @media (prefers-color-scheme: dark) {
                 .grp-style-{$style_name}.grp-theme-auto {
@@ -145,243 +170,438 @@ class GRP_Styles {
                     --grp-text: {$dark['text']};
                     --grp-muted: {$dark['muted']};
                     --grp-border: {$dark['border']};
+        ";
+            if (isset($dark['star'])) {
+                $css_vars .= "
+                    --grp-star: {$dark['star']};
+        ";
+            }
+            if (isset($dark['accent'])) {
+                $css_vars .= "
+                    --grp-accent: {$dark['accent']};
+        ";
+            }
+            if (isset($dark['card_background'])) {
+                $css_vars .= "
+                    --grp-card_background: {$dark['card_background']};
+        ";
+            }
+            if (isset($dark['gradient_blue'])) {
+                $css_vars .= "
+                    --grp-gradient_blue: {$dark['gradient_blue']};
+                    --grp-gradient_red: {$dark['gradient_red']};
+                    --grp-gradient_yellow: {$dark['gradient_yellow']};
+                    --grp-gradient_green: {$dark['gradient_green']};
+        ";
+            }
+            $css_vars .= "
                 }
             }
             ";
+            return $css_vars;
         }
 
         $colors = $variant === 'dark' ? $dark : $light;
         $variant_class = "grp-theme-{$variant}";
-        return "
+        $css_vars = "
         .grp-style-{$style_name}.{$variant_class} {
             --grp-background: {$colors['background']};
             --grp-background_alt: {$colors['background_alt']};
             --grp-text: {$colors['text']};
             --grp-muted: {$colors['muted']};
             --grp-border: {$colors['border']};
+        ";
+        
+        // Add star color if defined
+        if (isset($colors['star'])) {
+            $css_vars .= "
+            --grp-star: {$colors['star']};
+        ";
+        }
+        
+        // Add accent color if defined
+        if (isset($colors['accent'])) {
+            $css_vars .= "
+            --grp-accent: {$colors['accent']};
+        ";
+        }
+        
+        // Add card background if defined (for corporate style)
+        if (isset($colors['card_background'])) {
+            $css_vars .= "
+            --grp-card_background: {$colors['card_background']};
+        ";
+        }
+        
+        // Add gradient colors if defined (for creative style)
+        if (isset($colors['gradient_blue'])) {
+            $css_vars .= "
+            --grp-gradient_blue: {$colors['gradient_blue']};
+            --grp-gradient_red: {$colors['gradient_red']};
+            --grp-gradient_yellow: {$colors['gradient_yellow']};
+            --grp-gradient_green: {$colors['gradient_green']};
+        ";
+        }
+        
+        $css_vars .= "
         }
         ";
+        
+        return $css_vars;
     }
     
     /**
      * Get modern style CSS
+     * Design: High-end SaaS / startup feel. Glassmorphism, subtle motion, dark-mode first.
      */
     private function get_modern_css() {
         return "
-        .grp-style-modern .grp-review {
+        .grp-style-modern .grp-reviews {
+            font-family: 'Inter', 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--grp-background);
-            border: 1px solid var(--grp-border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .grp-style-modern .grp-review {
+            background: var(--grp-card_background, rgba(255, 255, 255, 0.08));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--grp-border, rgba(255, 255, 255, 0.15));
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+            position: relative;
+            transition: all 200ms ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
         
         .grp-style-modern .grp-review:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+        }
+        
+        .grp-style-modern .grp-review-avatar {
+            position: absolute;
+            top: -20px;
+            left: 24px;
+            z-index: 2;
+        }
+        
+        .grp-style-modern .grp-review-avatar img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--grp-border, rgba(255, 255, 255, 0.15));
+            background: var(--grp-background);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 200ms ease;
+        }
+        
+        .grp-style-modern .grp-review:hover .grp-review-avatar img {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
         }
         
         .grp-style-modern .grp-review-rating {
-            margin-bottom: 15px;
+            margin-top: 20px;
+            margin-bottom: 16px;
         }
         
         .grp-style-modern .grp-star {
-            color: #ffc107;
-            font-size: 18px;
-            margin-right: 2px;
+            color: var(--grp-star, #FBBC05);
+            font-size: clamp(14px, 1.2vw, 16px);
+            margin-right: 3px;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
         }
         
         .grp-style-modern .grp-review-text {
             color: var(--grp-text);
-            font-size: 16px;
+            font-size: clamp(14px, 1vw, 15px);
             line-height: 1.6;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            transition: all 200ms ease;
         }
         
         .grp-style-modern .grp-review-meta {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 12px;
+            opacity: 0.7;
+            transform: translateY(4px);
+            transition: all 200ms ease;
         }
         
-        .grp-style-modern .grp-review-avatar img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
+        .grp-style-modern .grp-review:hover .grp-review-meta {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .grp-style-modern .grp-review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .grp-style-modern .grp-author-name {
             font-weight: 600;
             color: var(--grp-text);
+            font-size: clamp(13px, 1vw, 14px);
+            transition: all 200ms ease;
         }
         
         .grp-style-modern .grp-review-date {
             color: var(--grp-muted);
-            font-size: 14px;
+            font-size: clamp(12px, 0.9vw, 13px);
+            transition: all 200ms ease;
+        }
+        
+        .grp-style-modern .grp-review-rating-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+        
+        .grp-style-modern .grp-review-rating-inline .grp-star {
+            font-size: clamp(12px, 1vw, 14px);
+            margin-right: 0;
         }
         ";
     }
     
     /**
      * Get classic style CSS
+     * Design: Timeless, familiar, trustworthy. Works well for local businesses and traditional brands.
      */
     private function get_classic_css() {
         return "
+        .grp-style-classic .grp-reviews {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--grp-background);
+        }
+        
         .grp-style-classic .grp-review {
             background: var(--grp-background);
-            border: 2px solid var(--grp-border);
+            border: 1px solid var(--grp-border, #D1D5DB);
             border-radius: 4px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: none;
         }
         
         .grp-style-classic .grp-review-rating {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
+            margin-top: 0;
         }
         
         .grp-style-classic .grp-star {
-            color: #ffc107;
+            color: var(--grp-star, #FBBC05);
             font-size: 16px;
-            margin-right: 2px;
+            margin-right: 3px;
         }
         
         .grp-style-classic .grp-review-text {
-            color: var(--grp-text);
+            color: var(--grp-text, #111827);
             font-size: 15px;
-            line-height: 1.5;
-            margin-bottom: 15px;
-            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         .grp-style-classic .grp-review-meta {
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-top: 1px solid var(--grp-border);
-            padding-top: 15px;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--grp-border, #D1D5DB);
+        }
+        
+        .grp-style-classic .grp-review-avatar {
+            flex-shrink: 0;
         }
         
         .grp-style-classic .grp-review-avatar img {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
         }
         
+        .grp-style-classic .grp-review-author {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+        
         .grp-style-classic .grp-author-name {
-            font-weight: 500;
-            color: var(--grp-text);
+            font-weight: 600;
+            color: var(--grp-text, #111827);
+            font-size: 15px;
+            font-family: 'Georgia', 'Merriweather', 'Playfair Display', serif;
+            line-height: 1.4;
         }
         
         .grp-style-classic .grp-review-date {
             color: var(--grp-muted);
             font-size: 13px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.4;
         }
         ";
     }
     
     /**
      * Get minimal style CSS
+     * Design: Clean, neutral, content-first. Native to modern SaaS dashboards.
      */
     private function get_minimal_css() {
         return "
+        .grp-style-minimal .grp-reviews {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
         .grp-style-minimal .grp-review {
             background: var(--grp-background);
             border: none;
-            border-radius: 0;
-            padding: 15px 0;
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--grp-border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            max-width: 420px;
+            width: 100%;
         }
         
         .grp-style-minimal .grp-review:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
         }
         
         .grp-style-minimal .grp-review-rating {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
         
         .grp-style-minimal .grp-star {
-            color: #ffc107;
-            font-size: 14px;
-            margin-right: 1px;
+            color: var(--grp-star, #FBBC05);
+            font-size: 16px;
+            margin-right: 2px;
+            line-height: 1;
         }
         
         .grp-style-minimal .grp-review-text {
             color: var(--grp-text);
             font-size: 14px;
-            line-height: 1.4;
-            margin-bottom: 10px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            font-weight: 400;
         }
         
         .grp-style-minimal .grp-review-meta {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+        }
+        
+        .grp-style-minimal .grp-review-avatar {
+            flex-shrink: 0;
         }
         
         .grp-style-minimal .grp-review-avatar img {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
+            filter: grayscale(100%);
+        }
+        
+        .grp-style-minimal .grp-review-author {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
         
         .grp-style-minimal .grp-author-name {
-            font-weight: 400;
+            font-weight: 600;
             color: var(--grp-text);
             font-size: 14px;
+            line-height: 1.4;
         }
         
         .grp-style-minimal .grp-review-date {
             color: var(--grp-muted);
-            font-size: 12px;
+            font-size: 13px;
+            line-height: 1.4;
         }
         ";
     }
     
     /**
      * Get corporate style CSS
+     * Design: Trust, authority, professionalism. Ideal for B2B, finance, legal, engineering.
      */
     private function get_corporate_css() {
         return "
-        .grp-style-corporate .grp-review {
+        .grp-style-corporate .grp-reviews {
+            font-family: 'IBM Plex Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--grp-background);
-            border: 1px solid var(--grp-border);
-            border-radius: 6px;
-            padding: 25px;
-            margin-bottom: 20px;
-            position: relative;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
         
-        .grp-style-corporate .grp-review::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #007cba, #005a87);
-            border-radius: 6px 6px 0 0;
+        .grp-style-corporate .grp-review {
+            background: var(--grp-card_background, var(--grp-background_alt));
+            border: 1px solid var(--grp-border);
+            border-radius: 6px;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .grp-style-corporate .grp-review-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--grp-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .grp-style-corporate .grp-review-header-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--grp-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .grp-style-corporate .grp-google-logo {
+            width: 20px;
+            height: 20px;
+            opacity: 0.6;
+        }
+        
+        .grp-style-corporate .grp-review-content {
+            padding: 20px;
+            flex: 1;
         }
         
         .grp-style-corporate .grp-review-rating {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            text-align: right;
         }
         
         .grp-style-corporate .grp-star {
-            color: #ffc107;
+            color: var(--grp-star, #FBBC05);
             font-size: 16px;
-            margin-right: 2px;
+            margin-left: 2px;
         }
         
         .grp-style-corporate .grp-review-text {
             color: var(--grp-text);
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1.6;
             margin-bottom: 20px;
         }
@@ -389,125 +609,180 @@ class GRP_Styles {
         .grp-style-corporate .grp-review-meta {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
         
         .grp-style-corporate .grp-review-avatar img {
-            width: 45px;
-            height: 45px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--grp-border);
         }
         
         .grp-style-corporate .grp-author-name {
-            font-weight: 600;
+            font-weight: 500;
             color: var(--grp-text);
-            font-size: 16px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .grp-style-corporate .grp-review-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--grp-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--grp-background);
         }
         
         .grp-style-corporate .grp-review-date {
             color: var(--grp-muted);
-            font-size: 14px;
+            font-size: 12px;
+        }
+        
+        .grp-style-corporate .grp-verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--grp-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .grp-style-corporate .grp-verified-badge::before {
+            content: '✓';
+            color: var(--grp-accent, #4285F4);
+            font-weight: bold;
         }
         ";
     }
     
     /**
      * Get creative style CSS
+     * Design: Personality-forward, eye-catching, social-proof driven. Great for agencies, creatives, ecommerce.
      */
     private function get_creative_css() {
         return "
-        .grp-style-creative .grp-review {
-            background: linear-gradient(135deg, var(--grp-background), var(--grp-background_alt));
-            border: none;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-            animation: slideInUp 0.6s ease-out;
+        .grp-style-creative .grp-reviews {
+            font-family: 'Poppins', 'DM Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         
-        .grp-style-creative .grp-review::before {
-            content: '';
+        .grp-style-creative .grp-review {
+            border: none;
+            border-radius: 16px;
+            padding: 35px 30px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335));
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .grp-style-creative .grp-review:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Random gradient variations - use data attributes for different colors */
+        .grp-style-creative .grp-review[data-gradient='blue'] {
+            background: linear-gradient(135deg, #4285F4, #34A853);
+        }
+        
+        .grp-style-creative .grp-review[data-gradient='red'] {
+            background: linear-gradient(135deg, #EA4335, #FBBC05);
+        }
+        
+        .grp-style-creative .grp-review[data-gradient='yellow'] {
+            background: linear-gradient(135deg, #FBBC05, #EA4335);
+        }
+        
+        .grp-style-creative .grp-review[data-gradient='green'] {
+            background: linear-gradient(135deg, #34A853, #4285F4);
+        }
+        
+        .grp-style-creative .grp-review[data-gradient='purple'] {
+            background: linear-gradient(135deg, #9C27B0, #E91E63);
+        }
+        
+        .grp-style-creative .grp-review-quote {
+            font-size: 48px;
+            line-height: 1;
+            color: rgba(255, 255, 255, 0.3);
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            animation: shimmer 3s infinite;
+            top: 20px;
+            left: 25px;
+            font-family: Georgia, serif;
         }
         
         .grp-style-creative .grp-review-rating {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            text-align: center;
         }
         
         .grp-style-creative .grp-star {
-            color: #ffc107;
-            font-size: 20px;
-            margin-right: 3px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            color: var(--grp-star, #FFFFFF);
+            font-size: 32px;
+            margin: 0 4px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
         
         .grp-style-creative .grp-review-text {
             color: var(--grp-text);
-            font-size: 16px;
-            line-height: 1.7;
-            margin-bottom: 20px;
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 30px;
             position: relative;
             z-index: 1;
+            font-weight: 400;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         
         .grp-style-creative .grp-review-meta {
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 15px;
             position: relative;
             z-index: 1;
         }
         
+        .grp-style-creative .grp-review-avatar {
+            position: relative;
+        }
+        
         .grp-style-creative .grp-review-avatar img {
-            width: 50px;
-            height: 50px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 4px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .grp-style-creative .grp-review-author {
+            text-align: center;
         }
         
         .grp-style-creative .grp-author-name {
             font-weight: 700;
             color: var(--grp-text);
-            font-size: 16px;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 5px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         
         .grp-style-creative .grp-review-date {
-            color: var(--grp-muted);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 14px;
-        }
-        
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes shimmer {
-            0% {
-                transform: translateX(-100%) translateY(-100%) rotate(45deg);
-            }
-            100% {
-                transform: translateX(100%) translateY(100%) rotate(45deg);
-            }
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         ";
     }
@@ -516,24 +791,150 @@ class GRP_Styles {
      * Get variant colors
      */
     private function get_variant_colors($style, $variant) {
-        $color_schemes = array(
+        // Style-specific color schemes
+        $style_schemes = array(
+            'minimal' => array(
+                'light' => array(
+                    'background' => '#FFFFFF',
+                    'background_alt' => '#FFFFFF',
+                    'text' => '#1F1F1F',
+                    'muted' => '#6B7280',
+                    'border' => '#E5E7EB',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                ),
+                'dark' => array(
+                    'background' => '#111111',
+                    'background_alt' => '#111111',
+                    'text' => '#F5F5F5',
+                    'muted' => '#6B7280',
+                    'border' => '#374151',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                )
+            ),
+            'corporate' => array(
+                'light' => array(
+                    'background' => '#F8FAFC',
+                    'background_alt' => '#FFFFFF',
+                    'card_background' => '#FFFFFF',
+                    'text' => '#111827',
+                    'muted' => '#6B7280',
+                    'border' => '#E5E7EB',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                ),
+                'dark' => array(
+                    'background' => '#0B1220',
+                    'background_alt' => '#111827',
+                    'card_background' => '#111827',
+                    'text' => '#F9FAFB',
+                    'muted' => '#9CA3AF',
+                    'border' => '#374151',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                )
+            ),
+            'creative' => array(
+                'light' => array(
+                    'background' => '#FFFFFF',
+                    'background_alt' => '#F9FAFB',
+                    'text' => '#FFFFFF',
+                    'muted' => '#FFFFFF',
+                    'border' => 'transparent',
+                    'accent' => '#4285F4',
+                    'star' => '#FFFFFF',
+                    'gradient_blue' => '#4285F4',
+                    'gradient_red' => '#EA4335',
+                    'gradient_yellow' => '#FBBC05',
+                    'gradient_green' => '#34A853'
+                ),
+                'dark' => array(
+                    'background' => '#0F172A',
+                    'background_alt' => '#1E293B',
+                    'text' => '#FFFFFF',
+                    'muted' => '#FFFFFF',
+                    'border' => 'transparent',
+                    'accent' => '#4285F4',
+                    'star' => '#FFFFFF',
+                    'gradient_blue' => '#4285F4',
+                    'gradient_red' => '#EA4335',
+                    'gradient_yellow' => '#FBBC05',
+                    'gradient_green' => '#34A853'
+                )
+            ),
+            'modern' => array(
+                'light' => array(
+                    'background' => '#FFFFFF',
+                    'background_alt' => '#F8F9FA',
+                    'card_background' => 'rgba(255, 255, 255, 0.95)',
+                    'text' => '#1F2937',
+                    'muted' => '#6B7280',
+                    'border' => 'rgba(0, 0, 0, 0.1)',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                ),
+                'dark' => array(
+                    'background' => '#0F172A',
+                    'background_alt' => '#1E293B',
+                    'card_background' => 'rgba(255, 255, 255, 0.08)',
+                    'text' => '#F9FAFB',
+                    'muted' => '#9CA3AF',
+                    'border' => 'rgba(255, 255, 255, 0.15)',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                )
+            ),
+            'classic' => array(
+                'light' => array(
+                    'background' => '#FFFFFF',
+                    'background_alt' => '#FFFFFF',
+                    'text' => '#111827',
+                    'muted' => '#6B7280',
+                    'border' => '#D1D5DB',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                ),
+                'dark' => array(
+                    'background' => '#1F2937',
+                    'background_alt' => '#374151',
+                    'text' => '#F9FAFB',
+                    'muted' => '#9CA3AF',
+                    'border' => '#4B5563',
+                    'accent' => '#4285F4',
+                    'star' => '#FBBC05'
+                )
+            )
+        );
+        
+        // Default color schemes for other styles
+        $default_schemes = array(
             'light' => array(
                 'background' => '#ffffff',
                 'background_alt' => '#f8f9fa',
                 'text' => '#333333',
                 'muted' => '#666666',
-                'border' => '#e0e0e0'
+                'border' => '#e0e0e0',
+                'accent' => '#007cba',
+                'star' => '#ffc107'
             ),
             'dark' => array(
                 'background' => '#2d3748',
                 'background_alt' => '#1a202c',
                 'text' => '#ffffff',
                 'muted' => '#a0aec0',
-                'border' => '#4a5568'
+                'border' => '#4a5568',
+                'accent' => '#007cba',
+                'star' => '#ffc107'
             )
         );
         
-        return isset($color_schemes[$variant]) ? $color_schemes[$variant] : $color_schemes['light'];
+        // Use style-specific colors if available, otherwise use defaults
+        if (isset($style_schemes[$style][$variant])) {
+            return $style_schemes[$style][$variant];
+        }
+        
+        return isset($default_schemes[$variant]) ? $default_schemes[$variant] : $default_schemes['light'];
     }
     
     /**

@@ -325,68 +325,195 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
         
         $this->end_controls_section();
         
-        // Style Section
+        // Style Customization Section (style-specific options)
         $this->start_controls_section(
-            'style_section',
+            'style_customization_section',
             array(
-                'label' => __('Style', 'google-reviews-plugin'),
+                'label' => __('Style Customization', 'google-reviews-plugin'),
                 'tab' => \Elementor\Controls_Manager::TAB_STYLE,
             )
         );
         
+        // Text Color (all styles)
         $this->add_control(
-            'text_color',
+            'custom_text_color',
             array(
                 'label' => __('Text Color', 'google-reviews-plugin'),
                 'type' => \Elementor\Controls_Manager::COLOR,
                 'selectors' => array(
-                    '{{WRAPPER}} .grp-review-text' => 'color: {{VALUE}}',
+                    '{{WRAPPER}} .grp-review-text' => 'color: {{VALUE}} !important;',
+                    '{{WRAPPER}} .grp-author-name' => 'color: {{VALUE}} !important;',
                 ),
             )
         );
         
+        // Background Color (all styles)
         $this->add_control(
-            'background_color',
+            'custom_background_color',
             array(
-                'label' => __('Background Color', 'google-reviews-plugin'),
+                'label' => __('Card Background Color', 'google-reviews-plugin'),
                 'type' => \Elementor\Controls_Manager::COLOR,
                 'selectors' => array(
-                    '{{WRAPPER}} .grp-review' => 'background-color: {{VALUE}}',
+                    '{{WRAPPER}} .grp-review' => 'background-color: {{VALUE}} !important;',
                 ),
             )
         );
         
+        // Border Color (Classic, Corporate styles)
         $this->add_control(
-            'border_color',
+            'custom_border_color',
             array(
                 'label' => __('Border Color', 'google-reviews-plugin'),
                 'type' => \Elementor\Controls_Manager::COLOR,
+                'condition' => array(
+                    'style' => array('classic', 'corporate'),
+                ),
                 'selectors' => array(
-                    '{{WRAPPER}} .grp-review' => 'border-color: {{VALUE}}',
+                    '{{WRAPPER}} .grp-review' => 'border-color: {{VALUE}} !important;',
                 ),
             )
         );
         
+        // Accent Color (Modern, Corporate, Minimal styles)
         $this->add_control(
-            'border_radius',
+            'custom_accent_color',
+            array(
+                'label' => __('Accent Color', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'condition' => array(
+                    'style' => array('modern', 'corporate', 'minimal'),
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review' => '--grp-accent: {{VALUE}};',
+                ),
+            )
+        );
+        
+        // Star Color (all styles)
+        $this->add_control(
+            'custom_star_color',
+            array(
+                'label' => __('Star Color', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-star' => 'color: {{VALUE}} !important;',
+                ),
+            )
+        );
+        
+        // Border Radius (all styles except Classic)
+        $this->add_control(
+            'custom_border_radius',
             array(
                 'label' => __('Border Radius', 'google-reviews-plugin'),
                 'type' => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => array('px', '%'),
+                'condition' => array(
+                    'style!' => 'classic',
+                ),
                 'selectors' => array(
-                    '{{WRAPPER}} .grp-review' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .grp-review' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}} !important;',
                 ),
             )
         );
         
+        // Padding Override
         $this->add_control(
-            'padding',
+            'custom_padding',
             array(
-                'label' => __('Padding', 'google-reviews-plugin'),
+                'label' => __('Card Padding', 'google-reviews-plugin'),
                 'type' => \Elementor\Controls_Manager::DIMENSIONS,
                 'size_units' => array('px', 'em', '%'),
                 'selectors' => array(
-                    '{{WRAPPER}} .grp-review' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                    '{{WRAPPER}} .grp-review' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}} !important;',
+                ),
+            )
+        );
+        
+        // Font Size (Body Text)
+        $this->add_control(
+            'custom_font_size',
+            array(
+                'label' => __('Body Text Size', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => array('px', 'em', 'rem'),
+                'range' => array(
+                    'px' => array(
+                        'min' => 10,
+                        'max' => 24,
+                        'step' => 1,
+                    ),
+                    'em' => array(
+                        'min' => 0.5,
+                        'max' => 2,
+                        'step' => 0.1,
+                    ),
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review-text' => 'font-size: {{SIZE}}{{UNIT}} !important;',
+                ),
+            )
+        );
+        
+        // Name Font Size
+        $this->add_control(
+            'custom_name_font_size',
+            array(
+                'label' => __('Name Text Size', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => array('px', 'em', 'rem'),
+                'range' => array(
+                    'px' => array(
+                        'min' => 10,
+                        'max' => 20,
+                        'step' => 1,
+                    ),
+                    'em' => array(
+                        'min' => 0.5,
+                        'max' => 1.5,
+                        'step' => 0.1,
+                    ),
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-author-name' => 'font-size: {{SIZE}}{{UNIT}} !important;',
+                ),
+            )
+        );
+        
+        $this->end_controls_section();
+        
+        // Typography Section
+        $this->start_controls_section(
+            'typography_section',
+            array(
+                'label' => __('Typography', 'google-reviews-plugin'),
+                'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+            )
+        );
+        
+        // Body Font Family
+        $this->add_control(
+            'body_font_family',
+            array(
+                'label' => __('Body Font Family', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::FONT,
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review-text' => 'font-family: {{VALUE}};',
+                ),
+            )
+        );
+        
+        // Name Font Family (especially for Classic style)
+        $this->add_control(
+            'name_font_family',
+            array(
+                'label' => __('Name Font Family', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::FONT,
+                'condition' => array(
+                    'style' => 'classic',
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-author-name' => 'font-family: {{VALUE}};',
                 ),
             )
         );
