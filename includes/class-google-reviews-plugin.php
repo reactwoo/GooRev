@@ -73,6 +73,9 @@ class Google_Reviews_Plugin {
             require_once GRP_PLUGIN_DIR . 'includes/class-grp-woocommerce.php';
         }
         
+        // Review Widgets addon (load class so it can hook into addon actions)
+        require_once GRP_PLUGIN_DIR . 'includes/class-grp-review-widgets.php';
+        
         // Admin classes
 		if (is_admin()) {
 			require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
@@ -127,6 +130,11 @@ class Google_Reviews_Plugin {
         // Initialize WooCommerce integration (class handles addon enable check internally)
         if (class_exists('WooCommerce') && class_exists('GRP_WooCommerce')) {
             GRP_WooCommerce::get_instance();
+        }
+        
+        // Initialize Review Widgets addon (class handles addon enable check internally)
+        if (class_exists('GRP_Review_Widgets')) {
+            GRP_Review_Widgets::get_instance();
         }
         
         // Initialize frontend

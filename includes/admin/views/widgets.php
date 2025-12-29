@@ -1,0 +1,441 @@
+<?php
+/**
+ * Review Widgets Settings Page
+ *
+ * @package Google_Reviews_Plugin
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Handle form submission
+if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_settings')) {
+    // Save widget settings
+    update_option('grp_widget_button_default_text', sanitize_text_field($_POST['grp_widget_button_default_text']));
+    update_option('grp_widget_button_default_style', sanitize_text_field($_POST['grp_widget_button_default_style']));
+    update_option('grp_widget_button_default_size', sanitize_text_field($_POST['grp_widget_button_default_size']));
+    update_option('grp_widget_button_default_color', sanitize_text_field($_POST['grp_widget_button_default_color']));
+    update_option('grp_widget_button_default_bg_color', sanitize_text_field($_POST['grp_widget_button_default_bg_color']));
+    update_option('grp_widget_qr_default_size', absint($_POST['grp_widget_qr_default_size']));
+    update_option('grp_widget_tracking_enabled', isset($_POST['grp_widget_tracking_enabled']));
+    
+    echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved successfully!', 'google-reviews-plugin') . '</p></div>';
+}
+
+// Get current settings
+$button_text = get_option('grp_widget_button_default_text', __('Leave us a review', 'google-reviews-plugin'));
+$button_style = get_option('grp_widget_button_default_style', 'default');
+$button_size = get_option('grp_widget_button_default_size', 'medium');
+$button_color = get_option('grp_widget_button_default_color', '');
+$button_bg_color = get_option('grp_widget_button_default_bg_color', '');
+$qr_size = get_option('grp_widget_qr_default_size', 200);
+$tracking_enabled = get_option('grp_widget_tracking_enabled', true);
+
+// Get Place ID
+$place_id = get_option('grp_place_id', '');
+$place_id_auto = get_option('grp_gbp_place_id_default', '');
+$has_place_id = !empty($place_id) || !empty($place_id_auto);
+
+// Get stats
+global $wpdb;
+$clicks_table = $wpdb->prefix . 'grp_widget_clicks';
+$total_clicks = $wpdb->get_var("SELECT COUNT(*) FROM {$clicks_table}");
+$converted_clicks = $wpdb->get_var("SELECT COUNT(*) FROM {$clicks_table} WHERE converted = 1");
+
+$license = new GRP_License();
+$is_pro = $license->is_pro();
+
+?>
+
+<div class="wrap">
+    <h1><?php esc_html_e('Review Request Widgets', 'google-reviews-plugin'); ?></h1>
+    
+    <nav class="nav-tab-wrapper">
+        <a href="?page=google-reviews-widgets&tab=widgets" class="nav-tab <?php echo (!isset($_GET['tab']) || $_GET['tab'] === 'widgets') ? 'nav-tab-active' : ''; ?>">
+            <?php esc_html_e('Widgets', 'google-reviews-plugin'); ?>
+        </a>
+        <a href="?page=google-reviews-widgets&tab=qr" class="nav-tab <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'qr') ? 'nav-tab-active' : ''; ?>">
+            <?php esc_html_e('QR Codes', 'google-reviews-plugin'); ?>
+        </a>
+        <a href="?page=google-reviews-widgets&tab=analytics" class="nav-tab <?php echo (isset($_GET['tab']) && $_GET['tab'] === 'analytics') ? 'nav-tab-active' : ''; ?>">
+            <?php esc_html_e('Analytics', 'google-reviews-plugin'); ?>
+            <?php if (!$is_pro): ?>
+                <span class="dashicons dashicons-lock" style="font-size: 12px; vertical-align: middle; margin-left: 3px;"></span>
+            <?php endif; ?>
+        </a>
+    </nav>
+    
+    <?php if (!$has_place_id): ?>
+        <div class="notice notice-warning is-dismissible" style="margin-top: 20px;">
+            <p>
+                <strong><?php esc_html_e('Place ID Required:', 'google-reviews-plugin'); ?></strong>
+                <?php esc_html_e('Please set your Place ID in the', 'google-reviews-plugin'); ?>
+                <a href="<?php echo admin_url('admin.php?page=google-reviews-settings'); ?>"><?php esc_html_e('Settings', 'google-reviews-plugin'); ?></a>
+                <?php esc_html_e('page to generate review links.', 'google-reviews-plugin'); ?>
+            </p>
+        </div>
+    <?php endif; ?>
+    
+    <?php
+    $active_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'widgets';
+    
+    if ($active_tab === 'qr'): ?>
+        <!-- QR Code Generator Tab -->
+        <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+            <h2 style="margin-top: 0;"><?php esc_html_e('QR Code Generator', 'google-reviews-plugin'); ?></h2>
+            
+            <?php if ($has_place_id): ?>
+                <div class="grp-qr-generator">
+                    <div class="grp-qr-controls" style="margin-bottom: 20px;">
+                        <label for="grp-qr-size">
+                            <?php esc_html_e('QR Code Size:', 'google-reviews-plugin'); ?>
+                            <input type="number" id="grp-qr-size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="50" style="width: 80px; margin-left: 10px;">
+                            <span>px</span>
+                        </label>
+                        <button type="button" id="grp-generate-qr" class="button button-primary" style="margin-left: 15px;">
+                            <?php esc_html_e('Generate QR Code', 'google-reviews-plugin'); ?>
+                        </button>
+                    </div>
+                    
+                    <div id="grp-qr-preview" style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 4px; min-height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <p style="color: #666;"><?php esc_html_e('Click "Generate QR Code" to create your QR code', 'google-reviews-plugin'); ?></p>
+                    </div>
+                    
+                    <div id="grp-qr-download" style="margin-top: 20px; text-align: center; display: none;">
+                        <a href="#" id="grp-qr-download-link" class="button" download="google-review-qr-code.png">
+                            <?php esc_html_e('Download QR Code', 'google-reviews-plugin'); ?>
+                        </a>
+                        <p class="description" style="margin-top: 10px;">
+                            <?php esc_html_e('Right-click the QR code above and select "Save image as..." to download, or use the download button.', 'google-reviews-plugin'); ?>
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <h3><?php esc_html_e('Shortcode', 'google-reviews-plugin'); ?></h3>
+                    <p><?php esc_html_e('Use this shortcode to display a QR code anywhere on your site:', 'google-reviews-plugin'); ?></p>
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                        <code>[grp_review_qr size="<?php echo esc_attr($qr_size); ?>" caption="<?php esc_attr_e('Scan to leave a review', 'google-reviews-plugin'); ?>"]</code>
+                        <button type="button" class="button grp-copy-shortcode" data-shortcode='[grp_review_qr size="<?php echo esc_attr($qr_size); ?>" caption="<?php esc_attr_e('Scan to leave a review', 'google-reviews-plugin'); ?>"]' style="margin-left: 10px;">
+                            <?php esc_html_e('Copy', 'google-reviews-plugin'); ?>
+                        </button>
+                    </div>
+                </div>
+            <?php else: ?>
+                <p><?php esc_html_e('Please configure your Place ID in Settings to generate QR codes.', 'google-reviews-plugin'); ?></p>
+            <?php endif; ?>
+        </div>
+        
+    <?php elseif ($active_tab === 'analytics'): ?>
+        <!-- Analytics Tab -->
+        <?php if (!$is_pro): ?>
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0;"><?php esc_html_e('Analytics & Tracking', 'google-reviews-plugin'); ?></h2>
+                <p><?php esc_html_e('Advanced analytics and conversion tracking are available in the Pro version.', 'google-reviews-plugin'); ?></p>
+                <div style="background: #f0f6fc; border-left: 4px solid #2271b1; padding: 15px; margin: 20px 0;">
+                    <h3 style="margin-top: 0;"><?php esc_html_e('Pro Features:', 'google-reviews-plugin'); ?></h3>
+                    <ul>
+                        <li>✓ <?php esc_html_e('Detailed click analytics', 'google-reviews-plugin'); ?></li>
+                        <li>✓ <?php esc_html_e('Conversion tracking (click → review)', 'google-reviews-plugin'); ?></li>
+                        <li>✓ <?php esc_html_e('Widget performance metrics', 'google-reviews-plugin'); ?></li>
+                        <li>✓ <?php esc_html_e('Export analytics data', 'google-reviews-plugin'); ?></li>
+                        <li>✓ <?php esc_html_e('Time-based reports', 'google-reviews-plugin'); ?></li>
+                    </ul>
+                    <a href="https://reactwoo.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank" style="margin-top: 15px;">
+                        <?php esc_html_e('Upgrade to Pro', 'google-reviews-plugin'); ?>
+                    </a>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0;"><?php esc_html_e('Analytics Overview', 'google-reviews-plugin'); ?></h2>
+                
+                <div class="grp-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+                    <div class="grp-stat-card" style="background: #f9f9f9; padding: 20px; border-radius: 4px; text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #0073aa; margin-bottom: 10px;">
+                            <?php echo number_format($total_clicks); ?>
+                        </div>
+                        <div style="color: #666; font-size: 14px;">
+                            <?php esc_html_e('Total Clicks', 'google-reviews-plugin'); ?>
+                        </div>
+                    </div>
+                    
+                    <div class="grp-stat-card" style="background: #f9f9f9; padding: 20px; border-radius: 4px; text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #46b450; margin-bottom: 10px;">
+                            <?php echo number_format($converted_clicks); ?>
+                        </div>
+                        <div style="color: #666; font-size: 14px;">
+                            <?php esc_html_e('Conversions', 'google-reviews-plugin'); ?>
+                        </div>
+                    </div>
+                    
+                    <div class="grp-stat-card" style="background: #f9f9f9; padding: 20px; border-radius: 4px; text-align: center;">
+                        <div style="font-size: 32px; font-weight: bold; color: #dc3232; margin-bottom: 10px;">
+                            <?php 
+                            $conversion_rate = $total_clicks > 0 ? round(($converted_clicks / $total_clicks) * 100, 1) : 0;
+                            echo $conversion_rate . '%';
+                            ?>
+                        </div>
+                        <div style="color: #666; font-size: 14px;">
+                            <?php esc_html_e('Conversion Rate', 'google-reviews-plugin'); ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="description">
+                    <?php esc_html_e('Note: Conversion tracking requires manual verification. Conversions are marked when a review is detected for your location.', 'google-reviews-plugin'); ?>
+                </p>
+            </div>
+        <?php endif; ?>
+        
+    <?php else: ?>
+        <!-- Widgets Tab -->
+        <form method="post" action="">
+            <?php wp_nonce_field('grp_widgets_settings'); ?>
+            
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('Review Button Widget', 'google-reviews-plugin'); ?></h2>
+                
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_button_default_text"><?php esc_html_e('Button Text', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="grp_widget_button_default_text" name="grp_widget_button_default_text" value="<?php echo esc_attr($button_text); ?>" class="regular-text">
+                                <p class="description"><?php esc_html_e('Default text for review buttons.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_button_default_style"><?php esc_html_e('Button Style', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <select id="grp_widget_button_default_style" name="grp_widget_button_default_style">
+                                    <option value="default" <?php selected($button_style, 'default'); ?>><?php esc_html_e('Default', 'google-reviews-plugin'); ?></option>
+                                    <option value="rounded" <?php selected($button_style, 'rounded'); ?>><?php esc_html_e('Rounded', 'google-reviews-plugin'); ?></option>
+                                    <option value="outline" <?php selected($button_style, 'outline'); ?>><?php esc_html_e('Outline', 'google-reviews-plugin'); ?></option>
+                                    <option value="minimal" <?php selected($button_style, 'minimal'); ?>><?php esc_html_e('Minimal', 'google-reviews-plugin'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_button_default_size"><?php esc_html_e('Button Size', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <select id="grp_widget_button_default_size" name="grp_widget_button_default_size">
+                                    <option value="small" <?php selected($button_size, 'small'); ?>><?php esc_html_e('Small', 'google-reviews-plugin'); ?></option>
+                                    <option value="medium" <?php selected($button_size, 'medium'); ?>><?php selected($button_size, 'medium'); ?>><?php esc_html_e('Medium', 'google-reviews-plugin'); ?></option>
+                                    <option value="large" <?php selected($button_size, 'large'); ?>><?php esc_html_e('Large', 'google-reviews-plugin'); ?></option>
+                                </select>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_button_default_color"><?php esc_html_e('Text Color', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color" id="grp_widget_button_default_color" name="grp_widget_button_default_color" value="<?php echo esc_attr($button_color ?: '#ffffff'); ?>">
+                                <input type="text" id="grp_widget_button_default_color_text" value="<?php echo esc_attr($button_color); ?>" placeholder="#ffffff" style="width: 100px; margin-left: 10px;">
+                                <p class="description"><?php esc_html_e('Leave empty to use default color.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_button_default_bg_color"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color" id="grp_widget_button_default_bg_color" name="grp_widget_button_default_bg_color" value="<?php echo esc_attr($button_bg_color ?: '#0073aa'); ?>">
+                                <input type="text" id="grp_widget_button_default_bg_color_text" value="<?php echo esc_attr($button_bg_color); ?>" placeholder="#0073aa" style="width: 100px; margin-left: 10px;">
+                                <p class="description"><?php esc_html_e('Leave empty to use default color.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('QR Code Settings', 'google-reviews-plugin'); ?></h2>
+                
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_qr_default_size"><?php esc_html_e('Default QR Code Size', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="50">
+                                <span>px</span>
+                                <p class="description"><?php esc_html_e('Default size for generated QR codes.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('Tracking Settings', 'google-reviews-plugin'); ?></h2>
+                
+                <table class="form-table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_tracking_enabled"><?php esc_html_e('Enable Click Tracking', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="checkbox" id="grp_widget_tracking_enabled" name="grp_widget_tracking_enabled" value="1" <?php checked($tracking_enabled, true); ?>>
+                                <p class="description"><?php esc_html_e('Track clicks on review buttons and QR codes for analytics.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <?php submit_button(); ?>
+        </form>
+        
+        <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+            <h2 style="margin-top: 0;"><?php esc_html_e('Shortcodes', 'google-reviews-plugin'); ?></h2>
+            
+            <h3><?php esc_html_e('Review Button', 'google-reviews-plugin'); ?></h3>
+            <p><?php esc_html_e('Use this shortcode to display a review button:', 'google-reviews-plugin'); ?></p>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                <code>[grp_review_button]</code>
+                <button type="button" class="button grp-copy-shortcode" data-shortcode="[grp_review_button]" style="margin-left: 10px;">
+                    <?php esc_html_e('Copy', 'google-reviews-plugin'); ?>
+                </button>
+            </div>
+            
+            <h4 style="margin-top: 20px;"><?php esc_html_e('Available Attributes:', 'google-reviews-plugin'); ?></h4>
+            <ul style="list-style: disc; margin-left: 20px;">
+                <li><code>text</code> - <?php esc_html_e('Button text (default: "Leave us a review")', 'google-reviews-plugin'); ?></li>
+                <li><code>style</code> - <?php esc_html_e('Button style: default, rounded, outline, minimal', 'google-reviews-plugin'); ?></li>
+                <li><code>size</code> - <?php esc_html_e('Button size: small, medium, large', 'google-reviews-plugin'); ?></li>
+                <li><code>color</code> - <?php esc_html_e('Text color (hex code)', 'google-reviews-plugin'); ?></li>
+                <li><code>bg_color</code> - <?php esc_html_e('Background color (hex code)', 'google-reviews-plugin'); ?></li>
+                <li><code>align</code> - <?php esc_html_e('Alignment: left, center, right', 'google-reviews-plugin'); ?></li>
+                <li><code>place_id</code> - <?php esc_html_e('Override Place ID (optional)', 'google-reviews-plugin'); ?></li>
+            </ul>
+            
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin: 15px 0;">
+                <strong><?php esc_html_e('Example:', 'google-reviews-plugin'); ?></strong><br>
+                <code>[grp_review_button text="Rate us on Google" style="rounded" size="large" align="center"]</code>
+                <button type="button" class="button grp-copy-shortcode" data-shortcode='[grp_review_button text="Rate us on Google" style="rounded" size="large" align="center"]' style="margin-left: 10px;">
+                    <?php esc_html_e('Copy', 'google-reviews-plugin'); ?>
+                </button>
+            </div>
+            
+            <h3 style="margin-top: 30px;"><?php esc_html_e('QR Code', 'google-reviews-plugin'); ?></h3>
+            <p><?php esc_html_e('Use this shortcode to display a QR code:', 'google-reviews-plugin'); ?></p>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                <code>[grp_review_qr]</code>
+                <button type="button" class="button grp-copy-shortcode" data-shortcode="[grp_review_qr]" style="margin-left: 10px;">
+                    <?php esc_html_e('Copy', 'google-reviews-plugin'); ?>
+                </button>
+            </div>
+            
+            <h4 style="margin-top: 20px;"><?php esc_html_e('Available Attributes:', 'google-reviews-plugin'); ?></h4>
+            <ul style="list-style: disc; margin-left: 20px;">
+                <li><code>size</code> - <?php esc_html_e('QR code size in pixels (default: 200)', 'google-reviews-plugin'); ?></li>
+                <li><code>caption</code> - <?php esc_html_e('Caption text below QR code', 'google-reviews-plugin'); ?></li>
+                <li><code>place_id</code> - <?php esc_html_e('Override Place ID (optional)', 'google-reviews-plugin'); ?></li>
+            </ul>
+        </div>
+        
+        <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+            <h2 style="margin-top: 0;"><?php esc_html_e('Preview', 'google-reviews-plugin'); ?></h2>
+            <p><?php esc_html_e('Preview of how your review button will look:', 'google-reviews-plugin'); ?></p>
+            <div style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
+                <?php
+                $preview_url = $has_place_id ? GRP_Review_Widgets::get_instance()->generate_review_url('', 'button', 'preview') : '#';
+                $preview_classes = array('grp-review-button', 'grp-review-button-' . $button_style, 'grp-review-button-' . $button_size);
+                $preview_styles = array();
+                if (!empty($button_color)) {
+                    $preview_styles[] = 'color: ' . esc_attr($button_color);
+                }
+                if (!empty($button_bg_color)) {
+                    $preview_styles[] = 'background-color: ' . esc_attr($button_bg_color);
+                }
+                $preview_style_attr = !empty($preview_styles) ? ' style="' . implode('; ', $preview_styles) . '"' : '';
+                ?>
+                <a href="<?php echo esc_url($preview_url); ?>" class="<?php echo esc_attr(implode(' ', $preview_classes)); ?>" target="_blank" rel="noopener"<?php echo $preview_style_attr; ?>>
+                    <span class="grp-review-button-icon">⭐</span>
+                    <span class="grp-review-button-text"><?php echo esc_html($button_text); ?></span>
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script>
+jQuery(document).ready(function($) {
+    // Color picker sync
+    $('#grp_widget_button_default_color').on('change', function() {
+        $('#grp_widget_button_default_color_text').val($(this).val());
+    });
+    $('#grp_widget_button_default_color_text').on('input', function() {
+        var val = $(this).val();
+        if (/^#[0-9A-F]{6}$/i.test(val)) {
+            $('#grp_widget_button_default_color').val(val);
+        }
+    });
+    
+    $('#grp_widget_button_default_bg_color').on('change', function() {
+        $('#grp_widget_button_default_bg_color_text').val($(this).val());
+    });
+    $('#grp_widget_button_default_bg_color_text').on('input', function() {
+        var val = $(this).val();
+        if (/^#[0-9A-F]{6}$/i.test(val)) {
+            $('#grp_widget_button_default_bg_color').val(val);
+        }
+    });
+    
+    // Copy shortcode
+    $('.grp-copy-shortcode').on('click', function() {
+        var shortcode = $(this).data('shortcode');
+        var $temp = $('<textarea>');
+        $('body').append($temp);
+        $temp.val(shortcode).select();
+        document.execCommand('copy');
+        $temp.remove();
+        $(this).text('<?php esc_js_e('Copied!', 'google-reviews-plugin'); ?>');
+        var $btn = $(this);
+        setTimeout(function() {
+            $btn.text('<?php esc_js_e('Copy', 'google-reviews-plugin'); ?>');
+        }, 2000);
+    });
+    
+    // Generate QR code
+    $('#grp-generate-qr').on('click', function() {
+        var $btn = $(this);
+        var originalText = $btn.text();
+        $btn.prop('disabled', true).text('<?php esc_js_e('Generating...', 'google-reviews-plugin'); ?>');
+        
+        var size = $('#grp-qr-size').val();
+        
+        $.post(grpWidgets.ajax_url, {
+            action: 'grp_generate_qr',
+            nonce: grpWidgets.nonce,
+            size: size
+        }, function(response) {
+            if (response.success) {
+                $('#grp-qr-preview').html('<img src="' + response.data.qr_url + '" alt="QR Code" style="max-width: 100%;">');
+                $('#grp-qr-download').show();
+                $('#grp-qr-download-link').attr('href', response.data.qr_url);
+            } else {
+                alert(response.data || '<?php esc_js_e('Failed to generate QR code', 'google-reviews-plugin'); ?>');
+            }
+        }).always(function() {
+            $btn.prop('disabled', false).text(originalText);
+        });
+    });
+});
+</script>
+
