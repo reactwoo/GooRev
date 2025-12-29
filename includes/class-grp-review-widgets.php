@@ -417,7 +417,7 @@ class GRP_Review_Widgets {
         }
         
         if (empty($place_id)) {
-            wp_send_json_error(__('Place ID is required', 'google-reviews-plugin'));
+            wp_send_json_error(__('Place ID is required. Please set your Place ID in Settings.', 'google-reviews-plugin'));
         }
         
         $review_url = $this->generate_review_url($place_id, 'qr', 'admin');
