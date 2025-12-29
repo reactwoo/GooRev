@@ -1,0 +1,262 @@
+/**
+ * Onboarding wizard styles
+ */
+
+.grp-onboarding-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.grp-onboarding-modal {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.grp-onboarding-header {
+    padding: 30px 30px 20px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.grp-onboarding-header h2 {
+    margin: 0 0 10px;
+    font-size: 24px;
+    color: #1d2327;
+}
+
+.grp-onboarding-subtitle {
+    margin: 0;
+    color: #646970;
+    font-size: 14px;
+}
+
+.grp-onboarding-content {
+    padding: 30px;
+    min-height: 300px;
+}
+
+.grp-onboarding-step {
+    display: none;
+}
+
+.grp-onboarding-step.active {
+    display: block;
+}
+
+.grp-onboarding-step h3 {
+    margin: 0 0 15px;
+    font-size: 18px;
+    color: #1d2327;
+}
+
+.grp-onboarding-step p {
+    margin: 0 0 20px;
+    color: #646970;
+    line-height: 1.6;
+}
+
+.grp-onboarding-field {
+    margin-bottom: 20px;
+}
+
+.grp-onboarding-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.grp-onboarding-field .optional {
+    font-weight: normal;
+    color: #646970;
+    font-size: 13px;
+}
+
+.grp-onboarding-field input[type="text"],
+.grp-onboarding-field input[type="email"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.grp-onboarding-field .description {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #646970;
+    line-height: 1.5;
+}
+
+.grp-onboarding-info-box {
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.grp-onboarding-info-box h4 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.grp-onboarding-info-box p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    color: #646970;
+}
+
+.grp-onboarding-info-box p:last-child {
+    margin-bottom: 0;
+}
+
+.grp-onboarding-google-connect {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.grp-connect-google-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+.grp-connect-google-btn .dashicons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.grp-onboarding-success {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    background: #d5f4e6;
+    border-radius: 4px;
+    color: #00a32a;
+}
+
+.grp-onboarding-success .dashicons {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+}
+
+.grp-onboarding-success p {
+    margin: 0;
+    font-weight: 600;
+}
+
+.grp-onboarding-visual-guide {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.grp-onboarding-visual-guide h4 {
+    margin: 0 0 15px;
+    font-size: 14px;
+    color: #1d2327;
+}
+
+.grp-onboarding-visual-guide ol {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.grp-onboarding-visual-guide li {
+    margin-bottom: 10px;
+    color: #646970;
+    line-height: 1.6;
+}
+
+.grp-onboarding-visual-guide li:last-child {
+    margin-bottom: 0;
+}
+
+.grp-onboarding-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+}
+
+.grp-onboarding-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.grp-onboarding-footer .button {
+    min-width: 100px;
+}
+
+.grp-onboarding-loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #2271b1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 782px) {
+    .grp-onboarding-modal {
+        max-width: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    
+    .grp-onboarding-content {
+        padding: 20px;
+    }
+    
+    .grp-onboarding-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .grp-onboarding-nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .grp-onboarding-footer .button {
+        flex: 1;
+    }
+}
+

@@ -76,6 +76,7 @@ class Google_Reviews_Plugin {
         // Admin classes
 		if (is_admin()) {
 			require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-admin.php';
+			require_once GRP_PLUGIN_DIR . 'includes/admin/class-grp-onboarding.php';
 		}
         
         // Frontend classes
@@ -135,6 +136,11 @@ class Google_Reviews_Plugin {
             // Initialize admin (adds menus, settings pages, assets)
             if (class_exists('GRP_Admin')) {
                 $this->admin = new GRP_Admin();
+            }
+            
+            // Initialize onboarding wizard
+            if (class_exists('GRP_Onboarding')) {
+                new GRP_Onboarding();
             }
         }
     }
