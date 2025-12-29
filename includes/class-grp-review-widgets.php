@@ -63,7 +63,13 @@ class GRP_Review_Widgets {
      * Initialize hooks
      */
     private function init_hooks() {
-        // Check if addon is enabled
+        // Always register admin menu hook (so we can check addon status inside)
+        if (is_admin()) {
+            add_action('admin_menu', array($this, 'add_admin_menu'));
+            add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
+        }
+        
+        // Check if addon is enabled for frontend/admin functionality
         $addons = GRP_Addons::get_instance();
         if (!$addons->is_addon_enabled('review-widgets')) {
             return;
@@ -85,12 +91,6 @@ class GRP_Review_Widgets {
         add_action('wp_ajax_nopriv_grp_generate_qr', array($this, 'ajax_generate_qr'));
         add_action('wp_ajax_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
         add_action('wp_ajax_nopriv_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
-        
-        // Admin hooks
-        if (is_admin()) {
-            add_action('admin_menu', array($this, 'add_admin_menu'));
-            add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
-        }
     }
     
     /**
