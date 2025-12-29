@@ -439,6 +439,21 @@ class GRP_License {
         $action = sanitize_text_field($_POST['grp_license_action']);
         
         switch ($action) {
+            case 'activate_free':
+                // Activate free license
+                $result = $this->activate_free_license();
+                
+                if (is_wp_error($result)) {
+                    add_action('admin_notices', function() use ($result) {
+                        echo '<div class="notice notice-error"><p>' . esc_html($result->get_error_message()) . '</p></div>';
+                    });
+                } else {
+                    add_action('admin_notices', function() {
+                        echo '<div class="notice notice-success"><p>' . esc_html__('Free license activated successfully! You can now connect to Google using the cloud server.', 'google-reviews-plugin') . '</p></div>';
+                    });
+                }
+                break;
+                
             case 'activate':
                 $license_key = sanitize_text_field($_POST['grp_license_key']);
                 $result = $this->activate_license($license_key);
