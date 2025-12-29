@@ -312,17 +312,41 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                                         <?php esc_html_e('Rate limit encountered. Using cached Place ID if available.', 'google-reviews-plugin'); ?>
                                     </p>
                                 <?php endif; ?>
-                                <?php if (!empty($place_id_display)): ?>
+                                <?php 
+                                $manual_place_id = get_option('grp_wc_place_id_override', '');
+                                $final_place_id = $manual_place_id ?: $place_id_display;
+                                ?>
+                                <?php if (!empty($final_place_id)): ?>
                                     <br>
-                                    <code style="margin-top: 5px; display: inline-block; padding: 4px 8px; background: #f0f0f0; border-radius: 3px;"><?php echo esc_html($place_id_display); ?></code>
+                                    <code style="margin-top: 5px; display: inline-block; padding: 4px 8px; background: #f0f0f0; border-radius: 3px;"><?php echo esc_html($final_place_id); ?></code>
+                                    <?php if ($manual_place_id): ?>
+                                        <span style="margin-left: 8px; color: #2271b1; font-size: 12px;">(<?php esc_html_e('Manual override', 'google-reviews-plugin'); ?>)</span>
+                                    <?php endif; ?>
                                     <p class="description" style="margin-top: 8px;">
-                                        <?php esc_html_e('Place ID automatically retrieved from your connected Google Business Profile location. Review links will use this Place ID.', 'google-reviews-plugin'); ?>
+                                        <?php esc_html_e('Place ID for review invite links. Note: Reviews are fetched using your Business Profile location (no Place ID needed). Place ID is only required for generating "leave a review" links.', 'google-reviews-plugin'); ?>
                                     </p>
                                 <?php else: ?>
-                                    <p class="description" style="color: #d63638; margin-top: 8px;">
-                                        <?php esc_html_e('Place ID not found. The Place ID may not be available in the API response, or the API request was rate limited. You may need to manually enter the Place ID if review links are not working.', 'google-reviews-plugin'); ?>
+                                    <p class="description" style="margin-top: 8px;">
+                                        <strong><?php esc_html_e('Note:', 'google-reviews-plugin'); ?></strong> <?php esc_html_e('Place ID is only needed for review invite links. Reviews are fetched using your Business Profile location automatically.', 'google-reviews-plugin'); ?>
+                                    </p>
+                                <?php endif; ?>
+                                <?php if (empty($place_id_display)): ?>
+                                    <p class="description" style="margin-top: 8px;">
+                                        <label for="grp_wc_place_id_override" style="font-weight: 600;">
+                                            <?php esc_html_e('Manual Place ID Override (optional):', 'google-reviews-plugin'); ?>
+                                        </label>
+                                        <input type="text" 
+                                               id="grp_wc_place_id_override" 
+                                               name="grp_wc_place_id_override" 
+                                               value="<?php echo esc_attr($manual_place_id); ?>" 
+                                               placeholder="ChIJ..." 
+                                               class="regular-text" 
+                                               style="margin-top: 5px;">
                                         <br>
-                                        <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank"><?php esc_html_e('How to find your Place ID', 'google-reviews-plugin'); ?></a>
+                                        <span class="description">
+                                            <?php esc_html_e('If auto-detection fails, you can manually enter your Place ID here. This is only needed for review invite links.', 'google-reviews-plugin'); ?>
+                                            <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank"><?php esc_html_e('How to find your Place ID', 'google-reviews-plugin'); ?></a>
+                                        </span>
                                     </p>
                                 <?php endif; ?>
                             </td>
