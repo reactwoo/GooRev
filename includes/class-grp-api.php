@@ -155,7 +155,8 @@ class GRP_API {
             if ($this->refresh_token) {
                 $data['refresh_token'] = $this->refresh_token;
             } else {
-                // Log warning if no refresh token available
+                // Always log if no refresh token - this is critical for OAuth refresh
+                error_log('[GRP Warning] API request without refresh_token | Endpoint: ' . $endpoint . ' | Has access_token: ' . (!empty($this->access_token) ? 'yes' : 'no'));
                 grp_debug_log('API request without refresh_token', array(
                     'endpoint' => $endpoint,
                     'has_access_token' => !empty($this->access_token),
@@ -163,6 +164,8 @@ class GRP_API {
                 ));
             }
         } else {
+            // Always log if no access token - this is critical
+            error_log('[GRP Error] API request without access_token | Endpoint: ' . $endpoint);
             grp_debug_log('API request without access_token', array(
                 'endpoint' => $endpoint
             ));
@@ -299,6 +302,10 @@ class GRP_API {
             if ($is_oauth_error) {
                 // This is a Google OAuth error, not a JWT error
                 // Don't try to refresh JWT token - this won't help
+                
+                // Always log OAuth errors (even if debug logging is off) - these are critical
+                error_log('[GRP OAuth Error] ' . $error_detail . ' | Endpoint: ' . $endpoint . ' | Error Code: ' . $error_code . ' | Full Response: ' . print_r($decoded, true));
+                
                 return new WP_Error('oauth_expired', sprintf(
                     __('Google OAuth token expired: %s. Please disconnect and reconnect your Google account in the plugin settings.', 'google-reviews-plugin'),
                     $error_detail
@@ -460,7 +467,8 @@ class GRP_API {
 
             update_option('grp_google_access_token', $this->access_token);
             
-            // Log token receipt for debugging
+            // Always log token receipt - this is critical for debugging OAuth issues
+            error_log('[GRP OAuth] Tokens saved | Has access_token: ' . (!empty($this->access_token) ? 'yes (' . strlen($this->access_token) . ' chars)' : 'no') . ' | Has refresh_token: ' . (!empty($this->refresh_token) ? 'yes (' . strlen($this->refresh_token) . ' chars)' : 'no'));
             grp_debug_log('OAuth tokens saved', array(
                 'has_access_token' => !empty($this->access_token),
                 'has_refresh_token' => !empty($this->refresh_token),
