@@ -404,8 +404,28 @@ class GRP_Admin {
             echo '<div class="notice notice-success"><p>' . esc_html__('Google account connected.', 'google-reviews-plugin') . '</p></div>';
             echo '<p>'
                 . '<button id="grp-test-connection" class="button">' . esc_html__('Test Connection', 'google-reviews-plugin') . '</button> '
-                . '<a class="button" href="' . esc_url($disconnect_url) . '">' . esc_html__('Disconnect', 'google-reviews-plugin') . '</a>'
+                . '<button id="grp-disconnect-btn" class="button" style="color: #dc3232; border-color: #dc3232;">' . esc_html__('Disconnect', 'google-reviews-plugin') . '</button>'
                 . '</p>';
+            // Disconnect confirmation modal (will be shown via JavaScript)
+            echo '<div id="grp-disconnect-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100000; align-items: center; justify-content: center;">';
+            echo '<div style="background: #fff; padding: 20px; border-radius: 4px; max-width: 500px; margin: 20px;">';
+            echo '<h2 style="margin-top: 0;">' . esc_html__('Disconnect Google Account', 'google-reviews-plugin') . '</h2>';
+            echo '<p>' . esc_html__('Are you sure you want to disconnect your Google account?', 'google-reviews-plugin') . '</p>';
+            echo '<form method="post" action="' . esc_url($disconnect_url) . '" id="grp-disconnect-form">';
+            echo '<label style="display: block; margin: 15px 0;">';
+            echo '<input type="checkbox" name="grp_clear_reviews" value="1" checked> ';
+            echo esc_html__('Also clear all stored reviews from the database', 'google-reviews-plugin');
+            echo '</label>';
+            echo '<p style="font-size: 12px; color: #666; margin-top: 10px;">';
+            echo esc_html__('If unchecked, reviews will remain in the database but won\'t be updated until you reconnect.', 'google-reviews-plugin');
+            echo '</p>';
+            echo '<div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">';
+            echo '<button type="button" class="button" id="grp-cancel-disconnect">' . esc_html__('Cancel', 'google-reviews-plugin') . '</button>';
+            echo '<button type="submit" class="button button-primary" style="background: #dc3232; border-color: #dc3232;">' . esc_html__('Disconnect', 'google-reviews-plugin') . '</button>';
+            echo '</div>';
+            echo '</form>';
+            echo '</div>';
+            echo '</div>';
         }
         
         include GRP_PLUGIN_DIR . 'includes/admin/views/settings.php';
