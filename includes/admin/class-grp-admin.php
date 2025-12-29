@@ -946,10 +946,12 @@ class GRP_Admin {
         // Check if this is a forced refresh
         $force = isset($_POST['force']) && (int) $_POST['force'] === 1;
         
+        // Define cache key (used whether force or not)
+        $cache_key = 'grp_accounts_list';
+        
         // Check for cached accounts first (cache for 10 minutes - accounts don't change often)
         // Skip cache if force refresh is requested
         if (!$force) {
-            $cache_key = 'grp_accounts_list';
             $cached_accounts = get_transient($cache_key);
             if ($cached_accounts !== false) {
                 wp_send_json_success(array('accounts' => $cached_accounts, 'cached' => true));
