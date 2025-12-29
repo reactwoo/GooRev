@@ -435,7 +435,18 @@ class GRP_Review_Widgets {
         // Check if addon is enabled
         $addons = GRP_Addons::get_instance();
         if (!$addons->is_addon_enabled('review-widgets')) {
-            wp_die(__('Review Widgets addon is not enabled. Please enable it from the Addons page.', 'google-reviews-plugin'));
+            // Show a friendly message instead of wp_die
+            echo '<div class="wrap">';
+            echo '<h1>' . esc_html__('Review Request Widgets', 'google-reviews-plugin') . '</h1>';
+            echo '<div class="notice notice-warning"><p>';
+            echo '<strong>' . esc_html__('Review Widgets addon is not enabled.', 'google-reviews-plugin') . '</strong><br>';
+            echo esc_html__('Please enable it from the', 'google-reviews-plugin') . ' ';
+            echo '<a href="' . esc_url(admin_url('admin.php?page=google-reviews-addons')) . '">';
+            echo esc_html__('Addons page', 'google-reviews-plugin');
+            echo '</a>.';
+            echo '</p></div>';
+            echo '</div>';
+            return;
         }
         
         include GRP_PLUGIN_DIR . 'includes/admin/views/widgets.php';
