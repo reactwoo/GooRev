@@ -74,6 +74,13 @@ if (!defined('ABSPATH')) {
                         <?php
                         $api = new GRP_API();
                         $is_connected = $api->is_connected();
+                        $auth_url = '';
+                        if (!$is_connected) {
+                            $auth_url_result = $api->get_auth_url();
+                            if (!is_wp_error($auth_url_result)) {
+                                $auth_url = $auth_url_result;
+                            }
+                        }
                         ?>
                         
                         <?php if ($is_connected): ?>
@@ -81,16 +88,23 @@ if (!defined('ABSPATH')) {
                                 <span class="dashicons dashicons-yes-alt"></span>
                                 <p><?php esc_html_e('Google account is already connected!', 'google-reviews-plugin'); ?></p>
                             </div>
-                        <?php else: ?>
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings&action=connect')); ?>" 
-                               class="button button-primary button-large grp-connect-google-btn" 
-                               target="_blank">
+                        <?php elseif (!empty($auth_url)): ?>
+                            <a href="<?php echo esc_url($auth_url); ?>" 
+                               class="button button-primary button-large grp-connect-google-btn">
                                 <span class="dashicons dashicons-google"></span>
                                 <?php esc_html_e('Connect Google Account', 'google-reviews-plugin'); ?>
                             </a>
                             <p class="description">
-                                <?php esc_html_e('This will open the settings page where you can connect your Google account. Once connected, return here to continue.', 'google-reviews-plugin'); ?>
+                                <?php esc_html_e('This will redirect you to Google to authorize the connection. After authorization, you\'ll be redirected back to continue setup.', 'google-reviews-plugin'); ?>
                             </p>
+                        <?php else: ?>
+                            <div class="notice notice-error">
+                                <p><?php esc_html_e('Unable to generate connection URL. Please try refreshing the page or contact support.', 'google-reviews-plugin'); ?></p>
+                            </div>
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings')); ?>" 
+                               class="button button-secondary">
+                                <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
+                            </a>
                         <?php endif; ?>
                     </div>
                 </div>

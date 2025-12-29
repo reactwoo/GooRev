@@ -518,6 +518,14 @@ class GRP_Admin {
                 delete_option('grp_oauth_state');
                 
                 add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
+                
+                // If we're in onboarding mode, redirect back to onboarding
+                $onboarding_complete = get_option('grp_onboarding_complete', false);
+                if (!$onboarding_complete) {
+                    // Redirect to dashboard to continue onboarding
+                    wp_safe_redirect(admin_url('admin.php?page=google-reviews'));
+                    exit;
+                }
             } else {
                 delete_option('grp_oauth_state');
                 add_settings_error('grp_settings', 'grp_oauth_fail', __('Failed to retrieve OAuth tokens. Please try connecting again.', 'google-reviews-plugin'), 'error');

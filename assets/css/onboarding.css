@@ -136,15 +136,26 @@
 .grp-connect-google-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
+    gap: 10px;
+    padding: 14px 28px;
     font-size: 16px;
+    line-height: 1.4;
+    text-decoration: none;
+    border-radius: 4px;
 }
 
 .grp-connect-google-btn .dashicons {
     font-size: 20px;
     width: 20px;
     height: 20px;
+    line-height: 1;
+}
+
+.grp-onboarding-google-connect .description {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #646970;
+    line-height: 1.5;
 }
 
 .grp-onboarding-success {
