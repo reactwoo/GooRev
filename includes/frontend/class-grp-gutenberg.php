@@ -166,6 +166,79 @@ class GRP_Gutenberg {
                 ),
             ),
         ));
+        
+        // Register Review Button block if addon is enabled
+        $addons = GRP_Addons::get_instance();
+        if ($addons->is_addon_enabled('review-widgets')) {
+            register_block_type('google-reviews/review-button', array(
+                'editor_script' => 'grp-gutenberg-block',
+                'editor_style' => 'grp-gutenberg-block-editor',
+                'style' => 'grp-review-widgets',
+                'render_callback' => array($this, 'render_review_button_block'),
+                'attributes' => array(
+                    'button_text' => array(
+                        'type' => 'string',
+                        'default' => __('Leave us a review', 'google-reviews-plugin'),
+                    ),
+                    'button_style' => array(
+                        'type' => 'string',
+                        'default' => 'default',
+                    ),
+                    'button_size' => array(
+                        'type' => 'string',
+                        'default' => 'medium',
+                    ),
+                    'align' => array(
+                        'type' => 'string',
+                        'default' => 'left',
+                    ),
+                    'text_color' => array(
+                        'type' => 'string',
+                    ),
+                    'background_color' => array(
+                        'type' => 'string',
+                    ),
+                ),
+            ));
+        }
+    }
+    
+    /**
+     * Render review button block
+     */
+    public function render_review_button_block($attributes) {
+        // Check if Review Widgets addon is enabled
+        $addons = GRP_Addons::get_instance();
+        if (!$addons->is_addon_enabled('review-widgets')) {
+            return '<p>' . __('Review Widgets addon is not enabled.', 'google-reviews-plugin') . '</p>';
+        }
+        
+        $widgets = GRP_Review_Widgets::get_instance();
+        
+        // Build shortcode attributes
+        $shortcode_atts = array(
+            'text' => $attributes['button_text'],
+            'style' => $attributes['button_style'],
+            'size' => $attributes['button_size'],
+            'align' => $attributes['align'],
+        );
+        
+        // Add colors if set
+        if (!empty($attributes['text_color'])) {
+            $shortcode_atts['color'] = $attributes['text_color'];
+        }
+        if (!empty($attributes['background_color'])) {
+            $shortcode_atts['bg_color'] = $attributes['background_color'];
+        }
+        
+        // Build shortcode
+        $shortcode = '[grp_review_button';
+        foreach ($shortcode_atts as $key => $value) {
+            $shortcode .= ' ' . $key . '="' . esc_attr($value) . '"';
+        }
+        $shortcode .= ']';
+        
+        return do_shortcode($shortcode);
     }
     
     /**

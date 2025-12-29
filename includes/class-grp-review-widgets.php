@@ -170,9 +170,12 @@ class GRP_Review_Widgets {
         wp_enqueue_style('grp-review-widgets', GRP_PLUGIN_URL . 'assets/css/review-widgets.css', array(), GRP_PLUGIN_VERSION);
         wp_enqueue_script('grp-review-widgets', GRP_PLUGIN_URL . 'assets/js/review-widgets.js', array('jquery'), GRP_PLUGIN_VERSION, true);
         
+        $tracking_enabled = get_option('grp_widget_tracking_enabled', true);
+        
         wp_localize_script('grp-review-widgets', 'grpReviewWidgets', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('grp_widgets_nonce'),
+            'tracking_enabled' => $tracking_enabled,
         ));
     }
     

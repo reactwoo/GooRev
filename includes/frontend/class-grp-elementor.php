@@ -38,6 +38,13 @@ class GRP_Elementor {
         require_once GRP_PLUGIN_DIR . 'includes/frontend/elementor/class-grp-elementor-widget.php';
         
         \Elementor\Plugin::instance()->widgets_manager->register_widget_type(new GRP_Elementor_Widget());
+        
+        // Register Review Button widget if addon is enabled
+        $addons = GRP_Addons::get_instance();
+        if ($addons->is_addon_enabled('review-widgets')) {
+            require_once GRP_PLUGIN_DIR . 'includes/frontend/elementor/class-grp-elementor-review-button-widget.php';
+            \Elementor\Plugin::instance()->widgets_manager->register_widget_type(new GRP_Elementor_Review_Button_Widget());
+        }
     }
     
     /**
