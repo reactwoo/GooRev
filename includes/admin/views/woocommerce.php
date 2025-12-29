@@ -76,35 +76,55 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
     // This prevents unnecessary API calls on every page load
     if (empty($place_id_display) || empty($location_name)) {
         // First, try to get placeId from single location endpoint (more reliable)
+        // This endpoint includes placeId in the readMask
         if (empty($place_id_display)) {
             $location_details = $api->get_location($account_id, $location_id);
-            if (!is_wp_error($location_details) && isset($location_details['location'])) {
-                $loc = $location_details['location'];
+            if (!is_wp_error($location_details)) {
+                // Handle response structure: could be {location: {...}} or just {...}
+                $loc = isset($location_details['location']) ? $location_details['location'] : $location_details;
                 
-                // Get location name if not cached
-                if (empty($location_name)) {
-                    $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? ($loc['name'] ?? '');
-                    if (!empty($location_name)) {
-                        update_option('grp_gbp_location_name', $location_name);
+                if (!empty($loc)) {
+                    // Get location name if not cached
+                    if (empty($location_name)) {
+                        $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? ($loc['name'] ?? '');
+                        if (!empty($location_name)) {
+                            update_option('grp_gbp_location_name', $location_name);
+                        }
+                    }
+                    
+                    // Extract placeId from single location response
+                    if (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                        $place_id_display = $loc['placeId'];
+                    } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
+                        $place_id_display = $loc['place_id'];
+                    } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
+                        $place_id_display = $loc['storefrontAddress']['placeId'];
+                    }
+                    
+                    if (!empty($place_id_display)) {
+                        update_option('grp_gbp_place_id_default', $place_id_display);
+                        // If we got both placeId and location_name, we're done - don't call locations list
+                        if (!empty($location_name)) {
+                            // Skip the fallback - we have everything we need
+                            $place_id_display = $place_id_display; // Set flag to skip fallback
+                        }
+                    } else {
+                        // Log for debugging if placeId wasn't found in single location response
+                        grp_debug_log('Place ID not found in single location response', array(
+                            'location_id' => $location_id,
+                            'response_keys' => array_keys($loc),
+                            'has_storefrontAddress' => isset($loc['storefrontAddress'])
+                        ));
                     }
                 }
-                
-                // Extract placeId from single location response
-                if (isset($loc['placeId']) && !empty($loc['placeId'])) {
-                    $place_id_display = $loc['placeId'];
-                } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
-                    $place_id_display = $loc['place_id'];
-                } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
-                    $place_id_display = $loc['storefrontAddress']['placeId'];
-                }
-                
-                if (!empty($place_id_display)) {
-                    update_option('grp_gbp_place_id_default', $place_id_display);
-                }
+            } else {
+                // Log error but continue to fallback
+                grp_debug_log('Single location endpoint failed', array('error' => $location_details->get_error_message()));
             }
         }
         
-        // Fallback: If we still don't have place_id or location_name, try locations list
+        // Fallback: Only call locations list if we still don't have place_id OR location_name
+        // AND we didn't successfully get location_name from single location endpoint
         if (empty($place_id_display) || empty($location_name)) {
             $locations = $api->get_locations($account_id);
             if (is_wp_error($locations)) {

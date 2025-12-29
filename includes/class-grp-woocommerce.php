@@ -670,24 +670,37 @@ Thanks again!
         // Try to get placeId from a single location details call (placeId is only available in single location endpoint)
         // This is more reliable than trying to get it from the locations list
         $location_details = $api->get_location($account_id, $location_id);
-        if (!is_wp_error($location_details) && isset($location_details['location'])) {
-            $location = $location_details['location'];
+        if (!is_wp_error($location_details)) {
+            // Handle response structure: could be {location: {...}} or just {...}
+            $location = isset($location_details['location']) ? $location_details['location'] : $location_details;
             
-            // Extract placeId from location details
-            $place_id = '';
-            if (isset($location['placeId']) && !empty($location['placeId'])) {
-                $place_id = $location['placeId'];
-            } elseif (isset($location['place_id']) && !empty($location['place_id'])) {
-                $place_id = $location['place_id'];
-            } elseif (isset($location['storefrontAddress']['placeId']) && !empty($location['storefrontAddress']['placeId'])) {
-                $place_id = $location['storefrontAddress']['placeId'];
+            if (!empty($location)) {
+                // Extract placeId from location details
+                $place_id = '';
+                if (isset($location['placeId']) && !empty($location['placeId'])) {
+                    $place_id = $location['placeId'];
+                } elseif (isset($location['place_id']) && !empty($location['place_id'])) {
+                    $place_id = $location['place_id'];
+                } elseif (isset($location['storefrontAddress']['placeId']) && !empty($location['storefrontAddress']['placeId'])) {
+                    $place_id = $location['storefrontAddress']['placeId'];
+                }
+                
+                if (!empty($place_id)) {
+                    // Store it for future use to avoid API calls
+                    update_option('grp_gbp_place_id_default', $place_id);
+                    grp_debug_log('Place ID found via single location endpoint', array('place_id' => $place_id));
+                    return $place_id;
+                } else {
+                    // Log for debugging
+                    grp_debug_log('Place ID not found in single location response', array(
+                        'location_id' => $location_id,
+                        'response_keys' => array_keys($location),
+                        'has_storefrontAddress' => isset($location['storefrontAddress'])
+                    ));
+                }
             }
-            
-            if (!empty($place_id)) {
-                // Store it for future use to avoid API calls
-                update_option('grp_gbp_place_id_default', $place_id);
-                return $place_id;
-            }
+        } else {
+            grp_debug_log('Single location endpoint failed', array('error' => $location_details->get_error_message()));
         }
         
         // Fallback: Try locations list (placeId might not be there, but worth trying)

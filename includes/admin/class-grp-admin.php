@@ -130,7 +130,7 @@ class GRP_Admin {
         // Individually stored options used throughout the plugin
         register_setting('grp_settings', 'grp_google_client_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_google_client_secret', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
-        register_setting('grp_settings', 'grp_google_account_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
+        register_setting('grp_settings', 'grp_google_account_id', array('type' => 'string', 'sanitize_callback' => function($value) { return $value !== null ? sanitize_text_field($value) : ''; }));
         register_setting('grp_settings', 'grp_google_location_id', array('type' => 'string', 'sanitize_callback' => array($this, 'sanitize_location_id')));
         register_setting('grp_settings', 'grp_default_style', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
