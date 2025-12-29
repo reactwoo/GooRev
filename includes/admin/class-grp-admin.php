@@ -464,8 +464,15 @@ class GRP_Admin {
             } elseif (isset($tokens['access_token'])) {
                 // Store tokens
                 update_option('grp_google_access_token', $tokens['access_token']);
-                if (isset($tokens['refresh_token'])) {
+                // Only update refresh_token if provided (Google doesn't always return it on reconnection)
+                if (isset($tokens['refresh_token']) && !empty($tokens['refresh_token'])) {
                     update_option('grp_google_refresh_token', $tokens['refresh_token']);
+                } else {
+                    // Log warning if no refresh token provided
+                    grp_debug_log('OAuth reconnection: No refresh_token in response', array(
+                        'has_access_token' => !empty($tokens['access_token']),
+                        'response_keys' => array_keys($tokens)
+                    ));
                 }
                 
                 // Clear stored state

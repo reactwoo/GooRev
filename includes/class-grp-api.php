@@ -421,12 +421,29 @@ class GRP_API {
 
         if (isset($response['access_token'])) {
             $this->access_token = $response['access_token'];
-            $this->refresh_token = isset($response['refresh_token']) ? $response['refresh_token'] : $this->refresh_token;
+            // Only update refresh_token if a new one is provided (Google doesn't always return it)
+            // If no new refresh_token, keep the existing one (if any)
+            if (isset($response['refresh_token']) && !empty($response['refresh_token'])) {
+                $this->refresh_token = $response['refresh_token'];
+                update_option('grp_google_refresh_token', $this->refresh_token);
+            } elseif (empty($this->refresh_token)) {
+                // If we don't have a refresh token at all, log a warning
+                grp_debug_log('OAuth tokens received but no refresh_token provided', array(
+                    'has_access_token' => !empty($response['access_token']),
+                    'has_refresh_token_in_response' => isset($response['refresh_token']),
+                    'existing_refresh_token' => !empty($this->refresh_token)
+                ));
+            }
 
             update_option('grp_google_access_token', $this->access_token);
-            if ($this->refresh_token) {
-                update_option('grp_google_refresh_token', $this->refresh_token);
-            }
+            
+            // Log token receipt for debugging
+            grp_debug_log('OAuth tokens saved', array(
+                'has_access_token' => !empty($this->access_token),
+                'has_refresh_token' => !empty($this->refresh_token),
+                'access_token_length' => strlen($this->access_token),
+                'refresh_token_length' => strlen($this->refresh_token)
+            ));
 
             return $response;
         }
