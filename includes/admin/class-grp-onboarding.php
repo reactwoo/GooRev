@@ -153,8 +153,15 @@ class GRP_Onboarding {
                     // Only activate free license if no license key was provided and email is provided
                     $result = $this->activate_free_license($name, $email);
                     if (is_wp_error($result)) {
+                        grp_debug_log('Onboarding free license activation failed', array(
+                            'error' => $result->get_error_message(),
+                            'code' => $result->get_error_code()
+                        ));
                         wp_send_json_error(array('message' => $result->get_error_message()));
                     }
+                } else {
+                    // Email is optional - allow proceeding without free license if user skipped
+                    // They can activate it later from settings
                 }
                 
                 wp_send_json_success(array(
