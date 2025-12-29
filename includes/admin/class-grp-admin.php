@@ -318,7 +318,9 @@ class GRP_Admin {
     public function render_dashboard_page() {
         $api = new GRP_API();
         $reviews = new GRP_Reviews();
-        $license = new GRP_License();
+        // Use the plugin instance's license object to avoid duplicate hooks
+        $plugin = Google_Reviews_Plugin::get_instance();
+        $license = $plugin->license;
         
         $is_connected = $api->is_connected();
         $recent_reviews = $reviews->get_stored_reviews(array('limit' => 5));
@@ -332,7 +334,9 @@ class GRP_Admin {
      */
     public function render_settings_page() {
         $api = new GRP_API();
-        $license = new GRP_License();
+        // Use the plugin instance's license object to avoid duplicate hooks
+        $plugin = Google_Reviews_Plugin::get_instance();
+        $license = $plugin->license;
         
         $is_connected = $api->is_connected();
         $is_pro = $license->is_pro();

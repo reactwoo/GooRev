@@ -25,6 +25,11 @@ class GRP_License {
     const STATUS_DEACTIVATED = 'deactivated';
     
     /**
+     * Static flag to track if hooks have been registered
+     */
+    private static $hooks_registered = false;
+    
+    /**
      * Constructor
      */
     public function __construct() {
@@ -35,9 +40,16 @@ class GRP_License {
      * Initialize hooks
      */
     private function init_hooks() {
+        // Only register hooks once to prevent duplicates
+        if (self::$hooks_registered) {
+            return;
+        }
+        
         add_action('admin_init', array($this, 'handle_license_actions'));
         add_action('grp_check_license', array($this, 'check_license_status'));
         add_action('admin_notices', array($this, 'show_license_notices'));
+        
+        self::$hooks_registered = true;
     }
     
     /**
