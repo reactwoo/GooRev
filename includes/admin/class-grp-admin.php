@@ -137,6 +137,7 @@ class GRP_Admin {
         register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_enable_debug_logging', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
         register_setting('grp_settings', 'grp_use_theme_font', array('type' => 'boolean', 'sanitize_callback' => function($v){return (bool) $v;}));
+        register_setting('grp_settings', 'grp_place_id', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_custom_css', array('type' => 'string'));
         register_setting('grp_settings', 'grp_custom_js', array('type' => 'string'));
         
@@ -168,6 +169,14 @@ class GRP_Admin {
             'grp_google_location_id',
             __('Location', 'google-reviews-plugin'),
             array($this, 'render_location_select_field'),
+            'grp_settings',
+            'grp_google_selection'
+        );
+
+        add_settings_field(
+            'grp_place_id',
+            __('Place ID', 'google-reviews-plugin'),
+            array($this, 'render_place_id_field'),
             'grp_settings',
             'grp_google_selection'
         );
@@ -765,6 +774,62 @@ class GRP_Admin {
             echo '<option value="' . esc_attr($saved) . '" selected>' . esc_html($saved) . '</option>';
         }
         echo '</select>';
+    }
+    
+    /**
+     * Render Place ID field
+     */
+    public function render_place_id_field() {
+        $api = new GRP_API();
+        $is_connected = $api->is_connected();
+        $location_id = get_option('grp_google_location_id', '');
+        $account_id = get_option('grp_google_account_id', '');
+        $place_id = get_option('grp_place_id', '');
+        $place_id_auto = get_option('grp_gbp_place_id_default', '');
+        $location_name = get_option('grp_gbp_location_name', '');
+        
+        // Use auto-detected Place ID if manual one is empty
+        $display_place_id = $place_id ?: $place_id_auto;
+        
+        echo '<input type="text" id="grp-place-id" name="grp_place_id" value="' . esc_attr($place_id) . '" class="regular-text" placeholder="ChIJ..." pattern="[A-Za-z0-9_-]+" />';
+        
+        if (!empty($display_place_id) && !$place_id) {
+            echo '<p class="description" style="margin-top: 5px;">';
+            echo '<strong>' . esc_html__('Auto-detected:', 'google-reviews-plugin') . '</strong> ';
+            echo '<code>' . esc_html($display_place_id) . '</code>';
+            echo '</p>';
+        }
+        
+        echo '<p class="description" style="margin-top: 8px;">';
+        echo esc_html__('Place ID is only needed for generating "Leave a Review" links (e.g., for WooCommerce review invites). Reviews are fetched automatically using your Business Profile location.', 'google-reviews-plugin');
+        echo ' <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank">' . esc_html__('How to find your Place ID', 'google-reviews-plugin') . '</a>';
+        echo '</p>';
+        
+        if ($is_connected && !empty($location_id) && !empty($account_id)) {
+            // Try to auto-detect if not set
+            if (empty($display_place_id)) {
+                $location_details = $api->get_location($account_id, $location_id);
+                if (!is_wp_error($location_details)) {
+                    $loc = isset($location_details['location']) ? $location_details['location'] : $location_details;
+                    if (!empty($loc)) {
+                        $detected_place_id = '';
+                        if (isset($loc['metadata']['placeId']) && !empty($loc['metadata']['placeId'])) {
+                            $detected_place_id = $loc['metadata']['placeId'];
+                        } elseif (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                            $detected_place_id = $loc['placeId'];
+                        }
+                        
+                        if (!empty($detected_place_id)) {
+                            update_option('grp_gbp_place_id_default', $detected_place_id);
+                            echo '<p class="description" style="color: #46b450; margin-top: 5px;">';
+                            echo '<strong>' . esc_html__('Auto-detected:', 'google-reviews-plugin') . '</strong> ';
+                            echo '<code>' . esc_html($detected_place_id) . '</code>';
+                            echo '</p>';
+                        }
+                    }
+                }
+            }
+        }
     }
     
     /**

@@ -18,12 +18,7 @@ if (isset($_POST['grp_wc_settings_submit']) && check_admin_referer('grp_wc_setti
     update_option('grp_wc_trigger_status', sanitize_text_field($_POST['grp_wc_trigger_status']));
     update_option('grp_wc_invite_delay_days', absint($_POST['grp_wc_invite_delay_days']));
     update_option('grp_wc_exclude_refunded', isset($_POST['grp_wc_exclude_refunded']));
-    // Manual Place ID override (only needed for review invite links, not for fetching reviews)
-    if (isset($_POST['grp_wc_place_id_override']) && !empty($_POST['grp_wc_place_id_override'])) {
-        update_option('grp_wc_place_id_override', sanitize_text_field($_POST['grp_wc_place_id_override']));
-    } else {
-        delete_option('grp_wc_place_id_override');
-    }
+    // Place ID is now managed in main Settings page, not here
     
     // Coupon settings
     update_option('grp_wc_coupon_type', sanitize_text_field($_POST['grp_wc_coupon_type']));
@@ -63,14 +58,10 @@ $email_body = get_option('grp_wc_email_body', '');
 // Get order statuses
 $order_statuses = wc_get_order_statuses();
 
-// Get connected location info
-$api = new GRP_API();
-$is_connected = $api->is_connected();
-$location_id = get_option('grp_google_location_id', '');
-$account_id = get_option('grp_google_account_id', '');
-$location_name = '';
-$place_id_display = '';
-$api_error = '';
+// Check if Place ID is set (required for review invites)
+$place_id = get_option('grp_place_id', '');
+$place_id_auto = get_option('grp_gbp_place_id_default', '');
+$has_place_id = !empty($place_id) || !empty($place_id_auto);
 
 if ($is_connected && !empty($location_id) && !empty($account_id)) {
     // Try to get from stored options first to avoid API calls
