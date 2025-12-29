@@ -1281,27 +1281,68 @@ jQuery(document).ready(function($) {
             '<label><?php esc_js_e('Body Font Family', 'google-reviews-plugin'); ?></label>' +
             '<select id="grp-custom-body-font" class="grp-font-select">' +
             '<option value=""><?php esc_js_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>' +
+            '<optgroup label="<?php esc_js_e('Sans-Serif', 'google-reviews-plugin'); ?>">' +
             '<option value="Inter, sans-serif">Inter</option>' +
             '<option value="Roboto, sans-serif">Roboto</option>' +
             '<option value="Open Sans, sans-serif">Open Sans</option>' +
             '<option value="Lato, sans-serif">Lato</option>' +
             '<option value="Montserrat, sans-serif">Montserrat</option>' +
             '<option value="Poppins, sans-serif">Poppins</option>' +
-            '<option value="Playfair Display, serif">Playfair Display</option>' +
-            '<option value="Georgia, serif">Georgia</option>' +
+            '<option value="Raleway, sans-serif">Raleway</option>' +
+            '<option value="Nunito, sans-serif">Nunito</option>' +
+            '<option value="Source Sans Pro, sans-serif">Source Sans Pro</option>' +
+            '<option value="Ubuntu, sans-serif">Ubuntu</option>' +
+            '<option value="Work Sans, sans-serif">Work Sans</option>' +
+            '<option value="DM Sans, sans-serif">DM Sans</option>' +
+            '</optgroup>' +
+            '<optgroup label="<?php esc_js_e('Serif', 'google-reviews-plugin'); ?>">' +
             '<option value="Merriweather, serif">Merriweather</option>' +
+            '<option value="Lora, serif">Lora</option>' +
+            '<option value="Playfair Display, serif">Playfair Display</option>' +
+            '<option value="PT Serif, serif">PT Serif</option>' +
+            '<option value="Crimson Text, serif">Crimson Text</option>' +
+            '<option value="Libre Baskerville, serif">Libre Baskerville</option>' +
+            '<option value="Bitter, serif">Bitter</option>' +
+            '<option value="Georgia, serif">Georgia</option>' +
+            '</optgroup>' +
+            '<optgroup label="<?php esc_js_e('Display', 'google-reviews-plugin'); ?>">' +
+            '<option value="Oswald, sans-serif">Oswald</option>' +
+            '<option value="Bebas Neue, sans-serif">Bebas Neue</option>' +
+            '<option value="Righteous, cursive">Righteous</option>' +
+            '</optgroup>' +
             '</select>' +
             '</div>' +
             '<div class="grp-customizer-control">' +
             '<label><?php esc_js_e('Name Font Family', 'google-reviews-plugin'); ?></label>' +
             '<select id="grp-custom-name-font" class="grp-font-select">' +
             '<option value=""><?php esc_js_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>' +
+            '<optgroup label="<?php esc_js_e('Sans-Serif', 'google-reviews-plugin'); ?>">' +
             '<option value="Inter, sans-serif">Inter</option>' +
             '<option value="Roboto, sans-serif">Roboto</option>' +
             '<option value="Open Sans, sans-serif">Open Sans</option>' +
+            '<option value="Montserrat, sans-serif">Montserrat</option>' +
+            '<option value="Poppins, sans-serif">Poppins</option>' +
+            '<option value="Raleway, sans-serif">Raleway</option>' +
+            '<option value="Nunito, sans-serif">Nunito</option>' +
+            '<option value="Work Sans, sans-serif">Work Sans</option>' +
+            '<option value="DM Sans, sans-serif">DM Sans</option>' +
+            '<option value="Barlow, sans-serif">Barlow</option>' +
+            '<option value="Rubik, sans-serif">Rubik</option>' +
+            '</optgroup>' +
+            '<optgroup label="<?php esc_js_e('Serif', 'google-reviews-plugin'); ?>">' +
             '<option value="Playfair Display, serif">Playfair Display</option>' +
-            '<option value="Georgia, serif">Georgia</option>' +
             '<option value="Merriweather, serif">Merriweather</option>' +
+            '<option value="Lora, serif">Lora</option>' +
+            '<option value="Crimson Text, serif">Crimson Text</option>' +
+            '<option value="Libre Baskerville, serif">Libre Baskerville</option>' +
+            '<option value="Georgia, serif">Georgia</option>' +
+            '</optgroup>' +
+            '<optgroup label="<?php esc_js_e('Display', 'google-reviews-plugin'); ?>">' +
+            '<option value="Oswald, sans-serif">Oswald</option>' +
+            '<option value="Bebas Neue, sans-serif">Bebas Neue</option>' +
+            '<option value="Righteous, cursive">Righteous</option>' +
+            '<option value="Fredoka One, cursive">Fredoka One</option>' +
+            '</optgroup>' +
             '</select>' +
             '</div>' +
             '<div class="grp-customizer-control">' +
