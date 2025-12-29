@@ -45,6 +45,8 @@ class GRP_Review_Widgets {
         if ($slug === 'review-widgets') {
             // Create database table if needed
             $this->maybe_create_tables();
+            // Flag to flush rewrite rules on next page load
+            update_option('grp_widgets_flush_rewrite_rules', '1');
         }
     }
     
@@ -81,6 +83,8 @@ class GRP_Review_Widgets {
         // AJAX endpoints
         add_action('wp_ajax_grp_generate_qr', array($this, 'ajax_generate_qr'));
         add_action('wp_ajax_nopriv_grp_generate_qr', array($this, 'ajax_generate_qr'));
+        add_action('wp_ajax_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
+        add_action('wp_ajax_nopriv_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
         
         // Admin hooks
         if (is_admin()) {

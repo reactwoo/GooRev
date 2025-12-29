@@ -113,6 +113,30 @@ class GRP_Activator {
         ) $charset_collate;";
         
         dbDelta($sql_invites);
+        
+        // Widget clicks tracking table (for Review Widgets addon)
+        $clicks_table = $wpdb->prefix . 'grp_widget_clicks';
+        
+        $sql_clicks = "CREATE TABLE $clicks_table (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            widget_type varchar(50) NOT NULL,
+            widget_id varchar(100) DEFAULT NULL,
+            review_url text NOT NULL,
+            clicked_at datetime DEFAULT CURRENT_TIMESTAMP,
+            ip_address varchar(45) DEFAULT NULL,
+            user_agent text DEFAULT NULL,
+            referrer text DEFAULT NULL,
+            converted tinyint(1) DEFAULT 0,
+            converted_at datetime DEFAULT NULL,
+            meta longtext DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY widget_type (widget_type),
+            KEY widget_id (widget_id),
+            KEY clicked_at (clicked_at),
+            KEY converted (converted)
+        ) $charset_collate;";
+        
+        dbDelta($sql_clicks);
     }
     
     /**

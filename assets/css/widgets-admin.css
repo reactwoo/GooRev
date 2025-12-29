@@ -1,0 +1,47 @@
+/**
+ * Review Widgets Admin Styles
+ */
+
+.grp-qr-generator {
+    margin: 20px 0;
+}
+
+.grp-qr-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.grp-qr-preview {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    border-radius: 4px;
+    padding: 20px;
+}
+
+.grp-qr-preview img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.grp-stat-card {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 4px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.grp-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+

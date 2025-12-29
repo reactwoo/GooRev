@@ -1,0 +1,145 @@
+/**
+ * Review Widgets Frontend Styles
+ */
+
+.grp-review-button-wrapper {
+    margin: 15px 0;
+}
+
+.grp-review-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.grp-review-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.grp-review-button:active {
+    transform: translateY(0);
+}
+
+/* Button Sizes */
+.grp-review-button-small {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.grp-review-button-medium {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+.grp-review-button-large {
+    padding: 16px 32px;
+    font-size: 18px;
+}
+
+/* Button Styles */
+.grp-review-button-default {
+    background-color: #0073aa;
+    color: #ffffff;
+}
+
+.grp-review-button-rounded {
+    background-color: #0073aa;
+    color: #ffffff;
+    border-radius: 25px;
+}
+
+.grp-review-button-outline {
+    background-color: transparent;
+    color: #0073aa;
+    border: 2px solid #0073aa;
+}
+
+.grp-review-button-outline:hover {
+    background-color: #0073aa;
+    color: #ffffff;
+}
+
+.grp-review-button-minimal {
+    background-color: transparent;
+    color: #0073aa;
+    text-decoration: underline;
+    padding: 8px 0;
+}
+
+.grp-review-button-minimal:hover {
+    text-decoration: none;
+}
+
+/* Alignment */
+.grp-align-left {
+    text-align: left;
+}
+
+.grp-align-center {
+    text-align: center;
+}
+
+.grp-align-right {
+    text-align: right;
+}
+
+.grp-align-center .grp-review-button-wrapper {
+    text-align: center;
+}
+
+.grp-align-right .grp-review-button-wrapper {
+    text-align: right;
+}
+
+/* Button Icon */
+.grp-review-button-icon {
+    font-size: 1.2em;
+    line-height: 1;
+}
+
+/* QR Code Styles */
+.grp-qr-code-wrapper {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.grp-qr-code {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background: #ffffff;
+}
+
+.grp-qr-caption {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .grp-review-button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .grp-review-button-wrapper {
+        width: 100%;
+    }
+}
+
