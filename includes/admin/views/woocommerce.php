@@ -104,17 +104,29 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                     
                     // Get placeId if not cached
                     if (empty($place_id_display)) {
+                        // Try multiple possible locations for placeId
                         if (isset($loc['placeId']) && !empty($loc['placeId'])) {
                             $place_id_display = $loc['placeId'];
                         } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
                             $place_id_display = $loc['place_id'];
                         } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
                             $place_id_display = $loc['storefrontAddress']['placeId'];
+                        } elseif (isset($loc['metadata']['placeId']) && !empty($loc['metadata']['placeId'])) {
+                            $place_id_display = $loc['metadata']['placeId'];
+                        } elseif (isset($loc['locationKey']['placeId']) && !empty($loc['locationKey']['placeId'])) {
+                            $place_id_display = $loc['locationKey']['placeId'];
                         }
                         
                         // Store for future use
                         if (!empty($place_id_display)) {
                             update_option('grp_gbp_place_id_default', $place_id_display);
+                        } else {
+                            // Log for debugging
+                            grp_debug_log('Place ID not found in location data', array(
+                                'location_id' => $location_id,
+                                'location_keys' => array_keys($loc),
+                                'has_storefrontAddress' => isset($loc['storefrontAddress'])
+                            ));
                         }
                     }
                     break;
