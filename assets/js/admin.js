@@ -115,7 +115,7 @@
         // Disconnect button
         $('#grp-disconnect-btn').on('click', function(e) {
             e.preventDefault();
-            $('#grp-disconnect-modal').fadeIn(200);
+            $('#grp-disconnect-modal').css('display', 'flex').fadeIn(200);
         });
         
         // Cancel disconnect
@@ -127,6 +127,13 @@
         $('#grp-disconnect-modal').on('click', function(e) {
             if (e.target === this) {
                 $(this).fadeOut(200);
+            }
+        });
+        
+        // Close modal on escape key
+        $(document).on('keydown', function(e) {
+            if (e.keyCode === 27 && $('#grp-disconnect-modal').is(':visible')) {
+                $('#grp-disconnect-modal').fadeOut(200);
             }
         });
         
