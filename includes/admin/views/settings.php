@@ -170,23 +170,45 @@ if (!defined('ABSPATH')) {
                <div class="grp-license-status">
                    <span class="grp-status-disconnected">✗ <?php esc_html_e('No License Active', 'google-reviews-plugin'); ?></span>
                </div>
-               <p><?php esc_html_e('Optional: Activate a free license for easy cloud server setup (no Google Cloud configuration needed). You can also use your own Google Cloud credentials below.', 'google-reviews-plugin'); ?></p>
+               <p><?php esc_html_e('To connect to Google easily, activate a free license (no credit card required). You can also use your own Google Cloud credentials below.', 'google-reviews-plugin'); ?></p>
                <p style="margin-top: 10px; font-size: 12px; color: #666;">
                    <?php esc_html_e('Pro and Enterprise licenses unlock advanced features like multiple locations, analytics, and AI-powered review responses.', 'google-reviews-plugin'); ?>
                </p>
-                    <form method="post" action="" style="margin-top: 15px;">
-                        <?php wp_nonce_field('grp_license_nonce'); ?>
-                        <input type="hidden" name="grp_license_action" value="activate">
-                        <input type="text" name="grp_license_key" value="<?php echo esc_attr($license_key); ?>" placeholder="<?php esc_attr_e('Enter license key', 'google-reviews-plugin'); ?>" class="regular-text" style="width: 100%; margin-bottom: 10px;" />
-                        <button type="submit" class="button button-primary" style="width: 100%;">
-                            <?php esc_html_e('Activate License', 'google-reviews-plugin'); ?>
-                        </button>
-                    </form>
-                    <p style="margin-top: 10px; font-size: 12px;">
-                        <a href="https://reactwoo.com/google-reviews-plugin-pro/" target="_blank">
-                            <?php esc_html_e('Get a license →', 'google-reviews-plugin'); ?>
-                        </a>
-                    </p>
+               
+               <!-- Free License Activation -->
+               <div style="margin-top: 15px; padding: 15px; background: #f0f6fc; border: 1px solid #c6d9f0; border-radius: 4px;">
+                   <h4 style="margin-top: 0; margin-bottom: 10px;"><?php esc_html_e('Get Free License', 'google-reviews-plugin'); ?></h4>
+                   <p style="margin: 0 0 10px 0; font-size: 13px;">
+                       <?php esc_html_e('Activate a free license to use our cloud server (no Google Cloud setup needed).', 'google-reviews-plugin'); ?>
+                   </p>
+                   <form method="post" action="" id="grp-free-license-form">
+                       <?php wp_nonce_field('grp_license_nonce'); ?>
+                       <input type="hidden" name="grp_license_action" value="activate_free">
+                       <button type="submit" class="button button-primary" style="width: 100%;">
+                           <?php esc_html_e('Activate Free License', 'google-reviews-plugin'); ?>
+                       </button>
+                   </form>
+               </div>
+               
+               <!-- Or Pro/Enterprise License -->
+               <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                   <p style="margin: 0 0 10px 0; font-size: 13px; color: #666;">
+                       <strong><?php esc_html_e('Or enter a Pro/Enterprise license key:', 'google-reviews-plugin'); ?></strong>
+                   </p>
+                   <form method="post" action="">
+                       <?php wp_nonce_field('grp_license_nonce'); ?>
+                       <input type="hidden" name="grp_license_action" value="activate">
+                       <input type="text" name="grp_license_key" value="<?php echo esc_attr($license_key); ?>" placeholder="<?php esc_attr_e('Enter Pro/Enterprise license key', 'google-reviews-plugin'); ?>" class="regular-text" style="width: 100%; margin-bottom: 10px;" />
+                       <button type="submit" class="button" style="width: 100%;">
+                           <?php esc_html_e('Activate License', 'google-reviews-plugin'); ?>
+                       </button>
+                   </form>
+                   <p style="margin-top: 10px; font-size: 12px;">
+                       <a href="https://reactwoo.com/google-reviews-plugin-pro/" target="_blank">
+                           <?php esc_html_e('Get a Pro/Enterprise license →', 'google-reviews-plugin'); ?>
+                       </a>
+                   </p>
+               </div>
                 <?php endif; ?>
             </div>
             

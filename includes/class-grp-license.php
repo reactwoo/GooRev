@@ -179,6 +179,72 @@ class GRP_License {
     }
     
     /**
+     * Activate free license (for WordPress.org compliance - no registration required)
+     */
+    public function activate_free_license() {
+        // Get site domain
+        $domain = parse_url(home_url(), PHP_URL_HOST);
+        
+        // Build request body
+        $body = array(
+            'domain' => $domain,
+            'plugin' => 'goorev',
+            'plugin_version' => GRP_PLUGIN_VERSION
+        );
+        
+        // SECURITY: Add HMAC signature for authentication
+        $plugin_secret = defined('GRP_PLUGIN_SECRET') ? GRP_PLUGIN_SECRET : 'goorev-free-license-secret-key-2024';
+        $timestamp = time();
+        $signature = hash_hmac('sha256', $domain . ':goorev:' . $timestamp, $plugin_secret);
+        
+        // Call license server to create/activate free license
+        $response = wp_remote_post(self::LICENSE_API_URL . 'api/v1/license/activate-free', array(
+            'body' => json_encode(array(
+                'domain' => $domain,
+                'plugin' => 'goorev',
+                'plugin_version' => GRP_PLUGIN_VERSION
+            )),
+            'timeout' => 15,
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'X-HMAC-Signature' => $signature,
+                'X-Timestamp' => $timestamp,
+                'User-Agent' => 'GooRev-Plugin/' . GRP_PLUGIN_VERSION
+            )
+        ));
+        
+        if (is_wp_error($response)) {
+            return $response;
+        }
+        
+        $response_body = wp_remote_retrieve_body($response);
+        $data = json_decode($response_body, true);
+        
+        if (isset($data['success']) && $data['success']) {
+            // Store license key and data
+            if (isset($data['license_key'])) {
+                update_option('grp_license_key', $data['license_key']);
+            }
+            if (isset($data['license_data'])) {
+                update_option('grp_license_data', $data['license_data']);
+                update_option('grp_license_status', self::STATUS_VALID);
+                
+                // Store JWT token separately for API requests
+                if (isset($data['license_data']['accessToken'])) {
+                    update_option('grp_license_jwt_token', $data['license_data']['accessToken']);
+                }
+            }
+            
+            // Schedule license check
+            $this->schedule_license_check();
+            
+            return true;
+        }
+        
+        return new WP_Error('free_license_activation_failed', $data['error'] ?? $data['message'] ?? __('Failed to activate free license', 'google-reviews-plugin'));
+    }
+    
+    /**
      * Deactivate license
      */
     public function deactivate_license() {
