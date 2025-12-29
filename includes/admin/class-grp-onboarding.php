@@ -144,9 +144,14 @@ class GRP_Onboarding {
         
                 // Handle license key if provided
                 if ($has_license && !empty($license_key)) {
-                    $license = new GRP_License();
-                    $result = $license->activate($license_key);
+                    $license = GRP_License::get_instance();
+                    $result = $license->activate_license($license_key);
                     if (is_wp_error($result)) {
+                        grp_debug_log('Onboarding license activation failed', array(
+                            'error' => $result->get_error_message(),
+                            'code' => $result->get_error_code(),
+                            'license_key_length' => strlen($license_key)
+                        ));
                         wp_send_json_error(array('message' => sprintf(__('Failed to activate license: %s', 'google-reviews-plugin'), $result->get_error_message())));
                     }
                 } elseif (!empty($email)) {
