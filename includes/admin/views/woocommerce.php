@@ -126,9 +126,10 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
             }
         }
         
-        // Fallback: Only call locations list if we still don't have place_id OR location_name
-        // AND we didn't successfully get location_name from single location endpoint
-        if (empty($place_id_display) || empty($location_name)) {
+        // Fallback: Only call locations list if the single-location endpoint failed entirely.
+        // If we got a valid location response (even without placeId), there is nothing more
+        // we can learn from the list endpoint and it would just be an extra API call.
+        if ($location_details instanceof WP_Error) {
             $locations = $api->get_locations($account_id);
             if (is_wp_error($locations)) {
                 $api_error = $locations->get_error_message();
