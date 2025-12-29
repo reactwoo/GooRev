@@ -238,15 +238,16 @@ class GRP_Onboarding {
         $timestamp = time();
         $signature = hash_hmac('sha256', $domain . ':goorev:' . $timestamp, $plugin_secret);
         
+        // Add signature and timestamp to request body (server expects them in body, not headers)
+        $request_body['signature'] = $signature;
+        $request_body['timestamp'] = $timestamp;
+        
         // Call license server to create/activate free license
-        // Use headers for HMAC (matching the server's expected format)
         $response = wp_remote_post(GRP_License::LICENSE_API_URL . 'api/v1/license/activate-free', array(
             'body' => json_encode($request_body),
             'timeout' => 15,
             'headers' => array(
                 'Content-Type' => 'application/json',
-                'X-HMAC-Signature' => $signature,
-                'X-Timestamp' => $timestamp,
                 'User-Agent' => 'GooRev-Plugin/' . GRP_PLUGIN_VERSION
             )
         ));
