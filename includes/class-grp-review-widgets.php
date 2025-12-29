@@ -70,6 +70,12 @@ class GRP_Review_Widgets {
             add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         }
         
+        // Always register AJAX endpoints (they check addon status internally)
+        add_action('wp_ajax_grp_generate_qr', array($this, 'ajax_generate_qr'));
+        add_action('wp_ajax_nopriv_grp_generate_qr', array($this, 'ajax_generate_qr'));
+        add_action('wp_ajax_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
+        add_action('wp_ajax_nopriv_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
+        
         // Check if addon is enabled for frontend/admin functionality
         $addons = GRP_Addons::get_instance();
         if (!$addons->is_addon_enabled('review-widgets')) {
@@ -86,12 +92,6 @@ class GRP_Review_Widgets {
         
         // Enqueue frontend assets
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
-        
-        // AJAX endpoints
-        add_action('wp_ajax_grp_generate_qr', array($this, 'ajax_generate_qr'));
-        add_action('wp_ajax_nopriv_grp_generate_qr', array($this, 'ajax_generate_qr'));
-        add_action('wp_ajax_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
-        add_action('wp_ajax_nopriv_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
     }
     
     /**
