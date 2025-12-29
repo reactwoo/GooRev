@@ -215,7 +215,35 @@
         // Load locations when account changes
         $(document).on('change', '#grp-account-select', function() {
             var accountId = $(this).val();
+            // Save the selected account's label
+            var $selectedOption = $(this).find('option:selected');
+            var accountLabel = $selectedOption.attr('data-label') || $selectedOption.text();
+            if (accountId && accountLabel && accountLabel !== accountId) {
+                // Save label via AJAX
+                $.post(window.__grpAdminConfig.ajax_url, {
+                    action: 'grp_save_account_label',
+                    nonce: window.__grpAdminConfig.nonce,
+                    account_id: accountId,
+                    account_label: accountLabel
+                });
+            }
             populateLocations(accountId, true);
+        });
+        
+        // Save location label when location changes
+        $(document).on('change', '#grp-location-select', function() {
+            var locationId = $(this).val();
+            var $selectedOption = $(this).find('option:selected');
+            var locationLabel = $selectedOption.attr('data-label') || $selectedOption.text();
+            if (locationId && locationLabel && locationLabel !== locationId) {
+                // Save label via AJAX
+                $.post(window.__grpAdminConfig.ajax_url, {
+                    action: 'grp_save_location_label',
+                    nonce: window.__grpAdminConfig.nonce,
+                    location_id: locationId,
+                    location_label: locationLabel
+                });
+            }
         });
     }
     

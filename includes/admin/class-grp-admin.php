@@ -32,6 +32,8 @@ class GRP_Admin {
         // New AJAX endpoints for accounts/locations selection
         add_action('wp_ajax_grp_list_accounts', array($this, 'ajax_list_accounts'));
         add_action('wp_ajax_grp_list_locations', array($this, 'ajax_list_locations'));
+        add_action('wp_ajax_grp_save_account_label', array($this, 'ajax_save_account_label'));
+        add_action('wp_ajax_grp_save_location_label', array($this, 'ajax_save_location_label'));
         add_action('wp_ajax_grp_save_custom_css', array($this, 'ajax_save_custom_css'));
         add_action('admin_post_grp_export_invites_csv', array($this, 'export_invites_csv'));
         add_action('admin_post_grp_export_invites_xls', array($this, 'export_invites_xls'));
@@ -1443,18 +1445,17 @@ class GRP_Admin {
         $cached_accounts = get_transient('grp_accounts_list');
         if ($cached_accounts && is_array($cached_accounts)) {
             foreach ($cached_accounts as $acc) {
-                if (isset($acc['id']) && $acc['id'] === $value) {
-                    if (isset($acc['label'])) {
-                        update_option('grp_google_account_label', $acc['label']);
-                        return;
-                    }
-                }
-                // Also check numeric ID
-                if (isset($acc['numeric_id']) && $acc['numeric_id'] === $value) {
-                    if (isset($acc['label'])) {
-                        update_option('grp_google_account_label', $acc['label']);
-                        return;
-                    }
+                $acc_id = isset($acc['id']) ? $acc['id'] : '';
+                $acc_numeric_id = isset($acc['numeric_id']) ? $acc['numeric_id'] : '';
+                $sanitized_acc_id = preg_replace('#^accounts/?#', '', $acc_id);
+                $sanitized_value = preg_replace('#^accounts/?#', '', $value);
+                
+                // Match by full ID, numeric ID, or sanitized ID (handle different formats)
+                if (($acc_id === $value || $sanitized_acc_id === $sanitized_value || 
+                     ($acc_numeric_id && ($acc_numeric_id === $value || $acc_numeric_id === $sanitized_value))) &&
+                    isset($acc['label'])) {
+                    update_option('grp_google_account_label', $acc['label']);
+                    return;
                 }
             }
         }
@@ -1462,21 +1463,21 @@ class GRP_Admin {
         $stale_accounts = get_option('grp_accounts_cache_stale', array());
         if ($stale_accounts && is_array($stale_accounts)) {
             foreach ($stale_accounts as $acc) {
-                if (isset($acc['id']) && $acc['id'] === $value) {
-                    if (isset($acc['label'])) {
-                        update_option('grp_google_account_label', $acc['label']);
-                        return;
-                    }
-                }
-                if (isset($acc['numeric_id']) && $acc['numeric_id'] === $value) {
-                    if (isset($acc['label'])) {
-                        update_option('grp_google_account_label', $acc['label']);
-                        return;
-                    }
+                $acc_id = isset($acc['id']) ? $acc['id'] : '';
+                $acc_numeric_id = isset($acc['numeric_id']) ? $acc['numeric_id'] : '';
+                $sanitized_acc_id = preg_replace('#^accounts/?#', '', $acc_id);
+                $sanitized_value = preg_replace('#^accounts/?#', '', $value);
+                
+                // Match by full ID, numeric ID, or sanitized ID (handle different formats)
+                if (($acc_id === $value || $sanitized_acc_id === $sanitized_value || 
+                     ($acc_numeric_id && ($acc_numeric_id === $value || $acc_numeric_id === $sanitized_value))) &&
+                    isset($acc['label'])) {
+                    update_option('grp_google_account_label', $acc['label']);
+                    return;
                 }
             }
         }
-        // If label not found, clear it
+        // If label not found, clear it only if value is empty
         if (empty($value)) {
             delete_option('grp_google_account_label');
         }
