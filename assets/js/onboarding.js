@@ -167,11 +167,25 @@
                             window.location.href = response.data.redirect;
                         }
                     } else {
-                        alert(response.data && response.data.message ? response.data.message : 'An error occurred. Please try again.');
+                        const errorMessage = response.data && response.data.message ? response.data.message : 'An error occurred. Please try again.';
+                        alert(errorMessage);
                     }
                 },
-                error: function() {
-                    alert('An error occurred. Please try again.');
+                error: function(xhr, status, error) {
+                    let errorMessage = 'An error occurred. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                        errorMessage = xhr.responseJSON.data.message;
+                    } else if (xhr.responseText) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.data && response.data.message) {
+                                errorMessage = response.data.message;
+                            }
+                        } catch (e) {
+                            // If parsing fails, use default message
+                        }
+                    }
+                    alert(errorMessage);
                 },
                 complete: function() {
                     $nextBtn.prop('disabled', false).text(originalText);
