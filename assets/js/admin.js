@@ -264,7 +264,14 @@
                 $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_account));
                 response.data.accounts.forEach(function(acc) {
                     var opt = $('<option>').val(acc.id).text(acc.label || acc.id);
-                    if (!force && window.__grpAdminConfig.saved_account_id === acc.id) {
+                    // Match by full ID or numeric ID to handle different formats
+                    var savedId = window.__grpAdminConfig.saved_account_id || '';
+                    var matches = (!force && (
+                        savedId === acc.id || 
+                        savedId === acc.numeric_id ||
+                        (acc.numeric_id && savedId === acc.numeric_id.toString())
+                    ));
+                    if (matches) {
                         opt.attr('selected', 'selected');
                     }
                     $select.append(opt);

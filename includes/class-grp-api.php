@@ -965,6 +965,35 @@ class GRP_API {
     }
     
     /**
+     * Get a single location's details (including placeId)
+     * 
+     * @param string $account_id Account ID
+     * @param string $location_id Location ID
+     * @return array|WP_Error Location details or error
+     */
+    public function get_location($account_id, $location_id) {
+        // Clean IDs
+        $clean_account_id = preg_replace('#^accounts/?#', '', $account_id);
+        $clean_location_id = preg_replace('#^locations/?#', '', $location_id);
+        
+        // Pro/Enterprise users must use cloud server
+        if ($this->is_using_api_server()) {
+            $response = $this->make_api_server_request('location', array(
+                'account_id' => $clean_account_id,
+                'location_id' => $clean_location_id
+            ), 'GET');
+            if (is_wp_error($response)) {
+                return $response;
+            }
+            return $response;
+        }
+        
+        // For custom credentials, make direct API call
+        // This would require implementing direct Google API call
+        return new WP_Error('not_implemented', __('Getting single location details requires cloud server.', 'google-reviews-plugin'));
+    }
+    
+    /**
      * Get reviews for a location
      */
     public function get_reviews($account_id, $location_id, $page_size = 50) {

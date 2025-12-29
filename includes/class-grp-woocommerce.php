@@ -667,13 +667,40 @@ Thanks again!
             // Still try to refresh, but return cached if API fails
         }
         
-        // Get location details from API (may need to request placeId field explicitly)
+        // Try to get placeId from a single location details call (placeId is only available in single location endpoint)
+        // This is more reliable than trying to get it from the locations list
+        $location_details = $api->get_location($account_id, $location_id);
+        if (!is_wp_error($location_details) && isset($location_details['location'])) {
+            $location = $location_details['location'];
+            
+            // Extract placeId from location details
+            $place_id = '';
+            if (isset($location['placeId']) && !empty($location['placeId'])) {
+                $place_id = $location['placeId'];
+            } elseif (isset($location['place_id']) && !empty($location['place_id'])) {
+                $place_id = $location['place_id'];
+            } elseif (isset($location['storefrontAddress']['placeId']) && !empty($location['storefrontAddress']['placeId'])) {
+                $place_id = $location['storefrontAddress']['placeId'];
+            }
+            
+            if (!empty($place_id)) {
+                // Store it for future use to avoid API calls
+                update_option('grp_gbp_place_id_default', $place_id);
+                return $place_id;
+            }
+        }
+        
+        // Fallback: Try locations list (placeId might not be there, but worth trying)
         // Note: We may get rate limited, so this might fail
         $locations = $api->get_locations($account_id);
         if (is_wp_error($locations)) {
             grp_debug_log('Failed to get locations for place_id', array('error' => $locations->get_error_message()));
             // If rate limited or error, return cached place_id if available
             if ($locations->get_error_code() === 'rate_limit' && !empty($cached_place_id)) {
+                return $cached_place_id;
+            }
+            // Return cached if we have it, even if API failed
+            if (!empty($cached_place_id)) {
                 return $cached_place_id;
             }
             return '';
@@ -704,11 +731,7 @@ Thanks again!
                     $place_id = $location['placeId'];
                 } elseif (isset($location['place_id']) && !empty($location['place_id'])) {
                     $place_id = $location['place_id'];
-                }
-                
-                // StoreCode is NOT a placeId - don't use it
-                // Also check if it's nested in storefrontAddress (unlikely but check)
-                if (empty($place_id) && isset($location['storefrontAddress']['placeId'])) {
+                } elseif (isset($location['storefrontAddress']['placeId']) && !empty($location['storefrontAddress']['placeId'])) {
                     $place_id = $location['storefrontAddress']['placeId'];
                 }
                 

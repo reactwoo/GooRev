@@ -983,9 +983,16 @@ class GRP_Admin {
         foreach ($list as $acc) {
             $name = isset($acc['name']) ? $acc['name'] : '';
             $id = $name ? preg_replace('#^accounts/+?#', '', $name) : '';
+            // Also extract just the numeric ID if it's a full resource name
+            $numeric_id = '';
+            if (preg_match('#/(\d+)$#', $id, $matches)) {
+                $numeric_id = $matches[1];
+            } elseif (is_numeric($id)) {
+                $numeric_id = $id;
+            }
             $label = isset($acc['accountName']) ? $acc['accountName'] : ($name ?: $id);
             if (!empty($id)) {
-                $accounts[] = array('id' => $id, 'label' => $label);
+                $accounts[] = array('id' => $id, 'label' => $label, 'numeric_id' => $numeric_id);
             }
         }
         
@@ -1060,8 +1067,15 @@ class GRP_Admin {
             $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_id);
             
             $label = isset($loc['title']) ? $loc['title'] : (isset($loc['locationName']) ? $loc['locationName'] : ($name ?: $loc_id));
+            // Also extract just the numeric ID if it's a full resource name
+            $numeric_id = '';
+            if (is_numeric($loc_id)) {
+                $numeric_id = $loc_id;
+            } elseif (preg_match('#/(\d+)$#', $loc_id, $matches)) {
+                $numeric_id = $matches[1];
+            }
             if (!empty($loc_id)) {
-                $locations[] = array('id' => $loc_id, 'label' => $label);
+                $locations[] = array('id' => $loc_id, 'label' => $label, 'numeric_id' => $numeric_id);
             }
         }
         
