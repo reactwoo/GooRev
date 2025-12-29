@@ -366,6 +366,15 @@ if (!defined('ABSPATH')) {
 
 <script>
 jQuery(document).ready(function($) {
+    // Ensure grp_admin is available
+    var grp_admin = window.grp_admin || window.__grpAdminConfig || {};
+    if (!grp_admin.ajax_url) {
+        grp_admin.ajax_url = typeof ajaxurl !== 'undefined' ? ajaxurl : '';
+    }
+    if (!grp_admin.nonce) {
+        grp_admin.nonce = '';
+    }
+    
     // Filter reviews by rating
     $('#grp-rating-filter').on('change', function() {
         var rating = $(this).val();
@@ -383,6 +392,33 @@ jQuery(document).ready(function($) {
         var text = $(this).data('review-text');
         navigator.clipboard.writeText(text).then(function() {
             alert('<?php esc_js_e('Review text copied to clipboard!', 'google-reviews-plugin'); ?>');
+        });
+    });
+    
+    // Clear all reviews
+    $('#grp-clear-reviews').on('click', function() {
+        if (!confirm('<?php esc_js_e('Are you sure you want to delete all reviews? This action cannot be undone.', 'google-reviews-plugin'); ?>')) {
+            return;
+        }
+        
+        var $button = $(this);
+        var originalText = $button.text();
+        $button.prop('disabled', true).text('<?php esc_js_e('Clearing...', 'google-reviews-plugin'); ?>');
+        
+        $.post(grp_admin.ajax_url, {
+            action: 'grp_clear_reviews',
+            nonce: grp_admin.nonce
+        }, function(response) {
+            if (response.success) {
+                alert('<?php esc_js_e('All reviews have been cleared.', 'google-reviews-plugin'); ?>');
+                location.reload();
+            } else {
+                alert('<?php esc_js_e('Failed to clear reviews: ', 'google-reviews-plugin'); ?>' + (response.data || '<?php esc_js_e('Unknown error', 'google-reviews-plugin'); ?>'));
+                $button.prop('disabled', false).text(originalText);
+            }
+        }).fail(function() {
+            alert('<?php esc_js_e('An error occurred. Please try again.', 'google-reviews-plugin'); ?>');
+            $button.prop('disabled', false).text(originalText);
         });
     });
     
