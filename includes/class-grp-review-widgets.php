@@ -432,9 +432,9 @@ class GRP_Review_Widgets {
      * Render widgets settings page
      */
     public function render_widgets_page() {
-        // Check user capabilities
+        // WordPress already checks manage_options capability via add_submenu_page, but double-check for safety
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have sufficient permissions to access this page.', 'google-reviews-plugin'));
+            wp_die(__('You do not have sufficient permissions to access this page.', 'google-reviews-plugin'), '', array('response' => 403));
         }
         
         // Check if addon is enabled
