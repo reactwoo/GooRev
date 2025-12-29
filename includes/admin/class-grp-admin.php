@@ -1497,11 +1497,17 @@ class GRP_Admin {
         $cached_locations = get_transient($cache_key);
         if ($cached_locations && is_array($cached_locations)) {
             foreach ($cached_locations as $loc) {
-                if (isset($loc['id']) && $loc['id'] === $value) {
-                    if (isset($loc['label'])) {
-                        update_option('grp_google_location_label', $loc['label']);
-                        return;
-                    }
+                // Match by full ID, numeric ID, or sanitized ID (handle different formats)
+                $loc_id = isset($loc['id']) ? $loc['id'] : '';
+                $loc_numeric_id = isset($loc['numeric_id']) ? $loc['numeric_id'] : '';
+                $sanitized_loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_id);
+                $sanitized_value = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $value);
+                
+                if (($loc_id === $value || $sanitized_loc_id === $sanitized_value || 
+                     ($loc_numeric_id && ($loc_numeric_id === $value || $loc_numeric_id === $sanitized_value))) &&
+                    isset($loc['label'])) {
+                    update_option('grp_google_location_label', $loc['label']);
+                    return;
                 }
             }
         }
@@ -1509,17 +1515,65 @@ class GRP_Admin {
         $stale_locations = get_option('grp_locations_cache_' . md5($account_id), array());
         if ($stale_locations && is_array($stale_locations)) {
             foreach ($stale_locations as $loc) {
-                if (isset($loc['id']) && $loc['id'] === $value) {
-                    if (isset($loc['label'])) {
-                        update_option('grp_google_location_label', $loc['label']);
-                        return;
-                    }
+                // Match by full ID, numeric ID, or sanitized ID (handle different formats)
+                $loc_id = isset($loc['id']) ? $loc['id'] : '';
+                $loc_numeric_id = isset($loc['numeric_id']) ? $loc['numeric_id'] : '';
+                $sanitized_loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_id);
+                $sanitized_value = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $value);
+                
+                if (($loc_id === $value || $sanitized_loc_id === $sanitized_value || 
+                     ($loc_numeric_id && ($loc_numeric_id === $value || $loc_numeric_id === $sanitized_value))) &&
+                    isset($loc['label'])) {
+                    update_option('grp_google_location_label', $loc['label']);
+                    return;
                 }
             }
         }
-        // If label not found, clear it
+        // If label not found, clear it only if value is empty
         if (empty($value)) {
             delete_option('grp_google_location_label');
         }
+    }
+    
+    /**
+     * AJAX handler to save account label
+     */
+    public function ajax_save_account_label() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+        
+        $account_id = isset($_POST['account_id']) ? sanitize_text_field($_POST['account_id']) : '';
+        $account_label = isset($_POST['account_label']) ? sanitize_text_field($_POST['account_label']) : '';
+        
+        if (!empty($account_id) && !empty($account_label)) {
+            update_option('grp_google_account_label', $account_label);
+            wp_send_json_success();
+        }
+        
+        wp_send_json_error(__('Invalid data', 'google-reviews-plugin'));
+    }
+    
+    /**
+     * AJAX handler to save location label
+     */
+    public function ajax_save_location_label() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+        
+        $location_id = isset($_POST['location_id']) ? sanitize_text_field($_POST['location_id']) : '';
+        $location_label = isset($_POST['location_label']) ? sanitize_text_field($_POST['location_label']) : '';
+        
+        if (!empty($location_id) && !empty($location_label)) {
+            update_option('grp_google_location_label', $location_label);
+            wp_send_json_success();
+        }
+        
+        wp_send_json_error(__('Invalid data', 'google-reviews-plugin'));
     }
 }
