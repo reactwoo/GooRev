@@ -1317,6 +1317,9 @@ class GRP_Admin {
      * Sanitize location ID - remove any prefixes
      */
     public function sanitize_location_id($value) {
+        if ($value === null) {
+            return '';
+        }
         $sanitized = sanitize_text_field($value);
         // Remove any location resource name prefixes
         $sanitized = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $sanitized);
