@@ -113,13 +113,20 @@
         });
         
         // Disconnect button
-        $('#grp-disconnect').on('click', function() {
-            if (confirm(window.__grpAdminConfig.strings.confirm_disconnect)) {
-                // Add disconnect functionality here
-                showNotice('info', 'Disconnecting...');
-                setTimeout(function() {
-                    location.reload();
-                }, 1000);
+        $('#grp-disconnect-btn').on('click', function(e) {
+            e.preventDefault();
+            $('#grp-disconnect-modal').fadeIn(200);
+        });
+        
+        // Cancel disconnect
+        $('#grp-cancel-disconnect').on('click', function() {
+            $('#grp-disconnect-modal').fadeOut(200);
+        });
+        
+        // Close modal on backdrop click
+        $('#grp-disconnect-modal').on('click', function(e) {
+            if (e.target === this) {
+                $(this).fadeOut(200);
             }
         });
         

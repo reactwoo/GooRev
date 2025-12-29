@@ -21,6 +21,11 @@ if (!defined('ABSPATH')) {
             <button id="grp-clear-cache" class="button">
                 <?php esc_html_e('Clear Cache', 'google-reviews-plugin'); ?>
             </button>
+            <?php if (!empty($all_reviews)): ?>
+                <button id="grp-clear-reviews" class="button" style="color: #dc3232; border-color: #dc3232;">
+                    <?php esc_html_e('Clear All Reviews', 'google-reviews-plugin'); ?>
+                </button>
+            <?php endif; ?>
         </div>
         
         <div class="grp-reviews-filters">

@@ -544,6 +544,13 @@ class GRP_Admin {
 
         $api = new GRP_API();
         $api->disconnect();
+        
+        // Check if user wants to clear reviews too
+        $clear_reviews = isset($_POST['grp_clear_reviews']) && $_POST['grp_clear_reviews'] === '1';
+        if ($clear_reviews) {
+            $reviews = new GRP_Reviews();
+            $reviews->clear_reviews();
+        }
 
         wp_safe_redirect(admin_url('admin.php?page=google-reviews-settings'));
         exit;

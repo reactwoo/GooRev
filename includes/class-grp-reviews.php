@@ -37,6 +37,7 @@ class GRP_Reviews {
     private function init_hooks() {
         add_action('wp_ajax_grp_sync_reviews', array($this, 'ajax_sync_reviews'));
         add_action('wp_ajax_grp_get_reviews', array($this, 'ajax_get_reviews'));
+        add_action('wp_ajax_grp_clear_reviews', array($this, 'ajax_clear_reviews'));
         add_action('grp_sync_reviews_cron', array($this, 'sync_reviews_cron'));
     }
     
@@ -537,5 +538,41 @@ class GRP_Reviews {
      */
     public function unschedule_sync() {
         wp_clear_scheduled_hook('grp_sync_reviews_cron');
+    }
+    
+    /**
+     * Clear all reviews from database
+     */
+    public function clear_reviews() {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'grp_reviews';
+        
+        // Delete all reviews
+        $deleted = $wpdb->query("DELETE FROM {$table_name}");
+        
+        // Clear cache
+        $this->cache->clear('grp_reviews_');
+        
+        return $deleted !== false;
+    }
+    
+    /**
+     * AJAX handler for clearing reviews
+     */
+    public function ajax_clear_reviews() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Insufficient permissions', 'google-reviews-plugin'));
+        }
+        
+        $result = $this->clear_reviews();
+        
+        if ($result) {
+            wp_send_json_success(__('All reviews have been cleared.', 'google-reviews-plugin'));
+        } else {
+            wp_send_json_error(__('Failed to clear reviews.', 'google-reviews-plugin'));
+        }
     }
 }
