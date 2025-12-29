@@ -75,61 +75,89 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
     // Only make API call if we don't have both place_id and location name cached
     // This prevents unnecessary API calls on every page load
     if (empty($place_id_display) || empty($location_name)) {
-        $locations = $api->get_locations($account_id);
-        if (is_wp_error($locations)) {
-            $api_error = $locations->get_error_message();
-            grp_debug_log('Failed to get locations for place_id display', array('error' => $api_error));
-        } else {
-            $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
-            $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
-            foreach ($locations_list as $loc) {
-                $loc_name = $loc['name'] ?? '';
-                $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
+        // First, try to get placeId from single location endpoint (more reliable)
+        if (empty($place_id_display)) {
+            $location_details = $api->get_location($account_id, $location_id);
+            if (!is_wp_error($location_details) && isset($location_details['location'])) {
+                $loc = $location_details['location'];
                 
-                // Match by ID (handle both numeric and resource name formats)
-                $matches = ($loc_id === $clean_location_id || 
-                           $loc_name === $location_id || 
-                           $loc_id === $location_id ||
-                           (is_numeric($clean_location_id) && $loc_id === $clean_location_id) ||
-                           (is_numeric($location_id) && $loc_id === $location_id));
-                
-                if ($matches) {
-                    // Get location name if not cached
-                    if (empty($location_name)) {
-                        $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
-                        if (!empty($location_name)) {
-                            update_option('grp_gbp_location_name', $location_name);
-                        }
+                // Get location name if not cached
+                if (empty($location_name)) {
+                    $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? ($loc['name'] ?? '');
+                    if (!empty($location_name)) {
+                        update_option('grp_gbp_location_name', $location_name);
                     }
+                }
+                
+                // Extract placeId from single location response
+                if (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                    $place_id_display = $loc['placeId'];
+                } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
+                    $place_id_display = $loc['place_id'];
+                } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
+                    $place_id_display = $loc['storefrontAddress']['placeId'];
+                }
+                
+                if (!empty($place_id_display)) {
+                    update_option('grp_gbp_place_id_default', $place_id_display);
+                }
+            }
+        }
+        
+        // Fallback: If we still don't have place_id or location_name, try locations list
+        if (empty($place_id_display) || empty($location_name)) {
+            $locations = $api->get_locations($account_id);
+            if (is_wp_error($locations)) {
+                $api_error = $locations->get_error_message();
+                grp_debug_log('Failed to get locations for place_id display', array('error' => $api_error));
+            } else {
+                $locations_list = isset($locations['locations']) ? $locations['locations'] : (is_array($locations) ? $locations : array());
+                $clean_location_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $location_id);
+                foreach ($locations_list as $loc) {
+                    $loc_name = $loc['name'] ?? '';
+                    $loc_id = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $loc_name);
                     
-                    // Get placeId if not cached
-                    if (empty($place_id_display)) {
-                        // Try multiple possible locations for placeId
-                        if (isset($loc['placeId']) && !empty($loc['placeId'])) {
-                            $place_id_display = $loc['placeId'];
-                        } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
-                            $place_id_display = $loc['place_id'];
-                        } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
-                            $place_id_display = $loc['storefrontAddress']['placeId'];
-                        } elseif (isset($loc['metadata']['placeId']) && !empty($loc['metadata']['placeId'])) {
-                            $place_id_display = $loc['metadata']['placeId'];
-                        } elseif (isset($loc['locationKey']['placeId']) && !empty($loc['locationKey']['placeId'])) {
-                            $place_id_display = $loc['locationKey']['placeId'];
+                    // Match by ID (handle both numeric and resource name formats)
+                    $matches = ($loc_id === $clean_location_id || 
+                               $loc_name === $location_id || 
+                               $loc_id === $location_id ||
+                               (is_numeric($clean_location_id) && $loc_id === $clean_location_id) ||
+                               (is_numeric($location_id) && $loc_id === $location_id));
+                    
+                    if ($matches) {
+                        // Get location name if not cached
+                        if (empty($location_name)) {
+                            $location_name = $loc['title'] ?? $loc['storefrontAddress']['addressLines'][0] ?? $loc_name;
+                            if (!empty($location_name)) {
+                                update_option('grp_gbp_location_name', $location_name);
+                            }
                         }
                         
-                        // Store for future use
-                        if (!empty($place_id_display)) {
-                            update_option('grp_gbp_place_id_default', $place_id_display);
-                        } else {
-                            // Log for debugging
-                            grp_debug_log('Place ID not found in location data', array(
-                                'location_id' => $location_id,
-                                'location_keys' => array_keys($loc),
-                                'has_storefrontAddress' => isset($loc['storefrontAddress'])
-                            ));
+                        // Get placeId if not cached (unlikely to be in list, but check anyway)
+                        if (empty($place_id_display)) {
+                            // Try multiple possible locations for placeId
+                            if (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                                $place_id_display = $loc['placeId'];
+                            } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
+                                $place_id_display = $loc['place_id'];
+                            } elseif (isset($loc['storefrontAddress']['placeId']) && !empty($loc['storefrontAddress']['placeId'])) {
+                                $place_id_display = $loc['storefrontAddress']['placeId'];
+                            }
+                            
+                            // Store for future use
+                            if (!empty($place_id_display)) {
+                                update_option('grp_gbp_place_id_default', $place_id_display);
+                            } else {
+                                // Log for debugging
+                                grp_debug_log('Place ID not found in location data', array(
+                                    'location_id' => $location_id,
+                                    'location_keys' => array_keys($loc),
+                                    'has_storefrontAddress' => isset($loc['storefrontAddress'])
+                                ));
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
         }
