@@ -131,11 +131,7 @@ class GRP_Review_Widgets {
      * Add admin menu
      */
     public function add_admin_menu() {
-        $addons = GRP_Addons::get_instance();
-        if (!$addons->is_addon_enabled('review-widgets')) {
-            return;
-        }
-        
+        // Always register the menu item (so page exists), but render function will check if addon is enabled
         add_submenu_page(
             'google-reviews',
             __('Review Widgets', 'google-reviews-plugin'),
