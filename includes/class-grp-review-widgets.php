@@ -64,8 +64,9 @@ class GRP_Review_Widgets {
      */
     private function init_hooks() {
         // Always register admin menu hook (so we can check addon status inside)
+        // Use priority 20 to ensure parent menu 'google-reviews' exists (registered by GRP_Admin at priority 10)
         if (is_admin()) {
-            add_action('admin_menu', array($this, 'add_admin_menu'));
+            add_action('admin_menu', array($this, 'add_admin_menu'), 20);
             add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         }
         
