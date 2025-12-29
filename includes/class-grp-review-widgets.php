@@ -431,6 +431,17 @@ class GRP_Review_Widgets {
      * Render widgets settings page
      */
     public function render_widgets_page() {
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'google-reviews-plugin'));
+        }
+        
+        // Check if addon is enabled
+        $addons = GRP_Addons::get_instance();
+        if (!$addons->is_addon_enabled('review-widgets')) {
+            wp_die(__('Review Widgets addon is not enabled. Please enable it from the Addons page.', 'google-reviews-plugin'));
+        }
+        
         include GRP_PLUGIN_DIR . 'includes/admin/views/widgets.php';
     }
 }
