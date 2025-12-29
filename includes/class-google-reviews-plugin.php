@@ -43,13 +43,6 @@ class Google_Reviews_Plugin {
      */
     private function __construct() {
         $this->load_dependencies();
-        
-        // Initialize Review Widgets addon early so menu hooks can be registered in time
-        // This must be done in constructor, not init_components, because admin_menu fires before init
-        if (class_exists('GRP_Review_Widgets')) {
-            GRP_Review_Widgets::get_instance();
-        }
-        
         $this->init_hooks();
     }
     
@@ -107,6 +100,21 @@ class Google_Reviews_Plugin {
         add_action('widgets_init', array($this, 'register_widgets'));
         add_action('elementor/widgets/widgets_registered', array($this, 'register_elementor_widgets'));
         add_action('init', array($this, 'register_gutenberg_blocks'));
+        
+        // Initialize Review Widgets addon on admin_menu hook to ensure parent menu exists
+        // Use priority 20 to ensure it runs after GRP_Admin registers the parent menu (priority 10)
+        if (is_admin()) {
+            add_action('admin_menu', array($this, 'init_review_widgets'), 20);
+        }
+    }
+    
+    /**
+     * Initialize Review Widgets addon after parent menu is registered
+     */
+    public function init_review_widgets() {
+        if (class_exists('GRP_Review_Widgets')) {
+            GRP_Review_Widgets::get_instance();
+        }
     }
     
     /**
@@ -139,7 +147,7 @@ class Google_Reviews_Plugin {
             GRP_WooCommerce::get_instance();
         }
         
-        // Note: Review Widgets addon is initialized in constructor to ensure menu registration happens early enough
+        // Note: Review Widgets addon is initialized on admin_menu hook (priority 20) to ensure parent menu exists
         
         // Initialize frontend
         if (!is_admin()) {
