@@ -170,21 +170,42 @@ class GRP_Onboarding {
      * Activate free license
      */
     private function activate_free_license($name, $email) {
-        $license = new GRP_License();
-        
         // Get site domain
         $domain = parse_url(home_url(), PHP_URL_HOST);
         
+        // Build request body (email and name are optional)
+        // SECURITY: Never send package_type - server will force it to 'goorev-free'
+        $body = array(
+            'domain' => $domain,
+            'plugin' => 'goorev',
+            'plugin_version' => GRP_PLUGIN_VERSION
+        );
+        
+        if (!empty($name)) {
+            $body['name'] = $name;
+        }
+        
+        if (!empty($email)) {
+            $body['email'] = $email;
+        }
+        
+        // SECURITY: Add HMAC signature for authentication
+        // Use a shared secret that matches the server's GOOREV_PLUGIN_SECRET
+        $plugin_secret = 'goorev-free-license-secret-key-2024'; // Should match server env var
+        $timestamp = time();
+        $signature = hash_hmac('sha256', $domain . ':goorev:' . $timestamp, $plugin_secret);
+        
+        $body['signature'] = $signature;
+        $body['timestamp'] = $timestamp;
+        
         // Call license server to create/activate free license
         $response = wp_remote_post(GRP_License::LICENSE_API_URL . 'api/v1/license/activate-free', array(
-            'body' => array(
-                'name' => $name,
-                'email' => $email,
-                'domain' => $domain,
-                'plugin' => 'goorev',
-                'package_type' => 'goorev-free'
-            ),
-            'timeout' => 15
+            'body' => json_encode($body),
+            'timeout' => 15,
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'User-Agent' => 'GooRev-Plugin/' . GRP_PLUGIN_VERSION
+            )
         ));
         
         if (is_wp_error($response)) {
