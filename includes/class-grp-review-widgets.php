@@ -188,7 +188,11 @@ class GRP_Review_Widgets {
      * Handle review redirect with click tracking
      */
     public function handle_review_redirect() {
+        // Check if this is our redirect endpoint
         $redirect_id = get_query_var('grp_review_redirect');
+        if (empty($redirect_id)) {
+            $redirect_id = isset($_GET['grp_review_redirect']) ? sanitize_text_field($_GET['grp_review_redirect']) : '';
+        }
         
         if (!$redirect_id) {
             return;

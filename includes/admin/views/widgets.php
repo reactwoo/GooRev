@@ -230,7 +230,7 @@ $is_pro = $license->is_pro();
                             <td>
                                 <select id="grp_widget_button_default_size" name="grp_widget_button_default_size">
                                     <option value="small" <?php selected($button_size, 'small'); ?>><?php esc_html_e('Small', 'google-reviews-plugin'); ?></option>
-                                    <option value="medium" <?php selected($button_size, 'medium'); ?>><?php selected($button_size, 'medium'); ?>><?php esc_html_e('Medium', 'google-reviews-plugin'); ?></option>
+                                    <option value="medium" <?php selected($button_size, 'medium'); ?>><?php esc_html_e('Medium', 'google-reviews-plugin'); ?></option>
                                     <option value="large" <?php selected($button_size, 'large'); ?>><?php esc_html_e('Large', 'google-reviews-plugin'); ?></option>
                                 </select>
                             </td>
