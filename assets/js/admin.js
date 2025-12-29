@@ -431,9 +431,16 @@
             $select.empty();
             if (response && response.success && response.data && response.data.locations && response.data.locations.length) {
                 $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_location));
+                var savedLocationId = window.__grpAdminConfig.saved_location_id || '';
                 response.data.locations.forEach(function(loc) {
                     var opt = $('<option>').val(loc.id).text(loc.label || loc.id).attr('data-label', loc.label || loc.id);
-                    if (!force && window.__grpAdminConfig.saved_location_id === loc.id) {
+                    // Match by full ID or numeric ID to handle different formats
+                    var matches = (!force && (
+                        savedLocationId === loc.id || 
+                        savedLocationId === loc.numeric_id ||
+                        (loc.numeric_id && savedLocationId === loc.numeric_id.toString())
+                    ));
+                    if (matches) {
                         opt.attr('selected', 'selected');
                     }
                     $select.append(opt);
