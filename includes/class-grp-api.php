@@ -259,10 +259,11 @@ class GRP_API {
             return new WP_Error('rate_limit', $error_message);
         }
         
-        // Handle 401 - JWT token expired, try to refresh
+        // Handle 401 - Could be JWT token expired OR Google OAuth expired
         if ($status_code === 401) {
             // Get error details first
             $error_detail = isset($decoded['message']) ? $decoded['message'] : (isset($decoded['error']) ? $decoded['error'] : '');
+            $error_code = isset($decoded['code']) ? $decoded['code'] : '';
             
             // For OAuth token exchange, don't retry - the code might be expired
             if (strpos($endpoint, 'oauth/token') !== false) {
@@ -272,7 +273,16 @@ class GRP_API {
                 ));
             }
             
-            // Try to refresh the JWT token (but limit retries to prevent infinite loops)
+            // Check if cloud server explicitly marked this as an OAuth error (not JWT)
+            if ($error_code === 'oauth_expired' || strpos($error_detail, 'OAuth') !== false || strpos($error_detail, 'authentication credentials') !== false || strpos($error_detail, 'reconnect your Google account') !== false) {
+                // This is a Google OAuth error, not a JWT error
+                return new WP_Error('oauth_expired', sprintf(
+                    __('Google OAuth token expired: %s. Please disconnect and reconnect your Google account in the plugin settings.', 'google-reviews-plugin'),
+                    $error_detail
+                ));
+            }
+            
+            // This might be a JWT license token error - try to refresh it
             if ($this->retry_count < 1) {
                 $this->retry_count++;
                 $refreshed = $this->refresh_jwt_token();
@@ -285,17 +295,7 @@ class GRP_API {
                 $this->retry_count = 0; // Reset on failure
             }
             
-            // If refresh failed, provide helpful error message
-            // Check if this is actually a Google OAuth error (not JWT error)
-            if (strpos($error_detail, 'OAuth') !== false || strpos($error_detail, 'authentication credentials') !== false) {
-                // This is a Google OAuth error, not a JWT error
-                return new WP_Error('oauth_expired', sprintf(
-                    __('Google OAuth token expired: %s. Please reconnect your Google account in the plugin settings.', 'google-reviews-plugin'),
-                    $error_detail
-                ));
-            }
-            
-            // This is a JWT license token error
+            // JWT refresh failed - this is a JWT license token error
             $error_msg = __('Invalid or expired license token.', 'google-reviews-plugin');
             if (!empty($error_detail)) {
                 $error_msg .= ' ' . $error_detail;
