@@ -407,8 +407,8 @@ class GRP_Admin {
                 . '<button id="grp-disconnect-btn" class="button" style="color: #dc3232; border-color: #dc3232;">' . esc_html__('Disconnect', 'google-reviews-plugin') . '</button>'
                 . '</p>';
             // Disconnect confirmation modal (will be shown via JavaScript)
-            echo '<div id="grp-disconnect-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100000; align-items: center; justify-content: center;">';
-            echo '<div style="background: #fff; padding: 20px; border-radius: 4px; max-width: 500px; margin: 20px;">';
+            echo '<div id="grp-disconnect-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 100000; align-items: center; justify-content: center; flex-direction: column;">';
+            echo '<div style="background: #fff; padding: 20px; border-radius: 4px; max-width: 500px; margin: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">';
             echo '<h2 style="margin-top: 0;">' . esc_html__('Disconnect Google Account', 'google-reviews-plugin') . '</h2>';
             echo '<p>' . esc_html__('Are you sure you want to disconnect your Google account?', 'google-reviews-plugin') . '</p>';
             echo '<form method="post" action="' . esc_url($disconnect_url) . '" id="grp-disconnect-form">';
