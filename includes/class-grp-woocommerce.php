@@ -676,8 +676,11 @@ Thanks again!
             
             if (!empty($location)) {
                 // Extract placeId from location details
+                // Business Information API exposes placeId in metadata.placeId
                 $place_id = '';
-                if (isset($location['placeId']) && !empty($location['placeId'])) {
+                if (isset($location['metadata']['placeId']) && !empty($location['metadata']['placeId'])) {
+                    $place_id = $location['metadata']['placeId'];
+                } elseif (isset($location['placeId']) && !empty($location['placeId'])) {
                     $place_id = $location['placeId'];
                 } elseif (isset($location['place_id']) && !empty($location['place_id'])) {
                     $place_id = $location['place_id'];

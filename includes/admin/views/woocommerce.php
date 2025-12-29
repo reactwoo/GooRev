@@ -93,7 +93,10 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                     }
                     
                     // Extract placeId from single location response
-                    if (isset($loc['placeId']) && !empty($loc['placeId'])) {
+                    // Business Information API exposes placeId in metadata.placeId
+                    if (isset($loc['metadata']['placeId']) && !empty($loc['metadata']['placeId'])) {
+                        $place_id_display = $loc['metadata']['placeId'];
+                    } elseif (isset($loc['placeId']) && !empty($loc['placeId'])) {
                         $place_id_display = $loc['placeId'];
                     } elseif (isset($loc['place_id']) && !empty($loc['place_id'])) {
                         $place_id_display = $loc['place_id'];
