@@ -132,7 +132,7 @@ class GRP_Review_Widgets {
      */
     public function add_admin_menu() {
         // Always register the menu item (so page exists), but render function will check if addon is enabled
-        add_submenu_page(
+        $hook = add_submenu_page(
             'google-reviews',
             __('Review Widgets', 'google-reviews-plugin'),
             __('Review Widgets', 'google-reviews-plugin'),
@@ -140,6 +140,11 @@ class GRP_Review_Widgets {
             'google-reviews-widgets',
             array($this, 'render_widgets_page')
         );
+        
+        // Debug: Log menu registration (remove in production)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('[GRP Review Widgets] Menu registered with hook: ' . $hook);
+        }
     }
     
     /**
