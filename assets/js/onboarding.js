@@ -10,8 +10,26 @@
         steps: ['welcome', 'google_connect', 'place_id'],
         
         init: function() {
+            // Check if there's a step parameter in the URL (e.g., after OAuth redirect)
+            const urlParams = new URLSearchParams(window.location.search);
+            const stepParam = urlParams.get('onboarding_step');
+            if (stepParam) {
+                const stepIndex = this.steps.indexOf(stepParam);
+                if (stepIndex !== -1) {
+                    this.currentStep = stepIndex;
+                }
+            }
+            
             this.bindEvents();
             this.updateStepDisplay();
+            
+            // Clean up URL by removing the onboarding_step parameter
+            if (stepParam) {
+                const newUrl = window.location.pathname + window.location.search.replace(/[?&]onboarding_step=[^&]*/, '').replace(/^&/, '?');
+                if (newUrl !== window.location.pathname + window.location.search) {
+                    window.history.replaceState({}, '', newUrl || window.location.pathname);
+                }
+            }
         },
         
         bindEvents: function() {

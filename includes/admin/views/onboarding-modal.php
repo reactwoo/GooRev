@@ -19,7 +19,13 @@ if (!defined('ABSPATH')) {
         
         <div class="grp-onboarding-content">
             <!-- Step 1: Welcome & Registration -->
-            <div class="grp-onboarding-step" data-step="welcome" style="display: block;">
+            <?php
+            // Check if we're returning from OAuth and should show google_connect step
+            $onboarding_step = isset($_GET['onboarding_step']) ? sanitize_text_field($_GET['onboarding_step']) : 'welcome';
+            $show_welcome = ($onboarding_step === 'welcome');
+            $show_google_connect = ($onboarding_step === 'google_connect');
+            ?>
+            <div class="grp-onboarding-step" data-step="welcome" style="display: <?php echo $show_welcome ? 'block' : 'none'; ?>;">
                 <div class="grp-onboarding-step-content">
                     <h3><?php esc_html_e('Get Started', 'google-reviews-plugin'); ?></h3>
                     <p><?php esc_html_e('To activate your free license and get started, please provide your details (optional):', 'google-reviews-plugin'); ?></p>
@@ -65,7 +71,7 @@ if (!defined('ABSPATH')) {
             </div>
             
             <!-- Step 2: Google Connection -->
-            <div class="grp-onboarding-step" data-step="google_connect" style="display: none;">
+            <div class="grp-onboarding-step" data-step="google_connect" style="display: <?php echo $show_google_connect ? 'block' : 'none'; ?>;">
                 <div class="grp-onboarding-step-content">
                     <h3><?php esc_html_e('Connect Your Google Account', 'google-reviews-plugin'); ?></h3>
                     <p><?php esc_html_e('Connect your Google Business Profile to fetch and display your reviews.', 'google-reviews-plugin'); ?></p>

@@ -519,11 +519,13 @@ class GRP_Admin {
                 
                 add_settings_error('grp_settings', 'grp_oauth_success', __('Successfully connected to Google.', 'google-reviews-plugin'), 'updated');
                 
-                // If we're in onboarding mode, redirect back to onboarding
+                // If we're in onboarding mode, redirect back to onboarding with step preserved
                 $onboarding_complete = get_option('grp_onboarding_complete', false);
                 if (!$onboarding_complete) {
+                    // Set a transient to indicate OAuth just completed and which step to show
+                    set_transient('grp_onboarding_oauth_complete', 'google_connect', 60);
                     // Redirect to dashboard to continue onboarding
-                    wp_safe_redirect(admin_url('admin.php?page=google-reviews'));
+                    wp_safe_redirect(admin_url('admin.php?page=google-reviews&onboarding_step=google_connect'));
                     exit;
                 }
             } else {
