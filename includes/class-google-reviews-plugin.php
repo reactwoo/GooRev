@@ -101,18 +101,9 @@ class Google_Reviews_Plugin {
         add_action('elementor/widgets/widgets_registered', array($this, 'register_elementor_widgets'));
         add_action('init', array($this, 'register_gutenberg_blocks'));
         
-        // Initialize Review Widgets addon on admin_menu hook to ensure parent menu exists
-        // Use priority 20 to ensure it runs after GRP_Admin registers the parent menu (priority 10)
-        if (is_admin()) {
-            add_action('admin_menu', array($this, 'init_review_widgets'), 20);
-        }
-    }
-    
-    /**
-     * Initialize Review Widgets addon after parent menu is registered
-     */
-    public function init_review_widgets() {
-        if (class_exists('GRP_Review_Widgets')) {
+        // Initialize Review Widgets addon early - it will register its menu on admin_menu hook with priority 20
+        // This ensures the parent menu 'google-reviews' exists (registered by GRP_Admin at priority 10)
+        if (is_admin() && class_exists('GRP_Review_Widgets')) {
             GRP_Review_Widgets::get_instance();
         }
     }
