@@ -132,6 +132,10 @@ class GRP_Admin {
         register_setting('grp_settings', 'grp_google_client_secret', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_google_account_id', array('type' => 'string', 'sanitize_callback' => function($value) { return $value !== null ? sanitize_text_field($value) : ''; }));
         register_setting('grp_settings', 'grp_google_location_id', array('type' => 'string', 'sanitize_callback' => array($this, 'sanitize_location_id')));
+        
+        // Hook to save account/location labels after settings are saved
+        add_action('update_option_grp_google_account_id', array($this, 'save_account_label'), 10, 2);
+        add_action('update_option_grp_google_location_id', array($this, 'save_location_label'), 10, 2);
         register_setting('grp_settings', 'grp_default_style', array('type' => 'string', 'sanitize_callback' => 'sanitize_text_field'));
         register_setting('grp_settings', 'grp_default_count', array('type' => 'integer', 'sanitize_callback' => 'absint'));
         register_setting('grp_settings', 'grp_cache_duration', array('type' => 'integer', 'sanitize_callback' => 'absint'));
@@ -747,10 +751,12 @@ class GRP_Admin {
     public function render_account_select_field() {
         $api = new GRP_API();
         $connected = $api->is_connected();
-        $saved = get_option('grp_google_account_id', '');
+        $saved_id = get_option('grp_google_account_id', '');
+        $saved_label = get_option('grp_google_account_label', '');
         echo '<select id="grp-account-select" name="grp_google_account_id" ' . (!$connected ? 'disabled' : '') . ' class="regular-text">';
-        if ($saved) {
-            echo '<option value="' . esc_attr($saved) . '" selected>' . esc_html($saved) . '</option>';
+        if ($saved_id) {
+            $display_label = !empty($saved_label) ? $saved_label : $saved_id;
+            echo '<option value="' . esc_attr($saved_id) . '" data-label="' . esc_attr($saved_label) . '" selected>' . esc_html($display_label) . '</option>';
         } else {
             echo '<option value="">' . esc_html__('Click Refresh to load accounts', 'google-reviews-plugin') . '</option>';
         }
@@ -767,11 +773,13 @@ class GRP_Admin {
     public function render_location_select_field() {
         $api = new GRP_API();
         $connected = $api->is_connected();
-        $saved = get_option('grp_google_location_id', '');
+        $saved_id = get_option('grp_google_location_id', '');
+        $saved_label = get_option('grp_google_location_label', '');
         echo '<select id="grp-location-select" name="grp_google_location_id" ' . (!$connected ? 'disabled' : '') . ' class="regular-text">';
         echo '<option value="">' . esc_html__('Select an account first', 'google-reviews-plugin') . '</option>';
-        if ($saved) {
-            echo '<option value="' . esc_attr($saved) . '" selected>' . esc_html($saved) . '</option>';
+        if ($saved_id) {
+            $display_label = !empty($saved_label) ? $saved_label : $saved_id;
+            echo '<option value="' . esc_attr($saved_id) . '" data-label="' . esc_attr($saved_label) . '" selected>' . esc_html($display_label) . '</option>';
         }
         echo '</select>';
     }
@@ -1141,6 +1149,11 @@ class GRP_Admin {
             }
             if (!empty($loc_id)) {
                 $locations[] = array('id' => $loc_id, 'label' => $label, 'numeric_id' => $numeric_id);
+                // Also save label if this matches the saved location ID
+                $saved_location_id = get_option('grp_google_location_id', '');
+                if ($saved_location_id === $loc_id || $saved_location_id === $numeric_id) {
+                    update_option('grp_google_location_label', $label);
+                }
             }
         }
         
@@ -1389,5 +1402,92 @@ class GRP_Admin {
         // Remove any location resource name prefixes
         $sanitized = preg_replace('#^(accounts/[^/]+/)?locations/?#', '', $sanitized);
         return $sanitized;
+    }
+    
+    /**
+     * Save account label when account ID is saved
+     */
+    public function save_account_label($old_value, $value) {
+        // Try to get label from cached accounts
+        $cached_accounts = get_transient('grp_accounts_list');
+        if ($cached_accounts && is_array($cached_accounts)) {
+            foreach ($cached_accounts as $acc) {
+                if (isset($acc['id']) && $acc['id'] === $value) {
+                    if (isset($acc['label'])) {
+                        update_option('grp_google_account_label', $acc['label']);
+                        return;
+                    }
+                }
+                // Also check numeric ID
+                if (isset($acc['numeric_id']) && $acc['numeric_id'] === $value) {
+                    if (isset($acc['label'])) {
+                        update_option('grp_google_account_label', $acc['label']);
+                        return;
+                    }
+                }
+            }
+        }
+        // If not found in cache, try stale cache
+        $stale_accounts = get_option('grp_accounts_cache_stale', array());
+        if ($stale_accounts && is_array($stale_accounts)) {
+            foreach ($stale_accounts as $acc) {
+                if (isset($acc['id']) && $acc['id'] === $value) {
+                    if (isset($acc['label'])) {
+                        update_option('grp_google_account_label', $acc['label']);
+                        return;
+                    }
+                }
+                if (isset($acc['numeric_id']) && $acc['numeric_id'] === $value) {
+                    if (isset($acc['label'])) {
+                        update_option('grp_google_account_label', $acc['label']);
+                        return;
+                    }
+                }
+            }
+        }
+        // If label not found, clear it
+        if (empty($value)) {
+            delete_option('grp_google_account_label');
+        }
+    }
+    
+    /**
+     * Save location label when location ID is saved
+     */
+    public function save_location_label($old_value, $value) {
+        $account_id = get_option('grp_google_account_id', '');
+        if (empty($account_id)) {
+            return;
+        }
+        
+        // Try to get label from cached locations
+        $cache_key = 'grp_locations_' . md5($account_id);
+        $cached_locations = get_transient($cache_key);
+        if ($cached_locations && is_array($cached_locations)) {
+            foreach ($cached_locations as $loc) {
+                if (isset($loc['id']) && $loc['id'] === $value) {
+                    if (isset($loc['label'])) {
+                        update_option('grp_google_location_label', $loc['label']);
+                        return;
+                    }
+                }
+            }
+        }
+        // If not found in cache, try stale cache
+        $stale_locations = get_option('grp_locations_cache_' . md5($account_id), array());
+        if ($stale_locations && is_array($stale_locations)) {
+            foreach ($stale_locations as $loc) {
+                if (isset($loc['id']) && $loc['id'] === $value) {
+                    if (isset($loc['label'])) {
+                        update_option('grp_google_location_label', $loc['label']);
+                        return;
+                    }
+                }
+            }
+        }
+        // If label not found, clear it
+        if (empty($value)) {
+            delete_option('grp_google_location_label');
+        }
     }
 }

@@ -263,7 +263,7 @@
             if (response && response.success && response.data && response.data.accounts && response.data.accounts.length) {
                 $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_account));
                 response.data.accounts.forEach(function(acc) {
-                    var opt = $('<option>').val(acc.id).text(acc.label || acc.id);
+                    var opt = $('<option>').val(acc.id).text(acc.label || acc.id).attr('data-label', acc.label || acc.id);
                     // Match by full ID or numeric ID to handle different formats
                     var savedId = window.__grpAdminConfig.saved_account_id || '';
                     var matches = (!force && (
@@ -353,7 +353,7 @@
             if (response && response.success && response.data && response.data.locations && response.data.locations.length) {
                 $select.append($('<option>').val('').text(window.__grpAdminConfig.strings.select_location));
                 response.data.locations.forEach(function(loc) {
-                    var opt = $('<option>').val(loc.id).text(loc.label || loc.id);
+                    var opt = $('<option>').val(loc.id).text(loc.label || loc.id).attr('data-label', loc.label || loc.id);
                     if (!force && window.__grpAdminConfig.saved_location_id === loc.id) {
                         opt.attr('selected', 'selected');
                     }

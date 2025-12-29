@@ -149,7 +149,7 @@ class GRP_Onboarding {
                 $place_id = isset($data['place_id']) ? sanitize_text_field($data['place_id']) : '';
                 
                 if (!empty($place_id)) {
-                    update_option('grp_wc_place_id_override', $place_id);
+                    update_option('grp_place_id', $place_id);
                 }
                 
                 // Mark onboarding as complete

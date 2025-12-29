@@ -43,6 +43,23 @@ if (!defined('ABSPATH')) {
                                 <?php esc_html_e('We\'ll use this to activate your free license and send you important updates. You can skip this step if you prefer.', 'google-reviews-plugin'); ?>
                             </p>
                         </div>
+                        
+                        <div class="grp-onboarding-field">
+                            <label>
+                                <input type="checkbox" id="grp-onboarding-has-license" name="has_license" value="1">
+                                <?php esc_html_e('I already have a license key', 'google-reviews-plugin'); ?>
+                            </label>
+                        </div>
+                        
+                        <div class="grp-onboarding-field grp-onboarding-license-field" style="display: none;">
+                            <label for="grp-onboarding-license-key">
+                                <?php esc_html_e('License Key', 'google-reviews-plugin'); ?>
+                            </label>
+                            <input type="text" id="grp-onboarding-license-key" name="license_key" class="regular-text" placeholder="<?php esc_attr_e('Enter your license key', 'google-reviews-plugin'); ?>">
+                            <p class="description">
+                                <?php esc_html_e('Enter your Pro or Enterprise license key to activate premium features.', 'google-reviews-plugin'); ?>
+                            </p>
+                        </div>
                     </form>
                 </div>
             </div>

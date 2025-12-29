@@ -35,6 +35,11 @@
                 self.handleSkip();
             });
             
+            // Toggle license key field
+            $(document).on('change', '#grp-onboarding-has-license', function() {
+                $('.grp-onboarding-license-field').toggle($(this).is(':checked'));
+            });
+            
             // Check if Google is connected (polling for step 2)
             if ($('.grp-onboarding-step[data-step="google_connect"]').length) {
                 this.checkGoogleConnection();
@@ -115,7 +120,9 @@
                 case 'welcome':
                     return {
                         name: $('#grp-onboarding-name').val(),
-                        email: $('#grp-onboarding-email').val()
+                        email: $('#grp-onboarding-email').val(),
+                        has_license: $('#grp-onboarding-has-license').is(':checked'),
+                        license_key: $('#grp-onboarding-license-key').val()
                     };
                     
                 case 'google_connect':
