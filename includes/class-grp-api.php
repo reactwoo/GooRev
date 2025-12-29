@@ -151,6 +151,9 @@ class GRP_API {
         // Add access token to data if available (for Google API calls)
         if ($this->access_token) {
             $data['access_token'] = $this->access_token;
+            // Always log token info for debugging OAuth issues
+            error_log('[GRP Request] Sending API request | Endpoint: ' . $endpoint . ' | Access token: ' . substr($this->access_token, 0, 20) . '... (' . strlen($this->access_token) . ' chars) | Has refresh_token: ' . (!empty($this->refresh_token) ? 'yes' : 'no'));
+            
             // Also include refresh token and expiry if available
             if ($this->refresh_token) {
                 $data['refresh_token'] = $this->refresh_token;
