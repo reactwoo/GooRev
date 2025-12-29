@@ -70,16 +70,40 @@ window.openCreativeCustomizer = function(style, styleName) {
         '<label><?php esc_js_e('Body Font (Google Fonts)', 'google-reviews-plugin'); ?></label>' +
         '<select id="grp-creative-body-font" class="grp-font-select grp-google-font-select">' +
         '<option value=""><?php esc_js_e('Default (Poppins)', 'google-reviews-plugin'); ?></option>' +
+        '<optgroup label="<?php esc_js_e('Sans-Serif', 'google-reviews-plugin'); ?>">' +
         '<option value="Inter">Inter</option>' +
         '<option value="Roboto">Roboto</option>' +
         '<option value="Open Sans">Open Sans</option>' +
         '<option value="Lato">Lato</option>' +
         '<option value="Montserrat">Montserrat</option>' +
         '<option value="DM Sans">DM Sans</option>' +
-        '<option value="Playfair Display">Playfair Display</option>' +
-        '<option value="Merriweather">Merriweather</option>' +
         '<option value="Raleway">Raleway</option>' +
+        '<option value="Nunito">Nunito</option>' +
+        '<option value="Source Sans Pro">Source Sans Pro</option>' +
+        '<option value="Ubuntu">Ubuntu</option>' +
+        '<option value="Poppins">Poppins</option>' +
+        '<option value="Work Sans">Work Sans</option>' +
+        '<option value="Manrope">Manrope</option>' +
+        '<option value="Outfit">Outfit</option>' +
+        '<option value="Plus Jakarta Sans">Plus Jakarta Sans</option>' +
+        '</optgroup>' +
+        '<optgroup label="<?php esc_js_e('Serif', 'google-reviews-plugin'); ?>">' +
+        '<option value="Merriweather">Merriweather</option>' +
+        '<option value="Lora">Lora</option>' +
+        '<option value="Playfair Display">Playfair Display</option>' +
+        '<option value="PT Serif">PT Serif</option>' +
+        '<option value="Crimson Text">Crimson Text</option>' +
+        '<option value="Libre Baskerville">Libre Baskerville</option>' +
+        '<option value="Bitter">Bitter</option>' +
+        '<option value="Source Serif Pro">Source Serif Pro</option>' +
+        '</optgroup>' +
+        '<optgroup label="<?php esc_js_e('Display', 'google-reviews-plugin'); ?>">' +
         '<option value="Oswald">Oswald</option>' +
+        '<option value="Bebas Neue">Bebas Neue</option>' +
+        '<option value="Righteous">Righteous</option>' +
+        '<option value="Fredoka One">Fredoka One</option>' +
+        '<option value="Abril Fatface">Abril Fatface</option>' +
+        '</optgroup>' +
         '</select>' +
         '<p class="description"><?php esc_js_e('Google Fonts will be automatically loaded', 'google-reviews-plugin'); ?></p>' +
         '</div>' +
@@ -87,12 +111,38 @@ window.openCreativeCustomizer = function(style, styleName) {
         '<label><?php esc_js_e('Name Font (Google Fonts)', 'google-reviews-plugin'); ?></label>' +
         '<select id="grp-creative-name-font" class="grp-font-select grp-google-font-select">' +
         '<option value=""><?php esc_js_e('Default (Poppins)', 'google-reviews-plugin'); ?></option>' +
+        '<optgroup label="<?php esc_js_e('Sans-Serif', 'google-reviews-plugin'); ?>">' +
         '<option value="Inter">Inter</option>' +
         '<option value="Roboto">Roboto</option>' +
         '<option value="Montserrat">Montserrat</option>' +
         '<option value="DM Sans">DM Sans</option>' +
+        '<option value="Raleway">Raleway</option>' +
+        '<option value="Nunito">Nunito</option>' +
+        '<option value="Poppins">Poppins</option>' +
+        '<option value="Work Sans">Work Sans</option>' +
+        '<option value="Manrope">Manrope</option>' +
+        '<option value="Outfit">Outfit</option>' +
+        '<option value="Plus Jakarta Sans">Plus Jakarta Sans</option>' +
+        '<option value="Barlow">Barlow</option>' +
+        '<option value="Rubik">Rubik</option>' +
+        '</optgroup>' +
+        '<optgroup label="<?php esc_js_e('Serif', 'google-reviews-plugin'); ?>">' +
         '<option value="Playfair Display">Playfair Display</option>' +
+        '<option value="Merriweather">Merriweather</option>' +
+        '<option value="Lora">Lora</option>' +
+        '<option value="Crimson Text">Crimson Text</option>' +
+        '<option value="Libre Baskerville">Libre Baskerville</option>' +
+        '<option value="Bitter">Bitter</option>' +
+        '</optgroup>' +
+        '<optgroup label="<?php esc_js_e('Display', 'google-reviews-plugin'); ?>">' +
         '<option value="Oswald">Oswald</option>' +
+        '<option value="Bebas Neue">Bebas Neue</option>' +
+        '<option value="Righteous">Righteous</option>' +
+        '<option value="Fredoka One">Fredoka One</option>' +
+        '<option value="Abril Fatface">Abril Fatface</option>' +
+        '<option value="Bungee">Bungee</option>' +
+        '<option value="Permanent Marker">Permanent Marker</option>' +
+        '</optgroup>' +
         '</select>' +
         '</div>' +
         '<div class="grp-customizer-control">' +
