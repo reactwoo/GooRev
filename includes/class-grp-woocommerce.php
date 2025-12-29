@@ -648,6 +648,12 @@ Thanks again!
      * Get place_id from connected Google Business Profile location
      */
     private function get_place_id_from_location() {
+        // Check for manual override first (user-entered Place ID)
+        $manual_place_id = get_option('grp_wc_place_id_override', '');
+        if (!empty($manual_place_id)) {
+            return $manual_place_id;
+        }
+        
         $location_id = get_option('grp_google_location_id', '');
         $account_id = get_option('grp_google_account_id', '');
         

@@ -18,7 +18,12 @@ if (isset($_POST['grp_wc_settings_submit']) && check_admin_referer('grp_wc_setti
     update_option('grp_wc_trigger_status', sanitize_text_field($_POST['grp_wc_trigger_status']));
     update_option('grp_wc_invite_delay_days', absint($_POST['grp_wc_invite_delay_days']));
     update_option('grp_wc_exclude_refunded', isset($_POST['grp_wc_exclude_refunded']));
-    // Place ID is now automatically retrieved from connected location, no manual input needed
+    // Manual Place ID override (only needed for review invite links, not for fetching reviews)
+    if (isset($_POST['grp_wc_place_id_override']) && !empty($_POST['grp_wc_place_id_override'])) {
+        update_option('grp_wc_place_id_override', sanitize_text_field($_POST['grp_wc_place_id_override']));
+    } else {
+        delete_option('grp_wc_place_id_override');
+    }
     
     // Coupon settings
     update_option('grp_wc_coupon_type', sanitize_text_field($_POST['grp_wc_coupon_type']));
