@@ -89,6 +89,71 @@ if (!defined('ABSPATH')) {
             </div>
         </div>
         
+        <!-- WooCommerce Integration Stats -->
+        <?php
+        // Check if WooCommerce addon is enabled
+        $woocommerce_stats = null;
+        if (class_exists('GRP_Addons')) {
+            $addons = GRP_Addons::get_instance();
+            if ($addons->is_addon_enabled('woocommerce') && class_exists('WooCommerce')) {
+                global $wpdb;
+                $invites_table = $wpdb->prefix . 'grp_review_invites';
+                
+                // Count total invites sent (sent, clicked, or rewarded)
+                $invites_sent = $wpdb->get_var(
+                    "SELECT COUNT(*) FROM {$invites_table} 
+                    WHERE invite_status IN ('sent', 'clicked', 'rewarded')"
+                );
+                
+                // Count total coupons created
+                $coupons_created = $wpdb->get_var(
+                    "SELECT COUNT(*) FROM {$invites_table} 
+                    WHERE coupon_id IS NOT NULL AND coupon_id > 0"
+                );
+                
+                // Count invites scheduled (pending)
+                $invites_scheduled = $wpdb->get_var(
+                    "SELECT COUNT(*) FROM {$invites_table} 
+                    WHERE invite_status = 'scheduled'"
+                );
+                
+                $woocommerce_stats = array(
+                    'invites_sent' => (int) $invites_sent,
+                    'coupons_created' => (int) $coupons_created,
+                    'invites_scheduled' => (int) $invites_scheduled
+                );
+            }
+        }
+        ?>
+        
+        <?php if ($woocommerce_stats !== null): ?>
+        <div class="grp-dashboard-card grp-woocommerce-stats">
+            <h2>
+                <span class="dashicons dashicons-cart" style="vertical-align: middle; margin-right: 5px;"></span>
+                <?php esc_html_e('WooCommerce Integration', 'google-reviews-plugin'); ?>
+            </h2>
+            <div class="grp-stats-grid">
+                <div class="grp-stat">
+                    <span class="grp-stat-number"><?php echo number_format($woocommerce_stats['invites_sent']); ?></span>
+                    <span class="grp-stat-label"><?php esc_html_e('Invites Sent', 'google-reviews-plugin'); ?></span>
+                </div>
+                <div class="grp-stat">
+                    <span class="grp-stat-number"><?php echo number_format($woocommerce_stats['coupons_created']); ?></span>
+                    <span class="grp-stat-label"><?php esc_html_e('Coupons Created', 'google-reviews-plugin'); ?></span>
+                </div>
+                <div class="grp-stat">
+                    <span class="grp-stat-number"><?php echo number_format($woocommerce_stats['invites_scheduled']); ?></span>
+                    <span class="grp-stat-label"><?php esc_html_e('Scheduled', 'google-reviews-plugin'); ?></span>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                <a href="<?php echo admin_url('admin.php?page=google-reviews-woocommerce&tab=invites'); ?>" class="button">
+                    <?php esc_html_e('View Review Invites', 'google-reviews-plugin'); ?>
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <!-- Pro Features -->
         <?php if (!$is_pro): ?>
         <div class="grp-dashboard-card grp-pro-card">
@@ -202,9 +267,13 @@ if (!defined('ABSPATH')) {
 
 .grp-stats-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 20px;
     margin: 15px 0;
+}
+
+.grp-woocommerce-stats .grp-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .grp-stat {
