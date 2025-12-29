@@ -24,8 +24,9 @@ class GRP_Onboarding {
     private function init_hooks() {
         add_action('admin_init', array($this, 'check_onboarding_status'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-        add_action('wp_ajax_grp_onboarding_step', array($this, 'handle_onboarding_step'));
+        add_action('wp_ajax_grp_onboarding_step', array($this, 'ajax_handle_onboarding_step'));
         add_action('wp_ajax_grp_skip_onboarding', array($this, 'skip_onboarding'));
+        add_action('wp_ajax_grp_restart_onboarding', array($this, 'ajax_restart_onboarding'));
     }
     
     /**
@@ -39,6 +40,19 @@ class GRP_Onboarding {
         
         // Don't show on OAuth callback page
         if (isset($_GET['action']) && $_GET['action'] === 'oauth_callback') {
+            return;
+        }
+        
+        // Check if user manually triggered onboarding
+        $restart_onboarding = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
+        if ($restart_onboarding) {
+            // Reset onboarding status
+            delete_option('grp_onboarding_complete');
+            delete_user_meta(get_current_user_id(), 'grp_onboarding_dismissed');
+            // Show onboarding modal
+            add_action('admin_footer', array($this, 'render_onboarding_modal'));
+            // Enqueue assets
+            add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
             return;
         }
         
@@ -103,9 +117,9 @@ class GRP_Onboarding {
     }
     
     /**
-     * Handle onboarding step submission
+     * AJAX handler for onboarding steps
      */
-    public function handle_onboarding_step() {
+    public function ajax_handle_onboarding_step() {
         check_ajax_referer('grp_onboarding_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
@@ -113,20 +127,34 @@ class GRP_Onboarding {
         }
         
         $step = isset($_POST['step']) ? sanitize_text_field($_POST['step']) : '';
-        $data = isset($_POST['data']) ? $_POST['data'] : array();
+        $data = isset($_POST['data']) ? map_deep($_POST['data'], 'sanitize_text_field') : array();
         
         switch ($step) {
             case 'welcome':
-                // Step 1: Collect name/email and activate free license
-                $name = isset($data['name']) ? sanitize_text_field($data['name']) : '';
-                $email = isset($data['email']) ? sanitize_email($data['email']) : '';
-                
-                // Always try to activate free license (email/name are optional)
-                $result = $this->activate_free_license($name, $email);
-                if (is_wp_error($result)) {
-                    // Log error but don't block onboarding - free license might already exist
-                    error_log('[GRP Onboarding] Free license activation: ' . $result->get_error_message());
-                    // Continue anyway - user might already have a license
+                // Step 1: Welcome and optional registration
+                $name = $data['name'] ?? '';
+                $email = $data['email'] ?? '';
+                $has_license = isset($data['has_license']) && ($data['has_license'] === true || $data['has_license'] === '1' || $data['has_license'] === 'true');
+                $license_key = isset($data['license_key']) ? sanitize_text_field($data['license_key']) : '';
+        
+                // Validate email if provided
+                if (!empty($email) && !is_email($email)) {
+                    wp_send_json_error(array('message' => __('Please enter a valid email address or leave it blank.', 'google-reviews-plugin')));
+                }
+        
+                // Handle license key if provided
+                if ($has_license && !empty($license_key)) {
+                    $license = new GRP_License();
+                    $result = $license->activate($license_key);
+                    if (is_wp_error($result)) {
+                        wp_send_json_error(array('message' => sprintf(__('Failed to activate license: %s', 'google-reviews-plugin'), $result->get_error_message())));
+                    }
+                } elseif (!empty($email)) {
+                    // Only activate free license if no license key was provided and email is provided
+                    $result = $this->activate_free_license($name, $email);
+                    if (is_wp_error($result)) {
+                        wp_send_json_error(array('message' => $result->get_error_message()));
+                    }
                 }
                 
                 wp_send_json_success(array(
@@ -247,6 +275,26 @@ class GRP_Onboarding {
         
         wp_send_json_success(array(
             'message' => __('Onboarding skipped', 'google-reviews-plugin')
+        ));
+    }
+    
+    /**
+     * AJAX handler to restart onboarding
+     */
+    public function ajax_restart_onboarding() {
+        check_ajax_referer('grp_admin_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions', 'google-reviews-plugin')));
+        }
+        
+        // Reset onboarding status
+        delete_option('grp_onboarding_complete');
+        delete_user_meta(get_current_user_id(), 'grp_onboarding_dismissed');
+        
+        wp_send_json_success(array(
+            'message' => __('Onboarding wizard restarted. Please refresh the page.', 'google-reviews-plugin'),
+            'redirect' => admin_url('admin.php?page=google-reviews&restart_onboarding=1')
         ));
     }
 }

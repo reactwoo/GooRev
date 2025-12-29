@@ -13,6 +13,13 @@ if (!defined('ABSPATH')) {
 <div class="wrap grp-settings">
     <h1><?php esc_html_e('Google Reviews Settings', 'google-reviews-plugin'); ?></h1>
     
+    <div style="margin: 20px 0;">
+        <button id="grp-restart-wizard" class="button" title="<?php esc_attr_e('Restart the setup wizard', 'google-reviews-plugin'); ?>">
+            <span class="dashicons dashicons-update" style="vertical-align: middle; margin-top: -2px;"></span>
+            <?php esc_html_e('Restart Setup Wizard', 'google-reviews-plugin'); ?>
+        </button>
+    </div>
+    
     <div class="grp-settings-container">
         <div class="grp-settings-main">
             <form method="post" action="options.php" class="grp-form">

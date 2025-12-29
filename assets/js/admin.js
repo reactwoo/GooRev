@@ -143,6 +143,43 @@
                 $button.prop('disabled', false).text(originalText);
             });
         });
+        
+        // Restart wizard button
+        $('#grp-restart-wizard').on('click', function() {
+            var $button = $(this);
+            var originalText = $button.html();
+            
+            if (!confirm('Are you sure you want to restart the setup wizard? This will reset your onboarding progress.')) {
+                return;
+            }
+            
+            $button.prop('disabled', true).html('<span class="spinner is-active" style="float: none; margin: 0 5px;"></span> Restarting...');
+            
+            $.post(window.__grpAdminConfig.ajax_url, {
+                action: 'grp_restart_onboarding',
+                nonce: window.__grpAdminConfig.nonce
+            }, function(response) {
+                if (response.success) {
+                    showNotice('success', response.data.message || 'Setup wizard restarted. Redirecting...');
+                    if (response.data.redirect) {
+                        setTimeout(function() {
+                            window.location.href = response.data.redirect;
+                        }, 1000);
+                    } else {
+                        // Fallback: redirect to dashboard with restart parameter
+                        setTimeout(function() {
+                            window.location.href = window.__grpAdminConfig.ajax_url.replace('admin-ajax.php', 'admin.php?page=google-reviews&restart_onboarding=1');
+                        }, 1000);
+                    }
+                } else {
+                    showNotice('error', response.data && response.data.message ? response.data.message : 'Failed to restart wizard');
+                    $button.prop('disabled', false).html(originalText);
+                }
+            }).fail(function() {
+                showNotice('error', 'An error occurred. Please try again.');
+                $button.prop('disabled', false).html(originalText);
+            });
+        });
 
         // DO NOT auto-populate accounts on page load to prevent API spam
         // Users must click "Refresh" button to load accounts/locations
