@@ -144,7 +144,7 @@ class GRP_Onboarding {
         
                 // Handle license key if provided
                 if ($has_license && !empty($license_key)) {
-                    $license = GRP_License::get_instance();
+                    $license = new GRP_License();
                     $result = $license->activate_license($license_key);
                     if (is_wp_error($result)) {
                         grp_debug_log('Onboarding license activation failed', array(
