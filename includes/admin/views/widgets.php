@@ -413,27 +413,38 @@ jQuery(document).ready(function($) {
     });
     
     // Generate QR code
-    $('#grp-generate-qr').on('click', function() {
+    $('#grp-generate-qr').on('click', function(e) {
+        e.preventDefault();
         var $btn = $(this);
         var originalText = $btn.text();
         $btn.prop('disabled', true).text('<?php esc_js_e('Generating...', 'google-reviews-plugin'); ?>');
         
         var size = $('#grp-qr-size').val();
         
-        $.post(grpWidgets.ajax_url, {
-            action: 'grp_generate_qr',
-            nonce: grpWidgets.nonce,
-            size: size
-        }, function(response) {
-            if (response.success) {
-                $('#grp-qr-preview').html('<img src="' + response.data.qr_url + '" alt="QR Code" style="max-width: 100%;">');
-                $('#grp-qr-download').show();
-                $('#grp-qr-download-link').attr('href', response.data.qr_url);
-            } else {
-                alert(response.data || '<?php esc_js_e('Failed to generate QR code', 'google-reviews-plugin'); ?>');
+        $.ajax({
+            url: (typeof grpWidgets !== 'undefined' ? grpWidgets.ajax_url : ajaxurl),
+            type: 'POST',
+            data: {
+                action: 'grp_generate_qr',
+                nonce: (typeof grpWidgets !== 'undefined' ? grpWidgets.nonce : ''),
+                size: size
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('#grp-qr-preview').html('<img src="' + response.data.qr_url + '" alt="QR Code" style="max-width: 100%;">');
+                    $('#grp-qr-download').show();
+                    $('#grp-qr-download-link').attr('href', response.data.qr_url);
+                } else {
+                    alert(response.data || '<?php esc_js_e('Failed to generate QR code', 'google-reviews-plugin'); ?>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('QR Code generation error:', error, xhr.responseText);
+                alert('<?php esc_js_e('An error occurred while generating the QR code. Please try again.', 'google-reviews-plugin'); ?>');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).text(originalText);
             }
-        }).always(function() {
-            $btn.prop('disabled', false).text(originalText);
         });
     });
 });
