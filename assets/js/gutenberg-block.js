@@ -2,7 +2,7 @@
  * Google Reviews Gutenberg Block
  */
 
-(function(blocks, element, components, i18n) {
+(function(blocks, element, components, i18n, serverSideRender) {
     'use strict';
     
     var el = element.createElement;
@@ -13,7 +13,8 @@
     var ToggleControl = components.ToggleControl;
     var RangeControl = components.RangeControl;
     var TextControl = components.TextControl;
-    var ServerSideRender = blocks.ServerSideRender;
+    // ServerSideRender is now a separate package in newer WordPress versions
+    var ServerSideRender = serverSideRender || blocks.ServerSideRender || null;
     
     registerBlockType('google-reviews/reviews', {
         title: i18n.__('Google Reviews', 'google-reviews-plugin'),
@@ -395,10 +396,12 @@
                             i18n.__('layout', 'google-reviews-plugin')
                         )
                     ),
-                    el(ServerSideRender, {
+                    ServerSideRender ? el(ServerSideRender, {
                         block: 'google-reviews/reviews',
                         attributes: attributes
-                    })
+                    }) : el('div', { className: 'grp-block-placeholder' },
+                        el('p', {}, i18n.__('Preview will be available after saving.', 'google-reviews-plugin'))
+                    )
                 )
             ];
         },
@@ -538,10 +541,12 @@
                     ),
                     
                     el('div', { className: 'grp-review-button-block-editor', style: { textAlign: attributes.align || 'left', padding: '20px' } },
-                        el(ServerSideRender, {
+                        ServerSideRender ? el(ServerSideRender, {
                             block: 'google-reviews/review-button',
                             attributes: attributes
-                        })
+                        }) : el('div', { className: 'grp-block-placeholder' },
+                            el('p', {}, i18n.__('Preview will be available after saving.', 'google-reviews-plugin'))
+                        )
                     )
                 ];
             },
@@ -557,5 +562,6 @@
     window.wp.blocks,
     window.wp.element,
     window.wp.components,
-    window.wp.i18n
+    window.wp.i18n,
+    window.wp.serverSideRender || null
 );

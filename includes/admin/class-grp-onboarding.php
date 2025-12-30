@@ -286,8 +286,15 @@ class GRP_Onboarding {
                 update_option('grp_license_status', GRP_License::STATUS_VALID);
                 
                 // Store JWT token separately for API requests
+                // accessToken can be a string or an object with a 'token' property
                 if (isset($data['license_data']['accessToken'])) {
-                    update_option('grp_license_jwt_token', $data['license_data']['accessToken']);
+                    $access_token = $data['license_data']['accessToken'];
+                    // Handle both formats: string token or object with token property
+                    if (is_array($access_token) && isset($access_token['token'])) {
+                        update_option('grp_license_jwt_token', $access_token['token']);
+                    } elseif (is_string($access_token)) {
+                        update_option('grp_license_jwt_token', $access_token);
+                    }
                 }
             }
             

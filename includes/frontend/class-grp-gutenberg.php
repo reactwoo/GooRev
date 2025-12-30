@@ -267,10 +267,25 @@ class GRP_Gutenberg {
      * Enqueue block editor assets
      */
     public function enqueue_block_editor_assets() {
+        // Register dependencies - include server-side-render for newer WordPress versions
+        $dependencies = array('wp-blocks', 'wp-element', 'wp-components', 'wp-i18n');
+        
+        // Add wp-editor for older WordPress versions, wp-block-editor for newer ones
+        if (function_exists('wp_enqueue_block_editor_assets')) {
+            $dependencies[] = 'wp-block-editor';
+        } else {
+            $dependencies[] = 'wp-editor';
+        }
+        
+        // Add server-side-render if available (WordPress 5.3+)
+        if (function_exists('register_block_type') && class_exists('WP_Block_Editor_Context')) {
+            $dependencies[] = 'wp-server-side-render';
+        }
+        
         wp_enqueue_script(
             'grp-gutenberg-block',
             GRP_PLUGIN_URL . 'assets/js/gutenberg-block.js',
-            array('wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n'),
+            $dependencies,
             GRP_PLUGIN_VERSION,
             true
         );
