@@ -20,6 +20,15 @@
                 }
             }
             
+            // If Google is already connected, skip the google_connect step
+            if (typeof grpOnboarding !== 'undefined' && grpOnboarding.google_connected) {
+                const googleConnectIndex = this.steps.indexOf('google_connect');
+                if (googleConnectIndex !== -1 && this.currentStep === googleConnectIndex) {
+                    // If we're on the google_connect step but already connected, move to next step
+                    this.currentStep = googleConnectIndex + 1;
+                }
+            }
+            
             this.bindEvents();
             this.updateStepDisplay();
             
@@ -173,8 +182,16 @@
                 },
                 success: (response) => {
                     if (response.success) {
+                        // If already connected, automatically move to next step
+                        if (response.data && response.data.already_connected) {
+                            const nextStepIndex = this.steps.indexOf(response.data.next_step);
+                            if (nextStepIndex !== -1) {
+                                this.currentStep = nextStepIndex;
+                                this.updateStepDisplay();
+                            }
+                        }
                         // Move to next step
-                        if (response.data && response.data.next_step) {
+                        else if (response.data && response.data.next_step) {
                             const nextStepIndex = this.steps.indexOf(response.data.next_step);
                             if (nextStepIndex !== -1) {
                                 this.currentStep = nextStepIndex;

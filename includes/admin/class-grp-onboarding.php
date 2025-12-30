@@ -96,8 +96,16 @@ class GRP_Onboarding {
             true
         );
         
+        // Check if Google is already connected
+        $api = new GRP_API();
+        $is_google_connected = $api->is_connected();
+        $has_account_id = !empty(get_option('grp_google_account_id', ''));
+        $has_location_id = !empty(get_option('grp_google_location_id', ''));
+        $google_connected = $is_google_connected && ($has_account_id || $has_location_id);
+        
         wp_localize_script('grp-onboarding', 'grpOnboarding', array(
             'ajax_url' => admin_url('admin-ajax.php'),
+            'google_connected' => $google_connected,
             'nonce' => wp_create_nonce('grp_onboarding_nonce'),
             'strings' => array(
                 'next' => __('Next', 'google-reviews-plugin'),
