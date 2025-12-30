@@ -56,6 +56,17 @@ class GRP_Onboarding {
             return;
         }
         
+        // Check if user wants to skip onboarding (via URL parameter)
+        $skip_onboarding = isset($_GET['skip_onboarding']) && $_GET['skip_onboarding'] === '1';
+        if ($skip_onboarding) {
+            // Mark onboarding as complete/dismissed
+            update_option('grp_onboarding_complete', true);
+            update_user_meta(get_current_user_id(), 'grp_onboarding_dismissed', true);
+            // Redirect to remove the parameter
+            wp_safe_redirect(admin_url('admin.php?page=google-reviews-settings'));
+            exit;
+        }
+        
         // Check if onboarding is complete
         $onboarding_complete = get_option('grp_onboarding_complete', false);
         if ($onboarding_complete) {

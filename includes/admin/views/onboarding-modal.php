@@ -125,13 +125,13 @@ if (!defined('ABSPATH')) {
                                 </ul>
                             </div>
                             <p>
-                                <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings')); ?>" 
-                                   class="button button-secondary">
-                                    <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
-                                </a>
-                                <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 10px;">
+                                <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 0;">
                                     <?php esc_html_e('Skip This Step', 'google-reviews-plugin'); ?>
                                 </button>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings&skip_onboarding=1')); ?>" 
+                                   class="button button-secondary" style="margin-left: 10px;">
+                                    <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
+                                </a>
                             </p>
                         <?php endif; ?>
                     </div>
