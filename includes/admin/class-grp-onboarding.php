@@ -185,11 +185,26 @@ class GRP_Onboarding {
                 
             case 'google_connect':
                 // Step 2: Google OAuth connection
-                // Just mark as ready - actual connection happens via existing OAuth flow
-                wp_send_json_success(array(
-                    'message' => __('Ready for Google connection', 'google-reviews-plugin'),
-                    'next_step' => 'place_id'
-                ));
+                // Check if already connected
+                $api = new GRP_API();
+                $is_connected = $api->is_connected();
+                $has_account_id = !empty(get_option('grp_google_account_id', ''));
+                $has_location_id = !empty(get_option('grp_google_location_id', ''));
+                
+                if ($is_connected && ($has_account_id || $has_location_id)) {
+                    // Already connected, skip to next step
+                    wp_send_json_success(array(
+                        'message' => __('Google account is already connected!', 'google-reviews-plugin'),
+                        'next_step' => 'place_id',
+                        'already_connected' => true
+                    ));
+                } else {
+                    // Not connected yet, mark as ready - actual connection happens via existing OAuth flow
+                    wp_send_json_success(array(
+                        'message' => __('Ready for Google connection', 'google-reviews-plugin'),
+                        'next_step' => 'place_id'
+                    ));
+                }
                 break;
                 
             case 'place_id':
