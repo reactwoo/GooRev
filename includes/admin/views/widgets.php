@@ -15,8 +15,21 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     update_option('grp_widget_button_default_text', sanitize_text_field($_POST['grp_widget_button_default_text']));
     update_option('grp_widget_button_default_style', sanitize_text_field($_POST['grp_widget_button_default_style']));
     update_option('grp_widget_button_default_size', sanitize_text_field($_POST['grp_widget_button_default_size']));
-    update_option('grp_widget_button_default_color', sanitize_text_field($_POST['grp_widget_button_default_color']));
-    update_option('grp_widget_button_default_bg_color', sanitize_text_field($_POST['grp_widget_button_default_bg_color']));
+    
+    // For colors, use the text input value (which can be empty), not the color picker value
+    $button_color = isset($_POST['grp_widget_button_default_color_text']) ? sanitize_text_field($_POST['grp_widget_button_default_color_text']) : '';
+    $button_bg_color = isset($_POST['grp_widget_button_default_bg_color_text']) ? sanitize_text_field($_POST['grp_widget_button_default_bg_color_text']) : '';
+    
+    // Only save if not empty and valid hex color
+    if (!empty($button_color) && !preg_match('/^#[0-9A-F]{6}$/i', $button_color)) {
+        $button_color = '';
+    }
+    if (!empty($button_bg_color) && !preg_match('/^#[0-9A-F]{6}$/i', $button_bg_color)) {
+        $button_bg_color = '';
+    }
+    
+    update_option('grp_widget_button_default_color', $button_color);
+    update_option('grp_widget_button_default_bg_color', $button_bg_color);
     update_option('grp_widget_qr_default_size', absint($_POST['grp_widget_qr_default_size']));
     update_option('grp_widget_tracking_enabled', isset($_POST['grp_widget_tracking_enabled']));
     
@@ -194,6 +207,30 @@ $is_pro = $license->is_pro();
         <form method="post" action="">
             <?php wp_nonce_field('grp_widgets_settings'); ?>
             
+            <!-- Preview Section at Top -->
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0;"><?php esc_html_e('Preview', 'google-reviews-plugin'); ?></h2>
+                <p><?php esc_html_e('Preview of how your review button will look (updates as you change settings):', 'google-reviews-plugin'); ?></p>
+                <div id="grp-button-preview" style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
+                    <?php
+                    $preview_url = $has_place_id ? GRP_Review_Widgets::get_instance()->generate_review_url('', 'button', 'preview') : '#';
+                    $preview_classes = array('grp-review-button', 'grp-review-button-' . $button_style, 'grp-review-button-' . $button_size);
+                    $preview_styles = array();
+                    if (!empty($button_color)) {
+                        $preview_styles[] = 'color: ' . esc_attr($button_color);
+                    }
+                    if (!empty($button_bg_color)) {
+                        $preview_styles[] = 'background-color: ' . esc_attr($button_bg_color);
+                    }
+                    $preview_style_attr = !empty($preview_styles) ? ' style="' . implode('; ', $preview_styles) . '"' : '';
+                    ?>
+                    <a href="<?php echo esc_url($preview_url); ?>" id="grp-preview-button" class="<?php echo esc_attr(implode(' ', $preview_classes)); ?>" target="_blank" rel="noopener"<?php echo $preview_style_attr; ?>>
+                        <span class="grp-review-button-icon">⭐</span>
+                        <span class="grp-review-button-text" id="grp-preview-text"><?php echo esc_html($button_text); ?></span>
+                    </a>
+                </div>
+            </div>
+            
             <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                 <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('Review Button Widget', 'google-reviews-plugin'); ?></h2>
                 
@@ -241,9 +278,10 @@ $is_pro = $license->is_pro();
                                 <label for="grp_widget_button_default_color"><?php esc_html_e('Text Color', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <input type="color" id="grp_widget_button_default_color" name="grp_widget_button_default_color" value="<?php echo esc_attr($button_color ?: '#ffffff'); ?>">
-                                <input type="text" id="grp_widget_button_default_color_text" value="<?php echo esc_attr($button_color); ?>" placeholder="#ffffff" style="width: 100px; margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Leave empty to use default color.', 'google-reviews-plugin'); ?></p>
+                                <input type="color" id="grp_widget_button_default_color" name="grp_widget_button_default_color" value="<?php echo esc_attr(!empty($button_color) ? $button_color : '#ffffff'); ?>">
+                                <input type="text" id="grp_widget_button_default_color_text" name="grp_widget_button_default_color_text" value="<?php echo esc_attr($button_color); ?>" placeholder="#ffffff (leave empty for default)" style="width: 150px; margin-left: 10px;">
+                                <button type="button" class="button button-small" id="grp-clear-text-color" style="margin-left: 10px;"><?php esc_html_e('Clear', 'google-reviews-plugin'); ?></button>
+                                <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
                         
@@ -252,9 +290,10 @@ $is_pro = $license->is_pro();
                                 <label for="grp_widget_button_default_bg_color"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <input type="color" id="grp_widget_button_default_bg_color" name="grp_widget_button_default_bg_color" value="<?php echo esc_attr($button_bg_color ?: '#0073aa'); ?>">
-                                <input type="text" id="grp_widget_button_default_bg_color_text" value="<?php echo esc_attr($button_bg_color); ?>" placeholder="#0073aa" style="width: 100px; margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Leave empty to use default color.', 'google-reviews-plugin'); ?></p>
+                                <input type="color" id="grp_widget_button_default_bg_color" name="grp_widget_button_default_bg_color" value="<?php echo esc_attr(!empty($button_bg_color) ? $button_bg_color : '#0073aa'); ?>">
+                                <input type="text" id="grp_widget_button_default_bg_color_text" name="grp_widget_button_default_bg_color_text" value="<?php echo esc_attr($button_bg_color); ?>" placeholder="#0073aa (leave empty for default)" style="width: 150px; margin-left: 10px;">
+                                <button type="button" class="button button-small" id="grp-clear-bg-color" style="margin-left: 10px;"><?php esc_html_e('Clear', 'google-reviews-plugin'); ?></button>
+                                <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
                     </tbody>
@@ -349,28 +388,6 @@ $is_pro = $license->is_pro();
             </ul>
         </div>
         
-        <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-            <h2 style="margin-top: 0;"><?php esc_html_e('Preview', 'google-reviews-plugin'); ?></h2>
-            <p><?php esc_html_e('Preview of how your review button will look:', 'google-reviews-plugin'); ?></p>
-            <div style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
-                <?php
-                $preview_url = $has_place_id ? GRP_Review_Widgets::get_instance()->generate_review_url('', 'button', 'preview') : '#';
-                $preview_classes = array('grp-review-button', 'grp-review-button-' . $button_style, 'grp-review-button-' . $button_size);
-                $preview_styles = array();
-                if (!empty($button_color)) {
-                    $preview_styles[] = 'color: ' . esc_attr($button_color);
-                }
-                if (!empty($button_bg_color)) {
-                    $preview_styles[] = 'background-color: ' . esc_attr($button_bg_color);
-                }
-                $preview_style_attr = !empty($preview_styles) ? ' style="' . implode('; ', $preview_styles) . '"' : '';
-                ?>
-                <a href="<?php echo esc_url($preview_url); ?>" class="<?php echo esc_attr(implode(' ', $preview_classes)); ?>" target="_blank" rel="noopener"<?php echo $preview_style_attr; ?>>
-                    <span class="grp-review-button-icon">⭐</span>
-                    <span class="grp-review-button-text"><?php echo esc_html($button_text); ?></span>
-                </a>
-            </div>
-        </div>
     <?php endif; ?>
 </div>
 
@@ -412,41 +429,8 @@ jQuery(document).ready(function($) {
         }, 2000);
     });
     
-    // Generate QR code
-    $('#grp-generate-qr').on('click', function(e) {
-        e.preventDefault();
-        var $btn = $(this);
-        var originalText = $btn.text();
-        $btn.prop('disabled', true).text('<?php esc_js_e('Generating...', 'google-reviews-plugin'); ?>');
-        
-        var size = $('#grp-qr-size').val();
-        
-        $.ajax({
-            url: (typeof grpWidgets !== 'undefined' ? grpWidgets.ajax_url : ajaxurl),
-            type: 'POST',
-            data: {
-                action: 'grp_generate_qr',
-                nonce: (typeof grpWidgets !== 'undefined' ? grpWidgets.nonce : ''),
-                size: size
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#grp-qr-preview').html('<img src="' + response.data.qr_url + '" alt="QR Code" style="max-width: 100%;">');
-                    $('#grp-qr-download').show();
-                    $('#grp-qr-download-link').attr('href', response.data.qr_url);
-                } else {
-                    alert(response.data || '<?php esc_js_e('Failed to generate QR code', 'google-reviews-plugin'); ?>');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('QR Code generation error:', error, xhr.responseText);
-                alert('<?php esc_js_e('An error occurred while generating the QR code. Please try again.', 'google-reviews-plugin'); ?>');
-            },
-            complete: function() {
-                $btn.prop('disabled', false).text(originalText);
-            }
-        });
-    });
+    // QR code generation is handled by widgets-admin.js
+    // This inline script is kept for backward compatibility but the external file takes precedence
 });
 </script>
 
