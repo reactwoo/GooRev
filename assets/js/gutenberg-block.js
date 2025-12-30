@@ -409,6 +409,150 @@
         }
     });
     
+    // Register Review Button block if addon is enabled
+    // Check if the block is registered on PHP side by checking if grp_gutenberg has reviewButtonEnabled
+    if (typeof grp_gutenberg !== 'undefined' && grp_gutenberg.reviewButtonEnabled) {
+        registerBlockType('google-reviews/review-button', {
+            title: i18n.__('Review Button', 'google-reviews-plugin'),
+            description: i18n.__('Add a button that links to your Google Business Profile review page.', 'google-reviews-plugin'),
+            icon: 'star-filled',
+            category: 'widgets',
+            keywords: [
+                i18n.__('google', 'google-reviews-plugin'),
+                i18n.__('review', 'google-reviews-plugin'),
+                i18n.__('button', 'google-reviews-plugin'),
+                i18n.__('link', 'google-reviews-plugin')
+            ],
+            attributes: {
+                button_text: {
+                    type: 'string',
+                    default: i18n.__('Leave us a review', 'google-reviews-plugin')
+                },
+                button_style: {
+                    type: 'string',
+                    default: 'default'
+                },
+                button_size: {
+                    type: 'string',
+                    default: 'medium'
+                },
+                align: {
+                    type: 'string',
+                    default: 'left'
+                },
+                text_color: {
+                    type: 'string'
+                },
+                background_color: {
+                    type: 'string'
+                }
+            },
+            
+            edit: function(props) {
+                var attributes = props.attributes;
+                var setAttributes = props.setAttributes;
+                
+                var styleOptions = [
+                    { label: i18n.__('Default', 'google-reviews-plugin'), value: 'default' },
+                    { label: i18n.__('Rounded', 'google-reviews-plugin'), value: 'rounded' },
+                    { label: i18n.__('Outline', 'google-reviews-plugin'), value: 'outline' },
+                    { label: i18n.__('Minimal', 'google-reviews-plugin'), value: 'minimal' }
+                ];
+                
+                var sizeOptions = [
+                    { label: i18n.__('Small', 'google-reviews-plugin'), value: 'small' },
+                    { label: i18n.__('Medium', 'google-reviews-plugin'), value: 'medium' },
+                    { label: i18n.__('Large', 'google-reviews-plugin'), value: 'large' }
+                ];
+                
+                var alignOptions = [
+                    { label: i18n.__('Left', 'google-reviews-plugin'), value: 'left' },
+                    { label: i18n.__('Center', 'google-reviews-plugin'), value: 'center' },
+                    { label: i18n.__('Right', 'google-reviews-plugin'), value: 'right' }
+                ];
+                
+                return [
+                    el(InspectorControls, {},
+                        el(PanelBody, { title: i18n.__('Button Settings', 'google-reviews-plugin'), initialOpen: true },
+                            el(TextControl, {
+                                label: i18n.__('Button Text', 'google-reviews-plugin'),
+                                value: attributes.button_text,
+                                onChange: function(value) {
+                                    setAttributes({ button_text: value });
+                                }
+                            }),
+                            el(SelectControl, {
+                                label: i18n.__('Button Style', 'google-reviews-plugin'),
+                                value: attributes.button_style,
+                                options: styleOptions,
+                                onChange: function(value) {
+                                    setAttributes({ button_style: value });
+                                }
+                            }),
+                            el(SelectControl, {
+                                label: i18n.__('Button Size', 'google-reviews-plugin'),
+                                value: attributes.button_size,
+                                options: sizeOptions,
+                                onChange: function(value) {
+                                    setAttributes({ button_size: value });
+                                }
+                            }),
+                            el(SelectControl, {
+                                label: i18n.__('Alignment', 'google-reviews-plugin'),
+                                value: attributes.align,
+                                options: alignOptions,
+                                onChange: function(value) {
+                                    setAttributes({ align: value });
+                                }
+                            })
+                        ),
+                        
+                        el(PanelBody, { title: i18n.__('Colors', 'google-reviews-plugin'), initialOpen: false },
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                    i18n.__('Text Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.text_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ text_color: value });
+                                    },
+                                    placeholder: '#ffffff'
+                                })
+                            ),
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
+                                    i18n.__('Background Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.background_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ background_color: value });
+                                    },
+                                    placeholder: '#0073aa'
+                                })
+                            )
+                        )
+                    ),
+                    
+                    el('div', { className: 'grp-review-button-block-editor', style: { textAlign: attributes.align || 'left', padding: '20px' } },
+                        el(ServerSideRender, {
+                            block: 'google-reviews/review-button',
+                            attributes: attributes
+                        })
+                    )
+                ];
+            },
+            
+            save: function() {
+                // Server-side rendering
+                return null;
+            }
+        });
+    }
+    
 })(
     window.wp.blocks,
     window.wp.element,

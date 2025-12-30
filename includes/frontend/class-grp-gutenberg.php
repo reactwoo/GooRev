@@ -207,38 +207,60 @@ class GRP_Gutenberg {
      * Render review button block
      */
     public function render_review_button_block($attributes) {
+        // Ensure attributes are set with defaults
+        if (empty($attributes)) {
+            $attributes = array();
+        }
+        
         // Check if Review Widgets addon is enabled
         $addons = GRP_Addons::get_instance();
         if (!$addons->is_addon_enabled('review-widgets')) {
-            return '<p>' . __('Review Widgets addon is not enabled.', 'google-reviews-plugin') . '</p>';
+            return '<div class="grp-review-button-block grp-addon-disabled"><p>' . __('Review Widgets addon is not enabled. Please enable it from the Addons page.', 'google-reviews-plugin') . '</p></div>';
         }
         
-        $widgets = GRP_Review_Widgets::get_instance();
+        // Get default values
+        $button_text = isset($attributes['button_text']) ? $attributes['button_text'] : __('Leave us a review', 'google-reviews-plugin');
+        $button_style = isset($attributes['button_style']) ? $attributes['button_style'] : 'default';
+        $button_size = isset($attributes['button_size']) ? $attributes['button_size'] : 'medium';
+        $align = isset($attributes['align']) ? $attributes['align'] : 'left';
         
-        // Build shortcode attributes
-        $shortcode_atts = array(
-            'text' => $attributes['button_text'],
-            'style' => $attributes['button_style'],
-            'size' => $attributes['button_size'],
-            'align' => $attributes['align'],
-        );
-        
-        // Add colors if set
-        if (!empty($attributes['text_color'])) {
-            $shortcode_atts['color'] = $attributes['text_color'];
+        try {
+            $widgets = GRP_Review_Widgets::get_instance();
+            
+            // Build shortcode attributes
+            $shortcode_atts = array(
+                'text' => $button_text,
+                'style' => $button_style,
+                'size' => $button_size,
+                'align' => $align,
+            );
+            
+            // Add colors if set
+            if (!empty($attributes['text_color'])) {
+                $shortcode_atts['color'] = $attributes['text_color'];
+            }
+            if (!empty($attributes['background_color'])) {
+                $shortcode_atts['bg_color'] = $attributes['background_color'];
+            }
+            
+            // Build shortcode
+            $shortcode = '[grp_review_button';
+            foreach ($shortcode_atts as $key => $value) {
+                $shortcode .= ' ' . $key . '="' . esc_attr($value) . '"';
+            }
+            $shortcode .= ']';
+            
+            $output = do_shortcode($shortcode);
+            
+            // If shortcode returns empty, show error
+            if (empty($output)) {
+                return '<div class="grp-review-button-block grp-error"><p>' . __('Unable to generate review button. Please check your Place ID settings.', 'google-reviews-plugin') . '</p></div>';
+            }
+            
+            return $output;
+        } catch (Exception $e) {
+            return '<div class="grp-review-button-block grp-error"><p>' . __('Error rendering review button: ', 'google-reviews-plugin') . esc_html($e->getMessage()) . '</p></div>';
         }
-        if (!empty($attributes['background_color'])) {
-            $shortcode_atts['bg_color'] = $attributes['background_color'];
-        }
-        
-        // Build shortcode
-        $shortcode = '[grp_review_button';
-        foreach ($shortcode_atts as $key => $value) {
-            $shortcode .= ' ' . $key . '="' . esc_attr($value) . '"';
-        }
-        $shortcode .= ']';
-        
-        return do_shortcode($shortcode);
     }
     
     /**
@@ -265,8 +287,12 @@ class GRP_Gutenberg {
         wp_add_inline_style('grp-gutenberg-block-editor', $styles->get_all_css());
         
         // Localize script
+        $addons = GRP_Addons::get_instance();
+        $review_button_enabled = $addons->is_addon_enabled('review-widgets');
+        
         wp_localize_script('grp-gutenberg-block', 'grp_gutenberg', array(
             'styles' => $this->get_style_options(),
+            'reviewButtonEnabled' => $review_button_enabled,
             'strings' => array(
                 'block_title' => __('Google Reviews', 'google-reviews-plugin'),
                 'block_description' => __('Display Google Business reviews', 'google-reviews-plugin'),
@@ -294,6 +320,18 @@ class GRP_Gutenberg {
      * Render reviews block
      */
     public function render_reviews_block($attributes) {
+        // Ensure attributes are set with defaults
+        if (empty($attributes)) {
+            $attributes = array();
+        }
+        
+        // Check if reviews are available
+        $reviews = new GRP_Reviews();
+        $has_reviews = $reviews->has_reviews();
+        
+        if (!$has_reviews) {
+            return '<div class="grp-gutenberg-block grp-no-reviews"><p>' . __('No reviews available. Please connect your Google Business Profile and sync reviews.', 'google-reviews-plugin') . '</p></div>';
+        }
         // Build custom CSS for style overrides
         $custom_css = '';
         if (!empty($attributes['custom_text_color'])) {
