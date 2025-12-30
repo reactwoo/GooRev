@@ -81,9 +81,16 @@ if (!defined('ABSPATH')) {
                         $api = new GRP_API();
                         $is_connected = $api->is_connected();
                         $auth_url = '';
+                        $auth_error = '';
                         if (!$is_connected) {
                             $auth_url_result = $api->get_auth_url();
-                            if (!is_wp_error($auth_url_result)) {
+                            if (is_wp_error($auth_url_result)) {
+                                $auth_error = $auth_url_result->get_error_message();
+                                grp_debug_log('Failed to get auth URL in onboarding', array(
+                                    'error' => $auth_error,
+                                    'error_code' => $auth_url_result->get_error_code()
+                                ));
+                            } else {
                                 $auth_url = $auth_url_result;
                             }
                         }
@@ -105,7 +112,13 @@ if (!defined('ABSPATH')) {
                             </p>
                         <?php else: ?>
                             <div class="notice notice-error">
-                                <p><?php esc_html_e('Unable to generate connection URL. Please try refreshing the page or contact support.', 'google-reviews-plugin'); ?></p>
+                                <p>
+                                    <?php esc_html_e('Unable to generate connection URL.', 'google-reviews-plugin'); ?>
+                                    <?php if (!empty($auth_error)): ?>
+                                        <br><strong><?php esc_html_e('Error:', 'google-reviews-plugin'); ?></strong> <?php echo esc_html($auth_error); ?>
+                                    <?php endif; ?>
+                                    <br><?php esc_html_e('Please try refreshing the page or contact support.', 'google-reviews-plugin'); ?>
+                                </p>
                             </div>
                             <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings')); ?>" 
                                class="button button-secondary">
