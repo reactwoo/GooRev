@@ -354,20 +354,48 @@ class GRP_Admin {
             $using_api_server = $api->is_using_api_server();
             
             if (is_wp_error($auth_url_result)) {
-                // Show error but still provide connect button if possible
-                echo '<div class="notice notice-error"><p><strong>' . esc_html__('Configuration Error', 'google-reviews-plugin') . ':</strong> ' . esc_html($auth_url_result->get_error_message()) . '</p></div>';
+                $error_message = $auth_url_result->get_error_message();
+                $error_code = $auth_url_result->get_error_code();
                 
-                // If using API server and it failed, suggest checking server or using custom credentials
-                if ($using_api_server) {
-                    echo '<div class="notice notice-warning"><p>';
-                    echo esc_html__('The cloud server may be unavailable. You can:', 'google-reviews-plugin');
-                    echo '<ul style="margin-left: 20px; margin-top: 10px;">';
-                    echo '<li>' . esc_html__('Wait a moment and try again', 'google-reviews-plugin') . '</li>';
-                    echo '<li>' . esc_html__('Enable custom credentials in the Enterprise section below to use your own Google Cloud Project', 'google-reviews-plugin') . '</li>';
-                    echo '</ul>';
+                // Check if it's a server error (503, 500, etc.)
+                $is_server_error = (
+                    strpos($error_message, '503') !== false ||
+                    strpos($error_message, 'Service Unavailable') !== false ||
+                    strpos($error_message, 'HTML') !== false ||
+                    strpos($error_code, 'server') !== false ||
+                    strpos($error_code, 'unavailable') !== false
+                );
+                
+                if ($is_server_error && $using_api_server) {
+                    // Server is down - show friendly message
+                    echo '<div class="notice notice-warning" style="border-left-color: #f56e28;"><p>';
+                    echo '<strong>' . esc_html__('Cloud Server Temporarily Unavailable', 'google-reviews-plugin') . '</strong><br>';
+                    echo esc_html__('The connection service is currently unavailable (Error 503). This is usually temporary.', 'google-reviews-plugin');
                     echo '</p></div>';
+                    
+                    echo '<div class="notice notice-info"><p><strong>' . esc_html__('What you can do:', 'google-reviews-plugin') . '</strong></p>';
+                    echo '<ul style="margin-left:20px; margin-top:10px;">';
+                    echo '<li>' . esc_html__('Wait a few minutes and try again - the server may be restarting', 'google-reviews-plugin') . '</li>';
+                    echo '<li>' . esc_html__('Check back later - server maintenance may be in progress', 'google-reviews-plugin') . '</li>';
+                    if ($license->is_enterprise()) {
+                        echo '<li>' . esc_html__('As an Enterprise user, you can enable custom credentials in the Enterprise section below to use your own Google Cloud Project', 'google-reviews-plugin') . '</li>';
+                    }
+                    echo '</ul></div>';
                 } else {
-                    echo '<p class="description">' . esc_html__('Please check your Google Cloud credentials in the Enterprise section below.', 'google-reviews-plugin') . '</p>';
+                    // Other errors - show standard error message
+                    echo '<div class="notice notice-error"><p><strong>' . esc_html__('Configuration Error', 'google-reviews-plugin') . ':</strong> ' . esc_html($error_message) . '</p></div>';
+                    
+                    if ($using_api_server) {
+                        echo '<div class="notice notice-warning"><p>';
+                        echo esc_html__('The cloud server may be unavailable. You can:', 'google-reviews-plugin');
+                        echo '<ul style="margin-left: 20px; margin-top: 10px;">';
+                        echo '<li>' . esc_html__('Wait a moment and try again', 'google-reviews-plugin') . '</li>';
+                        echo '<li>' . esc_html__('Enable custom credentials in the Enterprise section below to use your own Google Cloud Project', 'google-reviews-plugin') . '</li>';
+                        echo '</ul>';
+                        echo '</p></div>';
+                    } else {
+                        echo '<p class="description">' . esc_html__('Please check your Google Cloud credentials in the Enterprise section below.', 'google-reviews-plugin') . '</p>';
+                    }
                 }
                 
                 // Still try to show connect button if we can generate a URL (for custom credentials)
