@@ -311,9 +311,10 @@ class GRP_Review_Widgets {
      * Generate QR code
      */
     public function generate_qr_code($url, $size = 200) {
-        // Use Google Charts API for QR code generation (free, no library needed)
+        // Use QRServer API (Google Charts API was deprecated in Jan 2024)
+        // QRServer is free, reliable, and supports long URLs
         $encoded_url = urlencode($url);
-        return 'https://chart.googleapis.com/chart?chs=' . $size . 'x' . $size . '&cht=qr&chl=' . $encoded_url;
+        return 'https://api.qrserver.com/v1/create-qr-code/?size=' . $size . 'x' . $size . '&data=' . $encoded_url . '&format=png';
     }
     
     /**
