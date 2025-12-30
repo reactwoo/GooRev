@@ -276,6 +276,12 @@ class GRP_API {
             return new WP_Error('rate_limit', $error_message);
         }
         
+        // Handle 503 - Service Unavailable (cloud server is down)
+        if ($status_code === 503) {
+            $error_message = isset($decoded['message']) ? $decoded['message'] : __('Service temporarily unavailable. The cloud server may be restarting or under maintenance. Please try again in a few minutes.', 'google-reviews-plugin');
+            return new WP_Error('service_unavailable', $error_message);
+        }
+        
         // Handle 401 - Could be JWT token expired OR Google OAuth expired
         if ($status_code === 401) {
             // Get error details first
