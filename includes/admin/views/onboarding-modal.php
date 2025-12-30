@@ -117,13 +117,22 @@ if (!defined('ABSPATH')) {
                                     <?php if (!empty($auth_error)): ?>
                                         <br><strong><?php esc_html_e('Error:', 'google-reviews-plugin'); ?></strong> <?php echo esc_html($auth_error); ?>
                                     <?php endif; ?>
-                                    <br><?php esc_html_e('Please try refreshing the page or contact support.', 'google-reviews-plugin'); ?>
+                                    <br><?php esc_html_e('This may be due to the cloud server being temporarily unavailable. You can:', 'google-reviews-plugin'); ?>
                                 </p>
+                                <ul style="margin-left: 20px; margin-top: 10px;">
+                                    <li><?php esc_html_e('Try refreshing this page and clicking "Connect Google Account" again', 'google-reviews-plugin'); ?></li>
+                                    <li><?php esc_html_e('Or skip this step and connect later from Settings', 'google-reviews-plugin'); ?></li>
+                                </ul>
                             </div>
-                            <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings')); ?>" 
-                               class="button button-secondary">
-                                <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
-                            </a>
+                            <p>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings')); ?>" 
+                                   class="button button-secondary">
+                                    <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
+                                </a>
+                                <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 10px;">
+                                    <?php esc_html_e('Skip This Step', 'google-reviews-plugin'); ?>
+                                </button>
+                            </p>
                         <?php endif; ?>
                     </div>
                 </div>
