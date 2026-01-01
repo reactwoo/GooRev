@@ -157,6 +157,8 @@ class GRP_Review_Widgets {
         }
         
         wp_enqueue_style('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/css/widgets-admin.css', array(), GRP_PLUGIN_VERSION);
+        // Also load frontend styles in admin for preview
+        wp_enqueue_style('grp-review-widgets', GRP_PLUGIN_URL . 'assets/css/review-widgets.css', array(), GRP_PLUGIN_VERSION);
         wp_enqueue_script('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/js/widgets-admin.js', array('jquery'), GRP_PLUGIN_VERSION, true);
         
         wp_localize_script('grp-widgets-admin', 'grpWidgets', array(

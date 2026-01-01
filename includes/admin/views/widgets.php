@@ -337,7 +337,7 @@ $is_pro = $license->is_pro();
                 </table>
             </div>
             
-            <?php submit_button(); ?>
+            <?php submit_button(__('Save Settings', 'google-reviews-plugin'), 'primary', 'grp_widgets_submit', false); ?>
         </form>
         
         <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
@@ -393,44 +393,17 @@ $is_pro = $license->is_pro();
 
 <script>
 jQuery(document).ready(function($) {
-    // Color picker sync
-    $('#grp_widget_button_default_color').on('change', function() {
-        $('#grp_widget_button_default_color_text').val($(this).val());
-    });
-    $('#grp_widget_button_default_color_text').on('input', function() {
-        var val = $(this).val();
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            $('#grp_widget_button_default_color').val(val);
-        }
-    });
-    
-    $('#grp_widget_button_default_bg_color').on('change', function() {
-        $('#grp_widget_button_default_bg_color_text').val($(this).val());
-    });
-    $('#grp_widget_button_default_bg_color_text').on('input', function() {
-        var val = $(this).val();
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            $('#grp_widget_button_default_bg_color').val(val);
-        }
-    });
-    
-    // Copy shortcode
-    $('.grp-copy-shortcode').on('click', function() {
-        var shortcode = $(this).data('shortcode');
-        var $temp = $('<textarea>');
-        $('body').append($temp);
-        $temp.val(shortcode).select();
-        document.execCommand('copy');
-        $temp.remove();
-        $(this).text('<?php esc_js_e('Copied!', 'google-reviews-plugin'); ?>');
-        var $btn = $(this);
+    // Ensure preview is initialized on page load
+    // This will be called by widgets-admin.js but we ensure it runs if script loads late
+    if (typeof window.updateGRPPreview === 'undefined') {
+        // Wait a moment for widgets-admin.js to load, then initialize preview
         setTimeout(function() {
-            $btn.text('<?php esc_js_e('Copy', 'google-reviews-plugin'); ?>');
-        }, 2000);
-    });
-    
-    // QR code generation is handled by widgets-admin.js
-    // This inline script is kept for backward compatibility but the external file takes precedence
+            if ($('#grp-preview-button').length) {
+                // Trigger preview update
+                $('#grp_widget_button_default_text').trigger('input');
+            }
+        }, 100);
+    }
 });
 </script>
 

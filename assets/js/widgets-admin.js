@@ -6,7 +6,11 @@
     'use strict';
     
     $(document).ready(function() {
-        // Update preview function
+        // Update preview function (exposed globally for potential external calls)
+        window.updateGRPPreview = function() {
+            updatePreview();
+        };
+        
         function updatePreview() {
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
@@ -15,7 +19,7 @@
             var bgColor = $('#grp_widget_button_default_bg_color_text').val();
             
             // Update preview button text
-            $('#grp-preview-text').text(text);
+            $('#grp-preview-text').text(text || 'Leave us a review');
             
             // Update preview button classes
             var $previewBtn = $('#grp-preview-button');
@@ -24,15 +28,22 @@
             $previewBtn.addClass('grp-review-button-' + style);
             $previewBtn.addClass('grp-review-button-' + size);
             
-            // Update preview button styles
+            // Update preview button styles - clear existing inline styles first
+            $previewBtn.attr('style', '');
+            
+            // Only apply inline styles if colors are set and valid
             var styles = [];
-            if (textColor && /^#[0-9A-F]{6}$/i.test(textColor)) {
+            if (textColor && textColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(textColor)) {
                 styles.push('color: ' + textColor);
             }
-            if (bgColor && /^#[0-9A-F]{6}$/i.test(bgColor)) {
+            if (bgColor && bgColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(bgColor)) {
                 styles.push('background-color: ' + bgColor);
             }
-            $previewBtn.attr('style', styles.join('; '));
+            
+            // Apply styles if any, otherwise let CSS classes handle it
+            if (styles.length > 0) {
+                $previewBtn.attr('style', styles.join('; '));
+            }
         }
         
         // Color picker sync and preview updates
@@ -79,6 +90,9 @@
         $('#grp_widget_button_default_text').on('input', updatePreview);
         $('#grp_widget_button_default_style').on('change', updatePreview);
         $('#grp_widget_button_default_size').on('change', updatePreview);
+        
+        // Initialize preview on page load
+        updatePreview();
         
         // Copy shortcode
         $('.grp-copy-shortcode').on('click', function() {
