@@ -951,6 +951,11 @@ class GRP_API {
      * Note: Free users can access this for basic setup (single location)
      */
     public function get_accounts() {
+        // Don't make API calls if not connected (no access token)
+        if (!$this->is_connected()) {
+            return new WP_Error('not_connected', __('Not connected to Google. Please connect your account first.', 'google-reviews-plugin'));
+        }
+        
         // Pro/Enterprise users must use cloud server (if not Enterprise with custom credentials)
         if ($this->is_using_api_server()) {
             $response = $this->make_api_server_request('accounts');
@@ -1165,6 +1170,11 @@ class GRP_API {
      * Test API connection
      */
     public function test_connection() {
+        // Don't test if not connected
+        if (!$this->is_connected()) {
+            return new WP_Error('not_connected', __('Not connected to Google. Please connect your account first.', 'google-reviews-plugin'));
+        }
+        
         $accounts = $this->get_accounts();
         
         if (is_wp_error($accounts)) {
