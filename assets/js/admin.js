@@ -162,16 +162,26 @@
         $('#grp-restart-wizard').on('click', function() {
             var $button = $(this);
             var originalText = $button.html();
-            
+
             if (!confirm('Are you sure you want to restart the setup wizard? This will reset your onboarding progress.')) {
                 return;
             }
-            
+
+            // Use whichever config is available (older builds used window.__grpAdminConfig, current is grp_admin)
+            var cfg = window.__grpAdminConfig || window.grp_admin || window.grpAdminConfig || {};
+            var ajaxUrl = cfg.ajax_url || (window.grp_admin ? window.grp_admin.ajax_url : null) || window.ajaxurl || (typeof ajaxurl !== 'undefined' ? ajaxurl : null);
+            var nonce = cfg.nonce || (window.grp_admin ? window.grp_admin.nonce : null);
+
+            if (!ajaxUrl || !nonce) {
+                showNotice('error', 'Could not restart wizard: missing AJAX configuration.');
+                return;
+            }
+
             $button.prop('disabled', true).html('<span class="spinner is-active" style="float: none; margin: 0 5px;"></span> Restarting...');
-            
-            $.post(window.__grpAdminConfig.ajax_url, {
+
+            $.post(ajaxUrl, {
                 action: 'grp_restart_onboarding',
-                nonce: window.__grpAdminConfig.nonce
+                nonce: nonce
             }, function(response) {
                 if (response.success) {
                     showNotice('success', response.data.message || 'Setup wizard restarted. Redirecting...');
@@ -182,7 +192,7 @@
                     } else {
                         // Fallback: redirect to dashboard with restart parameter
                         setTimeout(function() {
-                            window.location.href = window.__grpAdminConfig.ajax_url.replace('admin-ajax.php', 'admin.php?page=google-reviews&restart_onboarding=1');
+                            window.location.href = ajaxUrl.replace('admin-ajax.php', 'admin.php?page=google-reviews&restart_onboarding=1');
                         }, 1000);
                     }
                 } else {
