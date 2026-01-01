@@ -153,6 +153,10 @@ class GRP_API {
         $license = new GRP_License();
         $jwt_token = $license->get_jwt_token();
         
+        // If using API server and no JWT token, check if we should fail gracefully
+        // For OAuth endpoints (auth-url), allow requests without JWT (for initial connection)
+        $is_oauth_endpoint = strpos($endpoint, 'oauth/') !== false;
+        
         // Add access token to data if available (for Google API calls)
         if ($this->access_token) {
             $data['access_token'] = $this->access_token;
@@ -192,16 +196,30 @@ class GRP_API {
         } else {
             // If no token and license is active, this is a problem
             $license_status = $license->get_license_status();
-            if ($license_status === 'valid') {
+            // For OAuth endpoints (like auth-url), allow requests without JWT token during initial setup
+            if ($license_status === 'valid' && !$is_oauth_endpoint) {
                 // License is active but no token - try to refresh
-                if (!$this->refresh_jwt_token()) {
-                    return new WP_Error('no_jwt_token', __('License is active but authentication token is missing. Please reactivate your license.', 'google-reviews-plugin'));
+                try {
+                    if (!$this->refresh_jwt_token()) {
+                        return new WP_Error('no_jwt_token', __('License is active but authentication token is missing. Please reactivate your license.', 'google-reviews-plugin'));
+                    }
+                    // Retry with new token
+                    $jwt_token = $license->get_jwt_token();
+                    if (!empty($jwt_token)) {
+                        $headers['Authorization'] = 'Bearer ' . $jwt_token;
+                    }
+                } catch (Exception $e) {
+                    // If license check fails, allow OAuth endpoints to proceed (for initial setup)
+                    if (!$is_oauth_endpoint) {
+                        return new WP_Error('jwt_token_error', __('Error checking license token. Please complete the setup wizard first.', 'google-reviews-plugin'));
+                    }
                 }
-                // Retry with new token
-                $jwt_token = $license->get_jwt_token();
-                if (!empty($jwt_token)) {
-                    $headers['Authorization'] = 'Bearer ' . $jwt_token;
-                }
+            } elseif (!$is_oauth_endpoint && !$this->is_using_api_server()) {
+                // If not using API server, JWT token is not needed (direct Google API)
+                // Allow the request to proceed
+            } elseif ($is_oauth_endpoint) {
+                // OAuth endpoints (like auth-url) can be called without JWT during initial setup
+                // Allow the request to proceed
             }
         }
         
