@@ -158,10 +158,14 @@
             });
         });
         
-        // Restart wizard button
-        $('#grp-restart-wizard').on('click', function() {
+        // Restart wizard button - intercept click if JavaScript is working, otherwise fallback to direct link
+        $('#grp-restart-wizard').on('click', function(e) {
             var $button = $(this);
             var originalText = $button.html();
+            var href = $button.attr('href');
+
+            // Prevent default link behavior
+            e.preventDefault();
 
             if (!confirm('Are you sure you want to restart the setup wizard? This will reset your onboarding progress.')) {
                 return;
@@ -190,9 +194,9 @@
                             window.location.href = response.data.redirect;
                         }, 1000);
                     } else {
-                        // Fallback: redirect to dashboard with restart parameter
+                        // Fallback: use the href from the link or redirect to dashboard
                         setTimeout(function() {
-                            window.location.href = ajaxUrl.replace('admin-ajax.php', 'admin.php?page=google-reviews&restart_onboarding=1');
+                            window.location.href = href || ajaxUrl.replace('admin-ajax.php', 'admin.php?page=google-reviews&restart_onboarding=1');
                         }, 1000);
                     }
                 } else {
@@ -200,8 +204,11 @@
                     $button.prop('disabled', false).html(originalText);
                 }
             }).fail(function() {
-                showNotice('error', 'An error occurred. Please try again.');
-                $button.prop('disabled', false).html(originalText);
+                showNotice('error', 'An error occurred. Redirecting...');
+                // Fallback to direct link if AJAX fails
+                setTimeout(function() {
+                    window.location.href = href || $button.attr('href') || 'admin.php?page=google-reviews&restart_onboarding=1';
+                }, 1000);
             });
         });
 

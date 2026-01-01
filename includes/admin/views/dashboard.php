@@ -185,10 +185,13 @@ if (!defined('ABSPATH')) {
             <a href="<?php echo admin_url('admin.php?page=google-reviews-help'); ?>" class="button">
                 <?php esc_html_e('Help & Documentation', 'google-reviews-plugin'); ?>
             </a>
-            <button id="grp-restart-wizard" class="button" title="<?php esc_attr_e('Restart the setup wizard', 'google-reviews-plugin'); ?>">
+            <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews&restart_onboarding=1')); ?>" 
+               id="grp-restart-wizard" 
+               class="button" 
+               title="<?php esc_attr_e('Restart the setup wizard', 'google-reviews-plugin'); ?>">
                 <span class="dashicons dashicons-update" style="vertical-align: middle; margin-top: -2px;"></span>
                 <?php esc_html_e('Setup Wizard', 'google-reviews-plugin'); ?>
-            </button>
+            </a>
             <?php if ($is_connected): ?>
                 <button id="grp-test-connection" class="button">
                     <?php esc_html_e('Test Connection', 'google-reviews-plugin'); ?>
