@@ -60,7 +60,13 @@ class GRP_Onboarding {
                 add_action('admin_footer', array($this, 'render_onboarding_modal'));
             }
         } catch (Exception $e) {
-            error_log('GRP Onboarding: Error in check_onboarding_status: ' . $e->getMessage());
+            error_log('GRP Onboarding: Error in check_onboarding_status: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            // If restart was requested, still try to show modal
+            if (isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1') {
+                add_action('admin_footer', array($this, 'render_onboarding_modal'));
+            }
+        } catch (Error $e) {
+            error_log('GRP Onboarding: Fatal error in check_onboarding_status: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
             // If restart was requested, still try to show modal
             if (isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1') {
                 add_action('admin_footer', array($this, 'render_onboarding_modal'));
@@ -84,6 +90,9 @@ class GRP_Onboarding {
             error_log('GRP Onboarding: Error checking should_show: ' . $e->getMessage());
             // If there's an error, still try to show onboarding if restart parameter is present
             $should_show = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
+        } catch (Error $e) {
+            error_log('GRP Onboarding: Fatal error checking should_show: ' . $e->getMessage());
+            $should_show = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
         }
         
         // Only enqueue assets if onboarding should be shown
@@ -106,9 +115,20 @@ class GRP_Onboarding {
             true
         );
         
-        // Check if Google is already connected
-        $api = new GRP_API();
-        $is_google_connected = $api->is_connected();
+        // Check if Google is already connected - handle errors gracefully
+        $is_google_connected = false;
+        $google_connected = false;
+        try {
+            if (class_exists('GRP_API')) {
+                $api = new GRP_API();
+                $is_google_connected = $api->is_connected();
+            }
+        } catch (Exception $e) {
+            error_log('GRP Onboarding: Error checking Google connection: ' . $e->getMessage());
+        } catch (Error $e) {
+            error_log('GRP Onboarding: Fatal error checking Google connection: ' . $e->getMessage());
+        }
+        
         $has_account_id = !empty(get_option('grp_google_account_id', ''));
         $has_location_id = !empty(get_option('grp_google_location_id', ''));
         $google_connected = $is_google_connected && ($has_account_id || $has_location_id);
@@ -162,7 +182,11 @@ class GRP_Onboarding {
             
             return true;
         } catch (Exception $e) {
-            error_log('GRP Onboarding: Error in should_show_onboarding: ' . $e->getMessage());
+            error_log('GRP Onboarding: Error in should_show_onboarding: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
+            // If restart was requested, always show
+            return isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
+        } catch (Error $e) {
+            error_log('GRP Onboarding: Fatal error in should_show_onboarding: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine());
             // If restart was requested, always show
             return isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
         }

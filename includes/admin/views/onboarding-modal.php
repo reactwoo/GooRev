@@ -78,16 +78,29 @@ if (!defined('ABSPATH')) {
                     
                     <div class="grp-onboarding-google-connect">
                         <?php
-                        $api = new GRP_API();
-                        $is_connected = $api->is_connected();
+                        $api = null;
+                        $is_connected = false;
                         $auth_url = '';
                         $auth_error = '';
                         $error_code = '';
                         $is_404_error = false;
                         $is_503_error = false;
-                        if (!$is_connected) {
-                            $auth_url_result = $api->get_auth_url();
-                            if (is_wp_error($auth_url_result)) {
+                        
+                        try {
+                            if (class_exists('GRP_API')) {
+                                $api = new GRP_API();
+                                $is_connected = $api->is_connected();
+                            }
+                        } catch (Exception $e) {
+                            error_log('GRP Onboarding Modal: Error creating API: ' . $e->getMessage());
+                        } catch (Error $e) {
+                            error_log('GRP Onboarding Modal: Fatal error creating API: ' . $e->getMessage());
+                        }
+                        
+                        if (!$is_connected && $api) {
+                            try {
+                                $auth_url_result = $api->get_auth_url();
+                                if (is_wp_error($auth_url_result)) {
                                 $auth_error = $auth_url_result->get_error_message();
                                 $error_code = $auth_url_result->get_error_code();
                                 $is_404_error = (
