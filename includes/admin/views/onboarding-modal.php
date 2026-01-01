@@ -82,13 +82,31 @@ if (!defined('ABSPATH')) {
                         $is_connected = $api->is_connected();
                         $auth_url = '';
                         $auth_error = '';
+                        $error_code = '';
+                        $is_404_error = false;
+                        $is_503_error = false;
                         if (!$is_connected) {
                             $auth_url_result = $api->get_auth_url();
                             if (is_wp_error($auth_url_result)) {
                                 $auth_error = $auth_url_result->get_error_message();
+                                $error_code = $auth_url_result->get_error_code();
+                                $is_404_error = (
+                                    strpos($auth_error, '404') !== false ||
+                                    strpos($auth_error, 'not found') !== false ||
+                                    strpos($error_code, 'not_found') !== false ||
+                                    strpos($error_code, 'endpoint_not_found') !== false ||
+                                    strpos($error_code, 'oauth_endpoint_not_found') !== false
+                                );
+                                $is_503_error = (
+                                    strpos($auth_error, '503') !== false ||
+                                    strpos($auth_error, 'Service Unavailable') !== false ||
+                                    strpos($error_code, 'service_unavailable') !== false
+                                );
                                 grp_debug_log('Failed to get auth URL in onboarding', array(
                                     'error' => $auth_error,
-                                    'error_code' => $auth_url_result->get_error_code()
+                                    'error_code' => $error_code,
+                                    'is_404' => $is_404_error,
+                                    'is_503' => $is_503_error
                                 ));
                             } else {
                                 $auth_url = $auth_url_result;
@@ -110,6 +128,53 @@ if (!defined('ABSPATH')) {
                             <p class="description">
                                 <?php esc_html_e('This will redirect you to Google to authorize the connection. After authorization, you\'ll be redirected back to continue setup.', 'google-reviews-plugin'); ?>
                             </p>
+                        <?php elseif ($is_503_error): ?>
+                            <div class="notice notice-warning" style="border-left-color: #f56e28;">
+                                <p>
+                                    <strong><?php esc_html_e('Cloud Server Temporarily Unavailable', 'google-reviews-plugin'); ?></strong><br>
+                                    <?php esc_html_e('The connection service is currently unavailable (Error 503). This is usually temporary.', 'google-reviews-plugin'); ?>
+                                </p>
+                            </div>
+                            <div class="notice notice-info">
+                                <p><strong><?php esc_html_e('What you can do:', 'google-reviews-plugin'); ?></strong></p>
+                                <ul style="margin-left: 20px; margin-top: 10px;">
+                                    <li><?php esc_html_e('Wait a few minutes and try again - the server may be restarting', 'google-reviews-plugin'); ?></li>
+                                    <li><?php esc_html_e('Check back later - server maintenance may be in progress', 'google-reviews-plugin'); ?></li>
+                                    <li><?php esc_html_e('Or skip this step and connect later from Settings', 'google-reviews-plugin'); ?></li>
+                                </ul>
+                            </div>
+                            <p>
+                                <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 0;">
+                                    <?php esc_html_e('Skip This Step', 'google-reviews-plugin'); ?>
+                                </button>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings&skip_onboarding=1')); ?>" 
+                                   class="button button-secondary" style="margin-left: 10px;">
+                                    <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
+                                </a>
+                            </p>
+                        <?php elseif ($is_404_error): ?>
+                            <div class="notice notice-error">
+                                <p>
+                                    <strong><?php esc_html_e('Cloud Server Configuration Issue', 'google-reviews-plugin'); ?></strong><br>
+                                    <?php esc_html_e('Unable to generate connection URL. The OAuth endpoint was not found on the cloud server.', 'google-reviews-plugin'); ?>
+                                </p>
+                            </div>
+                            <div class="notice notice-info">
+                                <p><strong><?php esc_html_e('What you can do:', 'google-reviews-plugin'); ?></strong></p>
+                                <ul style="margin-left: 20px; margin-top: 10px;">
+                                    <li><?php esc_html_e('Try refreshing this page - the server may have been updated', 'google-reviews-plugin'); ?></li>
+                                    <li><?php esc_html_e('Or skip this step and connect later from Settings', 'google-reviews-plugin'); ?></li>
+                                </ul>
+                            </div>
+                            <p>
+                                <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 0;">
+                                    <?php esc_html_e('Skip This Step', 'google-reviews-plugin'); ?>
+                                </button>
+                                <a href="<?php echo esc_url(admin_url('admin.php?page=google-reviews-settings&skip_onboarding=1')); ?>" 
+                                   class="button button-secondary" style="margin-left: 10px;">
+                                    <?php esc_html_e('Go to Settings', 'google-reviews-plugin'); ?>
+                                </a>
+                            </p>
                         <?php else: ?>
                             <div class="notice notice-error">
                                 <p>
@@ -124,6 +189,7 @@ if (!defined('ABSPATH')) {
                                     <li><?php esc_html_e('Or skip this step and connect later from Settings', 'google-reviews-plugin'); ?></li>
                                 </ul>
                             </div>
+                        <?php endif; ?>
                             <p>
                                 <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 0;">
                                     <?php esc_html_e('Skip This Step', 'google-reviews-plugin'); ?>

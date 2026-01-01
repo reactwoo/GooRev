@@ -366,6 +366,15 @@ class GRP_Admin {
                     strpos($error_code, 'unavailable') !== false
                 );
                 
+                // Check if it's a 404/not found error
+                $is_not_found_error = (
+                    strpos($error_message, '404') !== false ||
+                    strpos($error_message, 'not found') !== false ||
+                    strpos($error_code, 'not_found') !== false ||
+                    strpos($error_code, 'endpoint_not_found') !== false ||
+                    strpos($error_code, 'oauth_endpoint_not_found') !== false
+                );
+                
                 if ($is_server_error && $using_api_server) {
                     // Server is down - show friendly message
                     echo '<div class="notice notice-warning" style="border-left-color: #f56e28;"><p>';
@@ -377,6 +386,21 @@ class GRP_Admin {
                     echo '<ul style="margin-left:20px; margin-top:10px;">';
                     echo '<li>' . esc_html__('Wait a few minutes and try again - the server may be restarting', 'google-reviews-plugin') . '</li>';
                     echo '<li>' . esc_html__('Check back later - server maintenance may be in progress', 'google-reviews-plugin') . '</li>';
+                    if ($license->is_enterprise()) {
+                        echo '<li>' . esc_html__('As an Enterprise user, you can enable custom credentials in the Enterprise section below to use your own Google Cloud Project', 'google-reviews-plugin') . '</li>';
+                    }
+                    echo '</ul></div>';
+                } elseif ($is_not_found_error && $using_api_server) {
+                    // Endpoint not found - show helpful message
+                    echo '<div class="notice notice-error" style="border-left-color: #dc3232;"><p>';
+                    echo '<strong>' . esc_html__('Cloud Server Configuration Issue', 'google-reviews-plugin') . '</strong><br>';
+                    echo esc_html__('The OAuth endpoint was not found on the cloud server. This may indicate a server configuration issue.', 'google-reviews-plugin');
+                    echo '</p></div>';
+                    
+                    echo '<div class="notice notice-info"><p><strong>' . esc_html__('What you can do:', 'google-reviews-plugin') . '</strong></p>';
+                    echo '<ul style="margin-left:20px; margin-top:10px;">';
+                    echo '<li>' . esc_html__('Try refreshing this page - the server may have been updated', 'google-reviews-plugin') . '</li>';
+                    echo '<li>' . esc_html__('Contact support if this issue persists', 'google-reviews-plugin') . '</li>';
                     if ($license->is_enterprise()) {
                         echo '<li>' . esc_html__('As an Enterprise user, you can enable custom credentials in the Enterprise section below to use your own Google Cloud Project', 'google-reviews-plugin') . '</li>';
                     }

@@ -276,6 +276,17 @@ class GRP_API {
             return new WP_Error('rate_limit', $error_message);
         }
         
+        // Handle 404 - Not Found (endpoint doesn't exist or server misconfigured)
+        if ($status_code === 404) {
+            // Check if this is an OAuth endpoint - provide more specific error
+            if (strpos($endpoint, 'oauth/') !== false) {
+                $error_message = isset($decoded['message']) ? $decoded['message'] : __('OAuth endpoint not found. The cloud server may be misconfigured or the endpoint is unavailable.', 'google-reviews-plugin');
+                return new WP_Error('oauth_endpoint_not_found', $error_message);
+            }
+            $error_message = isset($decoded['message']) ? $decoded['message'] : __('API endpoint not found. Please check the cloud server configuration.', 'google-reviews-plugin');
+            return new WP_Error('endpoint_not_found', $error_message);
+        }
+        
         // Handle 503 - Service Unavailable (cloud server is down)
         if ($status_code === 503) {
             $error_message = isset($decoded['message']) ? $decoded['message'] : __('Service temporarily unavailable. The cloud server may be restarting or under maintenance. Please try again in a few minutes.', 'google-reviews-plugin');
