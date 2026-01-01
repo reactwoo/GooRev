@@ -101,28 +101,35 @@ if (!defined('ABSPATH')) {
                             try {
                                 $auth_url_result = $api->get_auth_url();
                                 if (is_wp_error($auth_url_result)) {
-                                $auth_error = $auth_url_result->get_error_message();
-                                $error_code = $auth_url_result->get_error_code();
-                                $is_404_error = (
-                                    strpos($auth_error, '404') !== false ||
-                                    strpos($auth_error, 'not found') !== false ||
-                                    strpos($error_code, 'not_found') !== false ||
-                                    strpos($error_code, 'endpoint_not_found') !== false ||
-                                    strpos($error_code, 'oauth_endpoint_not_found') !== false
-                                );
-                                $is_503_error = (
-                                    strpos($auth_error, '503') !== false ||
-                                    strpos($auth_error, 'Service Unavailable') !== false ||
-                                    strpos($error_code, 'service_unavailable') !== false
-                                );
-                                grp_debug_log('Failed to get auth URL in onboarding', array(
-                                    'error' => $auth_error,
-                                    'error_code' => $error_code,
-                                    'is_404' => $is_404_error,
-                                    'is_503' => $is_503_error
-                                ));
-                            } else {
-                                $auth_url = $auth_url_result;
+                                    $auth_error = $auth_url_result->get_error_message();
+                                    $error_code = $auth_url_result->get_error_code();
+                                    $is_404_error = (
+                                        strpos($auth_error, '404') !== false ||
+                                        strpos($auth_error, 'not found') !== false ||
+                                        strpos($error_code, 'not_found') !== false ||
+                                        strpos($error_code, 'endpoint_not_found') !== false ||
+                                        strpos($error_code, 'oauth_endpoint_not_found') !== false
+                                    );
+                                    $is_503_error = (
+                                        strpos($auth_error, '503') !== false ||
+                                        strpos($auth_error, 'Service Unavailable') !== false ||
+                                        strpos($error_code, 'service_unavailable') !== false
+                                    );
+                                    grp_debug_log('Failed to get auth URL in onboarding', array(
+                                        'error' => $auth_error,
+                                        'error_code' => $error_code,
+                                        'is_404' => $is_404_error,
+                                        'is_503' => $is_503_error
+                                    ));
+                                } else {
+                                    $auth_url = $auth_url_result;
+                                }
+                            } catch (Exception $e) {
+                                error_log('GRP Onboarding Modal: Error getting auth URL: ' . $e->getMessage());
+                                $auth_error = __('Unable to generate connection URL. Please try again later.', 'google-reviews-plugin');
+                            } catch (Error $e) {
+                                error_log('GRP Onboarding Modal: Fatal error getting auth URL: ' . $e->getMessage());
+                                $auth_error = __('Unable to generate connection URL. Please try again later.', 'google-reviews-plugin');
                             }
                         }
                         ?>
@@ -202,7 +209,6 @@ if (!defined('ABSPATH')) {
                                     <li><?php esc_html_e('Or skip this step and connect later from Settings', 'google-reviews-plugin'); ?></li>
                                 </ul>
                             </div>
-                        <?php endif; ?>
                             <p>
                                 <button type="button" class="button button-primary grp-onboarding-skip" style="margin-left: 0;">
                                     <?php esc_html_e('Skip This Step', 'google-reviews-plugin'); ?>
