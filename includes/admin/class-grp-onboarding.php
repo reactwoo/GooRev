@@ -245,7 +245,25 @@ class GRP_Onboarding {
                             'error' => $result->get_error_message(),
                             'code' => $result->get_error_code()
                         ));
-                        wp_send_json_error(array('message' => $result->get_error_message()));
+                        
+                        // If it's a temporary error (503, timeout, etc.), allow proceeding
+                        // User can activate license later from settings
+                        $error_code = $result->get_error_code();
+                        $is_temporary_error = (
+                            strpos($error_code, 'service_unavailable') !== false ||
+                            strpos($error_code, 'timeout') !== false ||
+                            strpos($error_code, '503') !== false ||
+                            strpos($result->get_error_message(), '503') !== false
+                        );
+                        
+                        if ($is_temporary_error) {
+                            // Log but continue - license activation can happen later
+                            error_log('[GRP Onboarding] Free license activation failed (temporary error), continuing onboarding: ' . $result->get_error_message());
+                        } else {
+                            // Permanent error - still allow proceeding but show warning
+                            error_log('[GRP Onboarding] Free license activation failed, continuing onboarding: ' . $result->get_error_message());
+                            // Don't block onboarding - user can activate later
+                        }
                     }
                 } else {
                     // Email is optional - allow proceeding without free license if user skipped
@@ -371,6 +389,12 @@ class GRP_Onboarding {
         
         if ($response_code >= 400) {
             $error_message = isset($data['error']) ? $data['error'] : (isset($data['message']) ? $data['message'] : __('License server returned an error', 'google-reviews-plugin'));
+            
+            // For 503 errors, return a more specific error code
+            if ($response_code === 503) {
+                return new WP_Error('license_activation_service_unavailable', __('License server is temporarily unavailable. You can activate your license later from Settings.', 'google-reviews-plugin'));
+            }
+            
             return new WP_Error('license_activation_failed', $error_message);
         }
         
