@@ -319,43 +319,97 @@ class GRP_Admin {
      */
     public function render_dashboard_page() {
         try {
-            $api = new GRP_API();
-            $reviews = new GRP_Reviews();
+            $api = null;
+            $reviews = null;
+            $license = null;
+            $plugin = null;
+            
+            // Safely instantiate classes
+            try {
+                $api = new GRP_API();
+            } catch (Exception $e) {
+                error_log('GRP Dashboard: Error creating GRP_API: ' . $e->getMessage());
+                $api = null;
+            }
+            
+            try {
+                $reviews = new GRP_Reviews();
+            } catch (Exception $e) {
+                error_log('GRP Dashboard: Error creating GRP_Reviews: ' . $e->getMessage());
+                $reviews = null;
+            }
+            
             // Use the plugin instance's license object to avoid duplicate hooks
-            $plugin = Google_Reviews_Plugin::get_instance();
-            $license = $plugin->license;
+            try {
+                if (class_exists('Google_Reviews_Plugin')) {
+                    $plugin = Google_Reviews_Plugin::get_instance();
+                    if ($plugin && isset($plugin->license)) {
+                        $license = $plugin->license;
+                    }
+                }
+            } catch (Exception $e) {
+                error_log('GRP Dashboard: Error getting plugin instance: ' . $e->getMessage());
+            }
+            
+            // Fallback to creating license directly if plugin instance failed
+            if (!$license) {
+                try {
+                    $license = new GRP_License();
+                } catch (Exception $e) {
+                    error_log('GRP Dashboard: Error creating GRP_License: ' . $e->getMessage());
+                }
+            }
             
             $is_connected = false;
             $recent_reviews = array();
             $is_pro = false;
             
             try {
-                $is_connected = $api->is_connected();
+                if ($api) {
+                    $is_connected = $api->is_connected();
+                }
             } catch (Exception $e) {
                 error_log('GRP Dashboard: Error checking connection: ' . $e->getMessage());
+            } catch (Error $e) {
+                error_log('GRP Dashboard: Fatal error checking connection: ' . $e->getMessage());
             }
             
             try {
-                $recent_reviews = $reviews->get_stored_reviews(array('limit' => 5));
-                if (!is_array($recent_reviews)) {
-                    $recent_reviews = array();
+                if ($reviews) {
+                    $recent_reviews = $reviews->get_stored_reviews(array('limit' => 5));
+                    if (!is_array($recent_reviews)) {
+                        $recent_reviews = array();
+                    }
                 }
             } catch (Exception $e) {
                 error_log('GRP Dashboard: Error loading reviews: ' . $e->getMessage());
                 $recent_reviews = array();
+            } catch (Error $e) {
+                error_log('GRP Dashboard: Fatal error loading reviews: ' . $e->getMessage());
+                $recent_reviews = array();
             }
             
             try {
-                $is_pro = $license->is_pro();
+                if ($license) {
+                    $is_pro = $license->is_pro();
+                }
             } catch (Exception $e) {
                 error_log('GRP Dashboard: Error checking license: ' . $e->getMessage());
+            } catch (Error $e) {
+                error_log('GRP Dashboard: Fatal error checking license: ' . $e->getMessage());
             }
             
             include GRP_PLUGIN_DIR . 'includes/admin/views/dashboard.php';
         } catch (Exception $e) {
-            error_log('GRP Dashboard: Fatal error: ' . $e->getMessage());
+            error_log('GRP Dashboard: Fatal error: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             echo '<div class="wrap"><h1>' . esc_html__('Google Reviews Dashboard', 'google-reviews-plugin') . '</h1>';
             echo '<div class="notice notice-error"><p><strong>' . esc_html__('Error loading dashboard:', 'google-reviews-plugin') . '</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+            echo '<p><a href="' . esc_url(admin_url('admin.php?page=google-reviews-settings')) . '" class="button">' . esc_html__('Go to Settings', 'google-reviews-plugin') . '</a></p>';
+            echo '</div>';
+        } catch (Error $e) {
+            error_log('GRP Dashboard: Fatal PHP error: ' . $e->getMessage() . ' | File: ' . $e->getFile() . ' | Line: ' . $e->getLine() . ' | Trace: ' . $e->getTraceAsString());
+            echo '<div class="wrap"><h1>' . esc_html__('Google Reviews Dashboard', 'google-reviews-plugin') . '</h1>';
+            echo '<div class="notice notice-error"><p><strong>' . esc_html__('Fatal error loading dashboard:', 'google-reviews-plugin') . '</strong> ' . esc_html($e->getMessage()) . '</p></div>';
             echo '<p><a href="' . esc_url(admin_url('admin.php?page=google-reviews-settings')) . '" class="button">' . esc_html__('Go to Settings', 'google-reviews-plugin') . '</a></p>';
             echo '</div>';
         }
