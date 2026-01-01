@@ -245,11 +245,20 @@ class GRP_API {
         $response = wp_remote_request($url, $args);
         
         if (is_wp_error($response)) {
+            // Log OAuth endpoint errors
+            if (strpos($endpoint, 'oauth/') !== false) {
+                error_log('[GRP OAuth Error] WP_Error on request | Endpoint: ' . $endpoint . ' | Error: ' . $response->get_error_message());
+            }
             return $response;
         }
         
         $status_code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
+        
+        // Log OAuth endpoint responses for debugging
+        if (strpos($endpoint, 'oauth/') !== false) {
+            error_log('[GRP OAuth Response] Status: ' . $status_code . ' | Endpoint: ' . $endpoint . ' | Body preview: ' . substr($body, 0, 200));
+        }
         
         // Handle empty response
         if (empty($body)) {
