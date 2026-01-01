@@ -1057,6 +1057,11 @@ class GRP_API {
      * Get reviews for a location
      */
     public function get_reviews($account_id, $location_id, $page_size = 50) {
+        // Don't make API calls if not connected
+        if (!$this->is_connected()) {
+            return new WP_Error('not_connected', __('Not connected to Google. Please connect your account first.', 'google-reviews-plugin'));
+        }
+        
         // Clean location_id - remove 'locations/' prefix if present
         $clean_location_id = preg_replace('#^locations/?#', '', $location_id);
         
