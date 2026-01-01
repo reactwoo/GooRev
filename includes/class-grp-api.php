@@ -144,6 +144,11 @@ class GRP_API {
     private function make_api_server_request_internal($endpoint, $data = array(), $method = 'POST') {
         $url = rtrim($this->api_server_url, '/') . '/' . ltrim($endpoint, '/');
         
+        // Log the full URL for OAuth endpoints to help diagnose 404 errors
+        if (strpos($endpoint, 'oauth/') !== false) {
+            error_log('[GRP OAuth Request] Making request to: ' . $url . ' | Method: ' . strtoupper($method) . ' | Base URL: ' . $this->api_server_url . ' | Endpoint: ' . $endpoint);
+        }
+        
         // Get JWT token from license
         $license = new GRP_License();
         $jwt_token = $license->get_jwt_token();
@@ -278,12 +283,27 @@ class GRP_API {
         
         // Handle 404 - Not Found (endpoint doesn't exist or server misconfigured)
         if ($status_code === 404) {
+            // Log detailed information for debugging
+            error_log('[GRP 404 Error] Endpoint not found | URL: ' . $url . ' | Method: ' . $http_method . ' | Endpoint: ' . $endpoint . ' | Response: ' . substr($body, 0, 500));
+            grp_debug_log('API endpoint 404 error', array(
+                'url' => $url,
+                'method' => $http_method,
+                'endpoint' => $endpoint,
+                'base_url' => $this->api_server_url,
+                'response_body' => substr($body, 0, 500),
+                'has_jwt_token' => !empty($jwt_token),
+                'jwt_token_preview' => !empty($jwt_token) ? substr($jwt_token, 0, 20) . '...' : 'none'
+            ));
+            
             // Check if this is an OAuth endpoint - provide more specific error
             if (strpos($endpoint, 'oauth/') !== false) {
                 $error_message = isset($decoded['message']) ? $decoded['message'] : __('OAuth endpoint not found. The cloud server may be misconfigured or the endpoint is unavailable.', 'google-reviews-plugin');
+                // Add URL to error message for debugging
+                $error_message .= sprintf(__(' Requested URL: %s', 'google-reviews-plugin'), $url);
                 return new WP_Error('oauth_endpoint_not_found', $error_message);
             }
             $error_message = isset($decoded['message']) ? $decoded['message'] : __('API endpoint not found. Please check the cloud server configuration.', 'google-reviews-plugin');
+            $error_message .= sprintf(__(' Requested URL: %s', 'google-reviews-plugin'), $url);
             return new WP_Error('endpoint_not_found', $error_message);
         }
         
