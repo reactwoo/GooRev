@@ -33,30 +33,38 @@ class GRP_Onboarding {
      * Check if onboarding should be shown
      */
     public function check_onboarding_status() {
-        // Check if user manually triggered onboarding
-        $restart_onboarding = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
-        if ($restart_onboarding) {
-            // Reset onboarding status
-            delete_option('grp_onboarding_complete');
-            delete_user_meta(get_current_user_id(), 'grp_onboarding_dismissed');
-            // Note: Modal and assets will be handled by should_show_onboarding check
-        }
-        
-        // Check if user wants to skip onboarding (via URL parameter)
-        $skip_onboarding = isset($_GET['skip_onboarding']) && $_GET['skip_onboarding'] === '1';
-        if ($skip_onboarding) {
-            // Mark onboarding as complete/dismissed
-            update_option('grp_onboarding_complete', true);
-            update_user_meta(get_current_user_id(), 'grp_onboarding_dismissed', true);
-            // Redirect to remove the parameter
-            wp_safe_redirect(admin_url('admin.php?page=google-reviews-settings'));
-            exit;
-        }
-        
-        // Check if onboarding should be shown
-        if ($this->should_show_onboarding()) {
-            // Show onboarding modal
-            add_action('admin_footer', array($this, 'render_onboarding_modal'));
+        try {
+            // Check if user manually triggered onboarding
+            $restart_onboarding = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
+            if ($restart_onboarding) {
+                // Reset onboarding status
+                delete_option('grp_onboarding_complete');
+                delete_user_meta(get_current_user_id(), 'grp_onboarding_dismissed');
+                // Note: Modal and assets will be handled by should_show_onboarding check
+            }
+            
+            // Check if user wants to skip onboarding (via URL parameter)
+            $skip_onboarding = isset($_GET['skip_onboarding']) && $_GET['skip_onboarding'] === '1';
+            if ($skip_onboarding) {
+                // Mark onboarding as complete/dismissed
+                update_option('grp_onboarding_complete', true);
+                delete_user_meta(get_current_user_id(), 'grp_onboarding_dismissed');
+                // Redirect to remove the parameter
+                wp_safe_redirect(admin_url('admin.php?page=google-reviews-settings'));
+                exit;
+            }
+            
+            // Check if onboarding should be shown
+            if ($this->should_show_onboarding()) {
+                // Show onboarding modal
+                add_action('admin_footer', array($this, 'render_onboarding_modal'));
+            }
+        } catch (Exception $e) {
+            error_log('GRP Onboarding: Error in check_onboarding_status: ' . $e->getMessage());
+            // If restart was requested, still try to show modal
+            if (isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1') {
+                add_action('admin_footer', array($this, 'render_onboarding_modal'));
+            }
         }
     }
     
@@ -70,7 +78,13 @@ class GRP_Onboarding {
         }
         
         // Check if onboarding should be shown (for asset enqueueing purposes)
-        $should_show = $this->should_show_onboarding();
+        try {
+            $should_show = $this->should_show_onboarding();
+        } catch (Exception $e) {
+            error_log('GRP Onboarding: Error checking should_show: ' . $e->getMessage());
+            // If there's an error, still try to show onboarding if restart parameter is present
+            $should_show = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
+        }
         
         // Only enqueue assets if onboarding should be shown
         if (!$should_show) {
@@ -117,35 +131,41 @@ class GRP_Onboarding {
      * Check if onboarding should be shown (helper method)
      */
     private function should_show_onboarding() {
-        // Only show on plugin admin pages
-        if (!isset($_GET['page']) || strpos($_GET['page'], 'google-reviews') === false) {
-            return false;
-        }
-        
-        // Don't show on OAuth callback page
-        if (isset($_GET['action']) && $_GET['action'] === 'oauth_callback') {
-            return false;
-        }
-        
-        // Check if user manually triggered onboarding
-        $restart_onboarding = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
-        if ($restart_onboarding) {
+        try {
+            // Only show on plugin admin pages
+            if (!isset($_GET['page']) || strpos($_GET['page'], 'google-reviews') === false) {
+                return false;
+            }
+            
+            // Don't show on OAuth callback page
+            if (isset($_GET['action']) && $_GET['action'] === 'oauth_callback') {
+                return false;
+            }
+            
+            // Check if user manually triggered onboarding
+            $restart_onboarding = isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
+            if ($restart_onboarding) {
+                return true;
+            }
+            
+            // Check if onboarding is complete
+            $onboarding_complete = get_option('grp_onboarding_complete', false);
+            if ($onboarding_complete) {
+                return false;
+            }
+            
+            // Check if user dismissed onboarding
+            $onboarding_dismissed = get_user_meta(get_current_user_id(), 'grp_onboarding_dismissed', true);
+            if ($onboarding_dismissed) {
+                return false;
+            }
+            
             return true;
+        } catch (Exception $e) {
+            error_log('GRP Onboarding: Error in should_show_onboarding: ' . $e->getMessage());
+            // If restart was requested, always show
+            return isset($_GET['restart_onboarding']) && $_GET['restart_onboarding'] === '1';
         }
-        
-        // Check if onboarding is complete
-        $onboarding_complete = get_option('grp_onboarding_complete', false);
-        if ($onboarding_complete) {
-            return false;
-        }
-        
-        // Check if user dismissed onboarding
-        $onboarding_dismissed = get_user_meta(get_current_user_id(), 'grp_onboarding_dismissed', true);
-        if ($onboarding_dismissed) {
-            return false;
-        }
-        
-        return true;
     }
     
     /**

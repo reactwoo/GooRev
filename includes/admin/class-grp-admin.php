@@ -318,17 +318,47 @@ class GRP_Admin {
      * Render dashboard page
      */
     public function render_dashboard_page() {
-        $api = new GRP_API();
-        $reviews = new GRP_Reviews();
-        // Use the plugin instance's license object to avoid duplicate hooks
-        $plugin = Google_Reviews_Plugin::get_instance();
-        $license = $plugin->license;
-        
-        $is_connected = $api->is_connected();
-        $recent_reviews = $reviews->get_stored_reviews(array('limit' => 5));
-        $is_pro = $license->is_pro();
-        
-        include GRP_PLUGIN_DIR . 'includes/admin/views/dashboard.php';
+        try {
+            $api = new GRP_API();
+            $reviews = new GRP_Reviews();
+            // Use the plugin instance's license object to avoid duplicate hooks
+            $plugin = Google_Reviews_Plugin::get_instance();
+            $license = $plugin->license;
+            
+            $is_connected = false;
+            $recent_reviews = array();
+            $is_pro = false;
+            
+            try {
+                $is_connected = $api->is_connected();
+            } catch (Exception $e) {
+                error_log('GRP Dashboard: Error checking connection: ' . $e->getMessage());
+            }
+            
+            try {
+                $recent_reviews = $reviews->get_stored_reviews(array('limit' => 5));
+                if (!is_array($recent_reviews)) {
+                    $recent_reviews = array();
+                }
+            } catch (Exception $e) {
+                error_log('GRP Dashboard: Error loading reviews: ' . $e->getMessage());
+                $recent_reviews = array();
+            }
+            
+            try {
+                $is_pro = $license->is_pro();
+            } catch (Exception $e) {
+                error_log('GRP Dashboard: Error checking license: ' . $e->getMessage());
+            }
+            
+            include GRP_PLUGIN_DIR . 'includes/admin/views/dashboard.php';
+        } catch (Exception $e) {
+            error_log('GRP Dashboard: Fatal error: ' . $e->getMessage());
+            echo '<div class="wrap"><h1>' . esc_html__('Google Reviews Dashboard', 'google-reviews-plugin') . '</h1>';
+            echo '<div class="notice notice-error"><p><strong>' . esc_html__('Error loading dashboard:', 'google-reviews-plugin') . '</strong> ' . esc_html($e->getMessage()) . '</p></div>';
+            echo '<p><a href="' . esc_url(admin_url('admin.php?page=google-reviews-settings')) . '" class="button">' . esc_html__('Go to Settings', 'google-reviews-plugin') . '</a></p>';
+            echo '</div>';
+        }
     }
     
     /**
