@@ -145,9 +145,11 @@ class GRP_WooCommerce {
      */
     public function handle_order_status_change($order_id, $old_status, $new_status) {
         $trigger_status = get_option('grp_wc_trigger_status', 'completed');
+        $normalized_new_status = $this->normalize_order_status($new_status);
+        $normalized_trigger_status = $this->normalize_order_status($trigger_status);
         
         // Only proceed if order reached the trigger status
-        if ($new_status !== $trigger_status) {
+        if ($normalized_new_status !== $normalized_trigger_status) {
             $this->log_eligibility_reason("order {$order_id} skipped: status transition {$old_status} → {$new_status} (trigger {$trigger_status})");
             return;
         }
@@ -756,6 +758,14 @@ Thanks again!
         }
 
         error_log('[GRP WooCommerce] ' . $message);
+    }
+
+    /**
+     * Normalize a WooCommerce order status so we can compare values that include or omit the `wc-` prefix.
+     */
+    private function normalize_order_status($status) {
+        $status = (string) $status;
+        return preg_replace('~^wc-~i', '', $status);
     }
 
 }
