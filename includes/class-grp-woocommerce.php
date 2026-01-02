@@ -740,73 +740,84 @@ Thanks again!
         return '';
     }
 
-    /**
-     * Get existing invite ID for an order
-     */
-    private static function get_invite_id_by_order($order_id) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'grp_review_invites';
-        return (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT id FROM {$table} WHERE order_id = %d ORDER BY id DESC LIMIT 1",
-                $order_id
-            )
-        );
-    }
-
-    /**
-     * WP-CLI helper to reschedule invites for recent orders
-     *
-     * Usage: wp grp invite reschedule --count=5 --status=completed --old_status=processing
-     */
-    public static function wp_cli_reschedule_invites($args, $assoc_args) {
-        if (!defined('WP_CLI') || !WP_CLI) {
-            return;
-        }
-
-        if (!class_exists('WooCommerce')) {
-            WP_CLI::error(__('WooCommerce is not active.', 'google-reviews-plugin'));
-            return;
-        }
-
-        $count = absint($assoc_args['count'] ?? 5);
-        $status = $assoc_args['status'] ?? 'completed';
-        $old_status = $assoc_args['old_status'] ?? 'processing';
-
-        $orders = wc_get_orders(array(
-            'status' => $status,
-            'limit' => $count,
-            'orderby' => 'date',
-            'order' => 'DESC',
-        ));
-
-        if (empty($orders)) {
-            WP_CLI::warning(__('No matching orders found for invite rescheduling.', 'google-reviews-plugin'));
-            return;
-        }
-
-        $woo = self::get_instance();
-
-        foreach ($orders as $order) {
-            $order_id = $order->get_id();
-            $before = self::get_invite_id_by_order($order_id);
-
-            $woo->handle_order_status_change($order_id, $old_status, $status);
-
-            $after = self::get_invite_id_by_order($order_id);
-
-            if ($after && $after !== $before) {
-                WP_CLI::success(sprintf(__('Invite scheduled for order %d (invite ID %d).', 'google-reviews-plugin'), $order_id, $after));
-            } elseif ($before) {
-                WP_CLI::log(sprintf(__('Invite already exists for order %d (invite ID %d).', 'google-reviews-plugin'), $order_id, $before));
-            } else {
-                WP_CLI::warning(sprintf(__('No invite created for order %d — review eligibility settings.', 'google-reviews-plugin'), $order_id));
-            }
-        }
-    }
 }
 
 if (defined('WP_CLI') && WP_CLI) {
-    WP_CLI::add_command('grp invite reschedule', array('GRP_WooCommerce', 'wp_cli_reschedule_invites'));
+    class GRP_WooCommerce_Invite_Command extends WP_CLI_Command {
+        /**
+         * Reschedule recent completed orders for review invites.
+         *
+         * ## OPTIONS
+         *
+         * [--count=<number>]
+         * : Number of recent orders to process. Default 5.
+         *
+         * [--status=<status>]
+         * : Order status to target. Default 'completed'.
+         *
+         * [--old_status=<status>]
+         * : Previous status to simulate before the transition. Default 'processing'.
+         *
+         * ## EXAMPLES
+         *
+         *     wp grp invite reschedule --count=5 --status=completed --old_status=processing
+         *
+         * @when after_wp_load
+         */
+        public function reschedule($args, $assoc_args) {
+            if (!class_exists('WooCommerce')) {
+                WP_CLI::error(__('WooCommerce is not active.', 'google-reviews-plugin'));
+                return;
+            }
+
+            $count = absint($assoc_args['count'] ?? 5);
+            $status = $assoc_args['status'] ?? 'completed';
+            $old_status = $assoc_args['old_status'] ?? 'processing';
+
+            $orders = wc_get_orders(array(
+                'status' => $status,
+                'limit' => $count,
+                'orderby' => 'date',
+                'order' => 'DESC',
+            ));
+
+            if (empty($orders)) {
+                WP_CLI::warning(__('No matching orders found for invite rescheduling.', 'google-reviews-plugin'));
+                return;
+            }
+
+            $woo = GRP_WooCommerce::get_instance();
+
+            foreach ($orders as $order) {
+                $order_id = $order->get_id();
+                $before = $this->get_invite_id_for_order($order_id);
+
+                $woo->handle_order_status_change($order_id, $old_status, $status);
+
+                $after = $this->get_invite_id_for_order($order_id);
+
+                if ($after && $after !== $before) {
+                    WP_CLI::success(sprintf(__('Invite scheduled for order %d (invite ID %d).', 'google-reviews-plugin'), $order_id, $after));
+                } elseif ($before) {
+                    WP_CLI::log(sprintf(__('Invite already exists for order %d (invite ID %d).', 'google-reviews-plugin'), $order_id, $before));
+                } else {
+                    WP_CLI::warning(sprintf(__('No invite created for order %d — review eligibility settings.', 'google-reviews-plugin'), $order_id));
+                }
+            }
+        }
+
+        private function get_invite_id_for_order($order_id) {
+            global $wpdb;
+            $table = $wpdb->prefix . 'grp_review_invites';
+            return (int) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT id FROM {$table} WHERE order_id = %d ORDER BY id DESC LIMIT 1",
+                    $order_id
+                )
+            );
+        }
+    }
+
+    WP_CLI::add_command('grp invite', 'GRP_WooCommerce_Invite_Command');
 }
 
