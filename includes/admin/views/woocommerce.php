@@ -33,6 +33,10 @@ if (isset($_POST['grp_wc_settings_submit']) && check_admin_referer('grp_wc_setti
     // Email settings
     update_option('grp_wc_email_subject', sanitize_text_field($_POST['grp_wc_email_subject']));
     update_option('grp_wc_email_body', wp_kses_post($_POST['grp_wc_email_body']));
+    update_option('grp_wc_reward_subject', sanitize_text_field($_POST['grp_wc_reward_subject'] ?? ''));
+    update_option('grp_wc_email_body_reward', wp_kses_post($_POST['grp_wc_email_body_reward'] ?? ''));
+    update_option('grp_wc_thank_you_subject', sanitize_text_field($_POST['grp_wc_thank_you_subject'] ?? ''));
+    update_option('grp_wc_email_body_thank_you', wp_kses_post($_POST['grp_wc_email_body_thank_you'] ?? ''));
     
     echo '<div class="notice notice-success"><p>' . esc_html__('Settings saved successfully!', 'google-reviews-plugin') . '</p></div>';
 }
@@ -52,8 +56,13 @@ $coupon_individual_use = get_option('grp_wc_coupon_individual_use', true);
 $coupon_min_spend = get_option('grp_wc_coupon_min_spend', '');
 $coupon_prefix = get_option('grp_wc_coupon_prefix', 'GRP-THANKS-');
 $max_coupons_per_customer = get_option('grp_wc_max_coupons_per_customer', 1);
-$email_subject = get_option('grp_wc_email_subject', __('We\'d love your feedback!', 'google-reviews-plugin'));
-$email_body = get_option('grp_wc_email_body', '');
+$woo_wc = GRP_WooCommerce::get_instance();
+$email_subject = get_option('grp_wc_email_subject', $woo_wc->get_default_email_subject('initial'));
+$email_body = get_option('grp_wc_email_body', $woo_wc->get_default_email_body('initial'));
+$reward_subject = get_option('grp_wc_reward_subject', $woo_wc->get_default_email_subject('reward'));
+$reward_body = get_option('grp_wc_email_body_reward', $woo_wc->get_default_email_body('reward'));
+$thank_you_subject = get_option('grp_wc_thank_you_subject', $woo_wc->get_default_email_subject('thank_you'));
+$thank_you_body = get_option('grp_wc_email_body_thank_you', $woo_wc->get_default_email_body('thank_you'));
 
 // Get order statuses
 $order_statuses = wc_get_order_statuses();
@@ -380,43 +389,51 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
         <!-- Email Template Settings Section -->
         <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
             <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('Email Template Settings', 'google-reviews-plugin'); ?></h2>
-            <table class="form-table">
-                <tbody>
-                    <tr>
-                        <th scope="row">
-                            <label for="grp_wc_email_subject"><?php esc_html_e('Email Subject', 'google-reviews-plugin'); ?></label>
-                        </th>
-                        <td>
-                            <input type="text" id="grp_wc_email_subject" name="grp_wc_email_subject" value="<?php echo esc_attr($email_subject); ?>" class="large-text">
-                            <p class="description">
-                                <?php esc_html_e('Available merge tags: {first_name}, {order_id}, {order_date}, {store_name}', 'google-reviews-plugin'); ?>
-                            </p>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <th scope="row">
-                            <label for="grp_wc_email_body"><?php esc_html_e('Email Body', 'google-reviews-plugin'); ?></label>
-                        </th>
-                        <td>
-                            <?php
-                            $editor_settings = array(
-                                'textarea_name' => 'grp_wc_email_body',
-                                'textarea_rows' => 12,
-                                'media_buttons' => false,
-                                'teeny' => true
-                            );
-                            wp_editor($email_body, 'grp_wc_email_body', $editor_settings);
-                            ?>
-                            <p class="description">
-                                <?php esc_html_e('Available merge tags: {first_name}, {order_id}, {order_date}, {review_url}, {store_name}, {coupon_code}, {coupon_value}', 'google-reviews-plugin'); ?>
-                                <br>
-                                <?php esc_html_e('Compliance disclaimer will be automatically appended if incentives are enabled.', 'google-reviews-plugin'); ?>
-                            </p>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
+            <?php
+            $editor_settings_base = array(
+                'textarea_rows' => 10,
+                'media_buttons' => false,
+                'teeny' => true,
+            );
+            ?>
+
+            <div class="grp-email-template-block" style="margin-bottom: 25px;">
+                <h3><?php esc_html_e('Initial Invite', 'google-reviews-plugin'); ?></h3>
+                <label for="grp_wc_email_subject"><?php esc_html_e('Subject', 'google-reviews-plugin'); ?></label>
+                <input type="text" id="grp_wc_email_subject" name="grp_wc_email_subject" value="<?php echo esc_attr($email_subject); ?>" class="large-text">
+                <p class="description"><?php esc_html_e('Available merge tags: {first_name}, {order_id}, {order_date}, {store_name}, {review_url}, {coupon_value}', 'google-reviews-plugin'); ?></p>
+                <label for="grp_wc_email_body"><?php esc_html_e('Body', 'google-reviews-plugin'); ?></label>
+                <?php
+                $initial_editor_settings = array_merge($editor_settings_base, array('textarea_name' => 'grp_wc_email_body'));
+                wp_editor($email_body, 'grp_wc_email_body', $initial_editor_settings);
+                ?>
+                <p class="description"><?php esc_html_e('Compliance disclaimer will be appended automatically when incentives are enabled.', 'google-reviews-plugin'); ?></p>
+            </div>
+
+            <div class="grp-email-template-block" style="margin-bottom: 25px;">
+                <h3><?php esc_html_e('Coupon Reward Email', 'google-reviews-plugin'); ?></h3>
+                <label for="grp_wc_reward_subject"><?php esc_html_e('Subject', 'google-reviews-plugin'); ?></label>
+                <input type="text" id="grp_wc_reward_subject" name="grp_wc_reward_subject" value="<?php echo esc_attr($reward_subject); ?>" class="large-text">
+                <p class="description"><?php esc_html_e('Available merge tags: {first_name}, {order_id}, {store_name}, {coupon_code}, {coupon_value}', 'google-reviews-plugin'); ?></p>
+                <label for="grp_wc_email_body_reward"><?php esc_html_e('Body', 'google-reviews-plugin'); ?></label>
+                <?php
+                $reward_editor_settings = array_merge($editor_settings_base, array('textarea_name' => 'grp_wc_email_body_reward'));
+                wp_editor($reward_body, 'grp_wc_email_body_reward', $reward_editor_settings);
+                ?>
+            </div>
+
+            <div class="grp-email-template-block">
+                <h3><?php esc_html_e('Thank You Email', 'google-reviews-plugin'); ?></h3>
+                <label for="grp_wc_thank_you_subject"><?php esc_html_e('Subject', 'google-reviews-plugin'); ?></label>
+                <input type="text" id="grp_wc_thank_you_subject" name="grp_wc_thank_you_subject" value="<?php echo esc_attr($thank_you_subject); ?>" class="large-text">
+                <p class="description"><?php esc_html_e('Available merge tags: {first_name}, {order_id}, {store_name}, {coupon_code}, {coupon_value}', 'google-reviews-plugin'); ?></p>
+                <label for="grp_wc_email_body_thank_you"><?php esc_html_e('Body', 'google-reviews-plugin'); ?></label>
+                <?php
+                $thank_you_editor_settings = array_merge($editor_settings_base, array('textarea_name' => 'grp_wc_email_body_thank_you'));
+                wp_editor($thank_you_body, 'grp_wc_email_body_thank_you', $thank_you_editor_settings);
+                ?>
+            </div>
         </div>
         
         <?php submit_button(__('Save Settings', 'google-reviews-plugin'), 'primary', 'grp_wc_settings_submit'); ?>

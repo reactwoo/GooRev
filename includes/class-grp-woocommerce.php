@@ -328,11 +328,9 @@ class GRP_WooCommerce {
      * Send invite email
      */
     private function send_invite_email($invite, $order) {
-        // Get place_id from invite or fetch from location if not stored
         $place_id = $invite->place_id;
         if (empty($place_id)) {
             $place_id = $this->get_place_id_from_location();
-            // Update invite with place_id if we found it
             if (!empty($place_id)) {
                 global $wpdb;
                 $table = $wpdb->prefix . 'grp_review_invites';
@@ -345,43 +343,25 @@ class GRP_WooCommerce {
                 );
             }
         }
-        
+
         if (empty($place_id)) {
             grp_debug_log('Cannot send invite: place_id is empty', array('invite_id' => $invite->id));
             return false;
         }
-        
-        // Generate review URL with tracking
-        $review_url = $this->generate_tracking_url($invite->id, $place_id);
-        
-        // Get email template
-        $subject = get_option('grp_wc_email_subject', __('We\'d love your feedback!', 'google-reviews-plugin'));
-        $body = get_option('grp_wc_email_body', $this->get_default_email_body());
-        
-        // Replace merge tags
-        $subject = $this->replace_merge_tags($subject, $order, $invite, $review_url);
-        $body = $this->replace_merge_tags($body, $order, $invite, $review_url);
-        
-        // Add compliance disclaimer if incentives enabled
-        if ($this->is_incentives_enabled()) {
-            $body .= "\n\n" . $this->get_compliance_disclaimer();
-        }
-        
-        // Convert line breaks to HTML
-        $body = nl2br($body);
-        
-        // Send email
-        $to = $invite->email;
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-        
-        $sent = wp_mail($to, $subject, $body, $headers);
-        
+
+        list($subject, $body) = $this->prepare_email_template('initial', $order, $invite, array(
+            'coupon_code' => '',
+            'coupon_value' => $this->get_coupon_value_display()
+        ));
+
+        $sent = $this->send_html_email($invite->email, $subject, $body);
+
         grp_debug_log('Review invite email sent', array(
             'invite_id' => $invite->id,
-            'to' => $to,
+            'to' => $invite->email,
             'sent' => $sent
         ));
-        
+
         return $sent;
     }
     
@@ -516,8 +496,8 @@ class GRP_WooCommerce {
                 array('%d')
             );
             
-            // Send coupon email
-            $this->send_coupon_email($invite, $coupon_code);
+            $order = wc_get_order($invite->order_id);
+            $this->send_coupon_email($invite, $order, $coupon_code);
         }
     }
     
@@ -585,29 +565,41 @@ class GRP_WooCommerce {
     }
     
     /**
-     * Send coupon email
+     * Send reward email (coupon delivery)
      */
-    private function send_coupon_email($invite, $coupon_code) {
+    private function send_coupon_email($invite, $order, $coupon_code) {
         $to = $invite->email;
-        $subject = __('Your Thank-You Discount Code', 'google-reviews-plugin');
-        
-        $coupon_value = floatval(get_option('grp_wc_coupon_value', 10));
-        $coupon_type = get_option('grp_wc_coupon_type', 'percent');
-        $value_display = $coupon_type === 'percent' ? $coupon_value . '%' : wc_price($coupon_value);
-        
-        $message = sprintf(
-            __('Thank you for your review! Here\'s your discount code: %s (%s off)', 'google-reviews-plugin'),
-            $coupon_code,
-            $value_display
-        );
-        
-        wp_mail($to, $subject, $message);
+        list($subject, $body) = $this->prepare_email_template('reward', $order, $invite, array(
+            'coupon_code' => $coupon_code,
+            'coupon_value' => $this->get_coupon_value_display()
+        ));
+
+        $this->send_html_email($to, $subject, $body);
+
+        $this->send_thank_you_email($invite, $order, $coupon_code);
     }
-    
+
+    private function send_thank_you_email($invite, $order, $coupon_code) {
+        if (!is_a($order, 'WC_Order')) {
+            return;
+        }
+
+        list($subject, $body) = $this->prepare_email_template('thank_you', $order, $invite, array(
+            'coupon_code' => $coupon_code,
+            'coupon_value' => $this->get_coupon_value_display()
+        ));
+
+        if (trim(strip_tags($body)) === '') {
+            return;
+        }
+
+        $this->send_html_email($invite->email, $subject, $body);
+    }
+
     /**
      * Replace merge tags in email content
      */
-    private function replace_merge_tags($content, $order, $invite, $review_url) {
+    private function replace_merge_tags($content, $order, $invite, $review_url, $extra = array()) {
         $customer = $order->get_billing_first_name() ? $order->get_billing_first_name() : __('Valued Customer', 'google-reviews-plugin');
         $store_name = get_bloginfo('name');
         
@@ -617,30 +609,80 @@ class GRP_WooCommerce {
             '{order_date}' => $order->get_date_created()->date_i18n(get_option('date_format')),
             '{review_url}' => $review_url,
             '{store_name}' => $store_name,
-            '{coupon_code}' => $invite->coupon_code ? $invite->coupon_code : '',
-            '{coupon_value}' => '',
+            '{coupon_code}' => $extra['coupon_code'] ?? ($invite->coupon_code ?? ''),
+            '{coupon_value}' => $extra['coupon_value'] ?? $this->get_coupon_value_display()
         );
-        
-        // Add coupon value if available
-        if ($invite->coupon_code) {
-            $coupon_value = floatval(get_option('grp_wc_coupon_value', 10));
-            $coupon_type = get_option('grp_wc_coupon_type', 'percent');
-            $replacements['{coupon_value}'] = $coupon_type === 'percent' ? $coupon_value . '%' : wc_price($coupon_value);
-        }
         
         return str_replace(array_keys($replacements), array_values($replacements), $content);
     }
-    
-    /**
-     * Get default email body
-     */
-    private function get_default_email_body() {
-        $default = get_option('grp_wc_email_body', '');
-        if (!empty($default)) {
-            return $default;
+
+    private function prepare_email_template($type, $order, $invite, $extra = array()) {
+        $review_url = $this->generate_tracking_url($invite->id, $invite->place_id);
+        $body = $this->get_email_template_body($type);
+        $subject = $this->get_email_template_subject($type);
+
+        $merged = $this->replace_merge_tags($body, $order, $invite, $review_url, $extra);
+
+        if ($type === 'initial' && $this->is_incentives_enabled()) {
+            $merged .= "\n\n" . $this->get_compliance_disclaimer();
         }
-        
-        return __('Hi {first_name},
+
+        return array($subject, nl2br($merged));
+    }
+
+    private function get_email_template_body($type) {
+        $option = $this->get_email_body_option_name($type);
+        $fallback = $this->get_default_email_body($type);
+        $value = get_option($option, '');
+        if (!empty($value)) {
+            return $value;
+        }
+        return $fallback;
+    }
+
+    private function get_email_template_subject($type) {
+        $option = $this->get_email_subject_option_name($type);
+        $fallback = $this->get_default_email_subject($type);
+        $value = get_option($option, '');
+        if (!empty($value)) {
+            return $value;
+        }
+        return $fallback;
+    }
+
+    private function get_email_body_option_name($type) {
+        $map = array(
+            'initial' => 'grp_wc_email_body',
+            'reward' => 'grp_wc_email_body_reward',
+            'thank_you' => 'grp_wc_email_body_thank_you',
+        );
+
+        return $map[$type] ?? 'grp_wc_email_body';
+    }
+
+    private function get_email_subject_option_name($type) {
+        $map = array(
+            'initial' => 'grp_wc_email_subject',
+            'reward' => 'grp_wc_reward_subject',
+            'thank_you' => 'grp_wc_thank_you_subject',
+        );
+
+        return $map[$type] ?? 'grp_wc_email_subject';
+    }
+
+    public function get_default_email_subject($type) {
+        $defaults = array(
+            'initial' => __('We\'d love your feedback!', 'google-reviews-plugin'),
+            'reward' => __('Here is your thank-you coupon', 'google-reviews-plugin'),
+            'thank_you' => __('Thanks again for your review!', 'google-reviews-plugin'),
+        );
+
+        return $defaults[$type] ?? $defaults['initial'];
+    }
+
+    public function get_default_email_body($type = 'initial') {
+        $defaults = array(
+            'initial' => __('Hi {first_name},
 
 Thank you for your recent order (#{order_id})!
 
@@ -653,7 +695,42 @@ As a thank-you, we\'ll send you a discount code after you visit the review link 
 
 Thanks again!
 
-{store_name}', 'google-reviews-plugin');
+{store_name}', 'google-reviews-plugin'),
+            'reward' => __('Hey {first_name},
+
+Thank you for taking the time to visit the review link! Here is your coupon code:
+{coupon_code}
+Good for {coupon_value} off your next purchase with {store_name}.
+
+We appreciate your feedback!', 'google-reviews-plugin'),
+            'thank_you' => __('Hi {first_name},
+
+Thanks again for leaving a review. Your coupon {coupon_code} ({coupon_value}) is ready whenever you are.
+
+Enjoy and we hope to serve you again soon!', 'google-reviews-plugin')
+        );
+
+        return $defaults[$type] ?? $defaults['initial'];
+    }
+
+    private function get_coupon_value_display() {
+        $coupon_type = get_option('grp_wc_coupon_type', 'percent');
+        $coupon_value = floatval(get_option('grp_wc_coupon_value', 0));
+
+        if ($coupon_type === 'percent') {
+            return $coupon_value . '%';
+        }
+
+        if (function_exists('wc_price')) {
+            return wc_price($coupon_value);
+        }
+
+        return $coupon_value;
+    }
+
+    private function send_html_email($to, $subject, $body) {
+        $headers = array('Content-Type: text/html; charset=UTF-8');
+        return wp_mail($to, $subject, $body, $headers);
     }
     
     /**
