@@ -372,7 +372,10 @@ class GRP_License {
         
         $response_body = wp_remote_retrieve_body($response);
         $status_code = wp_remote_retrieve_response_code($response);
-        
+        if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+            error_log( '[GRP License] activate response status: ' . $status_code );
+            error_log( '[GRP License] activate response body: ' . $response_body );
+        }
         $decoded = json_decode($response_body, true);
         
         if (json_last_error() !== JSON_ERROR_NONE) {
