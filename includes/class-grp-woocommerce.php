@@ -1,3 +1,6 @@
+
+
+
 <?php
 /**
  * WooCommerce Integration Class
@@ -254,16 +257,23 @@ class GRP_WooCommerce {
      * Send scheduled invites
      */
     public function send_scheduled_invites() {
+        error_log( '[GRP WooCommerce] send_scheduled_invites fired at ' . current_time( 'mysql' ) );
+    
         global $wpdb;
         $table = $wpdb->prefix . 'grp_review_invites';
-        
-        // Get invites that are due to be sent
-        $due_invites = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$table} 
-            WHERE invite_status = 'scheduled' 
-            AND scheduled_at <= %s",
-            current_time('mysql', true)
-        ));
+        // ...
+    
+        foreach ($due_invites as $invite) {
+            error_log( "[GRP WooCommerce] processing invite {$invite->id} for order {$invite->order_id}" );
+    
+            // existing eligibility checks...
+    
+            $sent = $this->send_invite_email($invite, $order);
+    
+            error_log( "[GRP WooCommerce] invite {$invite->id} status after send: " . ($sent ? 'sent' : 'failed') );
+            // existing status updates...
+        }
+    }
         
         foreach ($due_invites as $invite) {
             // Verify order is still eligible
