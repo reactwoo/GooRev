@@ -45,4 +45,161 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.grp-template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.grp-template-card {
+    position: relative;
+    border: 1px solid #ccd0d4;
+    border-radius: 10px;
+    padding: 16px;
+    background: #fff;
+    box-shadow: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+    min-height: 200px;
+}
+
+.grp-template-card.is-active {
+    border-color: #0073aa;
+    box-shadow: 0 6px 18px rgba(0, 115, 170, 0.15);
+    transform: translateY(-2px);
+}
+
+.grp-template-card.is-pro-locked {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+.grp-template-preview {
+    height: 74px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #f6f8fa, #e0e6ed);
+    position: relative;
+    overflow: hidden;
+}
+
+.grp-template-preview[data-template="basic"] {
+    background: linear-gradient(135deg, #0d6efd, #4dabf5);
+}
+
+.grp-template-preview[data-template="qr-badge"] {
+    background: linear-gradient(135deg, #0c63e4, #1a73e8);
+}
+
+.grp-template-preview[data-template="qr-badge"]::after {
+    content: '';
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    top: 18px;
+    right: 18px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: inset 0 0 0 2px #d9d9d9;
+}
+
+.grp-template-preview[data-template="barcode-panel"] {
+    background: #111;
+    background-image: linear-gradient(90deg, rgba(255,255,255,0.3) 2px, transparent 2px);
+    background-size: 16px 100%;
+}
+
+.grp-template-preview[data-template="barcode-panel"]::after {
+    content: '';
+    position: absolute;
+    inset: 12px 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.grp-template-preview[data-template="canva"] {
+    background: linear-gradient(135deg, #24a1ff, #6b5bff, #ff7b5a);
+}
+
+.grp-template-copy strong {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.grp-template-copy p {
+    margin: 0;
+    color: #555;
+    font-size: 13px;
+    min-height: 32px;
+}
+
+.grp-template-action {
+    margin-top: 10px;
+}
+
+.grp-template-lock-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #222;
+    letter-spacing: 0.5px;
+    font-size: 13px;
+}
+
+.grp-preview-qr {
+    display: none;
+    margin-right: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 52px;
+    height: 52px;
+    background: #fff;
+    align-items: center;
+    justify-content: center;
+}
+
+.grp-review-button-template-qr-badge .grp-preview-qr,
+.grp-review-button-template-barcode-panel .grp-preview-qr {
+    display: inline-flex;
+}
+
+.grp-preview-qr img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.grp-preview-qr-placeholder {
+    font-size: 12px;
+    color: #222;
+    font-weight: 600;
+}
+
+.grp-preview-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.2;
+}
+
+.grp-preview-tagline,
+.grp-preview-star-row {
+    display: none;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.grp-review-button-template-canva .grp-preview-tagline,
+.grp-review-button-template-canva .grp-preview-star-row {
+    display: block;
+}
+
 

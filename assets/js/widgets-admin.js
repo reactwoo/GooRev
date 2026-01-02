@@ -6,6 +6,12 @@
     'use strict';
     
     $(document).ready(function() {
+        var $templateInput = $('#grp_widget_button_default_template');
+        var $templateCards = $('.grp-template-card');
+        var templateClassList = $templateCards.map(function() {
+            var tpl = $(this).data('template');
+            return tpl ? 'grp-review-button-template-' + tpl : '';
+        }).get().filter(Boolean);
         // Update preview function (exposed globally for potential external calls)
         window.updateGRPPreview = function() {
             updatePreview();
@@ -27,6 +33,11 @@
             $previewBtn.removeClass('grp-review-button-small grp-review-button-medium grp-review-button-large');
             $previewBtn.addClass('grp-review-button-' + style);
             $previewBtn.addClass('grp-review-button-' + size);
+            var template = $templateInput.length ? ($templateInput.val() || 'basic') : 'basic';
+            if (templateClassList.length) {
+                $previewBtn.removeClass(templateClassList.join(' '));
+            }
+            $previewBtn.addClass('grp-review-button-template-' + template);
             
             // Update preview button styles - clear existing inline styles first
             $previewBtn.attr('style', '');
@@ -44,6 +55,16 @@
             if (styles.length > 0) {
                 $previewBtn.attr('style', styles.join('; '));
             }
+        }
+
+        function applyTemplate(template) {
+            template = template || 'basic';
+            if ($templateInput.length) {
+                $templateInput.val(template);
+            }
+            $templateCards.removeClass('is-active');
+            $templateCards.filter('[data-template="' + template + '"]').addClass('is-active');
+            updatePreview();
         }
         
         // Color picker sync and preview updates
@@ -90,9 +111,17 @@
         $('#grp_widget_button_default_text').on('input', updatePreview);
         $('#grp_widget_button_default_style').on('change', updatePreview);
         $('#grp_widget_button_default_size').on('change', updatePreview);
+        $templateCards.on('click', function(e) {
+            e.preventDefault();
+            var $card = $(this);
+            if ($card.hasClass('is-pro-locked')) {
+                return;
+            }
+            applyTemplate($card.data('template'));
+        });
         
-        // Initialize preview on page load
-        updatePreview();
+        // Initialize template selection and preview on page load
+        applyTemplate($templateInput.length ? $templateInput.val() : 'basic');
         
         // Copy shortcode
         $('.grp-copy-shortcode').on('click', function() {

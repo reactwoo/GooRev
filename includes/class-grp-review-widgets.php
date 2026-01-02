@@ -16,6 +16,11 @@ class GRP_Review_Widgets {
      * Instance
      */
     private static $instance = null;
+	    
+	    /**
+	     * Button templates
+	     */
+	    private $button_templates = array();
     
     /**
      * Get instance
@@ -31,6 +36,7 @@ class GRP_Review_Widgets {
      * Constructor
      */
     private function __construct() {
+        $this->init_button_templates();
         // Hook into addon enable/disable actions
         add_action('grp_addon_enabled', array($this, 'handle_addon_enabled'));
         add_action('grp_addon_disabled', array($this, 'handle_addon_disabled'));
@@ -146,6 +152,67 @@ class GRP_Review_Widgets {
         if (defined('WP_DEBUG') && WP_DEBUG) {
             error_log('[GRP Review Widgets] Menu registered with hook: ' . $hook);
         }
+    }
+    
+    /**
+     * Initialize button templates
+     */
+    private function init_button_templates() {
+        $this->button_templates = array(
+            'basic' => array(
+                'name' => __('Clean Button', 'google-reviews-plugin'),
+                'description' => __('Simple button with icon and text.', 'google-reviews-plugin'),
+                'pro' => false,
+                'qr' => false,
+            ),
+            'qr-badge' => array(
+                'name' => __('QR Badge', 'google-reviews-plugin'),
+                'description' => __('Compact button with a QR badge integrated directly into the layout.', 'google-reviews-plugin'),
+                'pro' => false,
+                'qr' => true,
+                'qr_size' => 96,
+            ),
+            'barcode-panel' => array(
+                'name' => __('Barcode Panel', 'google-reviews-plugin'),
+                'description' => __('Panel-style button with barcode-inspired art and embedded QR scan area.', 'google-reviews-plugin'),
+                'pro' => false,
+                'qr' => true,
+                'qr_size' => 140,
+            ),
+            'canva' => array(
+                'name' => __('Canva Edition', 'google-reviews-plugin'),
+                'description' => __('Premium Canva-inspired layout with gradients, badges, and advanced layout controls.', 'google-reviews-plugin'),
+                'pro' => true,
+                'qr' => false,
+                'tagline' => __('Scan & Share', 'google-reviews-plugin'),
+                'stars' => true,
+            ),
+        );
+    }
+
+    /**
+     * Get all registered button templates
+     */
+    public function get_button_templates() {
+        return $this->button_templates;
+    }
+
+    /**
+     * Get template metadata
+     */
+    public function get_button_template($key) {
+        return isset($this->button_templates[$key]) ? $this->button_templates[$key] : false;
+    }
+
+    /**
+     * Sanitize template key and fallback to default if invalid
+     */
+    public function sanitize_button_template($key) {
+        $key = sanitize_title($key);
+        if (isset($this->button_templates[$key])) {
+            return $key;
+        }
+        return 'basic';
     }
     
     /**
@@ -323,6 +390,7 @@ class GRP_Review_Widgets {
      * Render review button shortcode
      */
     public function render_review_button_shortcode($atts) {
+        $default_template = get_option('grp_widget_button_default_template', 'basic');
         $atts = shortcode_atts(array(
             'text' => __('Leave us a review', 'google-reviews-plugin'),
             'style' => 'default',
@@ -331,7 +399,10 @@ class GRP_Review_Widgets {
             'bg_color' => '',
             'align' => 'left',
             'place_id' => '',
+            'template' => $default_template,
         ), $atts, 'grp_review_button');
+        
+        $template = $this->sanitize_button_template($atts['template']);
         
         $review_url = $this->generate_review_url($atts['place_id'], 'button', 'shortcode');
         
@@ -358,14 +429,50 @@ class GRP_Review_Widgets {
             $styles[] = 'background-color: ' . esc_attr($atts['bg_color']);
         }
         $style_attr = !empty($styles) ? ' style="' . implode('; ', $styles) . '"' : '';
-        
+
+        $template_data = $this->get_button_template($template);
+        if (!$template_data) {
+            $template = 'basic';
+            $template_data = $this->get_button_template($template);
+        }
+        if (!empty($template_data['pro']) && !$is_pro) {
+            $template = 'basic';
+            $template_data = $this->get_button_template($template);
+        }
+
+        $classes[] = 'grp-review-button-template-' . sanitize_title($template);
+
+        $qr_html = '';
+        if (!empty($template_data['qr']) && !empty($review_url)) {
+            $qr_size = isset($template_data['qr_size']) ? absint($template_data['qr_size']) : 100;
+            $qr_url = $this->generate_qr_code($review_url, $qr_size);
+            $qr_html  = '<span class="grp-review-button-qr">';
+            $qr_html .= '<img src="' . esc_url($qr_url) . '" alt="' . esc_attr__('Scan to leave a review', 'google-reviews-plugin') . '">';
+            $qr_html .= '</span>';
+        }
+
+        $tagline_html = '';
+        if (!empty($template_data['tagline'])) {
+            $tagline_html = '<span class="grp-review-button-tagline">' . esc_html($template_data['tagline']) . '</span>';
+        }
+
+        $stars_html = '';
+        if (!empty($template_data['stars'])) {
+            $stars_html = '<span class="grp-review-button-star-row">' . esc_html(implode(' ', array_fill(0, 5, '★'))) . '</span>';
+        }
+
         $button_html = '<div class="grp-review-button-wrapper">';
         $button_html .= '<a href="' . esc_url($review_url) . '" class="' . esc_attr(implode(' ', $classes)) . '" target="_blank" rel="noopener"' . $style_attr . '>';
+        $button_html .= $qr_html;
+        $button_html .= '<div class="grp-review-button-content">';
         $button_html .= '<span class="grp-review-button-icon">⭐</span>';
         $button_html .= '<span class="grp-review-button-text">' . esc_html($atts['text']) . '</span>';
+        $button_html .= $tagline_html;
+        $button_html .= $stars_html;
+        $button_html .= '</div>';
         $button_html .= '</a>';
         $button_html .= '</div>';
-        
+
         return $button_html;
     }
     
