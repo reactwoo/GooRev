@@ -192,7 +192,7 @@ class GRP_WooCommerce {
         // Check if refunded/cancelled exclusion is enabled
         if (get_option('grp_wc_exclude_refunded', true)) {
             if ($order->get_status() === 'refunded' || $order->get_status() === 'cancelled') {
-                error_log('[GRP WooCommerce] order ' . $order->get_id() . ' excluded: status ' . $order->get_status());
+                $this->log_eligibility_reason('order ' . $order->get_id() . ' excluded: status ' . $order->get_status());
                 return false;
             }
         }
@@ -206,7 +206,7 @@ class GRP_WooCommerce {
             
             // Check excluded products
             if (!empty($excluded_products) && in_array($product_id, $excluded_products)) {
-                error_log('[GRP WooCommerce] order ' . $order->get_id() . ' excluded: product ' . $product_id);
+                $this->log_eligibility_reason('order ' . $order->get_id() . ' excluded: product ' . $product_id);
                 return false;
             }
             
@@ -214,7 +214,7 @@ class GRP_WooCommerce {
             if (!empty($excluded_categories)) {
                 $product_categories = wp_get_post_terms($product_id, 'product_cat', array('fields' => 'ids'));
                 if (array_intersect($excluded_categories, $product_categories)) {
-                    error_log('[GRP WooCommerce] order ' . $order->get_id() . ' excluded: category ' . implode(',', $excluded_categories));
+                    $this->log_eligibility_reason('order ' . $order->get_id() . ' excluded: category ' . implode(',', $excluded_categories));
                     return false;
                 }
             }
@@ -741,6 +741,18 @@ Thanks again!
         }
         
         return '';
+    }
+
+    /**
+     * Log why an order was rejected for invites.
+     */
+    private function log_eligibility_reason($message) {
+        if (defined('WP_CLI') && WP_CLI) {
+            WP_CLI::log('[GRP WooCommerce] ' . $message);
+            return;
+        }
+
+        error_log('[GRP WooCommerce] ' . $message);
     }
 
 }
