@@ -36,6 +36,17 @@ if (!empty($date_to)) {
     $query_params[] = $date_to . ' 23:59:59';
 }
 
+$tab = isset($_GET['email_tab']) ? sanitize_text_field($_GET['email_tab']) : '';
+$hard_status = '';
+
+if ($tab === 'pending') {
+    $where[] = '(invite_status = \'scheduled\' OR (invite_status = \'clicked\' AND coupon_ready_at IS NOT NULL))';
+    $hard_status = '?email_tab=pending';
+} elseif ($tab === 'clicked') {
+    $where[] = 'invite_status = \'clicked\'';
+    $hard_status = '?email_tab=clicked';
+}
+
 $where_clause = implode(' AND ', $where);
 
 // Get invites
@@ -80,6 +91,17 @@ $export_xls_url = wp_nonce_url($export_xls_url, 'grp_export_invites');
 
 <div class="wrap">
     <h1><?php esc_html_e('Review Invites', 'google-reviews-plugin'); ?></h1>
+    <div style="margin-bottom: 20px;">
+        <a href="?page=google-reviews-woocommerce&tab=invites<?php echo esc_attr($hard_status); ?>" class="grp-invite-tab <?php echo $tab === 'pending' ? 'grp-invite-tab-active' : ''; ?>">
+            <?php esc_html_e('Pending Emails', 'google-reviews-plugin'); ?>
+        </a>
+        <a href="?page=google-reviews-woocommerce&tab=invites&email_tab=clicked" class="grp-invite-tab <?php echo $tab === 'clicked' ? 'grp-invite-tab-active' : ''; ?>">
+            <?php esc_html_e('Clicked (ready)', 'google-reviews-plugin'); ?>
+        </a>
+        <a href="?page=google-reviews-woocommerce&tab=invites" class="grp-invite-tab <?php echo $tab === '' ? 'grp-invite-tab-active' : ''; ?>">
+            <?php esc_html_e('All Invites', 'google-reviews-plugin'); ?>
+        </a>
+    </div>
     
     <!-- Export buttons -->
     <div style="margin: 20px 0; display: flex; gap: 10px; align-items: center;">
@@ -220,6 +242,24 @@ $export_xls_url = wp_nonce_url($export_xls_url, 'grp_export_invites');
     .grp-status-rewarded { background: #00a32a; color: #fff; }
     .grp-status-failed { background: #d63638; color: #fff; }
     .grp-status-cancelled { background: #999; color: #fff; }
+    .grp-invite-tab {
+        display: inline-block;
+        border: 1px solid #ccd0d4;
+        padding: 6px 16px;
+        border-radius: 999px;
+        margin-right: 10px;
+        background: #fff;
+        text-decoration: none;
+        color: #233;
+        font-weight: 600;
+        transition: all .2s ease;
+    }
+    .grp-invite-tab-active {
+        background: #192f59;
+        border-color: #192f59;
+        color: #fff;
+        box-shadow: 0 6px 25px rgba(25,47,89,.2);
+    }
     </style>
 </div>
 

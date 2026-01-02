@@ -101,6 +101,11 @@ class GRP_WooCommerce {
         if (!wp_next_scheduled('grp_send_review_invites')) {
             wp_schedule_event(time(), 'hourly', 'grp_send_review_invites');
         }
+
+        add_filter('cron_schedules', array($this, 'add_ten_minute_schedule'));
+        add_action('init', array($this, 'maybe_add_coupon_ready_column'));
+        add_action('init', array($this, 'maybe_schedule_pending_coupon_cron'));
+        add_action('grp_process_pending_coupons', array($this, 'process_pending_coupons'));
     }
     
     /**
@@ -428,20 +433,34 @@ class GRP_WooCommerce {
         
         // Mark as clicked if not already
         if ($invite->invite_status === 'sent') {
-            $wpdb->update(
-                $table,
-                array(
-                    'invite_status' => 'clicked',
-                    'clicked_at' => current_time('mysql', true)
-                ),
-                array('id' => $invite_id),
-                array('%s', '%s'),
-                array('%d')
-            );
-            
-            // Issue coupon if incentives enabled and not already rewarded
             if ($this->is_incentives_enabled() && $invite->invite_status !== 'rewarded') {
-                $this->issue_coupon($invite);
+                $ready_at = current_time('mysql', true);
+                $ready_at = date('Y-m-d H:i:s', strtotime($ready_at . " +10 minutes"));
+
+                $wpdb->update(
+                    $table,
+                    array(
+                        'invite_status' => 'clicked',
+                        'clicked_at' => current_time('mysql', true),
+                        'coupon_ready_at' => $ready_at
+                    ),
+                    array('id' => $invite_id),
+                    array('%s', '%s', '%s'),
+                    array('%d')
+                );
+
+                // The cron job will handle issuing the coupon after the delay
+            } else {
+                $wpdb->update(
+                    $table,
+                    array(
+                        'invite_status' => 'clicked',
+                        'clicked_at' => current_time('mysql', true)
+                    ),
+                    array('id' => $invite_id),
+                    array('%s', '%s'),
+                    array('%d')
+                );
             }
         }
         
@@ -489,10 +508,11 @@ class GRP_WooCommerce {
                 array(
                     'invite_status' => 'rewarded',
                     'coupon_code' => $coupon_code,
-                    'rewarded_at' => current_time('mysql', true)
+                    'rewarded_at' => current_time('mysql', true),
+                    'coupon_ready_at' => null
                 ),
                 array('id' => $invite->id),
-                array('%s', '%s', '%s'),
+                array('%s', '%s', '%s', '%s'),
                 array('%d')
             );
             
@@ -731,6 +751,61 @@ Enjoy and we hope to serve you again soon!', 'google-reviews-plugin')
     private function send_html_email($to, $subject, $body) {
         $headers = array('Content-Type: text/html; charset=UTF-8');
         return wp_mail($to, $subject, $body, $headers);
+    }
+
+    private function add_ten_minute_schedule($schedules) {
+        $schedules['ten_minutes'] = array(
+            'interval' => 600,
+            'display' => __('Every Ten Minutes', 'google-reviews-plugin')
+        );
+
+        return $schedules;
+    }
+
+    public function maybe_schedule_pending_coupon_cron() {
+        if (!wp_next_scheduled('grp_process_pending_coupons')) {
+            wp_schedule_event(time() + 60, 'ten_minutes', 'grp_process_pending_coupons');
+        }
+    }
+
+    public function process_pending_coupons() {
+        global $wpdb;
+        $table = $this->get_invites_table();
+        $now = current_time('mysql', true);
+
+        $due = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$table} WHERE invite_status = %s AND coupon_ready_at IS NOT NULL AND coupon_ready_at <= %s",
+            'clicked',
+            $now
+        ));
+
+        if (empty($due)) {
+            return;
+        }
+
+        foreach ($due as $invite) {
+            $this->issue_coupon($invite);
+        }
+    }
+
+    private function maybe_add_coupon_ready_column() {
+        global $wpdb;
+        $table = $this->get_invites_table();
+
+        $column = $wpdb->get_var(
+            $wpdb->prepare("SHOW COLUMNS FROM {$table} LIKE %s", 'coupon_ready_at')
+        );
+
+        if ($column) {
+            return;
+        }
+
+        $wpdb->query("ALTER TABLE {$table} ADD COLUMN coupon_ready_at datetime DEFAULT NULL AFTER clicked_at");
+    }
+
+    private function get_invites_table() {
+        global $wpdb;
+        return $wpdb->prefix . 'grp_review_invites';
     }
     
     /**

@@ -398,8 +398,13 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
             );
             ?>
 
-            <div class="grp-email-template-block" style="margin-bottom: 25px;">
-                <h3><?php esc_html_e('Initial Invite', 'google-reviews-plugin'); ?></h3>
+            <div class="grp-email-tabs">
+                <button class="grp-email-tab active" type="button" data-template="initial"><?php esc_html_e('Initial Invite', 'google-reviews-plugin'); ?></button>
+                <button class="grp-email-tab" type="button" data-template="reward"><?php esc_html_e('Coupon Reward', 'google-reviews-plugin'); ?></button>
+                <button class="grp-email-tab" type="button" data-template="thank-you"><?php esc_html_e('Thank You', 'google-reviews-plugin'); ?></button>
+            </div>
+
+            <div class="grp-email-template-block grp-email-template-initial" data-template="initial">
                 <label for="grp_wc_email_subject"><?php esc_html_e('Subject', 'google-reviews-plugin'); ?></label>
                 <input type="text" id="grp_wc_email_subject" name="grp_wc_email_subject" value="<?php echo esc_attr($email_subject); ?>" class="large-text">
                 <p class="description"><?php esc_html_e('Available merge tags: {first_name}, {order_id}, {order_date}, {store_name}, {review_url}, {coupon_value}', 'google-reviews-plugin'); ?></p>
@@ -411,8 +416,7 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                 <p class="description"><?php esc_html_e('Compliance disclaimer will be appended automatically when incentives are enabled.', 'google-reviews-plugin'); ?></p>
             </div>
 
-            <div class="grp-email-template-block" style="margin-bottom: 25px;">
-                <h3><?php esc_html_e('Coupon Reward Email', 'google-reviews-plugin'); ?></h3>
+            <div class="grp-email-template-block grp-email-template-reward" data-template="reward">
                 <label for="grp_wc_reward_subject"><?php esc_html_e('Subject', 'google-reviews-plugin'); ?></label>
                 <input type="text" id="grp_wc_reward_subject" name="grp_wc_reward_subject" value="<?php echo esc_attr($reward_subject); ?>" class="large-text">
                 <p class="description"><?php esc_html_e('Available merge tags: {first_name}, {order_id}, {store_name}, {coupon_code}, {coupon_value}', 'google-reviews-plugin'); ?></p>
@@ -423,8 +427,7 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
                 ?>
             </div>
 
-            <div class="grp-email-template-block">
-                <h3><?php esc_html_e('Thank You Email', 'google-reviews-plugin'); ?></h3>
+            <div class="grp-email-template-block grp-email-template-thank-you" data-template="thank-you">
                 <label for="grp_wc_thank_you_subject"><?php esc_html_e('Subject', 'google-reviews-plugin'); ?></label>
                 <input type="text" id="grp_wc_thank_you_subject" name="grp_wc_thank_you_subject" value="<?php echo esc_attr($thank_you_subject); ?>" class="large-text">
                 <p class="description"><?php esc_html_e('Available merge tags: {first_name}, {order_id}, {store_name}, {coupon_code}, {coupon_value}', 'google-reviews-plugin'); ?></p>
@@ -446,6 +449,71 @@ if ($is_connected && !empty($location_id) && !empty($account_id)) {
             var unit = $(this).val() === 'percent' ? '%' : '<?php echo esc_js(get_woocommerce_currency_symbol()); ?>';
             $('#coupon-value-unit').text(unit);
         });
+
+        $('.grp-email-tab').on('click', function() {
+            var template = $(this).data('template');
+            $('.grp-email-tab').removeClass('active');
+            $(this).addClass('active');
+            $('.grp-email-template-block').hide();
+            $('.grp-email-template-' + template).show();
+        });
+
+        $('.grp-email-template-block').hide();
+        $('.grp-email-template-initial').show();
     });
     </script>
+    <style>
+        .grp-email-template-block {
+            background: #fdfdfd;
+            border: 1px solid #e1e5eb;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(15, 38, 78, 0.05);
+            padding: 20px 24px 18px;
+            margin-bottom: 20px;
+        }
+
+        .grp-email-template-block h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.15em;
+            color: #192f59;
+        }
+
+        .grp-email-template-block label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .grp-email-template-block input.large-text {
+            border: 1px solid #ccd0d4;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: #fff;
+        }
+        .grp-email-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .grp-email-tab {
+            border: 1px solid #ccd0d4;
+            background: #fff;
+            padding: 8px 18px;
+            border-radius: 28px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #4b5361;
+            transition: all .2s ease;
+        }
+
+        .grp-email-tab.active {
+            background: #192f59;
+            color: #fff;
+            border-color: #192f59;
+            box-shadow: 0 5px 18px rgba(25, 47, 89, 0.2);
+        }
+    </style>
 </div>
