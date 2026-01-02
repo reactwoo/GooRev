@@ -257,26 +257,26 @@ class GRP_WooCommerce {
      * Send scheduled invites
      */
     public function send_scheduled_invites() {
-        error_log( '[GRP WooCommerce] send_scheduled_invites fired at ' . current_time( 'mysql' ) );
-    
+        $now = current_time('mysql', true);
+        error_log('[GRP WooCommerce] send_scheduled_invites fired at ' . current_time('mysql'));
+
         global $wpdb;
         $table = $wpdb->prefix . 'grp_review_invites';
-        // ...
-    
-        foreach ($due_invites as $invite) {
-            error_log( "[GRP WooCommerce] processing invite {$invite->id} for order {$invite->order_id}" );
-    
-            // existing eligibility checks...
-    
-            $sent = $this->send_invite_email($invite, $order);
-    
-            error_log( "[GRP WooCommerce] invite {$invite->id} status after send: " . ($sent ? 'sent' : 'failed') );
-            // existing status updates...
+
+        $due_invites = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$table} WHERE invite_status = %s AND scheduled_at <= %s",
+            'scheduled',
+            $now
+        ));
+
+        if (empty($due_invites)) {
+            error_log('[GRP WooCommerce] no scheduled invites found at ' . $now);
+            return;
         }
-    }
-        
+
         foreach ($due_invites as $invite) {
-            // Verify order is still eligible
+            error_log("[GRP WooCommerce] processing invite {$invite->id} for order {$invite->order_id}");
+
             $order = wc_get_order($invite->order_id);
             if (!$order || !$this->is_order_eligible($order)) {
                 $wpdb->update(
@@ -288,10 +288,11 @@ class GRP_WooCommerce {
                 );
                 continue;
             }
-            
-            // Send invite email
+
             $sent = $this->send_invite_email($invite, $order);
-            
+
+            error_log("[GRP WooCommerce] invite {$invite->id} status after send: " . ($sent ? 'sent' : 'failed'));
+
             if ($sent) {
                 $wpdb->update(
                     $table,
