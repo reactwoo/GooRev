@@ -148,16 +148,19 @@ class GRP_WooCommerce {
         
         // Only proceed if order reached the trigger status
         if ($new_status !== $trigger_status) {
+            $this->log_eligibility_reason("order {$order_id} skipped: status transition {$old_status} → {$new_status} (trigger {$trigger_status})");
             return;
         }
         
         // Don't process if invite already exists for this order
         if ($this->invite_exists_for_order($order_id)) {
+            $this->log_eligibility_reason("order {$order_id} skipped: invite already exists");
             return;
         }
         
         $order = wc_get_order($order_id);
         if (!$order) {
+            $this->log_eligibility_reason("order {$order_id} skipped: could not load order");
             return;
         }
         
