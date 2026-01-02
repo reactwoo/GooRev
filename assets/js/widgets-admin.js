@@ -2,7 +2,7 @@
  * Review Widgets Admin JavaScript
  */
 
-(function($) {
+ (function($) {
     'use strict';
 
     $(document).ready(function() {
@@ -14,6 +14,12 @@
         var $previewQrImg = $('#grp-preview-qr-img');
         var $previewTagline = $('#grp-preview-tagline');
         var $previewStarRow = $('#grp-preview-star-row');
+        var $starColorInput = $('#grp_widget_template_star_color');
+        var $starColorText = $('#grp_widget_template_star_color_text');
+        var $starPlacementSelect = $('#grp_widget_template_star_placement');
+        var $logoToggle = $('#grp_widget_template_show_logo');
+        var $fontFamilyInput = $('#grp_widget_template_font_family');
+        var $maxHeightInput = $('#grp_widget_template_max_height');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
@@ -108,6 +114,11 @@
             var bgColor = $('#grp_widget_button_default_bg_color_text').val();
             var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(templateKey);
+            var starColor = $starColorText.val() || '#FBBD05';
+            var starPlacement = $starPlacementSelect.val() || 'below';
+            var showLogo = $logoToggle.is(':checked');
+            var fontFamily = $fontFamilyInput.val();
+            var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
 
             // Update preview button text
             $('#grp-preview-text').text(text || 'Leave us a review');
@@ -115,12 +126,14 @@
             // Update preview button classes
             $previewBtn.removeClass('grp-review-button-default grp-review-button-rounded grp-review-button-outline grp-review-button-minimal');
             $previewBtn.removeClass('grp-review-button-small grp-review-button-medium grp-review-button-large');
+            $previewBtn.removeClass('grp-star-placement-above grp-star-placement-below grp-star-placement-overlay');
             $previewBtn.addClass('grp-review-button-' + style);
             $previewBtn.addClass('grp-review-button-' + size);
             if (templateClassList.length) {
                 $previewBtn.removeClass(templateClassList.join(' '));
             }
             $previewBtn.addClass('grp-review-button-template-' + templateKey);
+            $previewBtn.addClass('grp-star-placement-' + starPlacement);
 
             // Update template description/pro note
             updateTemplateDescription(templateKey);
@@ -132,7 +145,14 @@
                 $previewTagline.text(tagline).toggle(!!tagline);
             }
             if ($previewStarRow.length) {
-                $previewStarRow.text(stars).toggle(!!stars);
+                $previewStarRow.text(stars).toggle(!!stars).css('color', starColor);
+            }
+
+            // Toggle logo
+            if (showLogo) {
+                $previewBtn.find('.grp-review-button-icon').show();
+            } else {
+                $previewBtn.find('.grp-review-button-icon').hide();
             }
 
             // Update preview button styles - clear inline styles first
@@ -143,6 +163,12 @@
             }
             if (bgColor && bgColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(bgColor)) {
                 styles.push('background-color: ' + bgColor);
+            }
+            if (fontFamily) {
+                styles.push('font-family: ' + fontFamily);
+            }
+            if (maxHeight > 0) {
+                styles.push('max-height: ' + maxHeight + 'px');
             }
             if (styles.length > 0) {
                 $previewBtn.attr('style', styles.join('; '));
@@ -156,7 +182,7 @@
             }
         }
 
-        // Color picker sync and preview updates
+        // Color picker sync and preview font/color updates
         $('#grp_widget_button_default_color').on('change', function() {
             var color = $(this).val();
             $('#grp_widget_button_default_color_text').val(color);
@@ -185,6 +211,21 @@
             updatePreview();
         });
 
+        // Star color sync
+        $starColorInput.on('change', function() {
+            var color = $(this).val();
+            $starColorText.val(color);
+            updatePreview();
+        });
+
+        $starColorText.on('input', function() {
+            var val = $(this).val();
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                $starColorInput.val(val);
+            }
+            updatePreview();
+        });
+
         // Clear color buttons
         $('#grp-clear-text-color').on('click', function() {
             $('#grp_widget_button_default_color_text').val('');
@@ -196,11 +237,15 @@
             updatePreview();
         });
 
-        // Update preview on text, style, size, and template changes
+        // Update preview triggers
         $('#grp_widget_button_default_text').on('input', updatePreview);
         $('#grp_widget_button_default_style').on('change', updatePreview);
         $('#grp_widget_button_default_size').on('change', updatePreview);
         $templateSelect.on('change', updatePreview);
+        $starPlacementSelect.on('change', updatePreview);
+        $logoToggle.on('change', updatePreview);
+        $fontFamilyInput.on('input', updatePreview);
+        $maxHeightInput.on('input', updatePreview);
 
         // Initialize preview on load
         updatePreview();

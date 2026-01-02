@@ -30,6 +30,25 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     
     update_option('grp_widget_button_default_color', $button_color);
     update_option('grp_widget_button_default_bg_color', $button_bg_color);
+    
+    $star_color = isset($_POST['grp_widget_template_star_color_text']) ? sanitize_text_field($_POST['grp_widget_template_star_color_text']) : '#FBBD05';
+    if (!preg_match('/^#[0-9A-F]{6}$/i', $star_color)) {
+        $star_color = '#FBBD05';
+    }
+    $star_placement_allowed = array('above', 'below', 'overlay');
+    $star_placement = isset($_POST['grp_widget_template_star_placement']) ? sanitize_text_field($_POST['grp_widget_template_star_placement']) : 'below';
+    if (!in_array($star_placement, $star_placement_allowed, true)) {
+        $star_placement = 'below';
+    }
+    $show_logo = isset($_POST['grp_widget_template_show_logo']) ? 1 : 0;
+    $font_family = isset($_POST['grp_widget_template_font_family']) ? sanitize_text_field($_POST['grp_widget_template_font_family']) : '';
+    $max_height = isset($_POST['grp_widget_template_max_height']) ? absint($_POST['grp_widget_template_max_height']) : 0;
+    
+    update_option('grp_widget_template_star_color', $star_color);
+    update_option('grp_widget_template_star_placement', $star_placement);
+    update_option('grp_widget_template_show_logo', $show_logo);
+    update_option('grp_widget_template_font_family', $font_family);
+    update_option('grp_widget_template_max_height', $max_height);
     $template = isset($_POST['grp_widget_button_default_template']) ? sanitize_text_field($_POST['grp_widget_button_default_template']) : 'basic';
     $template = GRP_Review_Widgets::get_instance()->sanitize_button_template($template);
     update_option('grp_widget_button_default_template', $template);
@@ -45,6 +64,11 @@ $button_style = get_option('grp_widget_button_default_style', 'default');
 $button_size = get_option('grp_widget_button_default_size', 'medium');
 $button_color = get_option('grp_widget_button_default_color', '');
 $button_bg_color = get_option('grp_widget_button_default_bg_color', '');
+$star_color = get_option('grp_widget_template_star_color', '#FBBD05');
+$star_placement = get_option('grp_widget_template_star_placement', 'below');
+$show_logo = get_option('grp_widget_template_show_logo', true);
+$font_family = get_option('grp_widget_template_font_family', '');
+$max_height = get_option('grp_widget_template_max_height', '');
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
 $button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
@@ -230,6 +254,11 @@ $is_pro = $license->is_pro();
                 }
                 $preview_tagline = !empty($preview_template['tagline']) ? $preview_template['tagline'] : '';
                 $preview_star_row = !empty($preview_template['stars']) ? implode(' ', array_fill(0, 5, '★')) : '';
+                $preview_star_color = $star_color;
+                $preview_star_placement = $star_placement;
+                $preview_show_logo = (bool) $show_logo;
+                $preview_font_family = $font_family;
+                $preview_max_height = absint($max_height);
                 $blank_qr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
                 ?>
                 <div id="grp-button-preview" style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
@@ -244,18 +273,26 @@ $is_pro = $license->is_pro();
                     if (!empty($button_bg_color)) {
                         $preview_styles[] = 'background-color: ' . esc_attr($button_bg_color);
                     }
+                    if (!empty($preview_font_family)) {
+                        $preview_styles[] = 'font-family: ' . esc_attr($preview_font_family);
+                    }
+                    if ($preview_max_height > 0) {
+                        $preview_styles[] = 'max-height: ' . $preview_max_height . 'px';
+                    }
                     $preview_style_attr = !empty($preview_styles) ? ' style="' . implode('; ', $preview_styles) . '"' : '';
                     ?>
-                    <a href="<?php echo esc_url($preview_url); ?>" id="grp-preview-button" class="<?php echo esc_attr(implode(' ', $preview_classes)); ?>" target="_blank" rel="noopener"<?php echo $preview_style_attr; ?>>
+                    <a href="<?php echo esc_url($preview_url); ?>" id="grp-preview-button" class="<?php echo esc_attr(implode(' ', array_merge($preview_classes, array('grp-star-placement-' . esc_attr($preview_star_placement))))); ?>" target="_blank" rel="noopener"<?php echo $preview_style_attr; ?>>
+                        <span class="grp-preview-star-row" id="grp-preview-star-row" style="color: <?php echo esc_attr($preview_star_color); ?>;"><?php echo esc_html($preview_star_row); ?></span>
                         <span class="grp-preview-qr <?php echo !empty($preview_qr_url) ? 'has-qr' : ''; ?>" id="grp-preview-qr">
                             <img id="grp-preview-qr-img" src="<?php echo esc_url(!empty($preview_qr_url) ? $preview_qr_url : $blank_qr); ?>" alt="<?php esc_attr_e('QR preview', 'google-reviews-plugin'); ?>">
                             <span class="grp-preview-qr-placeholder"><?php esc_html_e('QR', 'google-reviews-plugin'); ?></span>
                         </span>
                         <div class="grp-preview-content">
-                            <span class="grp-review-button-icon">⭐</span>
+                            <?php if ($preview_show_logo): ?>
+                                <span class="grp-review-button-icon">⭐</span>
+                            <?php endif; ?>
                             <span class="grp-review-button-text" id="grp-preview-text"><?php echo esc_html($button_text); ?></span>
                             <span class="grp-preview-tagline" id="grp-preview-tagline"><?php echo esc_html($preview_tagline); ?></span>
-                            <span class="grp-preview-star-row" id="grp-preview-star-row"><?php echo esc_html($preview_star_row); ?></span>
                         </div>
                     </a>
                 </div>
@@ -300,6 +337,59 @@ $is_pro = $license->is_pro();
                                     <option value="medium" <?php selected($button_size, 'medium'); ?>><?php esc_html_e('Medium', 'google-reviews-plugin'); ?></option>
                                     <option value="large" <?php selected($button_size, 'large'); ?>><?php esc_html_e('Large', 'google-reviews-plugin'); ?></option>
                                 </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_star_color"><?php esc_html_e('Star Color', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color" id="grp_widget_template_star_color" name="grp_widget_template_star_color" value="<?php echo esc_attr(!empty($star_color) ? $star_color : '#FBBD05'); ?>">
+                                <input type="text" id="grp_widget_template_star_color_text" name="grp_widget_template_star_color_text" value="<?php echo esc_attr($star_color); ?>" placeholder="#FBBD05" style="width: 140px; margin-left: 10px;">
+                                <p class="description"><?php esc_html_e('Control the color of the star row inside the template.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_star_placement"><?php esc_html_e('Star Placement', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <select id="grp_widget_template_star_placement" name="grp_widget_template_star_placement">
+                                    <option value="below" <?php selected($star_placement, 'below'); ?>><?php esc_html_e('Below QR', 'google-reviews-plugin'); ?></option>
+                                    <option value="above" <?php selected($star_placement, 'above'); ?>><?php esc_html_e('Above QR', 'google-reviews-plugin'); ?></option>
+                                    <option value="overlay" <?php selected($star_placement, 'overlay'); ?>><?php esc_html_e('Overlay QR', 'google-reviews-plugin'); ?></option>
+                                </select>
+                                <p class="description"><?php esc_html_e('Position the star row relative to the QR/graphic area.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_show_logo"><?php esc_html_e('Show Logo/Icon', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <label for="grp_widget_template_show_logo">
+                                    <input type="checkbox" id="grp_widget_template_show_logo" name="grp_widget_template_show_logo" value="1" <?php checked($show_logo, true); ?>>
+                                    <?php esc_html_e('Display the logo/icon inside the template', 'google-reviews-plugin'); ?>
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_font_family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="grp_widget_template_font_family" name="grp_widget_template_font_family" value="<?php echo esc_attr($font_family); ?>" placeholder="e.g. 'Inter', sans-serif" class="regular-text">
+                                <p class="description"><?php esc_html_e('Override the font used inside the template.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_max_height"><?php esc_html_e('Max Height', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="grp_widget_template_max_height" name="grp_widget_template_max_height" value="<?php echo esc_attr($max_height); ?>" min="0" step="1">
+                                <span>px</span>
+                                <p class="description"><?php esc_html_e('Limit the maximum height of the button/card so it fits specific areas.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
                         <tr>

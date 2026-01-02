@@ -413,6 +413,11 @@ class GRP_Review_Widgets {
             'align' => 'left',
             'place_id' => '',
             'template' => $default_template,
+            'star_color' => '',
+            'star_placement' => '',
+            'show_logo' => '',
+            'font_family' => '',
+            'max_height' => '',
         ), $atts, 'grp_review_button');
         
         $template = $this->sanitize_button_template($atts['template']);
@@ -427,11 +432,39 @@ class GRP_Review_Widgets {
         $license = new GRP_License();
         $is_pro = $license->is_pro();
         
+        // Template-specific settings
+        $stored_star_color = get_option('grp_widget_template_star_color', '#FBBD05');
+        $stored_star_placement = get_option('grp_widget_template_star_placement', 'below');
+        $stored_show_logo = get_option('grp_widget_template_show_logo', true);
+        $stored_font_family = get_option('grp_widget_template_font_family', '');
+        $stored_max_height = absint(get_option('grp_widget_template_max_height', 0));
+
+        $star_color = !empty($atts['star_color']) ? sanitize_text_field($atts['star_color']) : $stored_star_color;
+        if (!preg_match('/^#[0-9A-F]{6}$/i', $star_color)) {
+            $star_color = '#FBBD05';
+        }
+
+        $star_placement = !empty($atts['star_placement']) ? sanitize_text_field($atts['star_placement']) : $stored_star_placement;
+        $allowed_placements = array('above', 'below', 'overlay');
+        if (!in_array($star_placement, $allowed_placements, true)) {
+            $star_placement = 'below';
+        }
+
+        if ($atts['show_logo'] !== '') {
+            $show_logo = filter_var($atts['show_logo'], FILTER_VALIDATE_BOOLEAN);
+        } else {
+            $show_logo = (bool) $stored_show_logo;
+        }
+
+        $font_family = $atts['font_family'] ?: $stored_font_family;
+        $max_height = !empty($atts['max_height']) ? absint($atts['max_height']) : $stored_max_height;
+
         // Build button classes
         $classes = array('grp-review-button', 'grp-review-button-' . $atts['style'], 'grp-review-button-' . $atts['size']);
         if ($atts['align'] !== 'left') {
             $classes[] = 'grp-align-' . $atts['align'];
         }
+        $classes[] = 'grp-star-placement-' . $star_placement;
         
         // Build inline styles
         $styles = array();
@@ -440,6 +473,12 @@ class GRP_Review_Widgets {
         }
         if (!empty($atts['bg_color'])) {
             $styles[] = 'background-color: ' . esc_attr($atts['bg_color']);
+        }
+        if (!empty($font_family)) {
+            $styles[] = 'font-family: ' . esc_attr($font_family);
+        }
+        if ($max_height > 0) {
+            $styles[] = 'max-height: ' . $max_height . 'px';
         }
         $style_attr = !empty($styles) ? ' style="' . implode('; ', $styles) . '"' : '';
 
@@ -469,19 +508,21 @@ class GRP_Review_Widgets {
             $tagline_html = '<span class="grp-review-button-tagline">' . esc_html($template_data['tagline']) . '</span>';
         }
 
-        $stars_html = '';
+        $star_row_html = '';
         if (!empty($template_data['stars'])) {
-            $stars_html = '<span class="grp-review-button-star-row">' . esc_html(implode(' ', array_fill(0, 5, '★'))) . '</span>';
+            $star_row_html = '<span class="grp-review-button-star-row" style="color: ' . esc_attr($star_color) . ';">' . esc_html(implode(' ', array_fill(0, 5, '★'))) . '</span>';
         }
 
         $button_html = '<div class="grp-review-button-wrapper">';
         $button_html .= '<a href="' . esc_url($review_url) . '" class="' . esc_attr(implode(' ', $classes)) . '" target="_blank" rel="noopener"' . $style_attr . '>';
+        $button_html .= $star_row_html;
         $button_html .= $qr_html;
         $button_html .= '<div class="grp-review-button-content">';
-        $button_html .= '<span class="grp-review-button-icon">⭐</span>';
+        if ($show_logo) {
+            $button_html .= '<span class="grp-review-button-icon">⭐</span>';
+        }
         $button_html .= '<span class="grp-review-button-text">' . esc_html($atts['text']) . '</span>';
         $button_html .= $tagline_html;
-        $button_html .= $stars_html;
         $button_html .= '</div>';
         $button_html .= '</a>';
         $button_html .= '</div>';
