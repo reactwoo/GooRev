@@ -4,45 +4,139 @@
 
 (function($) {
     'use strict';
-    
+
     $(document).ready(function() {
-        var $templateInput = $('#grp_widget_button_default_template');
-        var $templateCards = $('.grp-template-card');
-        var templateClassList = $templateCards.map(function() {
-            var tpl = $(this).data('template');
-            return tpl ? 'grp-review-button-template-' + tpl : '';
-        }).get().filter(Boolean);
-        // Update preview function (exposed globally for potential external calls)
+        var $templateSelect = $('#grp_widget_button_default_template');
+        var $templateDescription = $('#grp-template-selected-description');
+        var $templateProNote = $('#grp-template-pro-note');
+        var $previewBtn = $('#grp-preview-button');
+        var $previewQr = $('#grp-preview-qr');
+        var $previewQrImg = $('#grp-preview-qr-img');
+        var $previewTagline = $('#grp-preview-tagline');
+        var $previewStarRow = $('#grp-preview-star-row');
+        var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
+        var templateClassList = Object.keys(templateMeta).map(function(key) {
+            return 'grp-review-button-template-' + key;
+        });
+        var qrCache = {};
+        var blankQr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+        var isPro = typeof grpWidgets !== 'undefined' ? !!grpWidgets.is_pro : false;
+        var hasPlaceId = typeof grpWidgets !== 'undefined' ? !!grpWidgets.has_place_id : false;
+
         window.updateGRPPreview = function() {
             updatePreview();
         };
-        
+
+        function getTemplateData(key) {
+            if (templateMeta[key]) {
+                return templateMeta[key];
+            }
+            return templateMeta.basic || {};
+        }
+
+        function updateTemplateDescription(key) {
+            var templateData = getTemplateData(key);
+            if ($templateDescription.length) {
+                $templateDescription.text(templateData.description || '');
+            }
+            if ($templateProNote.length) {
+                var text = '';
+                if (templateData.pro && !isPro) {
+                    if (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) {
+                        text = grpWidgets.strings.templateProMessage;
+                    }
+                }
+                $templateProNote.text(text).toggle(!!text);
+            }
+        }
+
+        function showPreviewQr(src) {
+            if (!$previewQr.length || !$previewQrImg.length) {
+                return;
+            }
+            $previewQrImg.attr('src', src);
+            $previewQr.addClass('has-qr');
+        }
+
+        function hidePreviewQr() {
+            if (!$previewQr.length || !$previewQrImg.length) {
+                return;
+            }
+            $previewQr.removeClass('has-qr');
+            $previewQrImg.attr('src', blankQr);
+        }
+
+        function fetchPreviewQr(size) {
+            size = parseInt(size, 10) || 100;
+            if (!hasPlaceId || typeof grpWidgets === 'undefined' || !grpWidgets.ajax_url) {
+                hidePreviewQr();
+                return;
+            }
+
+            if (qrCache[size]) {
+                showPreviewQr(qrCache[size]);
+                return;
+            }
+
+            $.ajax({
+                url: grpWidgets.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'grp_generate_qr',
+                    nonce: grpWidgets.nonce,
+                    size: size
+                },
+                success: function(response) {
+                    if (response.success && response.data && response.data.qr_url) {
+                        qrCache[size] = response.data.qr_url;
+                        showPreviewQr(response.data.qr_url);
+                    } else {
+                        hidePreviewQr();
+                    }
+                },
+                error: function() {
+                    hidePreviewQr();
+                }
+            });
+        }
+
         function updatePreview() {
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
             var size = $('#grp_widget_button_default_size').val();
             var textColor = $('#grp_widget_button_default_color_text').val();
             var bgColor = $('#grp_widget_button_default_bg_color_text').val();
-            
+            var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
+            var templateData = getTemplateData(templateKey);
+
             // Update preview button text
             $('#grp-preview-text').text(text || 'Leave us a review');
-            
+
             // Update preview button classes
-            var $previewBtn = $('#grp-preview-button');
             $previewBtn.removeClass('grp-review-button-default grp-review-button-rounded grp-review-button-outline grp-review-button-minimal');
             $previewBtn.removeClass('grp-review-button-small grp-review-button-medium grp-review-button-large');
             $previewBtn.addClass('grp-review-button-' + style);
             $previewBtn.addClass('grp-review-button-' + size);
-            var template = $templateInput.length ? ($templateInput.val() || 'basic') : 'basic';
             if (templateClassList.length) {
                 $previewBtn.removeClass(templateClassList.join(' '));
             }
-            $previewBtn.addClass('grp-review-button-template-' + template);
-            
-            // Update preview button styles - clear existing inline styles first
+            $previewBtn.addClass('grp-review-button-template-' + templateKey);
+
+            // Update template description/pro note
+            updateTemplateDescription(templateKey);
+
+            // Update preview tagline/stars
+            var tagline = templateData.tagline || '';
+            var stars = templateData.stars ? '★★★★★' : '';
+            if ($previewTagline.length) {
+                $previewTagline.text(tagline).toggle(!!tagline);
+            }
+            if ($previewStarRow.length) {
+                $previewStarRow.text(stars).toggle(!!stars);
+            }
+
+            // Update preview button styles - clear inline styles first
             $previewBtn.attr('style', '');
-            
-            // Only apply inline styles if colors are set and valid
             var styles = [];
             if (textColor && textColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(textColor)) {
                 styles.push('color: ' + textColor);
@@ -50,30 +144,25 @@
             if (bgColor && bgColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(bgColor)) {
                 styles.push('background-color: ' + bgColor);
             }
-            
-            // Apply styles if any, otherwise let CSS classes handle it
             if (styles.length > 0) {
                 $previewBtn.attr('style', styles.join('; '));
             }
+
+            // Update QR preview if needed
+            if (templateData.qr) {
+                fetchPreviewQr(templateData.qr_size || 100);
+            } else {
+                hidePreviewQr();
+            }
         }
 
-        function applyTemplate(template) {
-            template = template || 'basic';
-            if ($templateInput.length) {
-                $templateInput.val(template);
-            }
-            $templateCards.removeClass('is-active');
-            $templateCards.filter('[data-template="' + template + '"]').addClass('is-active');
-            updatePreview();
-        }
-        
         // Color picker sync and preview updates
         $('#grp_widget_button_default_color').on('change', function() {
             var color = $(this).val();
             $('#grp_widget_button_default_color_text').val(color);
             updatePreview();
         });
-        
+
         $('#grp_widget_button_default_color_text').on('input', function() {
             var val = $(this).val();
             if (/^#[0-9A-F]{6}$/i.test(val)) {
@@ -81,13 +170,13 @@
             }
             updatePreview();
         });
-        
+
         $('#grp_widget_button_default_bg_color').on('change', function() {
             var color = $(this).val();
             $('#grp_widget_button_default_bg_color_text').val(color);
             updatePreview();
         });
-        
+
         $('#grp_widget_button_default_bg_color_text').on('input', function() {
             var val = $(this).val();
             if (/^#[0-9A-F]{6}$/i.test(val)) {
@@ -95,33 +184,26 @@
             }
             updatePreview();
         });
-        
+
         // Clear color buttons
         $('#grp-clear-text-color').on('click', function() {
             $('#grp_widget_button_default_color_text').val('');
             updatePreview();
         });
-        
+
         $('#grp-clear-bg-color').on('click', function() {
             $('#grp_widget_button_default_bg_color_text').val('');
             updatePreview();
         });
-        
-        // Update preview on text, style, and size changes
+
+        // Update preview on text, style, size, and template changes
         $('#grp_widget_button_default_text').on('input', updatePreview);
         $('#grp_widget_button_default_style').on('change', updatePreview);
         $('#grp_widget_button_default_size').on('change', updatePreview);
-        $templateCards.on('click', function(e) {
-            e.preventDefault();
-            var $card = $(this);
-            if ($card.hasClass('is-pro-locked')) {
-                return;
-            }
-            applyTemplate($card.data('template'));
-        });
-        
-        // Initialize template selection and preview on page load
-        applyTemplate($templateInput.length ? $templateInput.val() : 'basic');
+        $templateSelect.on('change', updatePreview);
+
+        // Initialize preview on load
+        updatePreview();
         
         // Copy shortcode
         $('.grp-copy-shortcode').on('click', function() {

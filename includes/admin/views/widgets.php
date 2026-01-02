@@ -47,6 +47,7 @@ $button_color = get_option('grp_widget_button_default_color', '');
 $button_bg_color = get_option('grp_widget_button_default_bg_color', '');
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
+$button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
 $qr_size = get_option('grp_widget_qr_default_size', 200);
 $tracking_enabled = get_option('grp_widget_tracking_enabled', true);
 
@@ -229,6 +230,7 @@ $is_pro = $license->is_pro();
                 }
                 $preview_tagline = !empty($preview_template['tagline']) ? $preview_template['tagline'] : '';
                 $preview_star_row = !empty($preview_template['stars']) ? implode(' ', array_fill(0, 5, '★')) : '';
+                $blank_qr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
                 ?>
                 <div id="grp-button-preview" style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
                     <?php
@@ -245,18 +247,15 @@ $is_pro = $license->is_pro();
                     $preview_style_attr = !empty($preview_styles) ? ' style="' . implode('; ', $preview_styles) . '"' : '';
                     ?>
                     <a href="<?php echo esc_url($preview_url); ?>" id="grp-preview-button" class="<?php echo esc_attr(implode(' ', $preview_classes)); ?>" target="_blank" rel="noopener"<?php echo $preview_style_attr; ?>>
-                        <span class="grp-preview-qr" data-has-qr="<?php echo !empty($preview_qr_url) ? '1' : '0'; ?>">
-                            <?php if (!empty($preview_qr_url)): ?>
-                                <img src="<?php echo esc_url($preview_qr_url); ?>" alt="<?php esc_attr_e('QR preview', 'google-reviews-plugin'); ?>">
-                            <?php else: ?>
-                                <span class="grp-preview-qr-placeholder"><?php esc_html_e('QR', 'google-reviews-plugin'); ?></span>
-                            <?php endif; ?>
+                        <span class="grp-preview-qr <?php echo !empty($preview_qr_url) ? 'has-qr' : ''; ?>" id="grp-preview-qr">
+                            <img id="grp-preview-qr-img" src="<?php echo esc_url(!empty($preview_qr_url) ? $preview_qr_url : $blank_qr); ?>" alt="<?php esc_attr_e('QR preview', 'google-reviews-plugin'); ?>">
+                            <span class="grp-preview-qr-placeholder"><?php esc_html_e('QR', 'google-reviews-plugin'); ?></span>
                         </span>
                         <div class="grp-preview-content">
                             <span class="grp-review-button-icon">⭐</span>
                             <span class="grp-review-button-text" id="grp-preview-text"><?php echo esc_html($button_text); ?></span>
-                            <span class="grp-preview-tagline"><?php echo esc_html($preview_tagline); ?></span>
-                            <span class="grp-preview-star-row"><?php echo esc_html($preview_star_row); ?></span>
+                            <span class="grp-preview-tagline" id="grp-preview-tagline"><?php echo esc_html($preview_tagline); ?></span>
+                            <span class="grp-preview-star-row" id="grp-preview-star-row"><?php echo esc_html($preview_star_row); ?></span>
                         </div>
                     </a>
                 </div>
@@ -305,37 +304,25 @@ $is_pro = $license->is_pro();
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label><?php esc_html_e('Button Layout', 'google-reviews-plugin'); ?></label>
+                                <label for="grp_widget_button_default_template"><?php esc_html_e('Button Layout', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <input type="hidden" id="grp_widget_button_default_template" name="grp_widget_button_default_template" value="<?php echo esc_attr($button_template); ?>">
-                                <div class="grp-template-grid">
-                                    <?php foreach ($button_templates as $key => $template): ?>
-                                        <?php
-                                        $is_selected = ($button_template === $key);
-                                        $requires_pro = !empty($template['pro']);
-                                        $is_locked = $requires_pro && !$is_pro;
-                                        ?>
-                                        <div class="grp-template-card <?php echo $is_selected ? 'is-active' : ''; ?> <?php echo $is_locked ? 'is-pro-locked' : ''; ?>" data-template="<?php echo esc_attr($key); ?>">
-                                            <div class="grp-template-preview" data-template="<?php echo esc_attr($key); ?>"></div>
-                                            <div class="grp-template-copy">
-                                                <strong><?php echo esc_html($template['name']); ?></strong>
-                                                <p><?php echo esc_html($template['description']); ?></p>
-                                                <?php if ($is_locked): ?>
-                                                    <button type="button" class="button grp-template-action" disabled><?php esc_html_e('Pro Only', 'google-reviews-plugin'); ?></button>
-                                                    <a href="https://reactwoo.com/google-reviews-plugin-pro/" target="_blank" rel="noopener"><?php esc_html_e('Upgrade for more controls', 'google-reviews-plugin'); ?></a>
-                                                <?php else: ?>
-                                                    <button type="button" class="button grp-template-action"><?php esc_html_e('Select', 'google-reviews-plugin'); ?></button>
-                                                <?php endif; ?>
-                                            </div>
-                                            <?php if ($is_locked): ?>
-                                                <div class="grp-template-lock-overlay">
-                                                    <span class="grp-template-lock-text"><?php esc_html_e('Pro only', 'google-reviews-plugin'); ?></span>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endforeach; ?>
+                                <div class="grp-template-selector">
+                                    <select id="grp_widget_button_default_template" name="grp_widget_button_default_template">
+                                        <?php foreach ($button_templates as $key => $template): ?>
+                                            <option value="<?php echo esc_attr($key); ?>" <?php selected($button_template, $key); ?>
+                                                    data-description="<?php echo esc_attr($template['description']); ?>"
+                                                    data-qr="<?php echo !empty($template['qr']) ? '1' : '0'; ?>"
+                                                    data-qr-size="<?php echo esc_attr(isset($template['qr_size']) ? $template['qr_size'] : ''); ?>"
+                                                    data-pro="<?php echo !empty($template['pro']) ? '1' : '0'; ?>">
+                                                <?php echo esc_html($template['name']); ?>
+                                                <?php if (!empty($template['pro'])): ?><?php esc_html_e(' (Pro)', 'google-reviews-plugin'); ?><?php endif; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
+                                <p class="description" id="grp-template-selected-description"><?php echo esc_html($button_template_definition['description']); ?></p>
+                                <p class="description grp-template-pro-note" id="grp-template-pro-note"><?php if (!empty($button_template_definition['pro']) && !$is_pro): ?><?php esc_html_e('Upgrade to Pro to unlock extra layout controls.', 'google-reviews-plugin'); ?><?php endif; ?></p>
                                 <p class="description"><?php esc_html_e('Choose a layout that matches your experience. The barcode templates integrate QR art from our barcode creator, and the Canva Edition is a Pro-only design with extra editable controls.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>

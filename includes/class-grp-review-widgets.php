@@ -228,9 +228,22 @@ class GRP_Review_Widgets {
         wp_enqueue_style('grp-review-widgets', GRP_PLUGIN_URL . 'assets/css/review-widgets.css', array(), GRP_PLUGIN_VERSION);
         wp_enqueue_script('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/js/widgets-admin.js', array('jquery'), GRP_PLUGIN_VERSION, true);
         
+        $place_id = get_option('grp_place_id', '');
+        $place_id_auto = get_option('grp_gbp_place_id_default', '');
+        $has_place_id = !empty($place_id) || !empty($place_id_auto);
+        $license = new GRP_License();
+
         wp_localize_script('grp-widgets-admin', 'grpWidgets', array(
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('grp_widgets_nonce'),
+            'tracking_enabled' => get_option('grp_widget_tracking_enabled', true),
+            'has_place_id' => $has_place_id,
+            'is_pro' => $license->is_pro(),
+            'button_templates' => $this->get_button_templates(),
+            'strings' => array(
+                'templateProMessage' => __('Upgrade to Pro to unlock this layout.', 'google-reviews-plugin'),
+                'qrPreviewError' => __('Unable to refresh the QR preview. Please try again.', 'google-reviews-plugin'),
+            ),
         ));
     }
     
