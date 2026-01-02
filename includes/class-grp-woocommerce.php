@@ -161,8 +161,8 @@ class GRP_WooCommerce {
         }
         
         $order = wc_get_order($order_id);
-        if (!$order) {
-            $this->log_eligibility_reason("order {$order_id} skipped: could not load order");
+        if (!$order || !is_a($order, 'WC_Order')) {
+            $this->log_eligibility_reason("order {$order_id} skipped: could not load WC_Order (got " . (is_object($order) ? get_class($order) : 'none') . ")");
             return;
         }
         
