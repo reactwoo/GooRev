@@ -118,11 +118,14 @@
             var bgColor = $('#grp_widget_button_default_bg_color_text').val();
             var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(templateKey);
+            var isCard = templateData && templateData.type === 'card';
             var starColor = $starColorText.val() || '#FBBD05';
             var starPlacement = $starPlacementSelect.val() || 'below';
             var showLogo = $logoToggle.is(':checked');
             var fontFamily = $fontFamilyInput.val();
             var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
+            var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
+            var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
 
