@@ -26,7 +26,8 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
 }
 
 .grp-layout1-logo {
@@ -178,12 +179,17 @@
     border-radius: 999px;
 }
 
-.grp-layout1-logo-img,
-.grp-layout2-logo-img,
-.grp-card-logo-img {
-    width: 56px;
-    height: 56px;
-    object-fit: contain;
+.grp-layout1-link {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.grp-layout1-link a {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-decoration: underline;
 }
 
 .grp-glass-effect {

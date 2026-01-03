@@ -490,6 +490,10 @@ class GRP_Review_Widgets {
         $stored_gradient_start = sanitize_hex_color(get_option('grp_widget_template_gradient_start', '#24a1ff'));
         $stored_gradient_end = sanitize_hex_color(get_option('grp_widget_template_gradient_end', '#ff7b5a'));
         $stored_link_color = sanitize_hex_color(get_option('grp_widget_template_link_color', '#111111'));
+        $stored_link_text = sanitize_text_field(get_option('grp_widget_template_link_text', __('Click here', 'google-reviews-plugin')));
+        if ($stored_link_text === '') {
+            $stored_link_text = __('Click here', 'google-reviews-plugin');
+        }
         $stored_logo_scale = absint(get_option('grp_widget_template_logo_scale', 50));
         if ($stored_logo_scale < 10) {
             $stored_logo_scale = 10;
@@ -592,6 +596,9 @@ class GRP_Review_Widgets {
         $tagline = !empty($template_data['tagline']) ? $template_data['tagline'] : '';
         $subtitle = !empty($template_data['subtitle']) ? $template_data['subtitle'] : __('Scan the QR code below to leave a review!', 'google-reviews-plugin');
         $link_text = !empty($template_data['link_text']) ? $template_data['link_text'] : __('Click here', 'google-reviews-plugin');
+        if ($stored_link_text) {
+            $link_text = $stored_link_text;
+        }
         $link_html = '<a href="' . esc_url($review_url) . '" target="_blank" rel="noopener" style="color: ' . esc_attr($link_color) . ';">' . esc_html($link_text) . '</a>';
 
         $button_html = '';

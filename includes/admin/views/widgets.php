@@ -48,6 +48,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     $gradient_start = isset($_POST['grp_widget_template_gradient_start_text']) ? sanitize_text_field($_POST['grp_widget_template_gradient_start_text']) : '#24a1ff';
     $gradient_end = isset($_POST['grp_widget_template_gradient_end_text']) ? sanitize_text_field($_POST['grp_widget_template_gradient_end_text']) : '#ff7b5a';
     $link_color = isset($_POST['grp_widget_template_link_color_text']) ? sanitize_text_field($_POST['grp_widget_template_link_color_text']) : '#111111';
+    $link_text = isset($_POST['grp_widget_template_link_text']) ? sanitize_text_field($_POST['grp_widget_template_link_text']) : __('Click here', 'google-reviews-plugin');
     if (!preg_match('/^#[0-9A-F]{6}$/i', $gradient_start)) {
         $gradient_start = '#24a1ff';
     }
@@ -56,6 +57,9 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     }
     if (!preg_match('/^#[0-9A-F]{6}$/i', $link_color)) {
         $link_color = '#111111';
+    }
+    if ($link_text === '') {
+        $link_text = __('Click here', 'google-reviews-plugin');
     }
     $box_shadow_enabled = isset($_POST['grp_widget_template_box_shadow_enabled']) ? 1 : 0;
     $box_shadow_value = isset($_POST['grp_widget_template_box_shadow_value']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_value']) : '0 18px 35px rgba(0, 0, 0, 0.25)';
@@ -74,6 +78,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     update_option('grp_widget_template_gradient_start', $gradient_start);
     update_option('grp_widget_template_gradient_end', $gradient_end);
     update_option('grp_widget_template_link_color', $link_color);
+    update_option('grp_widget_template_link_text', $link_text);
     update_option('grp_widget_template_max_width', $max_width);
     update_option('grp_widget_template_box_shadow_enabled', $box_shadow_enabled);
     update_option('grp_widget_template_box_shadow_value', $box_shadow_value);
@@ -109,6 +114,7 @@ $max_width = get_option('grp_widget_template_max_width', 400);
 $gradient_start = get_option('grp_widget_template_gradient_start', '#24a1ff');
 $gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
 $link_color = get_option('grp_widget_template_link_color', '#111111');
+$link_text = get_option('grp_widget_template_link_text', __('Click here', 'google-reviews-plugin'));
 $box_shadow_enabled = get_option('grp_widget_template_box_shadow_enabled', true);
 $box_shadow_value = get_option('grp_widget_template_box_shadow_value', '0 18px 35px rgba(0, 0, 0, 0.25)');
 $box_shadow_h = get_option('grp_widget_template_box_shadow_h', '0');
@@ -435,7 +441,7 @@ $is_pro = $license->is_pro();
                                 <input type="text" id="grp_widget_template_gradient_end_text" name="grp_widget_template_gradient_end_text" value="<?php echo esc_attr($gradient_end); ?>" placeholder="#ff7b5a" style="width: 140px; margin-left: 10px;">
                             </td>
                         </tr>
-                        <tr class="grp-gradient-row">
+                        <tr>
                             <th scope="row">
                                 <label for="grp_widget_template_link_color"><?php esc_html_e('Link Color', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -443,6 +449,15 @@ $is_pro = $license->is_pro();
                                 <input type="color" id="grp_widget_template_link_color" name="grp_widget_template_link_color" value="<?php echo esc_attr($link_color); ?>">
                                 <input type="text" id="grp_widget_template_link_color_text" name="grp_widget_template_link_color_text" value="<?php echo esc_attr($link_color); ?>" placeholder="#111111" style="width: 140px; margin-left: 10px;">
                                 <p class="description"><?php esc_html_e('Color applied to the clickable link text inside layouts.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_link_text"><?php esc_html_e('Link Text', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="text" id="grp_widget_template_link_text" name="grp_widget_template_link_text" value="<?php echo esc_attr($link_text); ?>" class="regular-text">
+                                <p class="description"><?php esc_html_e('Text shown for the clickable link inside the layout (e.g. "Click to review").', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
                         <tr>

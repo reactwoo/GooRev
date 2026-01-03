@@ -26,6 +26,7 @@
         var $maxHeightInput = $('#grp_widget_template_max_height');
         var $linkColorInput = $('#grp_widget_template_link_color');
         var $linkColorText = $('#grp_widget_template_link_color_text');
+        var $linkTextInput = $('#grp_widget_template_link_text');
         var $maxWidthInput = $('#grp_widget_template_max_width');
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
@@ -222,6 +223,7 @@
             if (isNaN(logoScale) || logoScale <= 0) {
                 logoScale = 50;
             }
+            var linkText = ($linkTextInput.length ? $linkTextInput.val().trim() : '') || 'Click here';
             var boxShadowEnabled = $boxShadowCheckbox.is(':checked');
             var boxShadowValue = $boxShadowValue.val().trim();
             var glassEffect = $glassCheckbox.is(':checked');
@@ -271,7 +273,7 @@
             var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml(text || 'Leave us a review'),
                 subtitle: escapeHtml(subtitleText),
-                linkText: escapeHtml(templateData.link_text || 'Click here'),
+                linkText: escapeHtml(linkText),
                 showLogo: showLogo,
                 starColor: starColor,
                 starText: templateData.stars ? '★★★★★' : '',
@@ -347,6 +349,10 @@
             if (/^#[0-9A-F]{6}$/i.test(val)) {
                 $linkColorInput.val(val);
             }
+            updatePreview();
+        });
+
+        $linkTextInput.on('input', function() {
             updatePreview();
         });
 
