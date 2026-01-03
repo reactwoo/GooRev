@@ -398,7 +398,7 @@ $is_pro = $license->is_pro();
                                 <input type="text" id="grp_widget_template_gradient_end_text" name="grp_widget_template_gradient_end_text" value="<?php echo esc_attr($gradient_end); ?>" placeholder="#ff7b5a" style="width: 140px; margin-left: 10px;">
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-gradient-row">
                             <th scope="row">
                                 <label for="grp_widget_template_gradient_start"><?php esc_html_e('Gradient Start', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -408,7 +408,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Gradient start color for the Creative Pro card (updates live in preview).', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-gradient-row">
                             <th scope="row">
                                 <label for="grp_widget_template_gradient_end"><?php esc_html_e('Gradient End', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -417,7 +417,7 @@ $is_pro = $license->is_pro();
                                 <input type="text" id="grp_widget_template_gradient_end_text" name="grp_widget_template_gradient_end_text" value="<?php echo esc_attr($gradient_end); ?>" placeholder="#ff7b5a" style="width: 140px; margin-left: 10px;">
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-gradient-row">
                             <th scope="row">
                                 <label for="grp_widget_template_link_color"><?php esc_html_e('Link Color', 'google-reviews-plugin'); ?></label>
                             </th>

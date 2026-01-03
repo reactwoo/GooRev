@@ -30,6 +30,7 @@
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
         var $glassCheckbox = $('#grp_widget_template_glass_effect');
+        var $gradientRows = $('.grp-gradient-row');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
@@ -275,7 +276,7 @@
             });
             $previewBtn.html(previewHtml);
 
-            if (templateData.qr) {
+            if (templateData.qr && hasPlaceId && previewUrl && previewUrl !== '#') {
                 fetchPreviewQr(templateData.qr_size || 120);
             } else {
                 hidePreviewQr();

@@ -163,6 +163,10 @@
     text-decoration: underline;
 }
 
+.grp-gradient-row {
+    display: none;
+}
+
 .grp-star-placement-above .grp-card-stars {
     order: -1;
 }

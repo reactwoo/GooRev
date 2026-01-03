@@ -60,6 +60,15 @@
     border-radius: 999px;
 }
 
+.grp-layout1-logo-img,
+.grp-layout2-logo-img,
+.grp-card-logo-img {
+    max-width: 120px;
+    width: 60%;
+    height: auto;
+    display: block;
+}
+
 .grp-review-button-template-layout2 .grp-layout2-preview,
 .grp-review-button-template-layout2 .grp-layout2-preview.grp-layout-dark,
 .grp-review-button-template-creative-pro .grp-layout2-preview {
