@@ -127,6 +127,28 @@
     margin-right: 4px;
     border-radius: 999px;
 }
+
+.grp-layout1-logo-img,
+.grp-layout2-logo-img,
+.grp-card-logo-img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+.grp-glass-effect {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+}
+
+.grp-layout1-link a,
+.grp-layout2-link a,
+.grp-card-link a {
+    color: inherit;
+    text-decoration: underline;
+}
 /**
  * Review Widgets Frontend Styles
  */

@@ -24,6 +24,10 @@
         var $gradientEndText = $('#grp_widget_template_gradient_end_text');
         var $fontFamilyInput = $('#grp_widget_template_font_family');
         var $maxHeightInput = $('#grp_widget_template_max_height');
+        var $maxWidthInput = $('#grp_widget_template_max_width');
+        var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
+        var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
+        var $glassCheckbox = $('#grp_widget_template_glass_effect');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
@@ -32,6 +36,7 @@
         var blankQr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
         var isPro = typeof grpWidgets !== 'undefined' ? !!grpWidgets.is_pro : false;
         var hasPlaceId = typeof grpWidgets !== 'undefined' ? !!grpWidgets.has_place_id : false;
+        var logoUrls = (typeof grpWidgets !== 'undefined' && grpWidgets.logo_urls) ? grpWidgets.logo_urls : {};
 
         window.updateGRPPreview = function() {
             updatePreview();
@@ -65,7 +70,7 @@
                 $previewQrImg.attr('src', src);
                 $previewQr.addClass('has-qr');
             }
-            $previewBtn.find('.grp-card-qr img').attr('src', src);
+            $previewBtn.find('.grp-card-qr img, .grp-layout1-qr img, .grp-layout2-qr img').attr('src', src);
         }
 
         function hidePreviewQr() {
@@ -73,7 +78,7 @@
                 $previewQr.removeClass('has-qr');
                 $previewQrImg.attr('src', blankQr);
             }
-            $previewBtn.find('.grp-card-qr img').attr('src', blankQr);
+            $previewBtn.find('.grp-card-qr img, .grp-layout1-qr img, .grp-layout2-qr img').attr('src', blankQr);
         }
 
         function fetchPreviewQr(size) {
@@ -129,17 +134,18 @@
 
         function renderPreviewContent(templateType, templateData, options) {
             var qrHtml = templateData && templateData.qr ? '<img id="grp-preview-qr-img" src="' + blankQr + '" alt="QR">' : '';
-            var starHtml = templateData && templateData.stars ? '<div class="grp-context-star-row" style="color:' + options.starColor + ';">' + options.starText + '</div>' : '';
+            var linkHtml = options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
 
             if (templateType === 'layout1') {
                 return '<div class="grp-layout1-preview">' +
                     '<div class="grp-layout1-qr">' + qrHtml + '</div>' +
                     '<div class="grp-layout1-details">' +
-                        (options.showLogo ? '<div class="grp-layout1-logo">G</div>' : '') +
+                        (options.showLogo && options.logoIconUrl ? '<img src="' + options.logoIconUrl + '" class="grp-layout1-logo-img" alt="Google">' : '') +
                         '<div class="grp-layout1-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
                         '<div class="grp-layout1-title">' + options.title + '</div>' +
                         '<div class="grp-layout1-subtitle">' + options.subtitle + '</div>' +
                         '<div class="grp-layout1-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
+                        (linkHtml ? '<div class="grp-layout1-link">' + linkHtml + '</div>' : '') +
                     '</div>' +
                 '</div>';
             }
@@ -147,26 +153,26 @@
             if (templateType === 'layout2') {
                 var darkClass = templateData.dark ? ' grp-layout-dark' : '';
                 return '<div class="grp-layout2-preview' + darkClass + '">' +
-                    '<div class="grp-layout2-logo">G</div>' +
+                    (options.showLogo && options.logoClassicUrl ? '<img src="' + options.logoClassicUrl + '" class="grp-layout2-logo-img" alt="Google">' : '') +
                     '<div class="grp-layout2-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
                     '<div class="grp-layout2-heading">' + options.title + '</div>' +
                     '<div class="grp-layout2-subtitle">' + options.subtitle + '</div>' +
                     '<div class="grp-layout2-qr">' + qrHtml + '</div>' +
-                    '<div class="grp-layout2-link">' + options.linkText + '</div>' +
+                    '<div class="grp-layout2-link">' + linkHtml + '</div>' +
                     '<div class="grp-layout2-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
                 '</div>';
             }
 
             if (templateType === 'card') {
                 var inner = '<div class="grp-review-card">';
-                if (options.showLogo) {
-                    inner += '<div class="grp-card-logo">G</div>';
+                if (options.showLogo && options.logoClassicUrl) {
+                    inner += '<img src="' + options.logoClassicUrl + '" class="grp-card-logo-img" alt="Google">';
                 }
                 inner += '<div class="grp-card-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>';
                 inner += '<div class="grp-card-heading">' + options.title + '</div>';
                 inner += '<div class="grp-card-subtitle">' + options.subtitle + '</div>';
                 inner += '<div class="grp-card-qr">' + qrHtml + '</div>';
-                inner += '<div class="grp-card-link">' + options.linkText + '</div>';
+                inner += '<div class="grp-card-link">' + linkHtml + '</div>';
                 inner += '</div>';
                 return inner;
             }
@@ -180,6 +186,14 @@
                 '</div>';
         }
 
+        function toggleGradientControls(templateKey) {
+            if (templateKey === 'creative-pro') {
+                $gradientRows.show();
+            } else {
+                $gradientRows.hide();
+            }
+        }
+
         function updatePreview() {
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
@@ -188,18 +202,18 @@
             var bgColor = $('#grp_widget_button_default_bg_color_text').val();
             var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(templateKey);
+            var previewUrl = $previewBtn.attr('href') || '#';
             var starColor = $starColorText.val() || '#FBBD05';
             var starPlacement = $starPlacementSelect.val() || 'below';
             var showLogo = $logoToggle.is(':checked');
             var fontFamily = $fontFamilyInput.val();
             var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
+            var maxWidth = parseInt($maxWidthInput.val(), 10) || 0;
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
-            var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
-            var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
-
-            // Update preview button text
-            $('#grp-preview-text').text(text || 'Leave us a review');
+            var boxShadowEnabled = $boxShadowCheckbox.is(':checked');
+            var boxShadowValue = $boxShadowValue.val().trim();
+            var glassEffect = $glassCheckbox.is(':checked');
 
             // Update template description/pro note
             updateTemplateDescription(templateKey);
@@ -212,6 +226,11 @@
                 'grp-star-placement-' + starPlacement
             ];
             $previewBtn.attr('class', classes.join(' '));
+            if (glassEffect) {
+                $previewBtn.addClass('grp-glass-effect');
+            } else {
+                $previewBtn.removeClass('grp-glass-effect');
+            }
 
             var styles = [];
             if (textColor && textColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(textColor)) {
@@ -226,6 +245,12 @@
             if (maxHeight > 0) {
                 styles.push('max-height: ' + maxHeight + 'px');
             }
+            if (maxWidth > 0) {
+                styles.push('max-width: ' + maxWidth + 'px');
+            }
+            if (boxShadowEnabled && boxShadowValue) {
+                styles.push('box-shadow: ' + boxShadowValue);
+            }
             if (templateData.type === 'card' && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
                 styles.push('background: linear-gradient(135deg, ' + gradientStart + ', ' + gradientEnd + ')');
             }
@@ -235,10 +260,13 @@
             var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml(text || 'Leave us a review'),
                 subtitle: escapeHtml(subtitleText),
-                linkText: escapeHtml(templateData.link_text || 'www.google.com'),
+                linkText: escapeHtml(templateData.link_text || 'Click here'),
                 showLogo: showLogo,
                 starColor: starColor,
                 starText: templateData.stars ? '★★★★★' : '',
+                logoIconUrl: logoUrls.icon || '',
+                logoClassicUrl: logoUrls.classic || '',
+                reviewUrl: previewUrl,
             });
             $previewBtn.html(previewHtml);
 
@@ -247,6 +275,8 @@
             } else {
                 hidePreviewQr();
             }
+
+            toggleGradientControls(templateKey);
         }
 
         // Color picker sync and preview font/color updates
@@ -335,7 +365,11 @@
             }
             updatePreview();
         });
-        $fontFamilyInput.on('input', updatePreview);
+        $maxWidthInput.on('input', updatePreview);
+        $boxShadowCheckbox.on('change', updatePreview);
+        $boxShadowValue.on('input', updatePreview);
+        $glassCheckbox.on('change', updatePreview);
+        $fontFamilyInput.on('change input', updatePreview);
         $maxHeightInput.on('input', updatePreview);
 
         // Initialize preview on load
