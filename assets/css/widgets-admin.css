@@ -115,9 +115,70 @@
     letter-spacing: 1px;
 }
 
-.grp-review-button-template-canva .grp-preview-tagline,
-.grp-review-button-template-canva .grp-preview-star-row {
-    display: block;
+.grp-card-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 20px;
+    border-radius: 18px;
+    min-width: 280px;
+    gap: 10px;
+    color: #0f0f0f;
+    text-decoration: none;
+}
+
+.grp-card-preview .grp-card-logo {
+    font-size: 48px;
+    font-weight: 700;
+    color: #0f0f0f;
+}
+
+.grp-card-preview .grp-card-stars {
+    font-size: 20px;
+    letter-spacing: 0.2em;
+}
+
+.grp-card-preview .grp-card-heading {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.grp-card-preview .grp-card-subtitle {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+.grp-card-preview .grp-card-qr img {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px;
+}
+
+.grp-card-preview .grp-card-link {
+    font-size: 12px;
+    color: #333;
+    text-decoration: underline;
+}
+
+.grp-star-placement-above .grp-card-stars {
+    order: -1;
+}
+
+.grp-star-placement-below .grp-card-stars {
+    order: 1;
+}
+
+.grp-star-placement-overlay .grp-card-stars {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #fff !important;
 }
 
 

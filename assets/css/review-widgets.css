@@ -160,52 +160,102 @@
     gap: 12px;
 }
 
-.grp-review-button-template-barcode-panel {
-    background: #111;
-    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 2px, transparent 2px);
-    background-size: 18px 100%;
-    color: #fff;
-    border-radius: 16px;
-    padding: 18px 42px 18px 22px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-}
-
-.grp-review-button-template-barcode-panel .grp-review-button-qr {
-    display: inline-flex;
-    width: 70px;
-    height: 70px;
-    padding: 10px;
-}
-
-.grp-review-button-template-barcode-panel .grp-review-button-content {
+.grp-review-card {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 18px;
+    text-align: center;
+    padding: 28px 30px;
+    border-radius: 24px;
+    background: #fff;
+    color: #111;
+    min-width: 280px;
+    gap: 10px;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.1);
 }
 
-.grp-review-button-template-barcode-panel .grp-review-button-icon {
+.grp-review-card-content {
+    width: 100%;
+}
+
+.grp-review-card .grp-card-logo {
+    font-size: 48px;
+    font-weight: 700;
+    color: #111;
+}
+
+.grp-review-card .grp-card-stars {
+    font-size: 20px;
+    letter-spacing: 0.3em;
+}
+
+.grp-review-card .grp-card-heading {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.grp-review-card .grp-card-subtitle {
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.grp-review-card .grp-card-qr img {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    background: #fff;
+    padding: 8px;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.grp-review-card .grp-card-link {
+    font-size: 12px;
+    color: #111;
+    letter-spacing: 0.2em;
+}
+
+.grp-star-placement-above .grp-card-stars {
+    order: -1;
+}
+
+.grp-star-placement-below .grp-card-stars {
+    order: 1;
+}
+
+.grp-star-placement-overlay .grp-card-stars {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #fff;
+}
+
+.grp-review-button-template-google-card .grp-review-button-wrapper,
+.grp-review-button-template-creative-pro .grp-review-button-wrapper {
+    width: 100%;
+}
+
+.grp-review-button-template-google-card .grp-review-button-content,
+.grp-review-button-template-creative-pro .grp-review-button-content {
     display: none;
 }
 
-.grp-review-button-template-canva {
-    background: linear-gradient(120deg, #24a1ff, #6b5bff, #ff7b5a);
-    color: #ffffff;
-    border-radius: 20px;
-    padding: 22px 30px;
-    box-shadow: 0 20px 40px rgba(36, 161, 255, 0.35);
+.grp-review-button-template-google-card .grp-card-wrapper,
+.grp-review-button-template-creative-pro .grp-card-wrapper {
+    width: auto;
 }
 
-.grp-review-button-template-canva .grp-review-button-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+.grp-review-button-template-creative-pro .grp-card-logo,
+.grp-review-button-template-google-card .grp-card-logo {
+    color: #111;
 }
 
-.grp-review-button-template-canva .grp-review-button-tagline,
-.grp-review-button-template-canva .grp-review-button-star-row {
-    display: block;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 12px;
+.grp-review-button-template-creative-pro {
+    background: linear-gradient(135deg, #24a1ff, #ff7b5a);
+    color: #fff;
 }
 /* Alignment */
 .grp-align-left {

@@ -18,6 +18,10 @@
         var $starColorText = $('#grp_widget_template_star_color_text');
         var $starPlacementSelect = $('#grp_widget_template_star_placement');
         var $logoToggle = $('#grp_widget_template_show_logo');
+        var $gradientStartInput = $('#grp_widget_template_gradient_start');
+        var $gradientEndInput = $('#grp_widget_template_gradient_end');
+        var $gradientStartText = $('#grp_widget_template_gradient_start_text');
+        var $gradientEndText = $('#grp_widget_template_gradient_end_text');
         var $fontFamilyInput = $('#grp_widget_template_font_family');
         var $maxHeightInput = $('#grp_widget_template_max_height');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
@@ -57,19 +61,19 @@
         }
 
         function showPreviewQr(src) {
-            if (!$previewQr.length || !$previewQrImg.length) {
-                return;
+            if ($previewQr.length && $previewQrImg.length) {
+                $previewQrImg.attr('src', src);
+                $previewQr.addClass('has-qr');
             }
-            $previewQrImg.attr('src', src);
-            $previewQr.addClass('has-qr');
+            $previewBtn.find('.grp-card-qr img').attr('src', src);
         }
 
         function hidePreviewQr() {
-            if (!$previewQr.length || !$previewQrImg.length) {
-                return;
+            if ($previewQr.length && $previewQrImg.length) {
+                $previewQr.removeClass('has-qr');
+                $previewQrImg.attr('src', blankQr);
             }
-            $previewQr.removeClass('has-qr');
-            $previewQrImg.attr('src', blankQr);
+            $previewBtn.find('.grp-card-qr img').attr('src', blankQr);
         }
 
         function fetchPreviewQr(size) {
@@ -119,6 +123,8 @@
             var showLogo = $logoToggle.is(':checked');
             var fontFamily = $fontFamilyInput.val();
             var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
+            var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
+            var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
 
             // Update preview button text
             $('#grp-preview-text').text(text || 'Leave us a review');
@@ -169,6 +175,9 @@
             }
             if (maxHeight > 0) {
                 styles.push('max-height: ' + maxHeight + 'px');
+            }
+            if (isCard && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
+                styles.push('background: linear-gradient(135deg, ' + gradientStart + ', ' + gradientEnd + ')');
             }
             if (styles.length > 0) {
                 $previewBtn.attr('style', styles.join('; '));
@@ -244,6 +253,30 @@
         $templateSelect.on('change', updatePreview);
         $starPlacementSelect.on('change', updatePreview);
         $logoToggle.on('change', updatePreview);
+        $gradientStartInput.on('change', function() {
+            var color = $(this).val();
+            $gradientStartText.val(color);
+            updatePreview();
+        });
+        $gradientStartText.on('input', function() {
+            var val = $(this).val();
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                $gradientStartInput.val(val);
+            }
+            updatePreview();
+        });
+        $gradientEndInput.on('change', function() {
+            var color = $(this).val();
+            $gradientEndText.val(color);
+            updatePreview();
+        });
+        $gradientEndText.on('input', function() {
+            var val = $(this).val();
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                $gradientEndInput.val(val);
+            }
+            updatePreview();
+        });
         $fontFamilyInput.on('input', updatePreview);
         $maxHeightInput.on('input', updatePreview);
 
