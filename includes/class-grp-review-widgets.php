@@ -269,8 +269,8 @@ class GRP_Review_Widgets {
             'is_pro' => $license->is_pro(),
             'button_templates' => $this->get_button_templates(),
             'logo_urls' => array(
-                'icon' => GRP_PLUGIN_URL . 'assets/images/google-icon-logo-svgrepo-com.svg',
-                'classic' => GRP_PLUGIN_URL . 'assets/images/google-2015-logo-svgrepo-com.svg',
+                'icon' => GRP_PLUGIN_URL . 'assets/images/google-icon.svg',
+                'classic' => GRP_PLUGIN_URL . 'assets/images/google-wordmark.svg',
             ),
             'strings' => array(
                 'templateProMessage' => __('Upgrade to Pro to unlock this layout.', 'google-reviews-plugin'),
