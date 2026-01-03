@@ -628,23 +628,20 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
+            
+            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+                <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('QR Code Settings', 'google-reviews-plugin'); ?></h2>
+                
+                <table class="form-table">
+                    <tbody>
                         <tr>
                             <th scope="row">
-                                <label><?php esc_html_e('Box Shadow / Glass', 'google-reviews-plugin'); ?></label>
+                                <label for="grp_widget_qr_default_size"><?php esc_html_e('Default QR Code Size', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <label>
-                                    <input type="checkbox" id="grp_widget_template_box_shadow_enabled" name="grp_widget_template_box_shadow_enabled" value="1" <?php checked($box_shadow_enabled, true); ?>>
-                                    <?php esc_html_e('Enable custom shadow', 'google-reviews-plugin'); ?>
-                                </label>
-                                <button type="button" id="grp-box-shadow-edit" class="button" style="margin-left: 10px;"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
-                                <input type="hidden" id="grp_widget_template_box_shadow_value" name="grp_widget_template_box_shadow_value" value="<?php echo esc_attr($box_shadow_value); ?>">
-                                <input type="hidden" id="grp_widget_template_box_shadow_h" name="grp_widget_template_box_shadow_h" value="<?php echo esc_attr($box_shadow_h); ?>">
-                                <input type="hidden" id="grp_widget_template_box_shadow_v" name="grp_widget_template_box_shadow_v" value="<?php echo esc_attr($box_shadow_v); ?>">
-                                <input type="hidden" id="grp_widget_template_box_shadow_blur" name="grp_widget_template_box_shadow_blur" value="<?php echo esc_attr($box_shadow_blur); ?>">
-                                <input type="hidden" id="grp_widget_template_box_shadow_spread" name="grp_widget_template_box_shadow_spread" value="<?php echo esc_attr($box_shadow_spread); ?>">
-                                <input type="hidden" id="grp_widget_template_box_shadow_color" name="grp_widget_template_box_shadow_color" value="<?php echo esc_attr($box_shadow_color); ?>">
-                                <p class="description"><?php esc_html_e('Open the editor to adjust horizontal, vertical, blur, spread and color values.', 'google-reviews-plugin'); ?></p>
+                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="5">
+                                <span>px</span>
+                                <p class="description"><?php esc_html_e('Default size for generated QR codes.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
                     </tbody>
@@ -666,9 +663,8 @@ $is_pro = $license->is_pro();
                             );
                             foreach ($controls as $control): ?>
                                 <div class="grp-shadow-control">
-                                    <label><?php echo esc_html($control['name']); ?>
-                                        <input type="range" class="grp-shadow-range" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
-                                    </label>
+                                    <span class="grp-shadow-label"><?php echo esc_html($control['name']); ?></span>
+                                    <input type="range" class="grp-shadow-range" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
                                     <input type="number" class="grp-shadow-number" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
                                 </div>
                             <?php endforeach; ?>
@@ -678,25 +674,6 @@ $is_pro = $license->is_pro();
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
-                <h2 style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee;"><?php esc_html_e('QR Code Settings', 'google-reviews-plugin'); ?></h2>
-                
-                <table class="form-table">
-                    <tbody>
-                        <tr>
-                            <th scope="row">
-                                <label for="grp_widget_qr_default_size"><?php esc_html_e('Default QR Code Size', 'google-reviews-plugin'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="5">
-                                <span>px</span>
-                                <p class="description"><?php esc_html_e('Default size for generated QR codes.', 'google-reviews-plugin'); ?></p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
             
             <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">

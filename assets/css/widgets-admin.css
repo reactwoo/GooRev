@@ -194,13 +194,22 @@
 }
 
 .grp-shadow-control {
-    display: flex;
+    display: grid;
+    grid-template-columns: 120px 1fr 80px;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+}
+
+.grp-shadow-label {
+    font-weight: 600;
 }
 
 .grp-shadow-control input[type="range"] {
-    flex: 1;
+    width: 100%;
+}
+
+.grp-shadow-number {
+    width: 100%;
 }
 
 .grp-box-shadow-actions {
