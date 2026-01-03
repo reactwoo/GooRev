@@ -110,6 +110,76 @@
             });
         }
 
+        function escapeHtml(text) {
+            return $('<div>').text(text).html();
+        }
+
+        function buildUnderline(colors) {
+            var html = '';
+            if (!Array.isArray(colors)) {
+                return html;
+            }
+            colors.forEach(function(color) {
+                if (color) {
+                    html += '<span style="background: ' + color + ';"></span>';
+                }
+            });
+            return html;
+        }
+
+        function renderPreviewContent(templateType, templateData, options) {
+            var qrHtml = templateData && templateData.qr ? '<img id="grp-preview-qr-img" src="' + blankQr + '" alt="QR">' : '';
+            var starHtml = templateData && templateData.stars ? '<div class="grp-context-star-row" style="color:' + options.starColor + ';">' + options.starText + '</div>' : '';
+
+            if (templateType === 'layout1') {
+                return '<div class="grp-layout1-preview">' +
+                    '<div class="grp-layout1-qr">' + qrHtml + '</div>' +
+                    '<div class="grp-layout1-details">' +
+                        (options.showLogo ? '<div class="grp-layout1-logo">G</div>' : '') +
+                        '<div class="grp-layout1-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
+                        '<div class="grp-layout1-title">' + options.title + '</div>' +
+                        '<div class="grp-layout1-subtitle">' + options.subtitle + '</div>' +
+                        '<div class="grp-layout1-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            if (templateType === 'layout2') {
+                var darkClass = templateData.dark ? ' grp-layout-dark' : '';
+                return '<div class="grp-layout2-preview' + darkClass + '">' +
+                    '<div class="grp-layout2-logo">G</div>' +
+                    '<div class="grp-layout2-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
+                    '<div class="grp-layout2-heading">' + options.title + '</div>' +
+                    '<div class="grp-layout2-subtitle">' + options.subtitle + '</div>' +
+                    '<div class="grp-layout2-qr">' + qrHtml + '</div>' +
+                    '<div class="grp-layout2-link">' + options.linkText + '</div>' +
+                    '<div class="grp-layout2-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
+                '</div>';
+            }
+
+            if (templateType === 'card') {
+                var inner = '<div class="grp-review-card">';
+                if (options.showLogo) {
+                    inner += '<div class="grp-card-logo">G</div>';
+                }
+                inner += '<div class="grp-card-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>';
+                inner += '<div class="grp-card-heading">' + options.title + '</div>';
+                inner += '<div class="grp-card-subtitle">' + options.subtitle + '</div>';
+                inner += '<div class="grp-card-qr">' + qrHtml + '</div>';
+                inner += '<div class="grp-card-link">' + options.linkText + '</div>';
+                inner += '</div>';
+                return inner;
+            }
+
+            return '<span class="grp-preview-star-row" style="color:' + options.starColor + ';">' + options.starText + '</span>' +
+                '<span class="grp-preview-qr" id="grp-preview-qr">' + qrHtml + '</span>' +
+                '<div class="grp-preview-content">' +
+                    (options.showLogo ? '<span class="grp-review-button-icon">⭐</span>' : '') +
+                    '<span class="grp-review-button-text" id="grp-preview-text">' + options.title + '</span>' +
+                    '<span class="grp-preview-tagline" id="grp-preview-tagline">' + options.subtitle + '</span>' +
+                '</div>';
+        }
+
         function updatePreview() {
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
@@ -118,7 +188,6 @@
             var bgColor = $('#grp_widget_button_default_bg_color_text').val();
             var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(templateKey);
-            var isCard = templateData && templateData.type === 'card';
             var starColor = $starColorText.val() || '#FBBD05';
             var starPlacement = $starPlacementSelect.val() || 'below';
             var showLogo = $logoToggle.is(':checked');
@@ -132,40 +201,18 @@
             // Update preview button text
             $('#grp-preview-text').text(text || 'Leave us a review');
 
-            // Update preview button classes
-            $previewBtn.removeClass('grp-review-button-default grp-review-button-rounded grp-review-button-outline grp-review-button-minimal');
-            $previewBtn.removeClass('grp-review-button-small grp-review-button-medium grp-review-button-large');
-            $previewBtn.removeClass('grp-star-placement-above grp-star-placement-below grp-star-placement-overlay');
-            $previewBtn.addClass('grp-review-button-' + style);
-            $previewBtn.addClass('grp-review-button-' + size);
-            if (templateClassList.length) {
-                $previewBtn.removeClass(templateClassList.join(' '));
-            }
-            $previewBtn.addClass('grp-review-button-template-' + templateKey);
-            $previewBtn.addClass('grp-star-placement-' + starPlacement);
-
             // Update template description/pro note
             updateTemplateDescription(templateKey);
 
-            // Update preview tagline/stars
-            var tagline = templateData.tagline || '';
-            var stars = templateData.stars ? '★★★★★' : '';
-            if ($previewTagline.length) {
-                $previewTagline.text(tagline).toggle(!!tagline);
-            }
-            if ($previewStarRow.length) {
-                $previewStarRow.text(stars).toggle(!!stars).css('color', starColor);
-            }
+            var classes = [
+                'grp-review-button',
+                'grp-review-button-' + style,
+                'grp-review-button-' + size,
+                'grp-review-button-template-' + templateKey,
+                'grp-star-placement-' + starPlacement
+            ];
+            $previewBtn.attr('class', classes.join(' '));
 
-            // Toggle logo
-            if (showLogo) {
-                $previewBtn.find('.grp-review-button-icon').show();
-            } else {
-                $previewBtn.find('.grp-review-button-icon').hide();
-            }
-
-            // Update preview button styles - clear inline styles first
-            $previewBtn.attr('style', '');
             var styles = [];
             if (textColor && textColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(textColor)) {
                 styles.push('color: ' + textColor);
@@ -179,16 +226,24 @@
             if (maxHeight > 0) {
                 styles.push('max-height: ' + maxHeight + 'px');
             }
-            if (isCard && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
+            if (templateData.type === 'card' && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
                 styles.push('background: linear-gradient(135deg, ' + gradientStart + ', ' + gradientEnd + ')');
             }
-            if (styles.length > 0) {
-                $previewBtn.attr('style', styles.join('; '));
-            }
+            $previewBtn.attr('style', styles.join('; '));
 
-            // Update QR preview if needed
+            var subtitleText = templateData.tagline || templateData.subtitle || 'Scan the QR code below to leave a review!';
+            var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
+                title: escapeHtml(text || 'Leave us a review'),
+                subtitle: escapeHtml(subtitleText),
+                linkText: escapeHtml(templateData.link_text || 'www.google.com'),
+                showLogo: showLogo,
+                starColor: starColor,
+                starText: templateData.stars ? '★★★★★' : '',
+            });
+            $previewBtn.html(previewHtml);
+
             if (templateData.qr) {
-                fetchPreviewQr(templateData.qr_size || 100);
+                fetchPreviewQr(templateData.qr_size || 120);
             } else {
                 hidePreviewQr();
             }

@@ -347,7 +347,7 @@ $is_pro = $license->is_pro();
                                 <div class="grp-template-selector">
                                     <select id="grp_widget_button_default_template" name="grp_widget_button_default_template">
                                         <?php foreach ($button_templates as $key => $template): ?>
-                                            <option value="<?php echo esc_attr($key); ?>" <?php selected($button_template, $key); ?>
+                                            <option value="<?php echo esc_attr($key); ?>" <?php selected($button_template, $key); ?> <?php disabled($is_locked); ?>
                                                     data-description="<?php echo esc_attr($template['description']); ?>"
                                                     data-qr="<?php echo !empty($template['qr']) ? '1' : '0'; ?>"
                                                     data-qr-size="<?php echo esc_attr(isset($template['qr_size']) ? $template['qr_size'] : ''); ?>"

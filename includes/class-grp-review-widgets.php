@@ -166,26 +166,41 @@ class GRP_Review_Widgets {
                 'pro' => false,
                 'qr' => false,
             ),
-            'qr-badge' => array(
-                'name' => __('QR Badge', 'google-reviews-plugin'),
-                'description' => __('Compact button with an integrated QR badge.', 'google-reviews-plugin'),
-                'type' => 'button',
+            'layout1' => array(
+                'name' => __('Layout 1', 'google-reviews-plugin'),
+                'description' => __('Horizontal card with QR to the left and Google branding to the right.', 'google-reviews-plugin'),
+                'type' => 'layout1',
                 'pro' => false,
                 'qr' => true,
-                'qr_size' => 96,
+                'stars' => true,
+                'subtitle' => __('Scan the QR code to leave a review!', 'google-reviews-plugin'),
+                'underline_colors' => array('#4285f4', '#ea4335', '#fbbc05'),
             ),
-            'google-card' => array(
-                'name' => __('Google Card', 'google-reviews-plugin'),
-                'description' => __('Stacked card with Google branding, stars, and a large QR code.', 'google-reviews-plugin'),
-                'type' => 'card',
+            'layout2' => array(
+                'name' => __('Layout 2', 'google-reviews-plugin'),
+                'description' => __('Stacked light card with Google G, stars, instructions, and QR art.', 'google-reviews-plugin'),
+                'type' => 'layout2',
                 'pro' => false,
                 'qr' => true,
                 'stars' => true,
                 'subtitle' => __('Scan the QR code below to leave a review!', 'google-reviews-plugin'),
+                'underline_colors' => array('#4285f4', '#f4b400', '#0f9d58'),
+                'link_text' => __('www.google.com', 'google-reviews-plugin'),
+            ),
+            'layout3' => array(
+                'name' => __('Layout 3', 'google-reviews-plugin'),
+                'description' => __('Stacked dark card with the same elements plus a colorful underline.', 'google-reviews-plugin'),
+                'type' => 'layout2',
+                'dark' => true,
+                'pro' => false,
+                'qr' => true,
+                'stars' => true,
+                'subtitle' => __('Tap or scan to leave a review!', 'google-reviews-plugin'),
+                'underline_colors' => array('#4285f4', '#ea4335', '#0f9d58'),
                 'link_text' => __('www.google.com', 'google-reviews-plugin'),
             ),
             'creative-pro' => array(
-                'name' => __('Creative Pro', 'google-reviews-plugin'),
+                'name' => __('Creative (Pro Only)', 'google-reviews-plugin'),
                 'description' => __('Premium gradient card with Google-inspired branding and extra controls.', 'google-reviews-plugin'),
                 'type' => 'card',
                 'pro' => true,
@@ -217,6 +232,12 @@ class GRP_Review_Widgets {
     public function sanitize_button_template($key) {
         $key = sanitize_title($key);
         if (isset($this->button_templates[$key])) {
+            if (!empty($this->button_templates[$key]['pro'])) {
+                $license = new GRP_License();
+                if (!$license->is_pro()) {
+                    return 'basic';
+                }
+            }
             return $key;
         }
         return 'basic';
@@ -538,7 +559,45 @@ class GRP_Review_Widgets {
         $link_text = !empty($template_data['link_text']) ? $template_data['link_text'] : __('www.google.com', 'google-reviews-plugin');
 
         $button_html = '';
-        if ($is_card) {
+        if (isset($template_data['type']) && $template_data['type'] === 'layout1') {
+            $underline_colors = isset($template_data['underline_colors']) ? $template_data['underline_colors'] : array('#4285f4', '#ea4335', '#fbbc05');
+            $button_html .= '<div class="grp-review-button-wrapper grp-layout-wrapper">';
+            $button_html .= '<a href="' . esc_url($review_url) . '" class="' . esc_attr(implode(' ', $classes)) . ' grp-layout1"' . $style_attr . '>';
+            $button_html .= '<div class="grp-layout1-qr">' . $qr_image . '</div>';
+            $button_html .= '<div class="grp-layout1-details">';
+            if ($show_logo) {
+                $button_html .= '<div class="grp-layout1-logo">G</div>';
+            }
+            $button_html .= '<div class="grp-layout1-stars" style="color: ' . esc_attr($star_color) . ';">' . esc_html($star_text) . '</div>';
+            $button_html .= '<div class="grp-layout1-title">' . esc_html($atts['text']) . '</div>';
+            $button_html .= '<div class="grp-layout1-subtitle">' . esc_html($template_data['subtitle']) . '</div>';
+            $button_html .= '<div class="grp-layout1-underline">';
+            foreach ($underline_colors as $color) {
+                $button_html .= '<span style="background: ' . esc_attr($color) . ';"></span>';
+            }
+            $button_html .= '</div>';
+            $button_html .= '</div>';
+            $button_html .= '</a>';
+            $button_html .= '</div>';
+        } elseif (isset($template_data['type']) && $template_data['type'] === 'layout2') {
+            $dark_class = !empty($template_data['dark']) ? ' grp-layout-dark' : '';
+            $underline_colors = isset($template_data['underline_colors']) ? $template_data['underline_colors'] : array('#4285f4', '#ea4335', '#fbbc05');
+            $button_html .= '<div class="grp-review-button-wrapper grp-layout-wrapper">';
+            $button_html .= '<a href="' . esc_url($review_url) . '" class="' . esc_attr(implode(' ', $classes)) . ' grp-layout2' . $dark_class . '"' . $style_attr . '>';
+            $button_html .= '<div class="grp-layout2-logo">G</div>';
+            $button_html .= $card_star_html;
+            $button_html .= '<div class="grp-layout2-heading">' . esc_html($atts['text']) . '</div>';
+            $button_html .= '<div class="grp-layout2-subtitle">' . esc_html($template_data['subtitle']) . '</div>';
+            $button_html .= '<div class="grp-layout2-qr">' . $qr_image . '</div>';
+            $button_html .= '<div class="grp-layout2-link">' . esc_html($template_data['link_text']) . '</div>';
+            $button_html .= '<div class="grp-layout2-underline">';
+            foreach ($underline_colors as $color) {
+                $button_html .= '<span style="background: ' . esc_attr($color) . ';"></span>';
+            }
+            $button_html .= '</div>';
+            $button_html .= '</a>';
+            $button_html .= '</div>';
+        } elseif ($is_card) {
             $card_inner = '<div class="grp-review-card">';
             if ($show_logo) {
                 $card_inner .= '<div class="grp-card-logo">G</div>';
