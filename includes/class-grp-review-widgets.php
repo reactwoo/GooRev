@@ -452,6 +452,7 @@ class GRP_Review_Widgets {
             'max_height' => '',
             'gradient_start' => '',
             'gradient_end' => '',
+            'link_color' => '',
         ), $atts, 'grp_review_button');
 
         $template = $this->sanitize_button_template($atts['template']);
@@ -488,6 +489,15 @@ class GRP_Review_Widgets {
         $stored_max_height = absint(get_option('grp_widget_template_max_height', 0));
         $stored_gradient_start = sanitize_hex_color(get_option('grp_widget_template_gradient_start', '#24a1ff'));
         $stored_gradient_end = sanitize_hex_color(get_option('grp_widget_template_gradient_end', '#ff7b5a'));
+        $stored_link_color = sanitize_hex_color(get_option('grp_widget_template_link_color', '#111111'));
+        $stored_logo_scale = absint(get_option('grp_widget_template_logo_scale', 50));
+        if ($stored_logo_scale < 10) {
+            $stored_logo_scale = 10;
+        }
+        if ($stored_logo_scale > 100) {
+            $stored_logo_scale = 100;
+        }
+        $logo_scale_attr = ' style="width: ' . esc_attr($stored_logo_scale) . '%;"';
 
         $star_color = sanitize_hex_color($atts['star_color']) ?: $stored_star_color;
         if (!$star_color) {
@@ -515,6 +525,10 @@ class GRP_Review_Widgets {
         }
         if (!$gradient_end) {
             $gradient_end = '#ff7b5a';
+        }
+        $link_color = sanitize_hex_color($atts['link_color']) ?: $stored_link_color;
+        if (!$link_color) {
+            $link_color = '#111111';
         }
 
         $classes = array('grp-review-button', 'grp-review-button-' . $atts['style'], 'grp-review-button-' . $atts['size']);
@@ -573,6 +587,7 @@ class GRP_Review_Widgets {
             $qr_url = $this->generate_qr_code($review_url, $qr_size);
             $qr_image = '<img src="' . esc_url($qr_url) . '" alt="' . esc_attr__('Scan to leave a review', 'google-reviews-plugin') . '">';
         }
+        $qr_frame = $qr_image ? '<div class="grp-qr-frame">' . $qr_image . '</div>' : '';
 
         $tagline = !empty($template_data['tagline']) ? $template_data['tagline'] : '';
         $subtitle = !empty($template_data['subtitle']) ? $template_data['subtitle'] : __('Scan the QR code below to leave a review!', 'google-reviews-plugin');
@@ -584,10 +599,10 @@ class GRP_Review_Widgets {
             $underline_colors = isset($template_data['underline_colors']) ? $template_data['underline_colors'] : array('#4285f4', '#ea4335', '#fbbc05');
             $button_html .= '<div class="grp-review-button-wrapper grp-layout-wrapper">';
             $button_html .= '<a href="' . esc_url($review_url) . '" class="' . esc_attr(implode(' ', $classes)) . ' grp-layout1"' . $style_attr . '>';
-            $button_html .= '<div class="grp-layout1-qr">' . $qr_image . '</div>';
+            $button_html .= '<div class="grp-layout1-qr">' . $qr_frame . '</div>';
             $button_html .= '<div class="grp-layout1-details">';
             if ($show_logo && !empty($logo_icon_url)) {
-                $button_html .= '<img src="' . esc_url($logo_icon_url) . '" alt="Google logo" class="grp-layout1-logo-img">';
+                $button_html .= '<img src="' . esc_url($logo_icon_url) . '" alt="Google logo" class="grp-layout1-logo-img"' . $logo_scale_attr . '>';
             }
             $button_html .= '<div class="grp-layout1-stars" style="color: ' . esc_attr($star_color) . ';">' . esc_html($star_text) . '</div>';
             $button_html .= '<div class="grp-layout1-title">' . esc_html($atts['text']) . '</div>';
@@ -609,12 +624,12 @@ class GRP_Review_Widgets {
             $button_html .= '<div class="grp-review-button-wrapper grp-layout-wrapper">';
             $button_html .= '<a href="' . esc_url($review_url) . '" class="' . esc_attr(implode(' ', $classes)) . ' grp-layout2' . $dark_class . '"' . $style_attr . '>';
             if ($show_logo && !empty($logo_full_url)) {
-                $button_html .= '<img src="' . esc_url($logo_full_url) . '" alt="Google logo" class="grp-layout2-logo-img">';
+                $button_html .= '<img src="' . esc_url($logo_full_url) . '" alt="Google logo" class="grp-layout2-logo-img"' . $logo_scale_attr . '>';
             }
             $button_html .= '<div class="grp-layout2-stars" style="color: ' . esc_attr($star_color) . ';">' . esc_html($star_text) . '</div>';
             $button_html .= '<div class="grp-layout2-heading">' . esc_html($atts['text']) . '</div>';
             $button_html .= '<div class="grp-layout2-subtitle">' . esc_html($template_data['subtitle']) . '</div>';
-            $button_html .= '<div class="grp-layout2-qr">' . $qr_image . '</div>';
+            $button_html .= '<div class="grp-layout2-qr">' . $qr_frame . '</div>';
             $button_html .= '<div class="grp-layout2-link">' . $link_html . '</div>';
             $button_html .= '<div class="grp-layout2-underline">';
             foreach ($underline_colors as $color) {
@@ -626,7 +641,7 @@ class GRP_Review_Widgets {
         } elseif ($is_card) {
             $card_inner = '<div class="grp-review-card">';
             if ($show_logo && !empty($logo_full_url)) {
-                $card_inner .= '<img src="' . esc_url($logo_full_url) . '" alt="Google logo" class="grp-card-logo-img">';
+                $card_inner .= '<img src="' . esc_url($logo_full_url) . '" alt="Google logo" class="grp-card-logo-img"' . $logo_scale_attr . '>';
             }
             $card_inner .= $card_star_html;
             $card_inner .= '<div class="grp-card-heading">' . esc_html($atts['text']) . '</div>';
@@ -635,8 +650,8 @@ class GRP_Review_Widgets {
             } else {
                 $card_inner .= '<div class="grp-card-subtitle">' . esc_html($subtitle) . '</div>';
             }
-            if ($qr_image) {
-                $card_inner .= '<div class="grp-card-qr">' . $qr_image . '</div>';
+            if ($qr_frame) {
+                $card_inner .= '<div class="grp-card-qr">' . $qr_frame . '</div>';
             }
             $card_inner .= '<div class="grp-card-link">' . $link_html . '</div>';
             $card_inner .= '</div>';
@@ -647,7 +662,7 @@ class GRP_Review_Widgets {
             $button_html .= '</a>';
             $button_html .= '</div>';
         } else {
-            $qr_html = $qr_image ? '<span class="grp-review-button-qr">' . $qr_image . '</span>' : '';
+            $qr_html = $qr_frame ? '<span class="grp-review-button-qr">' . $qr_frame . '</span>' : '';
             $tagline_html = '';
             if (!empty($tagline)) {
                 $tagline_html = '<span class="grp-review-button-tagline">' . esc_html($tagline) . '</span>';
@@ -691,7 +706,9 @@ class GRP_Review_Widgets {
         $qr_url = $this->generate_qr_code($review_url, $size);
         
         $html = '<div class="grp-qr-code-wrapper">';
+        $html .= '<div class="grp-qr-frame">';
         $html .= '<img src="' . esc_url($qr_url) . '" alt="' . esc_attr__('Scan to leave a review', 'google-reviews-plugin') . '" class="grp-qr-code" style="width: ' . $size . 'px; height: ' . $size . 'px;">';
+        $html .= '</div>';
         if (!empty($atts['caption'])) {
             $html .= '<p class="grp-qr-caption">' . esc_html($atts['caption']) . '</p>';
         }

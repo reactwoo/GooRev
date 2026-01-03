@@ -43,6 +43,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     $show_logo = isset($_POST['grp_widget_template_show_logo']) ? 1 : 0;
     $font_family = isset($_POST['grp_widget_template_font_family']) ? sanitize_text_field($_POST['grp_widget_template_font_family']) : '';
     $max_height = isset($_POST['grp_widget_template_max_height']) ? absint($_POST['grp_widget_template_max_height']) : 0;
+    $logo_scale = isset($_POST['grp_widget_template_logo_scale']) ? absint($_POST['grp_widget_template_logo_scale']) : 50;
     $max_width = isset($_POST['grp_widget_template_max_width']) ? absint($_POST['grp_widget_template_max_width']) : 0;
     $gradient_start = isset($_POST['grp_widget_template_gradient_start_text']) ? sanitize_text_field($_POST['grp_widget_template_gradient_start_text']) : '#24a1ff';
     $gradient_end = isset($_POST['grp_widget_template_gradient_end_text']) ? sanitize_text_field($_POST['grp_widget_template_gradient_end_text']) : '#ff7b5a';
@@ -81,6 +82,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     update_option('grp_widget_template_box_shadow_blur', $box_shadow_blur);
     update_option('grp_widget_template_box_shadow_spread', $box_shadow_spread);
     update_option('grp_widget_template_box_shadow_color', $box_shadow_color);
+    update_option('grp_widget_template_logo_scale', $logo_scale);
     update_option('grp_widget_template_glass_effect', $glass_effect);
     $template = isset($_POST['grp_widget_button_default_template']) ? sanitize_text_field($_POST['grp_widget_button_default_template']) : 'basic';
     $template = GRP_Review_Widgets::get_instance()->sanitize_button_template($template);
@@ -99,9 +101,10 @@ $button_color = get_option('grp_widget_button_default_color', '');
 $button_bg_color = get_option('grp_widget_button_default_bg_color', '');
 $star_color = get_option('grp_widget_template_star_color', '#FBBD05');
 $star_placement = get_option('grp_widget_template_star_placement', 'below');
-$show_logo = get_option('grp_widget_template_show_logo', true);
-$font_family = get_option('grp_widget_template_font_family', '');
-$max_height = get_option('grp_widget_template_max_height', 0);
+    $show_logo = get_option('grp_widget_template_show_logo', true);
+    $font_family = get_option('grp_widget_template_font_family', '');
+    $max_height = get_option('grp_widget_template_max_height', 0);
+    $logo_scale = get_option('grp_widget_template_logo_scale', 50);
 $max_width = get_option('grp_widget_template_max_width', 400);
 $gradient_start = get_option('grp_widget_template_gradient_start', '#24a1ff');
 $gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
@@ -478,6 +481,16 @@ $is_pro = $license->is_pro();
                         </tr>
                         <tr>
                             <th scope="row">
+                                <label for="grp_widget_template_logo_scale"><?php esc_html_e('Logo Scale (%)', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="range" min="10" max="100" value="<?php echo esc_attr($logo_scale); ?>" id="grp_widget_template_logo_scale" name="grp_widget_template_logo_scale">
+                                <input type="number" min="10" max="100" value="<?php echo esc_attr($logo_scale); ?>" id="grp_widget_template_logo_scale_text" style="width: 80px; margin-left: 10px;">
+                                <p class="description"><?php esc_html_e('Scale the logo relative to the frame width (default 50%).', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
                                 <label for="grp_widget_template_font_family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
@@ -677,7 +690,7 @@ $is_pro = $license->is_pro();
                                 <label for="grp_widget_qr_default_size"><?php esc_html_e('Default QR Code Size', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="50">
+                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="5">
                                 <span>px</span>
                                 <p class="description"><?php esc_html_e('Default size for generated QR codes.', 'google-reviews-plugin'); ?></p>
                             </td>

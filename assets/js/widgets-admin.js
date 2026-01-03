@@ -30,6 +30,8 @@
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
         var $glassCheckbox = $('#grp_widget_template_glass_effect');
+        var $logoScaleSlider = $('#grp_widget_template_logo_scale');
+        var $logoScaleText = $('#grp_widget_template_logo_scale_text');
         var $gradientRows = $('.grp-gradient-row');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
@@ -136,7 +138,7 @@
         }
 
         function renderPreviewContent(templateType, templateData, options) {
-            var qrHtml = templateData && templateData.qr ? '<img id="grp-preview-qr-img" src="' + blankQr + '" alt="QR">' : '';
+            var qrHtml = templateData && templateData.qr ? '<div class="grp-qr-frame"><img id="grp-preview-qr-img" src="' + blankQr + '" alt="QR"></div>' : '';
             var linkColor = options.linkColor || '#111111';
             var linkHtml = options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener" style="color:' + linkColor + ';">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
 
@@ -144,7 +146,7 @@
                 return '<div class="grp-layout1-preview">' +
                     '<div class="grp-layout1-qr">' + qrHtml + '</div>' +
                     '<div class="grp-layout1-details">' +
-                        (options.showLogo && options.logoIconUrl ? '<img src="' + options.logoIconUrl + '" class="grp-layout1-logo-img" alt="Google">' : '') +
+                        (options.showLogo && options.logoIconUrl ? '<img src="' + options.logoIconUrl + '" class="grp-layout1-logo-img" alt="Google" style="width:' + options.logoScale + '%;">' : '') +
                         '<div class="grp-layout1-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
                         '<div class="grp-layout1-title">' + options.title + '</div>' +
                         '<div class="grp-layout1-subtitle">' + options.subtitle + '</div>' +
@@ -157,7 +159,7 @@
             if (templateType === 'layout2') {
                 var darkClass = templateData.dark ? ' grp-layout-dark' : '';
                 return '<div class="grp-layout2-preview' + darkClass + '">' +
-                    (options.showLogo && options.logoClassicUrl ? '<img src="' + options.logoClassicUrl + '" class="grp-layout2-logo-img" alt="Google">' : '') +
+                    (options.showLogo && options.logoClassicUrl ? '<img src="' + options.logoClassicUrl + '" class="grp-layout2-logo-img" alt="Google" style="width:' + options.logoScale + '%;">' : '') +
                     '<div class="grp-layout2-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
                     '<div class="grp-layout2-heading">' + options.title + '</div>' +
                     '<div class="grp-layout2-subtitle">' + options.subtitle + '</div>' +
@@ -170,7 +172,7 @@
             if (templateType === 'card') {
                 var inner = '<div class="grp-review-card">';
                 if (options.showLogo && options.logoClassicUrl) {
-                    inner += '<img src="' + options.logoClassicUrl + '" class="grp-card-logo-img" alt="Google">';
+                    inner += '<img src="' + options.logoClassicUrl + '" class="grp-card-logo-img" alt="Google" style="width:' + options.logoScale + '%;">';
                 }
                 inner += '<div class="grp-card-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>';
                 inner += '<div class="grp-card-heading">' + options.title + '</div>';
@@ -216,6 +218,10 @@
             var linkColor = $linkColorText.length ? ($linkColorText.val() || '#111111') : '#111111';
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
+            var logoScale = parseInt($logoScaleSlider.val(), 10);
+            if (isNaN(logoScale) || logoScale <= 0) {
+                logoScale = 50;
+            }
             var boxShadowEnabled = $boxShadowCheckbox.is(':checked');
             var boxShadowValue = $boxShadowValue.val().trim();
             var glassEffect = $glassCheckbox.is(':checked');
@@ -273,6 +279,7 @@
                 logoClassicUrl: logoUrls.classic || '',
                 reviewUrl: previewUrl,
                 linkColor: linkColor,
+                logoScale: logoScale,
             });
             $previewBtn.html(previewHtml);
 
@@ -339,6 +346,23 @@
             var val = $(this).val();
             if (/^#[0-9A-F]{6}$/i.test(val)) {
                 $linkColorInput.val(val);
+            }
+            updatePreview();
+        });
+
+        $logoScaleSlider.on('input', function() {
+            var value = $(this).val();
+            $logoScaleText.val(value);
+            updatePreview();
+        });
+
+        $logoScaleText.on('input', function() {
+            var value = $(this).val();
+            if (value === '') {
+                return;
+            }
+            if (!isNaN(value) && value >= 10 && value <= 100) {
+                $logoScaleSlider.val(value);
             }
             updatePreview();
         });

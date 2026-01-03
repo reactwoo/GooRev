@@ -18,10 +18,8 @@
 .grp-layout1-qr img {
     width: 120px;
     height: 120px;
-    border-radius: 16px;
-    background: #fff;
-    padding: 8px;
-    border: 2px solid #ddd;
+    object-fit: cover;
+    display: block;
 }
 
 .grp-layout1-details {
@@ -60,13 +58,56 @@
     border-radius: 999px;
 }
 
+.grp-qr-frame,
+.grp-layout1-qr .grp-qr-frame,
+.grp-layout2-qr .grp-qr-frame,
+.grp-card-qr .grp-qr-frame,
+.grp-review-button-qr .grp-qr-frame {
+    background: #fff;
+    padding: 6px;
+    border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.grp-qr-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.grp-layout1-qr .grp-qr-frame {
+    padding: 8px;
+}
+
+.grp-layout1-qr .grp-qr-frame img {
+    width: 120px;
+    height: 120px;
+}
+
+.grp-layout2-qr .grp-qr-frame img,
+.grp-card-qr .grp-qr-frame img {
+    width: 140px;
+    height: 140px;
+}
+
+.grp-review-button-qr .grp-qr-frame img {
+    width: 56px;
+    height: 56px;
+}
+
 .grp-layout1-logo-img,
 .grp-layout2-logo-img,
 .grp-card-logo-img {
-    max-width: 120px;
-    width: 60%;
+    width: auto;
     height: auto;
+    max-width: 100%;
     display: block;
+    object-fit: contain;
 }
 
 .grp-review-button-template-layout2 .grp-layout2-preview,
