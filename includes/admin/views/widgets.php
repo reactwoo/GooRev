@@ -58,6 +58,11 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     }
     $box_shadow_enabled = isset($_POST['grp_widget_template_box_shadow_enabled']) ? 1 : 0;
     $box_shadow_value = isset($_POST['grp_widget_template_box_shadow_value']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_value']) : '0 18px 35px rgba(0, 0, 0, 0.25)';
+    $box_shadow_h = isset($_POST['grp_widget_template_box_shadow_h']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_h']) : '0';
+    $box_shadow_v = isset($_POST['grp_widget_template_box_shadow_v']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_v']) : '18';
+    $box_shadow_blur = isset($_POST['grp_widget_template_box_shadow_blur']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_blur']) : '35';
+    $box_shadow_spread = isset($_POST['grp_widget_template_box_shadow_spread']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_spread']) : '0';
+    $box_shadow_color = isset($_POST['grp_widget_template_box_shadow_color']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_color']) : '#000000';
     $glass_effect = isset($_POST['grp_widget_template_glass_effect']) ? 1 : 0;
     
     update_option('grp_widget_template_star_color', $star_color);
@@ -71,6 +76,11 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     update_option('grp_widget_template_max_width', $max_width);
     update_option('grp_widget_template_box_shadow_enabled', $box_shadow_enabled);
     update_option('grp_widget_template_box_shadow_value', $box_shadow_value);
+    update_option('grp_widget_template_box_shadow_h', $box_shadow_h);
+    update_option('grp_widget_template_box_shadow_v', $box_shadow_v);
+    update_option('grp_widget_template_box_shadow_blur', $box_shadow_blur);
+    update_option('grp_widget_template_box_shadow_spread', $box_shadow_spread);
+    update_option('grp_widget_template_box_shadow_color', $box_shadow_color);
     update_option('grp_widget_template_glass_effect', $glass_effect);
     $template = isset($_POST['grp_widget_button_default_template']) ? sanitize_text_field($_POST['grp_widget_button_default_template']) : 'basic';
     $template = GRP_Review_Widgets::get_instance()->sanitize_button_template($template);
@@ -98,11 +108,16 @@ $gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
 $link_color = get_option('grp_widget_template_link_color', '#111111');
 $box_shadow_enabled = get_option('grp_widget_template_box_shadow_enabled', true);
 $box_shadow_value = get_option('grp_widget_template_box_shadow_value', '0 18px 35px rgba(0, 0, 0, 0.25)');
+$box_shadow_h = get_option('grp_widget_template_box_shadow_h', '0');
+$box_shadow_v = get_option('grp_widget_template_box_shadow_v', '18');
+$box_shadow_blur = get_option('grp_widget_template_box_shadow_blur', '35');
+$box_shadow_spread = get_option('grp_widget_template_box_shadow_spread', '0');
+$box_shadow_color = get_option('grp_widget_template_box_shadow_color', '#000000');
 $glass_effect = get_option('grp_widget_template_glass_effect', false);
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
 $button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
-$qr_size = get_option('grp_widget_qr_default_size', 200);
+$qr_size = get_option('grp_widget_qr_default_size', 125);
 $tracking_enabled = get_option('grp_widget_tracking_enabled', true);
 
 // Get Place ID
@@ -483,6 +498,25 @@ $is_pro = $license->is_pro();
                         </tr>
                         <tr>
                             <th scope="row">
+                                <label><?php esc_html_e('Box Shadow / Glass', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" id="grp_widget_template_box_shadow_enabled" name="grp_widget_template_box_shadow_enabled" value="1" <?php checked($box_shadow_enabled, true); ?>>
+                                    <?php esc_html_e('Enable custom shadow', 'google-reviews-plugin'); ?>
+                                </label>
+                                <button type="button" id="grp-box-shadow-edit" class="button" style="margin-left: 10px;"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
+                                <input type="hidden" id="grp_widget_template_box_shadow_value" name="grp_widget_template_box_shadow_value" value="<?php echo esc_attr($box_shadow_value); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_h" name="grp_widget_template_box_shadow_h" value="<?php echo esc_attr($box_shadow_h); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_v" name="grp_widget_template_box_shadow_v" value="<?php echo esc_attr($box_shadow_v); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_blur" name="grp_widget_template_box_shadow_blur" value="<?php echo esc_attr($box_shadow_blur); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_spread" name="grp_widget_template_box_shadow_spread" value="<?php echo esc_attr($box_shadow_spread); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_color" name="grp_widget_template_box_shadow_color" value="<?php echo esc_attr($box_shadow_color); ?>">
+                                <p class="description"><?php esc_html_e('Open the editor to adjust the shadow sliders (horizontal, vertical, blur, spread, color).', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
                                 <label for="grp_widget_template_max_width"><?php esc_html_e('Max Width', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
@@ -581,8 +615,56 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
+                        <tr>
+                            <th scope="row">
+                                <label><?php esc_html_e('Box Shadow / Glass', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <label>
+                                    <input type="checkbox" id="grp_widget_template_box_shadow_enabled" name="grp_widget_template_box_shadow_enabled" value="1" <?php checked($box_shadow_enabled, true); ?>>
+                                    <?php esc_html_e('Enable custom shadow', 'google-reviews-plugin'); ?>
+                                </label>
+                                <button type="button" id="grp-box-shadow-edit" class="button" style="margin-left: 10px;"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
+                                <input type="hidden" id="grp_widget_template_box_shadow_value" name="grp_widget_template_box_shadow_value" value="<?php echo esc_attr($box_shadow_value); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_h" name="grp_widget_template_box_shadow_h" value="<?php echo esc_attr($box_shadow_h); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_v" name="grp_widget_template_box_shadow_v" value="<?php echo esc_attr($box_shadow_v); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_blur" name="grp_widget_template_box_shadow_blur" value="<?php echo esc_attr($box_shadow_blur); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_spread" name="grp_widget_template_box_shadow_spread" value="<?php echo esc_attr($box_shadow_spread); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_color" name="grp_widget_template_box_shadow_color" value="<?php echo esc_attr($box_shadow_color); ?>">
+                                <p class="description"><?php esc_html_e('Open the editor to adjust horizontal, vertical, blur, spread and color values.', 'google-reviews-plugin'); ?></p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
+                <div id="grp-box-shadow-modal" class="grp-box-shadow-modal" style="display: none;">
+                    <div class="grp-box-shadow-modal-content">
+                        <h3><?php esc_html_e('Box Shadow Editor', 'google-reviews-plugin'); ?></h3>
+                        <label>
+                            <?php esc_html_e('Color', 'google-reviews-plugin'); ?>
+                            <input type="color" id="grp-box-shadow-color-picker" value="<?php echo esc_attr($box_shadow_color); ?>">
+                        </label>
+                        <div class="grp-box-shadow-controls">
+                            <?php
+                            $controls = array(
+                                array('name' => 'Horizontal', 'id' => 'h', 'min' => -50, 'max' => 50, 'value' => $box_shadow_h),
+                                array('name' => 'Vertical', 'id' => 'v', 'min' => -50, 'max' => 50, 'value' => $box_shadow_v),
+                                array('name' => 'Blur', 'id' => 'blur', 'min' => 0, 'max' => 100, 'value' => $box_shadow_blur),
+                                array('name' => 'Spread', 'id' => 'spread', 'min' => -50, 'max' => 50, 'value' => $box_shadow_spread),
+                            );
+                            foreach ($controls as $control): ?>
+                                <div class="grp-shadow-control">
+                                    <label><?php echo esc_html($control['name']); ?>
+                                        <input type="range" class="grp-shadow-range" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
+                                    </label>
+                                    <input type="number" class="grp-shadow-number" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="grp-box-shadow-actions">
+                            <button type="button" id="grp-box-shadow-modal-close" class="button"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
@@ -690,6 +772,72 @@ jQuery(document).ready(function($) {
             }
         }, 100);
     }
+
+    var $boxShadowEdit = $('#grp-box-shadow-edit');
+    var $boxShadowModal = $('#grp-box-shadow-modal');
+    var $boxShadowClose = $('#grp-box-shadow-modal-close');
+    var $boxShadowRanges = $('.grp-shadow-range');
+    var $boxShadowNumbers = $('.grp-shadow-number');
+    var $boxShadowColorPicker = $('#grp-box-shadow-color-picker');
+    var $hiddenH = $('#grp_widget_template_box_shadow_h');
+    var $hiddenV = $('#grp_widget_template_box_shadow_v');
+    var $hiddenBlur = $('#grp_widget_template_box_shadow_blur');
+    var $hiddenSpread = $('#grp_widget_template_box_shadow_spread');
+    var $hiddenColor = $('#grp_widget_template_box_shadow_color');
+    var $hiddenValue = $('#grp_widget_template_box_shadow_value');
+
+    function updateBoxShadowString() {
+        var h = $hiddenH.val() || 0;
+        var v = $hiddenV.val() || 0;
+        var blur = $hiddenBlur.val() || 0;
+        var spread = $hiddenSpread.val() || 0;
+        var color = $hiddenColor.val() || '#000000';
+        $hiddenValue.val(h + ' ' + v + ' ' + blur + ' ' + spread + ' ' + color);
+    }
+
+    function syncControl(target, value) {
+        $boxShadowRanges.filter('[data-target="' + target + '"]').val(value);
+        $boxShadowNumbers.filter('[data-target="' + target + '"]').val(value);
+        if (target === 'h') $hiddenH.val(value);
+        if (target === 'v') $hiddenV.val(value);
+        if (target === 'blur') $hiddenBlur.val(value);
+        if (target === 'spread') $hiddenSpread.val(value);
+        updateBoxShadowString();
+    }
+
+    $boxShadowRanges.on('input', function() {
+        var target = $(this).data('target');
+        syncControl(target, $(this).val());
+    });
+
+    $boxShadowNumbers.on('input', function() {
+        var target = $(this).data('target');
+        syncControl(target, $(this).val());
+    });
+
+    $boxShadowColorPicker.on('input', function() {
+        $hiddenColor.val($(this).val());
+        updateBoxShadowString();
+    });
+
+    $boxShadowEdit.on('click', function() {
+        $boxShadowModal.show();
+        syncControl('h', $hiddenH.val());
+        syncControl('v', $hiddenV.val());
+        syncControl('blur', $hiddenBlur.val());
+        syncControl('spread', $hiddenSpread.val());
+        $boxShadowColorPicker.val($hiddenColor.val());
+    });
+
+    $boxShadowClose.on('click', function() {
+        $boxShadowModal.hide();
+    });
+
+    $(window).on('click', function(e) {
+        if ($boxShadowModal.is(e.target)) {
+            $boxShadowModal.hide();
+        }
+    });
 });
 </script>
 
