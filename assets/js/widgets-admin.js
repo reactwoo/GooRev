@@ -24,6 +24,8 @@
         var $gradientEndText = $('#grp_widget_template_gradient_end_text');
         var $fontFamilyInput = $('#grp_widget_template_font_family');
         var $maxHeightInput = $('#grp_widget_template_max_height');
+        var $linkColorInput = $('#grp_widget_template_link_color');
+        var $linkColorText = $('#grp_widget_template_link_color_text');
         var $maxWidthInput = $('#grp_widget_template_max_width');
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
@@ -134,7 +136,8 @@
 
         function renderPreviewContent(templateType, templateData, options) {
             var qrHtml = templateData && templateData.qr ? '<img id="grp-preview-qr-img" src="' + blankQr + '" alt="QR">' : '';
-            var linkHtml = options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
+            var linkColor = options.linkColor || '#111111';
+            var linkHtml = options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener" style="color:' + linkColor + ';">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
 
             if (templateType === 'layout1') {
                 return '<div class="grp-layout1-preview">' +
@@ -145,7 +148,7 @@
                         '<div class="grp-layout1-title">' + options.title + '</div>' +
                         '<div class="grp-layout1-subtitle">' + options.subtitle + '</div>' +
                         '<div class="grp-layout1-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
-                        (linkHtml ? '<div class="grp-layout1-link">' + linkHtml + '</div>' : '') +
+                        (linkHtml ? '<div class="grp-layout1-link" style="color:' + linkColor + ';">' + linkHtml + '</div>' : '') +
                     '</div>' +
                 '</div>';
             }
@@ -158,7 +161,7 @@
                     '<div class="grp-layout2-heading">' + options.title + '</div>' +
                     '<div class="grp-layout2-subtitle">' + options.subtitle + '</div>' +
                     '<div class="grp-layout2-qr">' + qrHtml + '</div>' +
-                    '<div class="grp-layout2-link">' + linkHtml + '</div>' +
+                    '<div class="grp-layout2-link" style="color:' + linkColor + ';">' + linkHtml + '</div>' +
                     '<div class="grp-layout2-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
                 '</div>';
             }
@@ -209,6 +212,7 @@
             var fontFamily = $fontFamilyInput.val();
             var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
             var maxWidth = parseInt($maxWidthInput.val(), 10) || 0;
+            var linkColor = $linkColorText.length ? ($linkColorText.val() || '#111111') : '#111111';
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
             var boxShadowEnabled = $boxShadowCheckbox.is(':checked');
@@ -267,6 +271,7 @@
                 logoIconUrl: logoUrls.icon || '',
                 logoClassicUrl: logoUrls.classic || '',
                 reviewUrl: previewUrl,
+                linkColor: linkColor,
             });
             $previewBtn.html(previewHtml);
 
@@ -319,6 +324,20 @@
             var val = $(this).val();
             if (/^#[0-9A-F]{6}$/i.test(val)) {
                 $starColorInput.val(val);
+            }
+            updatePreview();
+        });
+        
+        $linkColorInput.on('change', function() {
+            var color = $(this).val();
+            $linkColorText.val(color);
+            updatePreview();
+        });
+
+        $linkColorText.on('input', function() {
+            var val = $(this).val();
+            if (/^#[0-9A-F]{6}$/i.test(val)) {
+                $linkColorInput.val(val);
             }
             updatePreview();
         });

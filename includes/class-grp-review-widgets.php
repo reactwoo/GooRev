@@ -577,7 +577,7 @@ class GRP_Review_Widgets {
         $tagline = !empty($template_data['tagline']) ? $template_data['tagline'] : '';
         $subtitle = !empty($template_data['subtitle']) ? $template_data['subtitle'] : __('Scan the QR code below to leave a review!', 'google-reviews-plugin');
         $link_text = !empty($template_data['link_text']) ? $template_data['link_text'] : __('Click here', 'google-reviews-plugin');
-        $link_html = '<a href="' . esc_url($review_url) . '" target="_blank" rel="noopener">' . esc_html($link_text) . '</a>';
+        $link_html = '<a href="' . esc_url($review_url) . '" target="_blank" rel="noopener" style="color: ' . esc_attr($link_color) . ';">' . esc_html($link_text) . '</a>';
 
         $button_html = '';
         if (isset($template_data['type']) && $template_data['type'] === 'layout1') {

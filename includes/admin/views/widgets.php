@@ -95,21 +95,10 @@ $max_height = get_option('grp_widget_template_max_height', 0);
 $max_width = get_option('grp_widget_template_max_width', 400);
 $gradient_start = get_option('grp_widget_template_gradient_start', '#24a1ff');
 $gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
+$link_color = get_option('grp_widget_template_link_color', '#111111');
 $box_shadow_enabled = get_option('grp_widget_template_box_shadow_enabled', true);
 $box_shadow_value = get_option('grp_widget_template_box_shadow_value', '0 18px 35px rgba(0, 0, 0, 0.25)');
 $glass_effect = get_option('grp_widget_template_glass_effect', false);
-$star_color = get_option('grp_widget_template_star_color', '#FBBD05');
-$star_placement = get_option('grp_widget_template_star_placement', 'below');
-$show_logo = get_option('grp_widget_template_show_logo', true);
-$font_family = get_option('grp_widget_template_font_family', '');
-$max_height = get_option('grp_widget_template_max_height', '');
-$gradient_start = get_option('grp_widget_template_gradient_start', '#24a1ff');
-$gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
-$star_color = get_option('grp_widget_template_star_color', '#FBBD05');
-$star_placement = get_option('grp_widget_template_star_placement', 'below');
-$show_logo = get_option('grp_widget_template_show_logo', true);
-$font_family = get_option('grp_widget_template_font_family', '');
-$max_height = get_option('grp_widget_template_max_height', '');
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
 $button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
@@ -426,6 +415,16 @@ $is_pro = $license->is_pro();
                             <td>
                                 <input type="color" id="grp_widget_template_gradient_end" name="grp_widget_template_gradient_end" value="<?php echo esc_attr($gradient_end); ?>">
                                 <input type="text" id="grp_widget_template_gradient_end_text" name="grp_widget_template_gradient_end_text" value="<?php echo esc_attr($gradient_end); ?>" placeholder="#ff7b5a" style="width: 140px; margin-left: 10px;">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label for="grp_widget_template_link_color"><?php esc_html_e('Link Color', 'google-reviews-plugin'); ?></label>
+                            </th>
+                            <td>
+                                <input type="color" id="grp_widget_template_link_color" name="grp_widget_template_link_color" value="<?php echo esc_attr($link_color); ?>">
+                                <input type="text" id="grp_widget_template_link_color_text" name="grp_widget_template_link_color_text" value="<?php echo esc_attr($link_color); ?>" placeholder="#111111" style="width: 140px; margin-left: 10px;">
+                                <p class="description"><?php esc_html_e('Color applied to the clickable link text inside layouts.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
                         <tr>
