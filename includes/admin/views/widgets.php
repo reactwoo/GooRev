@@ -109,7 +109,7 @@ $star_placement = get_option('grp_widget_template_star_placement', 'below');
     $show_logo = get_option('grp_widget_template_show_logo', true);
     $font_family = get_option('grp_widget_template_font_family', '');
     $max_height = get_option('grp_widget_template_max_height', 0);
-    $logo_scale = get_option('grp_widget_template_logo_scale', 50);
+    $logo_scale = get_option('grp_widget_template_logo_scale', 15);
 $max_width = get_option('grp_widget_template_max_width', 400);
 $gradient_start = get_option('grp_widget_template_gradient_start', '#24a1ff');
 $gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
@@ -127,6 +127,9 @@ $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
 $button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
 $qr_size = get_option('grp_widget_qr_default_size', 125);
+if ($qr_size < 125) {
+    $qr_size = 125;
+}
 $tracking_enabled = get_option('grp_widget_tracking_enabled', true);
 
 // Get Place ID
@@ -303,7 +306,7 @@ $is_pro = $license->is_pro();
                 }
                 $preview_qr_url = '';
                 if ($has_place_id && !empty($preview_template['qr'])) {
-                    $qr_size = isset($preview_template['qr_size']) ? absint($preview_template['qr_size']) : 96;
+                    $qr_size = isset($preview_template['qr_size']) ? absint($preview_template['qr_size']) : 125;
                     $preview_qr_url = $review_widgets->generate_qr_code($preview_url, $qr_size);
                 }
                 $preview_tagline = !empty($preview_template['tagline']) ? $preview_template['tagline'] : '';

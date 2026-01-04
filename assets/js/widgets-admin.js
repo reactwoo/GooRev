@@ -38,6 +38,7 @@
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
         });
+        var logoScaleTouched = false;
         var qrCache = {};
         var blankQr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
         var isPro = typeof grpWidgets !== 'undefined' ? !!grpWidgets.is_pro : false;
@@ -141,7 +142,8 @@
         function renderPreviewContent(templateType, templateData, options) {
             var qrHtml = templateData && templateData.qr ? '<div class="grp-qr-frame"><img id="grp-preview-qr-img" src="' + blankQr + '" alt="QR"></div>' : '';
             var linkColor = options.linkColor || '#111111';
-            var linkHtml = options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener" style="color:' + linkColor + ';">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
+            var showLink = options.showLink !== false;
+            var linkHtml = showLink && options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener" style="color:' + linkColor + ';">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
 
             if (templateType === 'layout1') {
                 return '<div class="grp-layout1-preview">' +
@@ -220,6 +222,11 @@
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
             var logoScale = parseInt($logoScaleSlider.val(), 10);
+            if (!logoScaleTouched && templateKey === 'layout1') {
+                logoScale = 15;
+                $logoScaleSlider.val(logoScale);
+                $logoScaleText.val(logoScale);
+            }
             if (isNaN(logoScale) || logoScale <= 0) {
                 logoScale = 50;
             }
@@ -282,6 +289,7 @@
                 reviewUrl: previewUrl,
                 linkColor: linkColor,
                 logoScale: logoScale,
+                showLink: templateData.show_link !== false,
             });
             $previewBtn.html(previewHtml);
 
@@ -358,6 +366,7 @@
 
         $logoScaleSlider.on('input', function() {
             var value = $(this).val();
+            logoScaleTouched = true;
             $logoScaleText.val(value);
             updatePreview();
         });
@@ -367,6 +376,7 @@
             if (value === '') {
                 return;
             }
+            logoScaleTouched = true;
             if (!isNaN(value) && value >= 10 && value <= 100) {
                 $logoScaleSlider.val(value);
             }

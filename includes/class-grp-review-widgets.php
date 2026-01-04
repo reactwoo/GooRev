@@ -175,6 +175,7 @@ class GRP_Review_Widgets {
                 'stars' => true,
                 'subtitle' => __('Scan the QR code to leave a review!', 'google-reviews-plugin'),
                 'underline_colors' => array('#4285f4', '#ea4335', '#fbbc05'),
+                'show_link' => false,
             ),
             'layout2' => array(
                 'name' => __('Layout 2', 'google-reviews-plugin'),
@@ -599,7 +600,11 @@ class GRP_Review_Widgets {
         if ($stored_link_text) {
             $link_text = $stored_link_text;
         }
-        $link_html = '<a href="' . esc_url($review_url) . '" target="_blank" rel="noopener" style="color: ' . esc_attr($link_color) . ';">' . esc_html($link_text) . '</a>';
+        $show_link = isset($template_data['show_link']) ? (bool) $template_data['show_link'] : true;
+        $link_html = '';
+        if ($show_link) {
+            $link_html = '<a href="' . esc_url($review_url) . '" target="_blank" rel="noopener" style="color: ' . esc_attr($link_color) . ';">' . esc_html($link_text) . '</a>';
+        }
 
         $button_html = '';
         if (isset($template_data['type']) && $template_data['type'] === 'layout1') {

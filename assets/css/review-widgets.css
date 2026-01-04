@@ -113,8 +113,19 @@
 
 .grp-review-button-template-layout2 .grp-layout2-preview,
 .grp-review-button-template-layout2 .grp-layout2-preview.grp-layout-dark,
-.grp-review-button-template-creative-pro .grp-layout2-preview {
+.grp-review-button-template-creative-pro .grp-layout2-preview,
+.grp-review-button-template-layout3 .grp-layout2-preview,
+.grp-review-button-template-layout3 .grp-layout2-preview.grp-layout-dark {
     width: 100%;
+}
+
+.grp-review-button-template-layout2 .grp-review-button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
+    color: inherit;
 }
 
 .grp-layout2-preview {
@@ -463,6 +474,17 @@
 .grp-review-button-template-creative-pro {
     background: linear-gradient(135deg, #24a1ff, #ff7b5a);
     color: #fff;
+}
+
+.grp-review-button-template-creative-pro .grp-card-wrapper {
+    background: transparent;
+    box-shadow: none;
+}
+
+.grp-review-button-template-creative-pro .grp-review-card {
+    background: transparent;
+    color: #fff;
+    box-shadow: none;
 }
 /* Alignment */
 .grp-align-left {
