@@ -290,6 +290,12 @@
             $modalGradientEnd.val(gradientEndValue);
             $modalGradientEndText.val(gradientEndValue);
 
+            console.log('[GRP DEBUG] populateTemplateModal', {
+                template: modalTemplateKey,
+                showLink: templateData.show_link !== false,
+                isCreative: isCreative,
+                logoScale: logoScaleValue,
+            });
             updateModalPreview();
         }
 
@@ -587,6 +593,11 @@
             if (!$templateEditorModal.length) {
                 return;
             }
+            console.log('[GRP DEBUG] Customize modal click', {
+                isPro: isPro,
+                licenseStatus: typeof grpWidgets !== 'undefined' ? grpWidgets.license_status : undefined,
+                licensePackage: typeof grpWidgets !== 'undefined' ? (grpWidgets.license_data || {}).packageType : undefined,
+            });
             populateTemplateModal();
             $templateEditorModal.addClass('grp-template-active');
         });
