@@ -61,9 +61,22 @@
         var modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
         var qrCache = {};
         var blankQr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-        var isPro = typeof grpWidgets !== 'undefined' ? !!grpWidgets.is_pro : false;
-        var hasPlaceId = typeof grpWidgets !== 'undefined' ? !!grpWidgets.has_place_id : false;
-        var logoUrls = (typeof grpWidgets !== 'undefined' && grpWidgets.logo_urls) ? grpWidgets.logo_urls : {};
+        var isPro = false;
+        var hasPlaceId = false;
+        var logoUrls = {};
+        if (typeof grpWidgets !== 'undefined') {
+            isPro = !!grpWidgets.is_pro;
+            hasPlaceId = !!grpWidgets.has_place_id;
+            logoUrls = grpWidgets.logo_urls || {};
+            if (!isPro && grpWidgets.license_status) {
+                var licenseData = grpWidgets.license_data || {};
+                var packageType = (licenseData.packageType || licenseData.package_type || '').toLowerCase();
+                var proPackages = ['pro', 'enterprise', 'goorev-pro', 'goorev-enterprise', 'pro_with_restricts'];
+                if (proPackages.indexOf(packageType) !== -1) {
+                    isPro = true;
+                }
+            }
+        }
 
         window.updateGRPPreview = function() {
             updatePreview();

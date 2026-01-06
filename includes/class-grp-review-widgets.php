@@ -268,6 +268,8 @@ class GRP_Review_Widgets {
             'tracking_enabled' => get_option('grp_widget_tracking_enabled', true),
             'has_place_id' => $has_place_id,
             'is_pro' => $license->is_pro(),
+            'license_status' => $license->get_license_status(),
+            'license_data' => $license->get_license_data(),
             'button_templates' => $this->get_button_templates(),
             'logo_urls' => array(
                 'icon' => GRP_PLUGIN_URL . 'assets/images/google-icon.svg',
