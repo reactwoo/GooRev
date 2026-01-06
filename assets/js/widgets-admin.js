@@ -326,7 +326,7 @@
         }
 
         function closeTemplateModal() {
-            $templateEditorModal.fadeOut(120);
+            $templateEditorModal.removeClass('grp-template-active');
         }
 
         function updatePreview() {
@@ -562,7 +562,7 @@
                 return;
             }
             populateTemplateModal();
-            $templateEditorModal.fadeIn(180);
+            $templateEditorModal.addClass('grp-template-active');
         });
 
         $templateEditorModal.on('click', function(e) {
