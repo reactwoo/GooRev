@@ -22,10 +22,16 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     
     // Only save if not empty and valid hex color
     if (!empty($button_color) && !preg_match('/^#[0-9A-F]{6}$/i', $button_color)) {
-        $button_color = '';
+        $button_color = '#ffffff';
+    }
+    if ($button_color === '') {
+        $button_color = '#ffffff';
     }
     if (!empty($button_bg_color) && !preg_match('/^#[0-9A-F]{6}$/i', $button_bg_color)) {
-        $button_bg_color = '';
+        $button_bg_color = '#2b2b2b';
+    }
+    if ($button_bg_color === '') {
+        $button_bg_color = '#2b2b2b';
     }
     
     update_option('grp_widget_button_default_color', $button_color);
@@ -47,7 +53,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     $max_width = isset($_POST['grp_widget_template_max_width']) ? absint($_POST['grp_widget_template_max_width']) : 0;
     $gradient_start = isset($_POST['grp_widget_template_gradient_start_text']) ? sanitize_text_field($_POST['grp_widget_template_gradient_start_text']) : '#24a1ff';
     $gradient_end = isset($_POST['grp_widget_template_gradient_end_text']) ? sanitize_text_field($_POST['grp_widget_template_gradient_end_text']) : '#ff7b5a';
-    $link_color = isset($_POST['grp_widget_template_link_color_text']) ? sanitize_text_field($_POST['grp_widget_template_link_color_text']) : '#111111';
+    $link_color = isset($_POST['grp_widget_template_link_color_text']) ? sanitize_text_field($_POST['grp_widget_template_link_color_text']) : '#ffffff';
     $link_text = isset($_POST['grp_widget_template_link_text']) ? sanitize_text_field($_POST['grp_widget_template_link_text']) : __('Click here', 'google-reviews-plugin');
     if (!preg_match('/^#[0-9A-F]{6}$/i', $gradient_start)) {
         $gradient_start = '#24a1ff';
@@ -56,7 +62,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
         $gradient_end = '#ff7b5a';
     }
     if (!preg_match('/^#[0-9A-F]{6}$/i', $link_color)) {
-        $link_color = '#111111';
+        $link_color = '#ffffff';
     }
     if ($link_text === '') {
         $link_text = __('Click here', 'google-reviews-plugin');
@@ -102,14 +108,14 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
 $button_text = get_option('grp_widget_button_default_text', __('Leave us a review', 'google-reviews-plugin'));
 $button_style = get_option('grp_widget_button_default_style', 'default');
 $button_size = get_option('grp_widget_button_default_size', 'medium');
-$button_color = get_option('grp_widget_button_default_color', '');
-$button_bg_color = get_option('grp_widget_button_default_bg_color', '');
+$button_color = get_option('grp_widget_button_default_color', '#ffffff');
+$button_bg_color = get_option('grp_widget_button_default_bg_color', '#2b2b2b');
 $star_color = get_option('grp_widget_template_star_color', '#FBBD05');
 $star_placement = get_option('grp_widget_template_star_placement', 'below');
     $show_logo = get_option('grp_widget_template_show_logo', true);
     $font_family = get_option('grp_widget_template_font_family', '');
     $max_height = get_option('grp_widget_template_max_height', 0);
-    $logo_scale = get_option('grp_widget_template_logo_scale', 15);
+$logo_scale = get_option('grp_widget_template_logo_scale', 13);
 $max_width = get_option('grp_widget_template_max_width', 400);
 $gradient_start = get_option('grp_widget_template_gradient_start', '#24a1ff');
 $gradient_end = get_option('grp_widget_template_gradient_end', '#ff7b5a');
@@ -126,9 +132,9 @@ $glass_effect = get_option('grp_widget_template_glass_effect', false);
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
 $button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
-$qr_size = get_option('grp_widget_qr_default_size', 125);
-if ($qr_size < 125) {
-    $qr_size = 125;
+$qr_size = get_option('grp_widget_qr_default_size', 135);
+if ($qr_size < 135) {
+    $qr_size = 135;
 }
 $tracking_enabled = get_option('grp_widget_tracking_enabled', true);
 
@@ -299,7 +305,17 @@ $is_pro = $license->is_pro();
                 <h2 style="margin-top: 0;"><?php esc_html_e('Preview', 'google-reviews-plugin'); ?></h2>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
                     <p style="margin:0;"><?php esc_html_e('Preview of how your review button will look (updates as you change settings):', 'google-reviews-plugin'); ?></p>
-                    <button type="button" id="grp-template-editor-open" class="button button-secondary"><?php esc_html_e('Edit Template', 'google-reviews-plugin'); ?></button>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <button type="button" id="grp-template-editor-open" class="button button-secondary" data-pro="<?php echo $is_pro ? '1' : '0'; ?>">
+                            <?php esc_html_e('Customize Template', 'google-reviews-plugin'); ?>
+                        </button>
+                        <?php if (!$is_pro): ?>
+                            <span class="grp-template-pro-label">
+                                <span class="dashicons dashicons-lock"></span>
+                                <?php esc_html_e('Pro only', 'google-reviews-plugin'); ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <?php
                 $review_widgets = GRP_Review_Widgets::get_instance();
@@ -382,7 +398,7 @@ $is_pro = $license->is_pro();
                 
                 <table class="form-table">
                     <tbody>
-                        <tr class="grp-template-control-row">
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_button_default_template"><?php esc_html_e('Layout', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -409,26 +425,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Choose a layout that matches your experience. The card templates stack Google branding, stars, and QR art while Creative Pro unlocks gradient/color control.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr class="grp-gradient-row grp-template-control-row" style="display: none;">
-                            <th scope="row">
-                                <label for="grp_widget_template_gradient_start"><?php esc_html_e('Gradient Start', 'google-reviews-plugin'); ?></label>
-                            </th>
-                            <td>
-                                <input type="color" id="grp_widget_template_gradient_start" name="grp_widget_template_gradient_start" value="<?php echo esc_attr($gradient_start); ?>">
-                                <input type="text" id="grp_widget_template_gradient_start_text" name="grp_widget_template_gradient_start_text" value="<?php echo esc_attr($gradient_start); ?>" placeholder="#24a1ff" style="width: 140px; margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Gradient start color for the Creative (Pro Only) card (updates live in preview).', 'google-reviews-plugin'); ?></p>
-                            </td>
-                        </tr>
-                        <tr class="grp-gradient-row grp-template-control-row" style="display: none;">
-                            <th scope="row">
-                                <label for="grp_widget_template_gradient_end"><?php esc_html_e('Gradient End', 'google-reviews-plugin'); ?></label>
-                            </th>
-                            <td>
-                                <input type="color" id="grp_widget_template_gradient_end" name="grp_widget_template_gradient_end" value="<?php echo esc_attr($gradient_end); ?>">
-                                <input type="text" id="grp_widget_template_gradient_end_text" name="grp_widget_template_gradient_end_text" value="<?php echo esc_attr($gradient_end); ?>" placeholder="#ff7b5a" style="width: 140px; margin-left: 10px;">
-                            </td>
-                        </tr>
-                        <tr class="grp-gradient-row grp-template-control-row">
+                        <tr class="grp-gradient-row grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_gradient_start"><?php esc_html_e('Gradient Start', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -438,7 +435,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Gradient start color for the Creative Pro card (updates live in preview).', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr class="grp-gradient-row grp-template-control-row">
+                        <tr class="grp-gradient-row grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_gradient_end"><?php esc_html_e('Gradient End', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -447,36 +444,33 @@ $is_pro = $license->is_pro();
                                 <input type="text" id="grp_widget_template_gradient_end_text" name="grp_widget_template_gradient_end_text" value="<?php echo esc_attr($gradient_end); ?>" placeholder="#ff7b5a" style="width: 140px; margin-left: 10px;">
                             </td>
                         </tr>
-                        <tr class="grp-template-control-row">
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_link_color"><?php esc_html_e('Link Color', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
                                 <input type="color" id="grp_widget_template_link_color" name="grp_widget_template_link_color" value="<?php echo esc_attr($link_color); ?>">
                                 <input type="text" id="grp_widget_template_link_color_text" name="grp_widget_template_link_color_text" value="<?php echo esc_attr($link_color); ?>" placeholder="#111111" style="width: 140px; margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Color applied to the clickable link text inside layouts.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr class="grp-template-control-row">
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_link_text"><?php esc_html_e('Link Text', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
                                 <input type="text" id="grp_widget_template_link_text" name="grp_widget_template_link_text" value="<?php echo esc_attr($link_text); ?>" class="regular-text">
-                                <p class="description"><?php esc_html_e('Text shown for the clickable link inside the layout (e.g. "Click to review").', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr class="grp-template-control-row">
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_star_color"><?php esc_html_e('Star Color', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
                                 <input type="color" id="grp_widget_template_star_color" name="grp_widget_template_star_color" value="<?php echo esc_attr(!empty($star_color) ? $star_color : '#FBBD05'); ?>">
                                 <input type="text" id="grp_widget_template_star_color_text" name="grp_widget_template_star_color_text" value="<?php echo esc_attr($star_color); ?>" placeholder="#FBBD05" style="width: 140px; margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Control the color of the star row inside the template.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr class="grp-template-control-row">
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_star_placement"><?php esc_html_e('Star Placement', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -486,10 +480,9 @@ $is_pro = $license->is_pro();
                                     <option value="above" <?php selected($star_placement, 'above'); ?>><?php esc_html_e('Above QR', 'google-reviews-plugin'); ?></option>
                                     <option value="overlay" <?php selected($star_placement, 'overlay'); ?>><?php esc_html_e('Overlay QR', 'google-reviews-plugin'); ?></option>
                                 </select>
-                                <p class="description"><?php esc_html_e('Position the star row relative to the QR/graphic area.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_show_logo"><?php esc_html_e('Show Logo/Icon', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -500,17 +493,16 @@ $is_pro = $license->is_pro();
                                 </label>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_logo_scale"><?php esc_html_e('Logo Scale (%)', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
                                 <input type="range" min="10" max="100" value="<?php echo esc_attr($logo_scale); ?>" id="grp_widget_template_logo_scale" name="grp_widget_template_logo_scale">
                                 <input type="number" min="10" max="100" value="<?php echo esc_attr($logo_scale); ?>" id="grp_widget_template_logo_scale_text" style="width: 80px; margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Scale the logo relative to the frame width (default 50%).', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_font_family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -527,10 +519,9 @@ $is_pro = $license->is_pro();
                                         <option value="<?php echo esc_attr($value); ?>" <?php selected($font_family, $value); ?>><?php echo esc_html($label); ?></option>
                                     <?php endforeach; ?>
                                 </select>
-                                <p class="description"><?php esc_html_e('Choose a font to match the review styles.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label><?php esc_html_e('Box Shadow / Glass', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -549,7 +540,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Open the editor to adjust the shadow sliders (horizontal, vertical, blur, spread, color).', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_max_width"><?php esc_html_e('Max Width', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -559,7 +550,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Limit the card width so it fits the container.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_max_height"><?php esc_html_e('Max Height', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -569,20 +560,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Limit the maximum height of the button/card so it fits specific areas.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="grp_widget_template_box_shadow_value"><?php esc_html_e('Box Shadow / Glass', 'google-reviews-plugin'); ?></label>
-                            </th>
-                            <td>
-                                <label for="grp_widget_template_box_shadow_enabled">
-                                    <input type="checkbox" id="grp_widget_template_box_shadow_enabled" name="grp_widget_template_box_shadow_enabled" value="1" <?php checked($box_shadow_enabled, true); ?>>
-                                    <?php esc_html_e('Enable box shadow', 'google-reviews-plugin'); ?>
-                                </label>
-                                <input type="text" id="grp_widget_template_box_shadow_value" name="grp_widget_template_box_shadow_value" value="<?php echo esc_attr($box_shadow_value); ?>" placeholder="0 18px 35px rgba(0,0,0,0.25)" class="regular-text" style="margin-left: 10px;">
-                                <p class="description"><?php esc_html_e('Enter a CSS box-shadow value for the layout card.', 'google-reviews-plugin'); ?></p>
-                            </td>
-                        </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting">
                             <th scope="row">
                                 <label for="grp_widget_template_glass_effect"><?php esc_html_e('Glass Effect', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -633,7 +611,7 @@ $is_pro = $license->is_pro();
                             </th>
                             <td>
                                 <input type="color" id="grp_widget_button_default_color" name="grp_widget_button_default_color" value="<?php echo esc_attr(!empty($button_color) ? $button_color : '#ffffff'); ?>">
-                                <input type="text" id="grp_widget_button_default_color_text" name="grp_widget_button_default_color_text" value="<?php echo esc_attr($button_color); ?>" placeholder="#ffffff (leave empty for default)" style="width: 150px; margin-left: 10px;">
+                                <input type="text" id="grp_widget_button_default_color_text" name="grp_widget_button_default_color_text" value="<?php echo esc_attr($button_color); ?>" placeholder="#ffffff (controlled by modal)" style="width: 150px; margin-left: 10px;">
                                 <button type="button" class="button button-small" id="grp-clear-text-color" style="margin-left: 10px;"><?php esc_html_e('Clear', 'google-reviews-plugin'); ?></button>
                                 <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
@@ -643,8 +621,8 @@ $is_pro = $license->is_pro();
                                 <label for="grp_widget_button_default_bg_color"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <input type="color" id="grp_widget_button_default_bg_color" name="grp_widget_button_default_bg_color" value="<?php echo esc_attr(!empty($button_bg_color) ? $button_bg_color : '#0073aa'); ?>">
-                                <input type="text" id="grp_widget_button_default_bg_color_text" name="grp_widget_button_default_bg_color_text" value="<?php echo esc_attr($button_bg_color); ?>" placeholder="#0073aa (leave empty for default)" style="width: 150px; margin-left: 10px;">
+                                <input type="color" id="grp_widget_button_default_bg_color" name="grp_widget_button_default_bg_color" value="<?php echo esc_attr(!empty($button_bg_color) ? $button_bg_color : '#2b2b2b'); ?>">
+                                <input type="text" id="grp_widget_button_default_bg_color_text" name="grp_widget_button_default_bg_color_text" value="<?php echo esc_attr($button_bg_color); ?>" placeholder="#2b2b2b (controlled by modal)" style="width: 150px; margin-left: 10px;">
                                 <button type="button" class="button button-small" id="grp-clear-bg-color" style="margin-left: 10px;"><?php esc_html_e('Clear', 'google-reviews-plugin'); ?></button>
                                 <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
@@ -660,7 +638,7 @@ $is_pro = $license->is_pro();
                                 <label for="grp_widget_qr_default_size"><?php esc_html_e('Default QR Code Size', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
-                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="100" max="1000" step="5">
+                                <input type="number" id="grp_widget_qr_default_size" name="grp_widget_qr_default_size" value="<?php echo esc_attr($qr_size); ?>" min="135" max="1000" step="5">
                                 <span>px</span>
                                 <p class="description"><?php esc_html_e('Default size for generated QR codes.', 'google-reviews-plugin'); ?></p>
                             </td>
@@ -724,7 +702,7 @@ $is_pro = $license->is_pro();
                 <h3><?php esc_html_e('Customize Template', 'google-reviews-plugin'); ?></h3>
                 <div id="grp-template-editor-preview" class="grp-template-editor-preview"></div>
                 <div class="grp-template-editor-controls">
-                    <div class="grp-template-editor-section">
+                    <div class="grp-template-editor-column">
                         <label>
                             <input type="checkbox" id="grp-modal-show-logo">
                             <?php esc_html_e('Show logo/icon', 'google-reviews-plugin'); ?>
@@ -733,8 +711,23 @@ $is_pro = $license->is_pro();
                             <input type="range" id="grp-modal-logo-scale-slider" min="10" max="100">
                             <input type="number" id="grp-modal-logo-scale-number" min="10" max="100">
                         </label>
+                        <label for="grp-modal-font-family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
+                        <select id="grp-modal-font-family">
+                            <option value='Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'><?php esc_html_e('Inter / Space Grotesk', 'google-reviews-plugin'); ?></option>
+                            <option value='"Roboto", "Helvetica Neue", sans-serif'><?php esc_html_e('Roboto', 'google-reviews-plugin'); ?></option>
+                            <option value='"Playfair Display", Georgia, serif'><?php esc_html_e('Playfair Display', 'google-reviews-plugin'); ?></option>
+                            <option value='"Lora", Georgia, serif'><?php esc_html_e('Lora', 'google-reviews-plugin'); ?></option>
+                        </select>
+                        <label><?php esc_html_e('Text Color', 'google-reviews-plugin'); ?>
+                            <input type="color" id="grp-modal-text-color">
+                            <input type="text" id="grp-modal-text-color-text" style="width: 90px; margin-left: 8px;">
+                        </label>
                     </div>
-                    <div class="grp-template-editor-section">
+                    <div class="grp-template-editor-column">
+                        <label><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?>
+                            <input type="color" id="grp-modal-background-color">
+                            <input type="text" id="grp-modal-background-color-text" style="width: 90px; margin-left: 8px;">
+                        </label>
                         <label><?php esc_html_e('Star Color', 'google-reviews-plugin'); ?>
                             <input type="color" id="grp-modal-star-color">
                             <input type="text" id="grp-modal-star-color-text" style="width: 90px; margin-left: 8px;">
@@ -745,35 +738,22 @@ $is_pro = $license->is_pro();
                             <option value="above"><?php esc_html_e('Above QR', 'google-reviews-plugin'); ?></option>
                             <option value="overlay"><?php esc_html_e('Overlay QR', 'google-reviews-plugin'); ?></option>
                         </select>
-                    </div>
-                    <div class="grp-template-editor-section">
-                        <label for="grp-modal-font-family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
-                        <select id="grp-modal-font-family">
-                            <option value='Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'><?php esc_html_e('Inter / Space Grotesk', 'google-reviews-plugin'); ?></option>
-                            <option value='"Roboto", "Helvetica Neue", sans-serif'><?php esc_html_e('Roboto', 'google-reviews-plugin'); ?></option>
-                            <option value='"Playfair Display", Georgia, serif'><?php esc_html_e('Playfair Display', 'google-reviews-plugin'); ?></option>
-                            <option value='"Lora", Georgia, serif'><?php esc_html_e('Lora', 'google-reviews-plugin'); ?></option>
-                        </select>
-                    </div>
-                    <div id="grp-template-editor-link-section" class="grp-template-editor-section">
-                        <label><?php esc_html_e('Link Color', 'google-reviews-plugin'); ?>
-                            <input type="color" id="grp-modal-link-color">
-                            <input type="text" id="grp-modal-link-color-text" style="width: 90px; margin-left: 8px;">
-                        </label>
-                        <label for="grp-modal-link-text"><?php esc_html_e('Link Text', 'google-reviews-plugin'); ?></label>
-                        <input type="text" id="grp-modal-link-text">
-                    </div>
-                    <div id="grp-template-editor-gradient-section" class="grp-template-editor-section">
-                        <strong><?php esc_html_e('Gradient colors for Creative (Pro)', 'google-reviews-plugin'); ?></strong>
-                        <label><?php esc_html_e('Gradient Start', 'google-reviews-plugin'); ?>
-                            <input type="color" id="grp-modal-gradient-start">
-                            <input type="text" id="grp-modal-gradient-start-text" style="width: 90px; margin-left: 8px;">
-                        </label>
-                        <label><?php esc_html_e('Gradient End', 'google-reviews-plugin'); ?>
-                            <input type="color" id="grp-modal-gradient-end">
-                            <input type="text" id="grp-modal-gradient-end-text" style="width: 90px; margin-left: 8px;">
+                        <label>
+                            <input type="checkbox" id="grp-modal-glass-effect">
+                            <?php esc_html_e('Glass Effect', 'google-reviews-plugin'); ?>
                         </label>
                     </div>
+                </div>
+                <div id="grp-template-editor-gradient-section" class="grp-template-editor-section">
+                    <strong><?php esc_html_e('Gradient colors for Creative (Pro)', 'google-reviews-plugin'); ?></strong>
+                    <label><?php esc_html_e('Gradient Start', 'google-reviews-plugin'); ?>
+                        <input type="color" id="grp-modal-gradient-start">
+                        <input type="text" id="grp-modal-gradient-start-text" style="width: 90px; margin-left: 8px;">
+                    </label>
+                    <label><?php esc_html_e('Gradient End', 'google-reviews-plugin'); ?>
+                        <input type="color" id="grp-modal-gradient-end">
+                        <input type="text" id="grp-modal-gradient-end-text" style="width: 90px; margin-left: 8px;">
+                    </label>
                 </div>
                 <div class="grp-template-editor-footer">
                     <button type="button" class="button" id="grp-template-editor-close"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>

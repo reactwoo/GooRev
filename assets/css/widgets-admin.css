@@ -167,6 +167,17 @@
     display: none;
 }
 
+.grp-hidden-setting {
+    display: none;
+}
+
+.grp-template-pro-label {
+    font-size: 12px;
+    color: #b42b2b;
+    margin-left: 10px;
+    font-weight: 600;
+}
+
 .grp-box-shadow-modal {
     position: fixed;
     inset: 0;
@@ -184,10 +195,6 @@
     width: 360px;
     max-width: 90%;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-}
-
-.grp-template-control-row {
-    display: none;
 }
 
 #grp-template-editor-modal {
@@ -238,9 +245,23 @@
 }
 
 .grp-template-editor-controls {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 18px;
+}
+
+.grp-template-editor-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.grp-template-editor-column label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 13px;
 }
 
 .grp-template-editor-section {
@@ -248,11 +269,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.grp-template-editor-section label {
-    font-weight: 600;
-    font-size: 13px;
 }
 
 .grp-template-editor-section input[type="range"] {

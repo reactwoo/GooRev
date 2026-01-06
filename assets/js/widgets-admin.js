@@ -40,15 +40,16 @@
         var $modalStarColorText = $('#grp-modal-star-color-text');
         var $modalStarPlacement = $('#grp-modal-star-placement');
         var $modalFontFamily = $('#grp-modal-font-family');
-        var $modalLinkColor = $('#grp-modal-link-color');
-        var $modalLinkColorText = $('#grp-modal-link-color-text');
-        var $modalLinkText = $('#grp-modal-link-text');
+        var $modalTextColor = $('#grp-modal-text-color');
+        var $modalTextColorText = $('#grp-modal-text-color-text');
+        var $modalBackgroundColor = $('#grp-modal-background-color');
+        var $modalBackgroundColorText = $('#grp-modal-background-color-text');
+        var $modalGlassEffect = $('#grp-modal-glass-effect');
         var $modalGradientSection = $('#grp-template-editor-gradient-section');
         var $modalGradientStart = $('#grp-modal-gradient-start');
         var $modalGradientStartText = $('#grp-modal-gradient-start-text');
         var $modalGradientEnd = $('#grp-modal-gradient-end');
         var $modalGradientEndText = $('#grp-modal-gradient-end-text');
-        var $modalLinkSection = $('#grp-template-editor-link-section');
         var $logoScaleSlider = $('#grp_widget_template_logo_scale');
         var $logoScaleText = $('#grp_widget_template_logo_scale_text');
         var $gradientRows = $('.grp-gradient-row');
@@ -229,10 +230,8 @@
         function populateTemplateModal() {
             modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(modalTemplateKey);
-            var showLink = templateData.show_link !== false;
             var isCreative = modalTemplateKey === 'creative-pro';
 
-            $modalLinkSection.toggle(showLink);
             $modalGradientSection.toggle(isCreative);
 
             $modalShowLogo.prop('checked', $logoToggle.is(':checked'));
@@ -250,10 +249,15 @@
 
             $modalFontFamily.val($fontFamilyInput.val() || '');
 
-            var linkColorValue = $linkColorText.val() || '#111111';
-            $modalLinkColor.val(linkColorValue);
-            $modalLinkColorText.val(linkColorValue);
-            $modalLinkText.val($linkTextInput.val() || 'Click here');
+            var textColorValue = $modalTextColorText.val() || $('#grp_widget_button_default_color_text').val() || '#ffffff';
+            $modalTextColor.val(textColorValue);
+            $modalTextColorText.val(textColorValue);
+
+            var backgroundColorValue = $modalBackgroundColorText.val() || $('#grp_widget_button_default_bg_color_text').val() || '#2b2b2b';
+            $modalBackgroundColor.val(backgroundColorValue);
+            $modalBackgroundColorText.val(backgroundColorValue);
+
+            $modalGlassEffect.prop('checked', $glassCheckbox.is(':checked'));
 
             var gradientStartValue = $gradientStartText.val() || '#24a1ff';
             var gradientEndValue = $gradientEndText.val() || '#ff7b5a';
@@ -279,9 +283,13 @@
             if (!isValidHex(modalStarColorValue)) {
                 modalStarColorValue = '#FBBD05';
             }
-            var modalLinkColorValue = $modalLinkColorText.val() || '#111111';
-            if (!isValidHex(modalLinkColorValue)) {
-                modalLinkColorValue = '#111111';
+            var modalTextColorValue = $modalTextColorText.val() || '#ffffff';
+            if (!isValidHex(modalTextColorValue)) {
+                modalTextColorValue = '#ffffff';
+            }
+            var modalBackgroundColorValue = $modalBackgroundColorText.val() || '#2b2b2b';
+            if (!isValidHex(modalBackgroundColorValue)) {
+                modalBackgroundColorValue = '#2b2b2b';
             }
             var modalGradientStartValue = $modalGradientStartText.val() || '#24a1ff';
             var modalGradientEndValue = $modalGradientEndText.val() || '#ff7b5a';
@@ -289,14 +297,14 @@
             var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml($('#grp_widget_button_default_text').val() || 'Leave us a review'),
                 subtitle: escapeHtml(templateData.subtitle || ''),
-                linkText: escapeHtml($modalLinkText.val() || 'Click here'),
+                linkText: escapeHtml($linkTextInput.length ? $linkTextInput.val() : 'Click here'),
                 showLogo: $modalShowLogo.is(':checked'),
                 starColor: modalStarColorValue,
                 starText: templateData.stars ? '★★★★★' : '',
                 logoIconUrl: logoUrls.icon || '',
                 logoClassicUrl: logoUrls.classic || '',
                 reviewUrl: previewUrl,
-                linkColor: modalLinkColorValue,
+                linkColor: $linkColorText.length ? ($linkColorText.val() || '#111111') : '#111111',
                 logoScale: modalLogoScale,
                 showLink: templateData.show_link !== false,
             });
@@ -306,8 +314,14 @@
                 $templateEditorPreview.css('background', 'linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
                 $templateEditorPreview.css('color', '#fff');
             } else {
-                $templateEditorPreview.css('background', '#fff');
-                $templateEditorPreview.css('color', '#111');
+                $templateEditorPreview.css('background', modalBackgroundColorValue);
+                $templateEditorPreview.css('color', modalTextColorValue);
+            }
+
+            if ($modalGlassEffect.is(':checked')) {
+                $templateEditorPreview.addClass('grp-glass-effect');
+            } else {
+                $templateEditorPreview.removeClass('grp-glass-effect');
             }
         }
 
@@ -330,7 +344,7 @@
             var fontFamily = $fontFamilyInput.val();
             var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
             var maxWidth = parseInt($maxWidthInput.val(), 10) || 0;
-            var linkColor = $linkColorText.length ? ($linkColorText.val() || '#111111') : '#111111';
+            var linkColor = $linkColorText.length ? ($linkColorText.val() || '#ffffff') : '#ffffff';
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
             var logoScale = parseInt($logoScaleSlider.val(), 10);
@@ -406,7 +420,7 @@
             $previewBtn.html(previewHtml);
 
             if (templateData.qr && hasPlaceId && previewUrl && previewUrl !== '#') {
-                fetchPreviewQr(templateData.qr_size || 120);
+                fetchPreviewQr(templateData.qr_size || 135);
             } else {
                 hidePreviewQr();
             }
@@ -539,6 +553,11 @@
             updatePreview();
         });
         $('#grp-template-editor-open').on('click', function() {
+            if (!isPro) {
+                var proMessage = (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) ? grpWidgets.strings.templateProMessage : 'Upgrade to Pro to customize templates.';
+                alert(proMessage);
+                return;
+            }
             if (!$templateEditorModal.length) {
                 return;
             }
@@ -566,6 +585,58 @@
             $logoScaleSlider.val(value);
             $logoScaleText.val(value);
         }
+
+        function syncTextColor(value) {
+            $modalTextColor.val(value);
+            $modalTextColorText.val(value);
+            $('#grp_widget_button_default_color').val(value);
+            $('#grp_widget_button_default_color_text').val(value);
+        }
+
+        function syncBackgroundColor(value) {
+            $modalBackgroundColor.val(value);
+            $modalBackgroundColorText.val(value);
+            $('#grp_widget_button_default_bg_color').val(value);
+            $('#grp_widget_button_default_bg_color_text').val(value);
+        }
+
+        $modalTextColor.on('change', function() {
+            var color = $(this).val();
+            syncTextColor(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalTextColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                syncTextColor(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalBackgroundColor.on('change', function() {
+            var color = $(this).val();
+            syncBackgroundColor(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalBackgroundColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                syncBackgroundColor(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalGlassEffect.on('change', function() {
+            $glassCheckbox.prop('checked', $(this).is(':checked'));
+            updatePreview();
+            updateModalPreview();
+        });
 
         $modalLogoScaleSlider.on('input', function() {
             var value = $(this).val();
@@ -616,32 +687,6 @@
 
         $modalFontFamily.on('change', function() {
             $fontFamilyInput.val($(this).val());
-            updatePreview();
-            updateModalPreview();
-        });
-
-        $modalLinkColor.on('change', function() {
-            var color = $(this).val();
-            $modalLinkColorText.val(color);
-            $linkColorInput.val(color);
-            $linkColorText.val(color);
-            updatePreview();
-            updateModalPreview();
-        });
-
-        $modalLinkColorText.on('input', function() {
-            var value = $(this).val();
-            if (isValidHex(value)) {
-                $modalLinkColor.val(value);
-                $linkColorInput.val(value);
-                $linkColorText.val(value);
-                updatePreview();
-                updateModalPreview();
-            }
-        });
-
-        $modalLinkText.on('input', function() {
-            $linkTextInput.val($(this).val());
             updatePreview();
             updateModalPreview();
         });
