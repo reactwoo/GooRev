@@ -31,6 +31,24 @@
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
         var $glassCheckbox = $('#grp_widget_template_glass_effect');
+        var $templateEditorModal = $('#grp-template-editor-modal');
+        var $templateEditorPreview = $('#grp-template-editor-preview');
+        var $modalShowLogo = $('#grp-modal-show-logo');
+        var $modalLogoScaleSlider = $('#grp-modal-logo-scale-slider');
+        var $modalLogoScaleNumber = $('#grp-modal-logo-scale-number');
+        var $modalStarColor = $('#grp-modal-star-color');
+        var $modalStarColorText = $('#grp-modal-star-color-text');
+        var $modalStarPlacement = $('#grp-modal-star-placement');
+        var $modalFontFamily = $('#grp-modal-font-family');
+        var $modalLinkColor = $('#grp-modal-link-color');
+        var $modalLinkColorText = $('#grp-modal-link-color-text');
+        var $modalLinkText = $('#grp-modal-link-text');
+        var $modalGradientSection = $('#grp-template-editor-gradient-section');
+        var $modalGradientStart = $('#grp-modal-gradient-start');
+        var $modalGradientStartText = $('#grp-modal-gradient-start-text');
+        var $modalGradientEnd = $('#grp-modal-gradient-end');
+        var $modalGradientEndText = $('#grp-modal-gradient-end-text');
+        var $modalLinkSection = $('#grp-template-editor-link-section');
         var $logoScaleSlider = $('#grp_widget_template_logo_scale');
         var $logoScaleText = $('#grp_widget_template_logo_scale_text');
         var $gradientRows = $('.grp-gradient-row');
@@ -39,6 +57,7 @@
             return 'grp-review-button-template-' + key;
         });
         var logoScaleTouched = false;
+        var modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
         var qrCache = {};
         var blankQr = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
         var isPro = typeof grpWidgets !== 'undefined' ? !!grpWidgets.is_pro : false;
@@ -203,6 +222,99 @@
             }
         }
 
+        function isValidHex(color) {
+            return /^#[0-9A-F]{6}$/i.test(color);
+        }
+
+        function populateTemplateModal() {
+            modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
+            var templateData = getTemplateData(modalTemplateKey);
+            var showLink = templateData.show_link !== false;
+            var isCreative = modalTemplateKey === 'creative-pro';
+
+            $modalLinkSection.toggle(showLink);
+            $modalGradientSection.toggle(isCreative);
+
+            $modalShowLogo.prop('checked', $logoToggle.is(':checked'));
+            var logoScaleValue = parseInt($logoScaleSlider.val(), 10);
+            if (isNaN(logoScaleValue) || logoScaleValue <= 0) {
+                logoScaleValue = 50;
+            }
+            $modalLogoScaleSlider.val(logoScaleValue);
+            $modalLogoScaleNumber.val(logoScaleValue);
+
+            var starColorValue = $starColorText.val() || '#FBBD05';
+            $modalStarColor.val(starColorValue);
+            $modalStarColorText.val(starColorValue);
+            $modalStarPlacement.val($starPlacementSelect.val() || 'below');
+
+            $modalFontFamily.val($fontFamilyInput.val() || '');
+
+            var linkColorValue = $linkColorText.val() || '#111111';
+            $modalLinkColor.val(linkColorValue);
+            $modalLinkColorText.val(linkColorValue);
+            $modalLinkText.val($linkTextInput.val() || 'Click here');
+
+            var gradientStartValue = $gradientStartText.val() || '#24a1ff';
+            var gradientEndValue = $gradientEndText.val() || '#ff7b5a';
+            $modalGradientStart.val(gradientStartValue);
+            $modalGradientStartText.val(gradientStartValue);
+            $modalGradientEnd.val(gradientEndValue);
+            $modalGradientEndText.val(gradientEndValue);
+
+            updateModalPreview();
+        }
+
+        function updateModalPreview() {
+            if (!$templateEditorPreview.length) {
+                return;
+            }
+            var templateData = getTemplateData(modalTemplateKey || 'basic');
+            var previewUrl = $previewBtn.attr('href') || '#';
+            var modalLogoScale = parseInt($modalLogoScaleSlider.val(), 10);
+            if (isNaN(modalLogoScale) || modalLogoScale <= 0) {
+                modalLogoScale = 50;
+            }
+            var modalStarColorValue = $modalStarColorText.val() || '#FBBD05';
+            if (!isValidHex(modalStarColorValue)) {
+                modalStarColorValue = '#FBBD05';
+            }
+            var modalLinkColorValue = $modalLinkColorText.val() || '#111111';
+            if (!isValidHex(modalLinkColorValue)) {
+                modalLinkColorValue = '#111111';
+            }
+            var modalGradientStartValue = $modalGradientStartText.val() || '#24a1ff';
+            var modalGradientEndValue = $modalGradientEndText.val() || '#ff7b5a';
+
+            var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
+                title: escapeHtml($('#grp_widget_button_default_text').val() || 'Leave us a review'),
+                subtitle: escapeHtml(templateData.subtitle || ''),
+                linkText: escapeHtml($modalLinkText.val() || 'Click here'),
+                showLogo: $modalShowLogo.is(':checked'),
+                starColor: modalStarColorValue,
+                starText: templateData.stars ? '★★★★★' : '',
+                logoIconUrl: logoUrls.icon || '',
+                logoClassicUrl: logoUrls.classic || '',
+                reviewUrl: previewUrl,
+                linkColor: modalLinkColorValue,
+                logoScale: modalLogoScale,
+                showLink: templateData.show_link !== false,
+            });
+            $templateEditorPreview.html(previewHtml);
+
+            if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
+                $templateEditorPreview.css('background', 'linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
+                $templateEditorPreview.css('color', '#fff');
+            } else {
+                $templateEditorPreview.css('background', '#fff');
+                $templateEditorPreview.css('color', '#111');
+            }
+        }
+
+        function closeTemplateModal() {
+            $templateEditorModal.fadeOut(120);
+        }
+
         function updatePreview() {
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
@@ -300,6 +412,7 @@
             }
 
             toggleGradientControls(templateKey);
+            updateModalPreview();
         }
 
         // Color picker sync and preview font/color updates
@@ -424,6 +537,153 @@
                 $gradientEndInput.val(val);
             }
             updatePreview();
+        });
+        $('#grp-template-editor-open').on('click', function() {
+            if (!$templateEditorModal.length) {
+                return;
+            }
+            populateTemplateModal();
+            $templateEditorModal.fadeIn(180);
+        });
+
+        $templateEditorModal.on('click', function(e) {
+            if ($(e.target).is($templateEditorModal)) {
+                closeTemplateModal();
+            }
+        });
+
+        $('.grp-template-editor-close, #grp-template-editor-close').on('click', closeTemplateModal);
+
+        $modalShowLogo.on('change', function() {
+            $logoToggle.prop('checked', $(this).is(':checked'));
+            updatePreview();
+            updateModalPreview();
+        });
+
+        function syncLogoScale(value) {
+            $modalLogoScaleSlider.val(value);
+            $modalLogoScaleNumber.val(value);
+            $logoScaleSlider.val(value);
+            $logoScaleText.val(value);
+        }
+
+        $modalLogoScaleSlider.on('input', function() {
+            var value = $(this).val();
+            logoScaleTouched = true;
+            syncLogoScale(value);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalLogoScaleNumber.on('input', function() {
+            var value = $(this).val();
+            if (value === '') {
+                return;
+            }
+            if (!isNaN(value) && value >= 10 && value <= 100) {
+                logoScaleTouched = true;
+                syncLogoScale(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalStarColor.on('change', function() {
+            var color = $(this).val();
+            $modalStarColorText.val(color);
+            $starColorInput.val(color);
+            $starColorText.val(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalStarColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $modalStarColor.val(value);
+                $starColorInput.val(value);
+                $starColorText.val(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalStarPlacement.on('change', function() {
+            $starPlacementSelect.val($(this).val());
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalFontFamily.on('change', function() {
+            $fontFamilyInput.val($(this).val());
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalLinkColor.on('change', function() {
+            var color = $(this).val();
+            $modalLinkColorText.val(color);
+            $linkColorInput.val(color);
+            $linkColorText.val(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalLinkColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $modalLinkColor.val(value);
+                $linkColorInput.val(value);
+                $linkColorText.val(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalLinkText.on('input', function() {
+            $linkTextInput.val($(this).val());
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalGradientStart.on('change', function() {
+            var color = $(this).val();
+            $modalGradientStartText.val(color);
+            $gradientStartInput.val(color);
+            $gradientStartText.val(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalGradientStartText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $modalGradientStart.val(value);
+                $gradientStartInput.val(value);
+                $gradientStartText.val(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalGradientEnd.on('change', function() {
+            var color = $(this).val();
+            $modalGradientEndText.val(color);
+            $gradientEndInput.val(color);
+            $gradientEndText.val(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalGradientEndText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $modalGradientEnd.val(value);
+                $gradientEndInput.val(value);
+                $gradientEndText.val(value);
+                updatePreview();
+                updateModalPreview();
+            }
         });
         $maxWidthInput.on('input', updatePreview);
         $boxShadowCheckbox.on('change', updatePreview);

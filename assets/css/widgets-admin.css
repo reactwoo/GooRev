@@ -186,6 +186,84 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
+.grp-template-control-row {
+    display: none;
+}
+
+#grp-template-editor-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    padding: 20px;
+}
+
+.grp-template-editor-content {
+    background: #fff;
+    border-radius: 16px;
+    width: min(760px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+    position: relative;
+}
+
+.grp-template-editor-close {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    font-size: 24px;
+    color: #999;
+}
+
+.grp-template-editor-preview {
+    width: 100%;
+    min-height: 220px;
+    border-radius: 14px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.grp-template-editor-preview .grp-review-button {
+    width: 100%;
+}
+
+.grp-template-editor-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.grp-template-editor-section {
+    flex: 1 1 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.grp-template-editor-section label {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.grp-template-editor-section input[type="range"] {
+    width: 100%;
+}
+
+.grp-template-editor-footer {
+    margin-top: 24px;
+    text-align: right;
+}
+
 .grp-box-shadow-controls {
     margin-top: 12px;
     display: flex;
