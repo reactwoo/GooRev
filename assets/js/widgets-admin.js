@@ -76,6 +76,17 @@
             return templateMeta.basic || {};
         }
 
+        function safeTrimValue($element) {
+            if (!$element || !$element.length) {
+                return '';
+            }
+            var value = $element.val();
+            if (typeof value === 'string') {
+                return value.trim();
+            }
+            return value || '';
+        }
+
         function updateTemplateDescription(key) {
             var templateData = getTemplateData(key);
             if ($templateDescription.length) {
@@ -333,8 +344,8 @@
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
             var size = $('#grp_widget_button_default_size').val();
-            var textColor = $('#grp_widget_button_default_color_text').val();
-            var bgColor = $('#grp_widget_button_default_bg_color_text').val();
+            var textColor = safeTrimValue($('#grp_widget_button_default_color_text'));
+            var bgColor = safeTrimValue($('#grp_widget_button_default_bg_color_text'));
             var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(templateKey);
             var previewUrl = $previewBtn.attr('href') || '#';
@@ -344,7 +355,8 @@
             var fontFamily = $fontFamilyInput.val();
             var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
             var maxWidth = parseInt($maxWidthInput.val(), 10) || 0;
-            var linkColor = $linkColorText.length ? ($linkColorText.val() || '#ffffff') : '#ffffff';
+            var linkColorRaw = $linkColorText.length ? safeTrimValue($linkColorText) : '';
+            var linkColor = linkColorRaw || '#ffffff';
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
             var logoScale = parseInt($logoScaleSlider.val(), 10);
@@ -356,9 +368,9 @@
             if (isNaN(logoScale) || logoScale <= 0) {
                 logoScale = 50;
             }
-            var linkText = ($linkTextInput.length ? $linkTextInput.val().trim() : '') || 'Click here';
+            var linkText = safeTrimValue($linkTextInput) || 'Click here';
             var boxShadowEnabled = $boxShadowCheckbox.is(':checked');
-            var boxShadowValue = $boxShadowValue.val().trim();
+            var boxShadowValue = safeTrimValue($boxShadowValue);
             var glassEffect = $glassCheckbox.is(':checked');
 
             // Update template description/pro note
@@ -379,10 +391,10 @@
             }
 
             var styles = [];
-            if (textColor && textColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(textColor)) {
+            if (textColor && /^#[0-9A-F]{6}$/i.test(textColor)) {
                 styles.push('color: ' + textColor);
             }
-            if (bgColor && bgColor.trim() !== '' && /^#[0-9A-F]{6}$/i.test(bgColor)) {
+            if (bgColor && /^#[0-9A-F]{6}$/i.test(bgColor)) {
                 styles.push('background-color: ' + bgColor);
             }
             if (fontFamily) {
@@ -419,7 +431,7 @@
             });
             $previewBtn.html(previewHtml);
 
-            var sanitizedPreviewUrl = (previewUrl || '').trim();
+            var sanitizedPreviewUrl = String(previewUrl || '').trim();
             if (templateData.qr && hasPlaceId && sanitizedPreviewUrl && sanitizedPreviewUrl !== '#') {
                 fetchPreviewQr(templateData.qr_size || 135);
             } else {
