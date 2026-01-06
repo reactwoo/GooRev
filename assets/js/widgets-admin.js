@@ -419,7 +419,8 @@
             });
             $previewBtn.html(previewHtml);
 
-            if (templateData.qr && hasPlaceId && previewUrl && previewUrl !== '#') {
+            var sanitizedPreviewUrl = (previewUrl || '').trim();
+            if (templateData.qr && hasPlaceId && sanitizedPreviewUrl && sanitizedPreviewUrl !== '#') {
                 fetchPreviewQr(templateData.qr_size || 135);
             } else {
                 hidePreviewQr();
