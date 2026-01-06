@@ -56,6 +56,46 @@
     font-size: 14px;
 }
 
+#grp-template-editor-open {
+    border: none;
+}
+
+.grp-template-preview-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.grp-template-preview-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.grp-template-customize-btn {
+    background: #2271b1;
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.grp-template-customize-btn:hover {
+    background: #1b5d96;
+}
+
+.grp-template-pro-label {
+    font-size: 12px;
+    color: #b42b2b;
+    margin-left: 8px;
+    font-weight: 600;
+}
+
 #grp-template-selected-description {
     margin-top: 8px;
     margin-bottom: 0;
@@ -201,22 +241,23 @@
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
-    display: none;
+    display: flex !important;
     justify-content: center;
     align-items: center;
     z-index: 10001;
     padding: 20px;
+    flex-direction: column;
 }
 
 .grp-template-editor-content {
     background: #fff;
     border-radius: 16px;
-    width: min(760px, 100%);
-    max-height: 90vh;
-    overflow-y: auto;
+    width: min(900px, 100%);
+    max-width: 900px;
     padding: 24px;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
     position: relative;
+    overflow: visible;
 }
 
 .grp-template-editor-close {
@@ -246,22 +287,62 @@
 
 .grp-template-editor-controls {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
 }
 
 .grp-template-editor-column {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 18px;
 }
 
-.grp-template-editor-column label {
+.grp-template-editor-row {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.grp-template-editor-label {
     font-weight: 600;
-    font-size: 13px;
+    font-size: 14px;
+    flex: 0 0 130px;
+    text-align: left;
+}
+
+.grp-template-editor-field {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    width: 100%;
+}
+
+.grp-template-editor-field > input[type="color"],
+.grp-template-editor-field > input[type="number"],
+.grp-template-editor-field select,
+.grp-template-editor-field input[type="text"] {
+    max-width: 160px;
+    width: 100%;
+}
+
+.grp-template-editor-slider {
+    flex-wrap: wrap;
+}
+
+.grp-template-editor-slider input {
+    flex: 1;
+}
+
+.grp-template-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.grp-template-editor-field input[type="range"] {
+    max-width: 220px;
 }
 
 .grp-template-editor-section {

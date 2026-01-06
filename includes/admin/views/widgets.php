@@ -303,14 +303,14 @@ $is_pro = $license->is_pro();
             <!-- Preview Section at Top -->
             <div class="grp-settings-section" style="background: #fff; border: 1px solid #ccd0d4; border-radius: 4px; padding: 20px; margin: 20px 0; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
                 <h2 style="margin-top: 0;"><?php esc_html_e('Preview', 'google-reviews-plugin'); ?></h2>
-                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-                    <p style="margin:0;"><?php esc_html_e('Preview of how your review button will look (updates as you change settings):', 'google-reviews-plugin'); ?></p>
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <button type="button" id="grp-template-editor-open" class="button button-secondary" data-pro="<?php echo $is_pro ? '1' : '0'; ?>">
+                <div class="grp-template-preview-header">
+                    <p><?php esc_html_e('Preview of how your review button will look (updates as you change settings):', 'google-reviews-plugin'); ?></p>
+                    <div class="grp-template-preview-action">
+                        <button type="button" id="grp-template-editor-open" class="button grp-template-customize-btn" data-pro="<?php echo $is_pro ? '1' : '0'; ?>" title="<?php esc_attr_e('Available in Pro only', 'google-reviews-plugin'); ?>">
                             <?php esc_html_e('Customize Template', 'google-reviews-plugin'); ?>
                         </button>
                         <?php if (!$is_pro): ?>
-                            <span class="grp-template-pro-label">
+                            <span class="grp-template-pro-label" title="<?php esc_attr_e('Pro only', 'google-reviews-plugin'); ?>">
                                 <span class="dashicons dashicons-lock"></span>
                                 <?php esc_html_e('Pro only', 'google-reviews-plugin'); ?>
                             </span>
@@ -398,7 +398,7 @@ $is_pro = $license->is_pro();
                 
                 <table class="form-table">
                     <tbody>
-                        <tr class="grp-hidden-setting">
+                        <tr>
                             <th scope="row">
                                 <label for="grp_widget_button_default_template"><?php esc_html_e('Layout', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -703,45 +703,75 @@ $is_pro = $license->is_pro();
                 <div id="grp-template-editor-preview" class="grp-template-editor-preview"></div>
                 <div class="grp-template-editor-controls">
                     <div class="grp-template-editor-column">
-                        <label>
-                            <input type="checkbox" id="grp-modal-show-logo">
-                            <?php esc_html_e('Show logo/icon', 'google-reviews-plugin'); ?>
-                        </label>
-                        <label><?php esc_html_e('Logo Scale (%)', 'google-reviews-plugin'); ?>
-                            <input type="range" id="grp-modal-logo-scale-slider" min="10" max="100">
-                            <input type="number" id="grp-modal-logo-scale-number" min="10" max="100">
-                        </label>
-                        <label for="grp-modal-font-family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
-                        <select id="grp-modal-font-family">
-                            <option value='Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'><?php esc_html_e('Inter / Space Grotesk', 'google-reviews-plugin'); ?></option>
-                            <option value='"Roboto", "Helvetica Neue", sans-serif'><?php esc_html_e('Roboto', 'google-reviews-plugin'); ?></option>
-                            <option value='"Playfair Display", Georgia, serif'><?php esc_html_e('Playfair Display', 'google-reviews-plugin'); ?></option>
-                            <option value='"Lora", Georgia, serif'><?php esc_html_e('Lora', 'google-reviews-plugin'); ?></option>
-                        </select>
-                        <label><?php esc_html_e('Text Color', 'google-reviews-plugin'); ?>
-                            <input type="color" id="grp-modal-text-color">
-                            <input type="text" id="grp-modal-text-color-text" style="width: 90px; margin-left: 8px;">
-                        </label>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Show logo/icon', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <label class="grp-template-checkbox">
+                                    <input type="checkbox" id="grp-modal-show-logo">
+                                    <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Logo Scale (%)', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field grp-template-editor-slider">
+                                <input type="range" id="grp-modal-logo-scale-slider" min="10" max="100">
+                                <input type="number" id="grp-modal-logo-scale-number" min="10" max="100">
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <select id="grp-modal-font-family">
+                                    <option value='Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'><?php esc_html_e('Inter / Space Grotesk', 'google-reviews-plugin'); ?></option>
+                                    <option value='"Roboto", "Helvetica Neue", sans-serif'><?php esc_html_e('Roboto', 'google-reviews-plugin'); ?></option>
+                                    <option value='"Playfair Display", Georgia, serif'><?php esc_html_e('Playfair Display', 'google-reviews-plugin'); ?></option>
+                                    <option value='"Lora", Georgia, serif'><?php esc_html_e('Lora', 'google-reviews-plugin'); ?></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Text Color', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="color" id="grp-modal-text-color">
+                                <input type="text" id="grp-modal-text-color-text">
+                            </div>
+                        </div>
                     </div>
                     <div class="grp-template-editor-column">
-                        <label><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?>
-                            <input type="color" id="grp-modal-background-color">
-                            <input type="text" id="grp-modal-background-color-text" style="width: 90px; margin-left: 8px;">
-                        </label>
-                        <label><?php esc_html_e('Star Color', 'google-reviews-plugin'); ?>
-                            <input type="color" id="grp-modal-star-color">
-                            <input type="text" id="grp-modal-star-color-text" style="width: 90px; margin-left: 8px;">
-                        </label>
-                        <label for="grp-modal-star-placement"><?php esc_html_e('Star Placement', 'google-reviews-plugin'); ?></label>
-                        <select id="grp-modal-star-placement">
-                            <option value="below"><?php esc_html_e('Below QR', 'google-reviews-plugin'); ?></option>
-                            <option value="above"><?php esc_html_e('Above QR', 'google-reviews-plugin'); ?></option>
-                            <option value="overlay"><?php esc_html_e('Overlay QR', 'google-reviews-plugin'); ?></option>
-                        </select>
-                        <label>
-                            <input type="checkbox" id="grp-modal-glass-effect">
-                            <?php esc_html_e('Glass Effect', 'google-reviews-plugin'); ?>
-                        </label>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="color" id="grp-modal-background-color">
+                                <input type="text" id="grp-modal-background-color-text">
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Star Color', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="color" id="grp-modal-star-color">
+                                <input type="text" id="grp-modal-star-color-text">
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Star Placement', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <select id="grp-modal-star-placement">
+                                    <option value="below"><?php esc_html_e('Below QR', 'google-reviews-plugin'); ?></option>
+                                    <option value="above"><?php esc_html_e('Above QR', 'google-reviews-plugin'); ?></option>
+                                    <option value="overlay"><?php esc_html_e('Overlay QR', 'google-reviews-plugin'); ?></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Glass Effect', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <label class="grp-template-checkbox">
+                                    <input type="checkbox" id="grp-modal-glass-effect">
+                                    <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div id="grp-template-editor-gradient-section" class="grp-template-editor-section">
