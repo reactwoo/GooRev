@@ -292,7 +292,8 @@
 }
 
 .grp-template-editor-preview .grp-review-button {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
 }
 
 .grp-template-editor-controls {
