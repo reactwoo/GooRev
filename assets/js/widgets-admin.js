@@ -357,6 +357,7 @@
 
         function closeTemplateModal() {
             $templateEditorModal.removeClass('grp-template-active');
+            $templateEditorModal.css('display', 'none');
         }
 
         function updatePreview() {
@@ -599,6 +600,7 @@
                 licensePackage: typeof grpWidgets !== 'undefined' ? (grpWidgets.license_data || {}).packageType : undefined,
             });
             populateTemplateModal();
+            $templateEditorModal.css('display', 'flex');
             $templateEditorModal.addClass('grp-template-active');
         });
 
