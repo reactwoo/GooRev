@@ -306,16 +306,14 @@ $is_pro = $license->is_pro();
                 <div class="grp-template-preview-header">
                     <p><?php esc_html_e('Preview of how your review button will look (updates as you change settings):', 'google-reviews-plugin'); ?></p>
                     <div class="grp-template-preview-action">
-                        <?php $show_customize_button = $button_template === 'creative-pro'; ?>
-                        <button type="button" id="grp-template-editor-open" class="button grp-template-customize-btn" data-pro="<?php echo $is_pro ? '1' : '0'; ?>" title="<?php esc_attr_e('Available in Pro only', 'google-reviews-plugin'); ?>" style="<?php echo $show_customize_button ? '' : 'display:none;'; ?>">
+                        <?php $template_requires_pro = !empty($preview_template['pro']); ?>
+                        <button type="button" id="grp-template-editor-open" class="button grp-template-customize-btn" data-template-key="<?php echo esc_attr($button_template); ?>" data-template-pro="<?php echo $template_requires_pro ? '1' : '0'; ?>" data-is-pro="<?php echo $is_pro ? '1' : '0'; ?>" title="<?php esc_attr_e('Customize this layout', 'google-reviews-plugin'); ?>">
                             <?php esc_html_e('Customize Template', 'google-reviews-plugin'); ?>
                         </button>
-                        <?php if (!$is_pro): ?>
-                            <span class="grp-template-pro-label" title="<?php esc_attr_e('Pro only', 'google-reviews-plugin'); ?>">
-                                <span class="dashicons dashicons-lock"></span>
-                                <?php esc_html_e('Pro only', 'google-reviews-plugin'); ?>
-                            </span>
-                        <?php endif; ?>
+                        <span id="grp-template-pro-badge" class="grp-template-pro-label" title="<?php esc_attr_e('Pro only', 'google-reviews-plugin'); ?>" style="<?php echo ($template_requires_pro && !$is_pro) ? '' : 'display:none;'; ?>">
+                            <span class="dashicons dashicons-lock"></span>
+                            <?php esc_html_e('Pro only', 'google-reviews-plugin'); ?>
+                        </span>
                     </div>
                 </div>
                 <?php
@@ -581,7 +579,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Default text for review buttons.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting grp-button-settings-row grp-button-style-row">
                             <th scope="row">
                                 <label for="grp_widget_button_default_style"><?php esc_html_e('Button Style', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -594,7 +592,7 @@ $is_pro = $license->is_pro();
                                 </select>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting grp-button-settings-row grp-button-size-row">
                             <th scope="row">
                                 <label for="grp_widget_button_default_size"><?php esc_html_e('Button Size', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -606,7 +604,7 @@ $is_pro = $license->is_pro();
                                 </select>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-hidden-setting grp-button-settings-row grp-button-text-color-row">
                             <th scope="row">
                                 <label for="grp_widget_button_default_color"><?php esc_html_e('Text Color', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -617,7 +615,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr class="grp-bg-color-row">
+                        <tr class="grp-hidden-setting grp-bg-color-row">
                             <th scope="row">
                                 <label for="grp_widget_button_default_bg_color"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -738,6 +736,12 @@ $is_pro = $license->is_pro();
                                 <input type="text" id="grp-modal-text-color-text">
                             </div>
                         </div>
+                        <div class="grp-template-editor-row grp-modal-link-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Link Text', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="text" id="grp-modal-link-text" placeholder="<?php esc_attr_e('Click here', 'google-reviews-plugin'); ?>">
+                            </div>
+                        </div>
                     </div>
                     <div class="grp-template-editor-column">
                         <div class="grp-template-editor-row">
@@ -752,6 +756,13 @@ $is_pro = $license->is_pro();
                             <div class="grp-template-editor-field">
                                 <input type="color" id="grp-modal-star-color">
                                 <input type="text" id="grp-modal-star-color-text">
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row grp-modal-link-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Link Color', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="color" id="grp-modal-link-color">
+                                <input type="text" id="grp-modal-link-color-text">
                             </div>
                         </div>
                         <div class="grp-template-editor-row">
@@ -771,6 +782,16 @@ $is_pro = $license->is_pro();
                                     <input type="checkbox" id="grp-modal-glass-effect">
                                     <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
                                 </label>
+                            </div>
+                        </div>
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Box Shadow', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <label class="grp-template-checkbox">
+                                    <input type="checkbox" id="grp-modal-box-shadow-enabled">
+                                    <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                                </label>
+                                <button type="button" class="button" id="grp-template-editor-box-shadow-edit"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
                             </div>
                         </div>
                     </div>

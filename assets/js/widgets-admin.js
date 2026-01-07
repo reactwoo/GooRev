@@ -30,6 +30,7 @@
         var $maxWidthInput = $('#grp_widget_template_max_width');
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
+        var $boxShadowEditTrigger = $('#grp-box-shadow-edit');
         var $bgColorRow = $('.grp-bg-color-row');
         var $glassCheckbox = $('#grp_widget_template_glass_effect');
         var $templateEditorModal = $('#grp-template-editor-modal');
@@ -51,10 +52,20 @@
         var $modalGradientStartText = $('#grp-modal-gradient-start-text');
         var $modalGradientEnd = $('#grp-modal-gradient-end');
         var $modalGradientEndText = $('#grp-modal-gradient-end-text');
+        var $modalLinkText = $('#grp-modal-link-text');
+        var $modalLinkColor = $('#grp-modal-link-color');
+        var $modalLinkColorText = $('#grp-modal-link-color-text');
+        var $modalLinkRows = $('.grp-modal-link-row');
+        var $modalBoxShadowEnabled = $('#grp-modal-box-shadow-enabled');
+        var $modalBoxShadowEdit = $('#grp-template-editor-box-shadow-edit');
+        var $templateProBadge = $('#grp-template-pro-badge');
         var $logoScaleSlider = $('#grp_widget_template_logo_scale');
         var $logoScaleText = $('#grp_widget_template_logo_scale_text');
         var $gradientRows = $('.grp-gradient-row');
         var $customizeButton = $('#grp-template-editor-open');
+        var $buttonStyleRows = $('.grp-button-style-row');
+        var $buttonSizeRows = $('.grp-button-size-row');
+        var $buttonTextColorRows = $('.grp-button-text-color-row');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
@@ -257,6 +268,25 @@
             $bgColorRow.toggle(templateData.type === 'button');
         }
 
+        function toggleButtonControls(templateKey) {
+            if (!$buttonStyleRows.length && !$buttonSizeRows.length && !$buttonTextColorRows.length) {
+                return;
+            }
+            var templateData = getTemplateData(templateKey);
+            var showButtonSettings = templateData.type === 'button';
+            $buttonStyleRows.toggle(showButtonSettings);
+            $buttonSizeRows.toggle(showButtonSettings);
+            $buttonTextColorRows.toggle(showButtonSettings);
+        }
+
+        function toggleLinkRows(templateKey) {
+            if (!$modalLinkRows.length) {
+                return;
+            }
+            var templateData = getTemplateData(templateKey);
+            $modalLinkRows.toggle(templateData.show_link !== false);
+        }
+
         function isValidHex(color) {
             return /^#[0-9A-F]{6}$/i.test(color);
         }
@@ -267,6 +297,8 @@
             var isCreative = modalTemplateKey === 'creative-pro';
 
             $modalGradientSection.toggle(isCreative);
+
+            toggleLinkRows(modalTemplateKey);
 
             $modalShowLogo.prop('checked', $logoToggle.is(':checked'));
             var logoScaleValue = parseInt($logoScaleSlider.val(), 10);
@@ -293,6 +325,15 @@
 
             $modalGlassEffect.prop('checked', $glassCheckbox.is(':checked'));
 
+            var linkTextValue = safeTrimValue($linkTextInput) || templateData.link_text || 'Click here';
+            syncLinkText(linkTextValue);
+
+            var linkColorValue = $linkColorText.length ? $linkColorText.val() : '';
+            if (!isValidHex(linkColorValue)) {
+                linkColorValue = '#111111';
+            }
+            syncLinkColor(linkColorValue);
+
             var gradientStartValue = $gradientStartText.val() || '#24a1ff';
             var gradientEndValue = $gradientEndText.val() || '#ff7b5a';
             $modalGradientStart.val(gradientStartValue);
@@ -306,6 +347,7 @@
                 isCreative: isCreative,
                 logoScale: logoScaleValue,
             });
+            $modalBoxShadowEnabled.prop('checked', $boxShadowCheckbox.is(':checked'));
             updateModalPreview();
         }
 
@@ -455,7 +497,7 @@
             if (maxWidth > 0) {
                 styles.push('max-width: ' + maxWidth + 'px');
             }
-            if (boxShadowEnabled && boxShadowValue) {
+            if (boxShadowEnabled && boxShadowValue && isSimpleButton) {
                 styles.push('box-shadow: ' + boxShadowValue);
             }
             if (templateData.type === 'card' && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
@@ -481,9 +523,11 @@
             $previewBtn.html(previewHtml);
 
             toggleGradientControls(templateKey);
-            updateModalPreview();
             toggleBackgroundColorRow(templateKey);
+            toggleButtonControls(templateKey);
+            toggleLinkRows(templateKey);
             updateCustomizeButtonVisibility(templateKey);
+            updateModalPreview();
 
             var sanitizedPreviewUrl = String(previewUrl || '').trim();
             if (templateData.qr && hasPlaceId && sanitizedPreviewUrl && sanitizedPreviewUrl !== '#') {
@@ -492,16 +536,28 @@
                 hidePreviewQr();
             }
 
-            toggleGradientControls(templateKey);
-            updateModalPreview();
         }
 
         function updateCustomizeButtonVisibility(templateKey) {
             if (!$customizeButton.length) {
                 return;
             }
-            var shouldShow = templateKey === 'creative-pro' && isPro;
-            $customizeButton.toggle(shouldShow);
+            var templateData = getTemplateData(templateKey);
+            var requiresPro = !!templateData.pro;
+            $customizeButton.attr('data-template-key', templateKey);
+            $customizeButton.attr('data-template-pro', requiresPro ? '1' : '0');
+            $customizeButton.attr('data-is-pro', isPro ? '1' : '0');
+            if (requiresPro && !isPro) {
+                if ($templateProBadge.length) {
+                    $templateProBadge.show();
+                }
+                $customizeButton.attr('title', 'Available in Pro only');
+            } else {
+                if ($templateProBadge.length) {
+                    $templateProBadge.hide();
+                }
+                $customizeButton.attr('title', 'Customize this layout');
+            }
         }
 
         // Color picker sync and preview font/color updates
@@ -681,6 +737,18 @@
             $('#grp_widget_button_default_bg_color_text').val(value);
         }
 
+        function syncLinkText(value) {
+            $modalLinkText.val(value);
+            $linkTextInput.val(value);
+        }
+
+        function syncLinkColor(value) {
+            $modalLinkColor.val(value);
+            $modalLinkColorText.val(value);
+            $linkColorInput.val(value);
+            $linkColorText.val(value);
+        }
+
         $modalTextColor.on('change', function() {
             var color = $(this).val();
             syncTextColor(color);
@@ -692,6 +760,29 @@
             var value = $(this).val();
             if (isValidHex(value)) {
                 syncTextColor(value);
+                updatePreview();
+                updateModalPreview();
+            }
+        });
+
+        $modalLinkText.on('input', function() {
+            var value = $(this).val();
+            syncLinkText(value);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalLinkColor.on('change', function() {
+            var color = $(this).val();
+            syncLinkColor(color);
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalLinkColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                syncLinkColor(value);
                 updatePreview();
                 updateModalPreview();
             }
@@ -717,6 +808,16 @@
             $glassCheckbox.prop('checked', $(this).is(':checked'));
             updatePreview();
             updateModalPreview();
+        });
+
+        $modalBoxShadowEnabled.on('change', function() {
+            $boxShadowCheckbox.prop('checked', $(this).is(':checked'));
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalBoxShadowEdit.on('click', function() {
+            $boxShadowEditTrigger.trigger('click');
         });
 
         $modalLogoScaleSlider.on('input', function() {
