@@ -296,6 +296,21 @@
     max-width: 100%;
 }
 
+.grp-template-modal-preview-inner {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.grp-template-modal-preview-inner .grp-layout1-preview,
+.grp-template-modal-preview-inner .grp-layout2-preview,
+.grp-template-modal-preview-inner .grp-card-wrapper,
+.grp-template-modal-preview-inner .grp-review-card {
+    width: 100%;
+}
+
 .grp-template-editor-controls {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -311,8 +326,7 @@
 .grp-template-editor-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 18px;
+    gap: 16px;
     background: #fff;
     border: 1px solid #eaeff5;
     border-radius: 12px;
@@ -323,12 +337,11 @@
 .grp-template-editor-row:hover {
     border-color: #d0d6e0;
 }
-}
 
 .grp-template-editor-label {
     font-weight: 600;
     font-size: 14px;
-    flex: 0 0 130px;
+    flex: 0 0 180px;
     text-align: left;
 }
 
@@ -337,15 +350,26 @@
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
+    flex: 1;
+}
+
+.grp-template-editor-field > input[type="text"],
+.grp-template-editor-field > input[type="number"] {
+    max-width: 130px;
     width: 100%;
 }
 
-.grp-template-editor-field > input[type="color"],
-.grp-template-editor-field > input[type="number"],
-.grp-template-editor-field select,
-.grp-template-editor-field input[type="text"] {
-    max-width: 160px;
-    width: 100%;
+.grp-template-editor-field > input[type="color"] {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid #d0d6e0;
+}
+
+.grp-template-editor-field select {
+    flex: 2;
+    min-width: 0;
 }
 
 .grp-template-editor-slider {
@@ -356,6 +380,10 @@
     flex: 1;
 }
 
+.grp-template-editor-slider input[type="number"] {
+    width: 70px;
+}
+
 .grp-template-checkbox {
     display: flex;
     align-items: center;
@@ -363,7 +391,8 @@
 }
 
 .grp-template-editor-field input[type="range"] {
-    max-width: 220px;
+    flex: 1;
+    max-width: none;
 }
 
 .grp-template-editor-section {

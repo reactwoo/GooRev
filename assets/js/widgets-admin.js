@@ -324,7 +324,19 @@
             var modalGradientStartValue = $modalGradientStartText.val() || '#24a1ff';
             var modalGradientEndValue = $modalGradientEndText.val() || '#ff7b5a';
 
-            var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
+            var modalMaxWidth = parseInt($maxWidthInput.val(), 10) || 0;
+            var modalMaxHeight = parseInt($maxHeightInput.val(), 10) || 0;
+            var previewWrapperStyles = [];
+            if (modalMaxWidth > 0) {
+                previewWrapperStyles.push('max-width: ' + modalMaxWidth + 'px');
+            }
+            if (modalMaxHeight > 0) {
+                previewWrapperStyles.push('max-height: ' + modalMaxHeight + 'px');
+            }
+            var previewWrapperAttr = previewWrapperStyles.length ? ' style="' + previewWrapperStyles.join('; ') + '"' : '';
+
+            var previewHtml = '<div class="grp-template-modal-preview-inner"' + previewWrapperAttr + '>' +
+                renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml($('#grp_widget_button_default_text').val() || 'Leave us a review'),
                 subtitle: escapeHtml(templateData.subtitle || ''),
                 linkText: escapeHtml($linkTextInput.length ? $linkTextInput.val() : 'Click here'),
@@ -337,7 +349,7 @@
                 linkColor: $linkColorText.length ? ($linkColorText.val() || '#111111') : '#111111',
                 logoScale: modalLogoScale,
                 showLink: templateData.show_link !== false,
-            });
+            }) + '</div>';
             $templateEditorPreview.html(previewHtml);
 
             if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
