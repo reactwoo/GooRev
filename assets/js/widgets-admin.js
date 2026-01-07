@@ -393,8 +393,12 @@
             var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
             var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
             var logoScale = parseInt($logoScaleSlider.val(), 10);
-            if (!logoScaleTouched && templateKey === 'layout1') {
-                logoScale = 15;
+            if (!logoScaleTouched) {
+                if (templateKey === 'layout1') {
+                    logoScale = 15;
+                } else if (templateKey === 'layout2' || templateKey === 'layout3') {
+                    logoScale = 30;
+                }
                 $logoScaleSlider.val(logoScale);
                 $logoScaleText.val(logoScale);
             }
@@ -427,10 +431,11 @@
             if (textColor && /^#[0-9A-F]{6}$/i.test(textColor)) {
                 styles.push('color: ' + textColor);
             }
-            if (bgColor && /^#[0-9A-F]{6}$/i.test(bgColor)) {
+            var isSimpleButton = templateData.type === 'button';
+            if (bgColor && /^#[0-9A-F]{6}$/i.test(bgColor) && isSimpleButton) {
                 styles.push('background-color: ' + bgColor);
             }
-            if (fontFamily) {
+            if (fontFamily && isSimpleButton) {
                 styles.push('font-family: ' + fontFamily);
             }
             if (maxHeight > 0) {
