@@ -399,7 +399,7 @@ $is_pro = $license->is_pro();
                 
                 <table class="form-table">
                     <tbody>
-                        <tr class="grp-bg-color-row">
+                        <tr>
                             <th scope="row">
                                 <label for="grp_widget_button_default_template"><?php esc_html_e('Layout', 'google-reviews-plugin'); ?></label>
                             </th>
@@ -617,7 +617,7 @@ $is_pro = $license->is_pro();
                                 <p class="description"><?php esc_html_e('Leave empty to use default color. The color picker shows a preview color, but empty text field = default.', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="grp-bg-color-row">
                             <th scope="row">
                                 <label for="grp_widget_button_default_bg_color"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></label>
                             </th>
