@@ -279,7 +279,8 @@
 }
 
 .grp-template-editor-preview {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     min-height: 220px;
     border-radius: 14px;
     margin-bottom: 18px;
