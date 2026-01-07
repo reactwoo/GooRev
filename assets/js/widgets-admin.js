@@ -53,6 +53,7 @@
         var $logoScaleSlider = $('#grp_widget_template_logo_scale');
         var $logoScaleText = $('#grp_widget_template_logo_scale_text');
         var $gradientRows = $('.grp-gradient-row');
+        var $customizeButton = $('#grp-template-editor-open');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
@@ -463,6 +464,8 @@
             });
             $previewBtn.html(previewHtml);
 
+            updateCustomizeButtonVisibility(templateKey);
+
             var sanitizedPreviewUrl = String(previewUrl || '').trim();
             if (templateData.qr && hasPlaceId && sanitizedPreviewUrl && sanitizedPreviewUrl !== '#') {
                 fetchPreviewQr(templateData.qr_size || 135);
@@ -472,6 +475,14 @@
 
             toggleGradientControls(templateKey);
             updateModalPreview();
+        }
+
+        function updateCustomizeButtonVisibility(templateKey) {
+            if (!$customizeButton.length) {
+                return;
+            }
+            var shouldShow = templateKey === 'creative-pro' && isPro;
+            $customizeButton.toggle(shouldShow);
         }
 
         // Color picker sync and preview font/color updates

@@ -178,7 +178,7 @@ class GRP_Review_Widgets {
                 'show_link' => false,
             ),
             'layout2' => array(
-                'name' => __('Layout 2', 'google-reviews-plugin'),
+                'name' => __('Layout 2 (Light)', 'google-reviews-plugin'),
                 'description' => __('Stacked light card with Google G, stars, instructions, and QR art.', 'google-reviews-plugin'),
                 'type' => 'layout2',
                 'pro' => false,
@@ -189,7 +189,7 @@ class GRP_Review_Widgets {
                 'link_text' => __('www.google.com', 'google-reviews-plugin'),
             ),
             'layout3' => array(
-                'name' => __('Layout 3', 'google-reviews-plugin'),
+                'name' => __('Layout 3 (Dark)', 'google-reviews-plugin'),
                 'description' => __('Stacked dark card with the same elements plus a colorful underline.', 'google-reviews-plugin'),
                 'type' => 'layout2',
                 'dark' => true,

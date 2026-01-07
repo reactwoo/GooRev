@@ -306,7 +306,8 @@ $is_pro = $license->is_pro();
                 <div class="grp-template-preview-header">
                     <p><?php esc_html_e('Preview of how your review button will look (updates as you change settings):', 'google-reviews-plugin'); ?></p>
                     <div class="grp-template-preview-action">
-                        <button type="button" id="grp-template-editor-open" class="button grp-template-customize-btn" data-pro="<?php echo $is_pro ? '1' : '0'; ?>" title="<?php esc_attr_e('Available in Pro only', 'google-reviews-plugin'); ?>">
+                        <?php $show_customize_button = $button_template === 'creative-pro'; ?>
+                        <button type="button" id="grp-template-editor-open" class="button grp-template-customize-btn" data-pro="<?php echo $is_pro ? '1' : '0'; ?>" title="<?php esc_attr_e('Available in Pro only', 'google-reviews-plugin'); ?>" style="<?php echo $show_customize_button ? '' : 'display:none;'; ?>">
                             <?php esc_html_e('Customize Template', 'google-reviews-plugin'); ?>
                         </button>
                         <?php if (!$is_pro): ?>
