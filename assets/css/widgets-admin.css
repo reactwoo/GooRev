@@ -297,7 +297,8 @@
 }
 
 .grp-template-modal-preview-inner {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -309,6 +310,7 @@
 .grp-template-modal-preview-inner .grp-card-wrapper,
 .grp-template-modal-preview-inner .grp-review-card {
     width: 100%;
+    max-width: 100%;
 }
 
 .grp-template-editor-controls {
