@@ -399,7 +399,7 @@ $is_pro = $license->is_pro();
                 
                 <table class="form-table">
                     <tbody>
-                        <tr>
+                        <tr class="grp-bg-color-row">
                             <th scope="row">
                                 <label for="grp_widget_button_default_template"><?php esc_html_e('Layout', 'google-reviews-plugin'); ?></label>
                             </th>

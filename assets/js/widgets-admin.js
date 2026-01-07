@@ -30,6 +30,7 @@
         var $maxWidthInput = $('#grp_widget_template_max_width');
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
+        var $bgColorRow = $('.grp-bg-color-row');
         var $glassCheckbox = $('#grp_widget_template_glass_effect');
         var $templateEditorModal = $('#grp-template-editor-modal');
         var $templateEditorPreview = $('#grp-template-editor-preview');
@@ -248,6 +249,14 @@
             }
         }
 
+        function toggleBackgroundColorRow(templateKey) {
+            if (!$bgColorRow.length) {
+                return;
+            }
+            var templateData = getTemplateData(templateKey);
+            $bgColorRow.toggle(templateData.type === 'button');
+        }
+
         function isValidHex(color) {
             return /^#[0-9A-F]{6}$/i.test(color);
         }
@@ -415,11 +424,13 @@
 
             var classes = [
                 'grp-review-button',
-                'grp-review-button-' + style,
-                'grp-review-button-' + size,
                 'grp-review-button-template-' + templateKey,
                 'grp-star-placement-' + starPlacement
             ];
+            if (templateData.type === 'button') {
+                classes.splice(1, 0, 'grp-review-button-' + style);
+                classes.splice(2, 0, 'grp-review-button-' + size);
+            }
             $previewBtn.attr('class', classes.join(' '));
             if (glassEffect) {
                 $previewBtn.addClass('grp-glass-effect');
@@ -469,6 +480,9 @@
             });
             $previewBtn.html(previewHtml);
 
+            toggleGradientControls(templateKey);
+            updateModalPreview();
+            toggleBackgroundColorRow(templateKey);
             updateCustomizeButtonVisibility(templateKey);
 
             var sanitizedPreviewUrl = String(previewUrl || '').trim();
