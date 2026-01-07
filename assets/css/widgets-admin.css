@@ -297,19 +297,20 @@
 }
 
 .grp-template-modal-preview-inner {
-    width: auto;
-    max-width: 100%;
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
     gap: 12px;
+    width: auto;
+    max-width: 100%;
+    padding: 0 8px;
 }
 
 .grp-template-modal-preview-inner .grp-layout1-preview,
 .grp-template-modal-preview-inner .grp-layout2-preview,
 .grp-template-modal-preview-inner .grp-card-wrapper,
 .grp-template-modal-preview-inner .grp-review-card {
-    width: 100%;
+    width: auto;
     max-width: 100%;
 }
 
