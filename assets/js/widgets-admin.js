@@ -220,10 +220,12 @@
                 var darkClass = templateData.dark ? ' grp-layout-dark' : '';
                 return '<div class="grp-layout2-preview' + darkClass + '">' +
                     (options.showLogo && options.logoClassicUrl ? '<img src="' + options.logoClassicUrl + '" class="grp-layout2-logo-img" alt="Google" style="width:' + options.logoScale + '%;">' : '') +
-                    '<div class="grp-layout2-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
+                    '<div class="grp-layout2-stars-qr">' +
+                        '<div class="grp-layout2-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
+                        '<div class="grp-layout2-qr">' + qrHtml + '</div>' +
+                    '</div>' +
                     '<div class="grp-layout2-heading">' + options.title + '</div>' +
                     '<div class="grp-layout2-subtitle">' + options.subtitle + '</div>' +
-                    '<div class="grp-layout2-qr">' + qrHtml + '</div>' +
                     '<div class="grp-layout2-link" style="color:' + linkColor + ';">' + linkHtml + '</div>' +
                     '<div class="grp-layout2-underline">' + buildUnderline(templateData.underline_colors) + '</div>' +
                 '</div>';
@@ -381,10 +383,10 @@
             var isModalButton = templateData.type === 'button';
             var modalStarPlacementValue = $modalStarPlacement.val() || 'below';
             var previewWrapperStyles = [];
-            if (modalMaxWidth > 0) {
+            if (isModalButton && modalMaxWidth > 0) {
                 previewWrapperStyles.push('max-width: ' + modalMaxWidth + 'px');
             }
-            if (modalMaxHeight > 0) {
+            if (isModalButton && modalMaxHeight > 0) {
                 previewWrapperStyles.push('max-height: ' + modalMaxHeight + 'px');
             }
             var previewWrapperClass = 'grp-template-modal-preview-inner grp-star-placement-' + modalStarPlacementValue;
@@ -418,10 +420,10 @@
             if ($modalFontFamily.val()) {
                 modalRootStyles.push('font-family: ' + $modalFontFamily.val());
             }
-            if (modalMaxHeight > 0) {
+            if (isModalButton && modalMaxHeight > 0) {
                 modalRootStyles.push('max-height: ' + modalMaxHeight + 'px');
             }
-            if (modalMaxWidth > 0) {
+            if (isModalButton && modalMaxWidth > 0) {
                 modalRootStyles.push('max-width: ' + modalMaxWidth + 'px');
             }
             var trimmedBoxShadow = safeTrimValue($boxShadowValue);
