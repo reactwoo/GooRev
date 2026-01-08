@@ -406,20 +406,36 @@
                 showLink: templateData.show_link !== false,
             }) + '</div>';
             $templateEditorPreview.html(previewHtml);
+            $templateEditorPreview.css('background', '');
+            $templateEditorPreview.css('color', '');
             var $modalPreviewInner = $templateEditorPreview.find('.grp-template-modal-preview-inner');
             var $modalTemplateRoot = $modalPreviewInner.children().first();
-            if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
-                $modalTemplateRoot.css('background', 'linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
-                $modalTemplateRoot.css('color', '#fff');
-            } else {
-                if (isModalButton) {
-                    $modalTemplateRoot.css('background', modalBackgroundColorValue);
-                    $modalTemplateRoot.css('color', modalTextColorValue);
-                } else {
-                    $modalTemplateRoot.css('background', '');
-                    $modalTemplateRoot.css('color', '');
+            var modalRootStyles = [];
+            if (isValidHex(modalTextColorValue)) {
+                modalRootStyles.push('color: ' + modalTextColorValue);
+            }
+            if (isModalButton) {
+                if (isValidHex(modalBackgroundColorValue)) {
+                    modalRootStyles.push('background-color: ' + modalBackgroundColorValue);
+                }
+                if ($modalFontFamily.val()) {
+                    modalRootStyles.push('font-family: ' + $modalFontFamily.val());
+                }
+                if (modalMaxHeight > 0) {
+                    modalRootStyles.push('max-height: ' + modalMaxHeight + 'px');
+                }
+                if (modalMaxWidth > 0) {
+                    modalRootStyles.push('max-width: ' + modalMaxWidth + 'px');
+                }
+                if ($modalBoxShadowEnabled.is(':checked') && safeTrimValue($boxShadowValue)) {
+                    modalRootStyles.push('box-shadow: ' + safeTrimValue($boxShadowValue));
                 }
             }
+            if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
+                modalRootStyles.push('background: linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
+                modalRootStyles.push('color: #fff');
+            }
+            $modalTemplateRoot.attr('style', modalRootStyles.join('; '));
 
             if ($modalGlassEffect.is(':checked')) {
                 $modalTemplateRoot.addClass('grp-glass-effect');
