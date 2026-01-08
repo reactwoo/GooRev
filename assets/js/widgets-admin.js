@@ -406,19 +406,25 @@
                 showLink: templateData.show_link !== false,
             }) + '</div>';
             $templateEditorPreview.html(previewHtml);
-
+            var $modalPreviewInner = $templateEditorPreview.find('.grp-template-modal-preview-inner');
+            var $modalTemplateRoot = $modalPreviewInner.children().first();
             if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
-                $templateEditorPreview.css('background', 'linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
-                $templateEditorPreview.css('color', '#fff');
+                $modalTemplateRoot.css('background', 'linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
+                $modalTemplateRoot.css('color', '#fff');
             } else {
-                $templateEditorPreview.css('background', modalBackgroundColorValue);
-                $templateEditorPreview.css('color', modalTextColorValue);
+                if (isModalButton) {
+                    $modalTemplateRoot.css('background', modalBackgroundColorValue);
+                    $modalTemplateRoot.css('color', modalTextColorValue);
+                } else {
+                    $modalTemplateRoot.css('background', '');
+                    $modalTemplateRoot.css('color', '');
+                }
             }
 
             if ($modalGlassEffect.is(':checked')) {
-                $templateEditorPreview.addClass('grp-glass-effect');
+                $modalTemplateRoot.addClass('grp-glass-effect');
             } else {
-                $templateEditorPreview.removeClass('grp-glass-effect');
+                $modalTemplateRoot.removeClass('grp-glass-effect');
             }
         }
 
