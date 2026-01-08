@@ -378,12 +378,15 @@
 
             var modalMaxWidth = parseInt($maxWidthInput.val(), 10) || 0;
             var modalMaxHeight = parseInt($maxHeightInput.val(), 10) || 0;
+            var isModalButton = templateData.type === 'button';
             var previewWrapperStyles = [];
-            if (modalMaxWidth > 0) {
-                previewWrapperStyles.push('max-width: ' + modalMaxWidth + 'px');
-            }
-            if (modalMaxHeight > 0) {
-                previewWrapperStyles.push('max-height: ' + modalMaxHeight + 'px');
+            if (isModalButton) {
+                if (modalMaxWidth > 0) {
+                    previewWrapperStyles.push('max-width: ' + modalMaxWidth + 'px');
+                }
+                if (modalMaxHeight > 0) {
+                    previewWrapperStyles.push('max-height: ' + modalMaxHeight + 'px');
+                }
             }
             var previewWrapperAttr = previewWrapperStyles.length ? ' style="' + previewWrapperStyles.join('; ') + '"' : '';
 
