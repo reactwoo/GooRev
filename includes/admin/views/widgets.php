@@ -339,22 +339,38 @@ $is_pro = $license->is_pro();
                 <div id="grp-button-preview" class="grp-preview-shell" style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
                     <?php
                     $preview_url = $has_place_id ? GRP_Review_Widgets::get_instance()->generate_review_url('', 'button', 'preview') : '#';
-                    $preview_classes = array('grp-review-button', 'grp-review-button-' . $button_style, 'grp-review-button-' . $button_size);
-                    $preview_classes[] = 'grp-review-button-template-' . sanitize_title($button_template);
                     $preview_styles = array();
+                    $preview_classes = array('grp-review-button', 'grp-review-button-template-' . sanitize_title($button_template));
+                    $is_card = isset($preview_template['type']) && $preview_template['type'] === 'card';
+                    $is_button_preview = isset($preview_template['type']) && $preview_template['type'] === 'button';
+                    if ($is_button_preview) {
+                        $preview_classes[] = 'grp-review-button';
+                        $preview_classes[] = 'grp-review-button-' . $button_style;
+                        $preview_classes[] = 'grp-review-button-' . $button_size;
+                        if (!empty($button_bg_color)) {
+                            $preview_styles[] = 'background-color: ' . esc_attr($button_bg_color);
+                        }
+                        if (!empty($preview_font_family)) {
+                            $preview_styles[] = 'font-family: ' . esc_attr($preview_font_family);
+                        }
+                        if ($preview_max_height > 0) {
+                            $preview_styles[] = 'max-height: ' . $preview_max_height . 'px';
+                        }
+                        if ($preview_max_width > 0) {
+                            $preview_styles[] = 'max-width: ' . $preview_max_width . 'px';
+                        }
+                        if ($box_shadow_enabled && !empty($box_shadow_value)) {
+                            $preview_styles[] = 'box-shadow: ' . esc_attr($box_shadow_value);
+                        }
+                    } else {
+                        $preview_classes[] = 'grp-review-button';
+                    }
                     if (!empty($button_color)) {
                         $preview_styles[] = 'color: ' . esc_attr($button_color);
                     }
-                    if (!empty($button_bg_color)) {
-                        $preview_styles[] = 'background-color: ' . esc_attr($button_bg_color);
-                    }
-                    if (!empty($preview_font_family)) {
+                    if (!empty($preview_font_family) && !$is_button_preview) {
                         $preview_styles[] = 'font-family: ' . esc_attr($preview_font_family);
                     }
-                    if ($preview_max_height > 0) {
-                        $preview_styles[] = 'max-height: ' . $preview_max_height . 'px';
-                    }
-                    $is_card = isset($preview_template['type']) && $preview_template['type'] === 'card';
                     $preview_subtitle = !empty($preview_template['subtitle']) ? $preview_template['subtitle'] : __('Scan the QR code below to leave a review!', 'google-reviews-plugin');
                     $card_gradient = ($is_card && $button_template === 'creative-pro') ? 'background: linear-gradient(135deg, ' . esc_attr($gradient_start) . ', ' . esc_attr($gradient_end) . ');' : '';
                     $combined_style = trim($card_gradient . ' ' . implode('; ', $preview_styles), '; ');

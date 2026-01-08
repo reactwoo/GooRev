@@ -491,14 +491,16 @@
             if (fontFamily && isSimpleButton) {
                 styles.push('font-family: ' + fontFamily);
             }
-            if (maxHeight > 0) {
-                styles.push('max-height: ' + maxHeight + 'px');
-            }
-            if (maxWidth > 0) {
-                styles.push('max-width: ' + maxWidth + 'px');
-            }
-            if (boxShadowEnabled && boxShadowValue && isSimpleButton) {
-                styles.push('box-shadow: ' + boxShadowValue);
+            if (isSimpleButton) {
+                if (maxHeight > 0) {
+                    styles.push('max-height: ' + maxHeight + 'px');
+                }
+                if (maxWidth > 0) {
+                    styles.push('max-width: ' + maxWidth + 'px');
+                }
+                if (boxShadowEnabled && boxShadowValue) {
+                    styles.push('box-shadow: ' + boxShadowValue);
+                }
             }
             if (templateData.type === 'card' && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
                 styles.push('background: linear-gradient(135deg, ' + gradientStart + ', ' + gradientEnd + ')');
