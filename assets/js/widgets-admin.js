@@ -379,18 +379,18 @@
             var modalMaxWidth = parseInt($maxWidthInput.val(), 10) || 0;
             var modalMaxHeight = parseInt($maxHeightInput.val(), 10) || 0;
             var isModalButton = templateData.type === 'button';
+            var modalStarPlacementValue = $modalStarPlacement.val() || 'below';
             var previewWrapperStyles = [];
-            if (isModalButton) {
-                if (modalMaxWidth > 0) {
-                    previewWrapperStyles.push('max-width: ' + modalMaxWidth + 'px');
-                }
-                if (modalMaxHeight > 0) {
-                    previewWrapperStyles.push('max-height: ' + modalMaxHeight + 'px');
-                }
+            if (modalMaxWidth > 0) {
+                previewWrapperStyles.push('max-width: ' + modalMaxWidth + 'px');
             }
+            if (modalMaxHeight > 0) {
+                previewWrapperStyles.push('max-height: ' + modalMaxHeight + 'px');
+            }
+            var previewWrapperClass = 'grp-template-modal-preview-inner grp-star-placement-' + modalStarPlacementValue;
             var previewWrapperAttr = previewWrapperStyles.length ? ' style="' + previewWrapperStyles.join('; ') + '"' : '';
 
-            var previewHtml = '<div class="grp-template-modal-preview-inner"' + previewWrapperAttr + '>' +
+            var previewHtml = '<div class="' + previewWrapperClass + '"' + previewWrapperAttr + '>' +
                 renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml($('#grp_widget_button_default_text').val() || 'Leave us a review'),
                 subtitle: escapeHtml(templateData.subtitle || ''),
@@ -406,30 +406,29 @@
                 showLink: templateData.show_link !== false,
             }) + '</div>';
             $templateEditorPreview.html(previewHtml);
-            $templateEditorPreview.css('background', '');
-            $templateEditorPreview.css('color', '');
             var $modalPreviewInner = $templateEditorPreview.find('.grp-template-modal-preview-inner');
             var $modalTemplateRoot = $modalPreviewInner.children().first();
             var modalRootStyles = [];
             if (isValidHex(modalTextColorValue)) {
                 modalRootStyles.push('color: ' + modalTextColorValue);
             }
-            if (isModalButton) {
-                if (isValidHex(modalBackgroundColorValue)) {
-                    modalRootStyles.push('background-color: ' + modalBackgroundColorValue);
-                }
-                if ($modalFontFamily.val()) {
-                    modalRootStyles.push('font-family: ' + $modalFontFamily.val());
-                }
-                if (modalMaxHeight > 0) {
-                    modalRootStyles.push('max-height: ' + modalMaxHeight + 'px');
-                }
-                if (modalMaxWidth > 0) {
-                    modalRootStyles.push('max-width: ' + modalMaxWidth + 'px');
-                }
-                if ($modalBoxShadowEnabled.is(':checked') && safeTrimValue($boxShadowValue)) {
-                    modalRootStyles.push('box-shadow: ' + safeTrimValue($boxShadowValue));
-                }
+            if (isValidHex(modalBackgroundColorValue)) {
+                modalRootStyles.push('background-color: ' + modalBackgroundColorValue);
+            }
+            if ($modalFontFamily.val()) {
+                modalRootStyles.push('font-family: ' + $modalFontFamily.val());
+            }
+            if (modalMaxHeight > 0) {
+                modalRootStyles.push('max-height: ' + modalMaxHeight + 'px');
+            }
+            if (modalMaxWidth > 0) {
+                modalRootStyles.push('max-width: ' + modalMaxWidth + 'px');
+            }
+            var trimmedBoxShadow = safeTrimValue($boxShadowValue);
+            if ($modalBoxShadowEnabled.is(':checked') && trimmedBoxShadow) {
+                modalRootStyles.push('box-shadow: ' + trimmedBoxShadow);
+            } else {
+                modalRootStyles.push('box-shadow: none');
             }
             if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
                 modalRootStyles.push('background: linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
