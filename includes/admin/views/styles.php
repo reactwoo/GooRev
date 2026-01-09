@@ -185,22 +185,25 @@ if (!class_exists('GRP_License')) {
                                         <span class="grp-pro-badge"><?php esc_html_e('Pro', 'google-reviews-plugin'); ?></span>
                                     </button>
                                 <?php else: ?>
-                                    <button class="button button-primary grp-use-style" 
-                                            data-style="<?php echo esc_attr($key); ?>">
+                                <button class="button button-primary grp-use-style" 
+                                        data-style="<?php echo esc_attr($key); ?>">
                                         <?php esc_html_e('Use This Style', 'google-reviews-plugin'); ?>
                                     </button>
                                 <?php endif; ?>
-                                <?php
-                                $license = new GRP_License();
-                                $is_pro = $license->is_pro();
-                                if ($is_pro): ?>
+                            <?php
+                            $license = new GRP_License();
+                            $is_pro = $license->is_pro();
+                            $template_key = isset($style['template']) ? $style['template'] : 'layout1';
+                            if ($is_pro): ?>
                                     <button class="button grp-customize-style" 
-                                            data-style="<?php echo esc_attr($key); ?>">
+                                            data-style="<?php echo esc_attr($key); ?>"
+                                            data-template="<?php echo esc_attr($template_key); ?>">
                                         <?php esc_html_e('Customize', 'google-reviews-plugin'); ?>
                                     </button>
                                 <?php else: ?>
                                     <button class="button grp-customize-style grp-pro-feature" 
                                             data-style="<?php echo esc_attr($key); ?>"
+                                            data-template="<?php echo esc_attr($template_key); ?>"
                                             title="<?php esc_attr_e('Customize is a Pro feature. Upgrade to unlock advanced styling options.', 'google-reviews-plugin'); ?>">
                                         <?php esc_html_e('Customize', 'google-reviews-plugin'); ?>
                                         <span class="grp-pro-badge"><?php esc_html_e('Pro', 'google-reviews-plugin'); ?></span>
@@ -991,6 +994,8 @@ if (!class_exists('GRP_License')) {
 }
 </style>
 
+<?php include GRP_PLUGIN_DIR . 'includes/admin/views/partials/template-editor-modal.php'; ?>
+
 <script>
 jQuery(document).ready(function($) {
     // Variant switching
@@ -1655,6 +1660,22 @@ jQuery(document).ready(function($) {
         });
     });
 });
+</script>
+
+<script>
+    jQuery(function($) {
+        $('.grp-customize-style').off('click.grpCustomModal');
+        $('.grp-customize-style').on('click.grpCustomModal', function(e) {
+            e.preventDefault();
+            if ($(this).hasClass('grp-pro-feature')) {
+                return;
+            }
+            if (typeof window.grpOpenTemplateModal === 'function') {
+                var templateKey = $(this).data('template') || 'layout1';
+                grpOpenTemplateModal(templateKey);
+            }
+        });
+    });
 </script>
 
 <?php

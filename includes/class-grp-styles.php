@@ -41,31 +41,36 @@ class GRP_Styles {
                 'name' => __('Modern', 'google-reviews-plugin'),
                 'description' => __('Clean and contemporary design with subtle shadows', 'google-reviews-plugin'),
                 'variants' => array('light', 'dark', 'auto'),
-                'features' => array('shadows', 'rounded_corners', 'gradients')
+                'features' => array('shadows', 'rounded_corners', 'gradients'),
+                'template' => 'layout1',
             ),
             'classic' => array(
                 'name' => __('Classic', 'google-reviews-plugin'),
                 'description' => __('Traditional design with clean lines and professional look', 'google-reviews-plugin'),
                 'variants' => array('light', 'dark', 'auto'),
-                'features' => array('borders', 'clean_typography')
+                'features' => array('borders', 'clean_typography'),
+                'template' => 'layout1',
             ),
             'minimal' => array(
                 'name' => __('Minimal', 'google-reviews-plugin'),
                 'description' => __('Minimalist design focusing on content', 'google-reviews-plugin'),
                 'variants' => array('light', 'dark', 'auto'),
-                'features' => array('minimal_spacing', 'clean_typography')
+                'features' => array('minimal_spacing', 'clean_typography'),
+                'template' => 'layout1',
             ),
             'corporate' => array(
                 'name' => __('Corporate', 'google-reviews-plugin'),
                 'description' => __('Professional business design with structured layout', 'google-reviews-plugin'),
                 'variants' => array('light', 'dark', 'auto'),
-                'features' => array('structured_layout', 'professional_colors')
+                'features' => array('structured_layout', 'professional_colors'),
+                'template' => 'layout1',
             ),
             'creative' => array(
                 'name' => __('Creative', 'google-reviews-plugin'),
                 'description' => __('Artistic design with creative elements and animations', 'google-reviews-plugin'),
                 'variants' => array('light', 'dark', 'auto'),
-                'features' => array('animations', 'creative_elements', 'gradients')
+                'features' => array('animations', 'creative_elements', 'gradients'),
+                'template' => 'creative-pro',
             )
         );
     }

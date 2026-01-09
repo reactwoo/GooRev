@@ -505,7 +505,7 @@ class GRP_Review_Widgets {
      * Enqueue admin assets
      */
     public function enqueue_admin_assets($hook) {
-        if ($hook !== 'google-reviews_page_google-reviews-widgets') {
+        if (!in_array($hook, array('google-reviews_page_google-reviews-widgets', 'google-reviews_page_google-reviews-styles'), true)) {
             return;
         }
         

@@ -969,9 +969,19 @@
                 licensePackage: typeof grpWidgets !== 'undefined' ? (grpWidgets.license_data || {}).packageType : undefined,
             });
             populateTemplateModal();
+        $templateEditorModal.css('display', 'flex');
+        $templateEditorModal.addClass('grp-template-active');
+        });
+
+        window.grpOpenTemplateModal = function(templateKey) {
+            if (!templateKey) {
+                templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
+            }
+            modalTemplateKey = templateKey;
+            populateTemplateModal();
             $templateEditorModal.css('display', 'flex');
             $templateEditorModal.addClass('grp-template-active');
-        });
+        };
 
         $templateEditorModal.on('click', function(e) {
             if ($(e.target).is($templateEditorModal)) {
