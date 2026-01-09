@@ -830,6 +830,14 @@
                 return;
             }
             var templateData = getTemplateData(templateKey);
+            if (templateData.type === 'button') {
+                $customizeButton.hide();
+                if ($templateProBadge.length) {
+                    $templateProBadge.hide();
+                }
+                return;
+            }
+            $customizeButton.show();
             var requiresPro = !!templateData.pro;
             $customizeButton.attr('data-template-key', templateKey);
             $customizeButton.attr('data-template-pro', requiresPro ? '1' : '0');
