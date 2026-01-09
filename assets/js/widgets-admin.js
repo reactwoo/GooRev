@@ -536,9 +536,6 @@
             if (!isValidHex(modalBackgroundColorValue)) {
                 modalBackgroundColorValue = '#2b2b2b';
             }
-            var modalGradientStartValue = $modalGradientStartText.val() || '#24a1ff';
-            var modalGradientEndValue = $modalGradientEndText.val() || '#ff7b5a';
-
             var modalMaxWidth = parseInt($maxWidthInput.val(), 10) || 0;
             var modalMaxHeight = parseInt($maxHeightInput.val(), 10) || 0;
             var isModalButton = templateData.type === 'button';
@@ -1130,16 +1127,6 @@
             $boxShadowCheckbox.prop('checked', !!customization.box_shadow_enabled);
             $modalBoxShadowEnabled.prop('checked', !!customization.box_shadow_enabled);
             $boxShadowValue.val(customization.box_shadow_value || '');
-            var gradientStart = customization.gradient_start || '#0091ff';
-            var gradientEnd = customization.gradient_end || '#612c1f';
-            $modalGradientStart.val(gradientStart);
-            $modalGradientStartText.val(gradientStart);
-            $gradientStartInput.val(gradientStart);
-            $gradientStartText.val(gradientStart);
-            $modalGradientEnd.val(gradientEnd);
-            $modalGradientEndText.val(gradientEnd);
-            $gradientEndInput.val(gradientEnd);
-            $gradientEndText.val(gradientEnd);
             $maxWidthInput.val(customization.max_width || 0);
             $maxHeightInput.val(customization.max_height || 0);
             if ($('#grp-modal-message-text').length) {
@@ -1369,45 +1356,6 @@
             updateModalPreview();
         });
 
-        $modalGradientStart.on('change', function() {
-            var color = $(this).val();
-            $modalGradientStartText.val(color);
-            $gradientStartInput.val(color);
-            $gradientStartText.val(color);
-            updatePreview();
-            updateModalPreview();
-        });
-
-        $modalGradientStartText.on('input', function() {
-            var value = $(this).val();
-            if (isValidHex(value)) {
-                $modalGradientStart.val(value);
-                $gradientStartInput.val(value);
-                $gradientStartText.val(value);
-                updatePreview();
-                updateModalPreview();
-            }
-        });
-
-        $modalGradientEnd.on('change', function() {
-            var color = $(this).val();
-            $modalGradientEndText.val(color);
-            $gradientEndInput.val(color);
-            $gradientEndText.val(color);
-            updatePreview();
-            updateModalPreview();
-        });
-
-        $modalGradientEndText.on('input', function() {
-            var value = $(this).val();
-            if (isValidHex(value)) {
-                $modalGradientEnd.val(value);
-                $gradientEndInput.val(value);
-                $gradientEndText.val(value);
-                updatePreview();
-                updateModalPreview();
-            }
-        });
         $maxWidthInput.on('input', function() {
             var value = parsePositiveInt($(this).val());
             updateTemplateCustomizationValue('max_width', value);
