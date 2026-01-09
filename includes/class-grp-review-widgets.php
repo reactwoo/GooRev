@@ -269,6 +269,8 @@ class GRP_Review_Widgets {
             'box_shadow_color' => '#000000',
             'gradient_start' => '#0091ff',
             'gradient_end' => '#612c1f',
+            'gradient_start_opacity' => 100,
+            'gradient_end_opacity' => 100,
             'gradient_type' => 'linear',
             'gradient_angle' => 135,
             'gradient_start_pos' => 0,
@@ -444,6 +446,8 @@ class GRP_Review_Widgets {
             case 'background_color_opacity':
             case 'star_color_opacity':
             case 'link_color_opacity':
+            case 'gradient_start_opacity':
+            case 'gradient_end_opacity':
                 $numeric = intval($value);
                 if ($numeric < 0) {
                     $numeric = 0;

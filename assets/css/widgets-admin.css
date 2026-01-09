@@ -279,7 +279,7 @@
 }
 
 .grp-template-editor-preview {
-    width: 435px;
+    width: 100%;
     max-width: 100%;
     min-height: auto;
     border-radius: 14px;
@@ -288,10 +288,15 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    background: transparent;
+    background: #fff;
     box-shadow: none;
     margin-left: auto;
     margin-right: auto;
+    transition: background-color 0.2s ease;
+}
+
+.grp-template-editor-preview.grp-glass-preview {
+    background: #232323;
 }
 
 .grp-template-editor-preview .grp-review-button {
@@ -378,6 +383,25 @@
     min-width: 0;
 }
 
+.grp-template-color-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.grp-template-color-opacity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #555;
+}
+
+.grp-template-color-opacity input[type="range"] {
+    width: 120px;
+}
+
 .grp-template-editor-slider {
     flex-wrap: wrap;
 }
@@ -415,6 +439,86 @@
 .grp-template-editor-footer {
     margin-top: 24px;
     text-align: right;
+}
+
+.grp-gradient-summary-row .grp-template-editor-field {
+    gap: 12px;
+}
+
+.grp-gradient-summary-preview {
+    width: 120px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #dfe3ea;
+    background: #2b2b2b;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.grp-gradient-editor-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002;
+    padding: 20px;
+}
+
+.grp-gradient-editor-modal.grp-active {
+    display: flex;
+}
+
+.grp-gradient-editor-content {
+    width: min(520px, 100%);
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.grp-gradient-editor-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.grp-gradient-editor-row span {
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+}
+
+.grp-gradient-editor-row select,
+.grp-gradient-editor-row input[type="number"] {
+    width: 100%;
+}
+
+.grp-gradient-editor-range-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.grp-gradient-editor-range-group input[type="number"] {
+    width: 70px;
+}
+
+.grp-gradient-editor-preview {
+    width: 100%;
+    height: 120px;
+    border-radius: 16px;
+    border: 1px solid #e0e5ef;
+    margin-bottom: 18px;
+    background: linear-gradient(135deg, #0091ff 0%, #612c1f 100%);
+}
+
+.grp-gradient-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .grp-box-shadow-controls {

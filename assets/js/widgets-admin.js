@@ -18,10 +18,6 @@
         var $starColorText = $('#grp_widget_template_star_color_text');
         var $starPlacementSelect = $('#grp_widget_template_star_placement');
         var $logoToggle = $('#grp_widget_template_show_logo');
-        var $gradientStartInput = $('#grp_widget_template_gradient_start');
-        var $gradientEndInput = $('#grp_widget_template_gradient_end');
-        var $gradientStartText = $('#grp_widget_template_gradient_start_text');
-        var $gradientEndText = $('#grp_widget_template_gradient_end_text');
         var $fontFamilyInput = $('#grp_widget_template_font_family');
         var $maxHeightInput = $('#grp_widget_template_max_height');
         var $linkColorInput = $('#grp_widget_template_link_color');
@@ -48,16 +44,51 @@
         var $modalBackgroundColorText = $('#grp-modal-background-color-text');
         var $modalGlassEffect = $('#grp-modal-glass-effect');
         var $modalGradientSection = $('#grp-template-editor-gradient-section');
-        var $modalGradientStart = $('#grp-modal-gradient-start');
-        var $modalGradientStartText = $('#grp-modal-gradient-start-text');
-        var $modalGradientEnd = $('#grp-modal-gradient-end');
-        var $modalGradientEndText = $('#grp-modal-gradient-end-text');
+        var $gradientSummaryPreview = $('#grp-gradient-summary-preview');
+        var $gradientEditorOpen = $('#grp-gradient-editor-open');
+        var $gradientEditorModal = $('#grp-gradient-editor-modal');
+        var $gradientEditorClose = $('.grp-gradient-editor-close');
+        var $gradientEditorDone = $('#grp-gradient-editor-done');
+        var $gradientEditorCancel = $('#grp-gradient-editor-cancel');
+        var $gradientEditorType = $('#grp-gradient-type');
+        var $gradientEditorAngle = $('#grp-gradient-angle');
+        var $gradientEditorAngleNumber = $('#grp-gradient-angle-number');
+        var $gradientEditorStartPos = $('#grp-gradient-start-pos');
+        var $gradientEditorStartPosNumber = $('#grp-gradient-start-pos-number');
+        var $gradientEditorEndPos = $('#grp-gradient-end-pos');
+        var $gradientEditorEndPosNumber = $('#grp-gradient-end-pos-number');
+        var $gradientEditorStartColor = $('#grp-gradient-start-color');
+        var $gradientEditorStartColorText = $('#grp-gradient-start-color-text');
+        var $gradientEditorStartOpacity = $('#grp-gradient-start-opacity');
+        var $gradientEditorStartOpacityValue = $('#grp-gradient-start-opacity-value');
+        var $gradientEditorEndColor = $('#grp-gradient-end-color');
+        var $gradientEditorEndColorText = $('#grp-gradient-end-color-text');
+        var $gradientEditorEndOpacity = $('#grp-gradient-end-opacity');
+        var $gradientEditorEndOpacityValue = $('#grp-gradient-end-opacity-value');
+        var $gradientEditorPreview = $('#grp-gradient-editor-preview');
         var $modalLinkText = $('#grp-modal-link-text');
         var $modalLinkColor = $('#grp-modal-link-color');
         var $modalLinkColorText = $('#grp-modal-link-color-text');
         var $modalLinkRows = $('.grp-modal-link-row');
+        var $modalTextColorOpacity = $('#grp-modal-text-color-opacity');
+        var $modalTextColorOpacityValue = $('#grp-modal-text-color-opacity-value');
+        var $modalBackgroundColorOpacity = $('#grp-modal-background-color-opacity');
+        var $modalBackgroundColorOpacityValue = $('#grp-modal-background-color-opacity-value');
+        var $modalStarColorOpacity = $('#grp-modal-star-color-opacity');
+        var $modalStarColorOpacityValue = $('#grp-modal-star-color-opacity-value');
+        var $modalLinkColorOpacity = $('#grp-modal-link-color-opacity');
+        var $modalLinkColorOpacityValue = $('#grp-modal-link-color-opacity-value');
         var $modalBoxShadowEnabled = $('#grp-modal-box-shadow-enabled');
         var $modalBoxShadowEdit = $('#grp-template-editor-box-shadow-edit');
+        var $modalMessageText = $('#grp-modal-message-text');
+        var $modalPaddingTop = $('#grp-modal-padding-top');
+        var $modalPaddingRight = $('#grp-modal-padding-right');
+        var $modalPaddingBottom = $('#grp-modal-padding-bottom');
+        var $modalPaddingLeft = $('#grp-modal-padding-left');
+        var $modalBorderTopLeft = $('#grp-modal-border-top-left');
+        var $modalBorderTopRight = $('#grp-modal-border-top-right');
+        var $modalBorderBottomRight = $('#grp-modal-border-bottom-right');
+        var $modalBorderBottomLeft = $('#grp-modal-border-bottom-left');
         var $templateProBadge = $('#grp-template-pro-badge');
         var $logoScaleSlider = $('#grp_widget_template_logo_scale');
         var $logoScaleText = $('#grp_widget_template_logo_scale_text');
@@ -79,6 +110,7 @@
         var isPro = false;
         var hasPlaceId = false;
         var logoUrls = {};
+        var modalDirty = false;
         if (typeof grpWidgets !== 'undefined') {
             isPro = !!grpWidgets.is_pro;
             hasPlaceId = !!grpWidgets.has_place_id;
@@ -137,6 +169,63 @@
             return $.extend({}, defaults, stored);
         }
 
+        function ensureTemplateCustomizationEntry(key) {
+            var templateKey = key || modalTemplateKey || ($templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic');
+            if (!templateKey) {
+                return null;
+            }
+            if (!templateCustomizations[templateKey]) {
+                templateCustomizations[templateKey] = {};
+            }
+            return templateCustomizations[templateKey];
+        }
+
+        function updateTemplateCustomizationValue(field, value, key) {
+            var entry = ensureTemplateCustomizationEntry(key);
+            if (!entry) {
+                return;
+            }
+            if (entry[field] === value) {
+                return;
+            }
+            entry[field] = value;
+            modalDirty = true;
+        }
+
+        function parsePositiveInt(value) {
+            var parsed = parseInt(value, 10);
+            if (isNaN(parsed) || parsed < 0) {
+                return 0;
+            }
+            return parsed;
+        }
+
+        function clampValue(value, min, max) {
+            var parsed = parseInt(value, 10);
+            if (isNaN(parsed)) {
+                parsed = typeof min === 'number' ? min : 0;
+            }
+            if (typeof min === 'number') {
+                parsed = Math.max(parsed, min);
+            }
+            if (typeof max === 'number') {
+                parsed = Math.min(parsed, max);
+            }
+            return parsed;
+        }
+
+        function bindModalNumberInput($input, fieldName) {
+            if (!$input || !$input.length) {
+                return;
+            }
+            $input.on('input', function() {
+                var value = parsePositiveInt($(this).val());
+                updateTemplateCustomizationValue(fieldName, value);
+                updatePreview();
+                updateModalPreview();
+            });
+        }
+
         function combineColorWithOpacity(color, opacity, fallback) {
             if (!color) {
                 return fallback || '';
@@ -171,10 +260,29 @@
                 return '';
             }
             var type = customization.gradient_type || 'linear';
-            var angle = customization.gradient_angle || 135;
-            var startPos = customization.gradient_start_pos || 0;
-            var endPos = customization.gradient_end_pos || 100;
-            return type + '-gradient(' + angle + 'deg, ' + customization.gradient_start + ' ' + startPos + '%, ' + customization.gradient_end + ' ' + endPos + '%)';
+            var angle = clampValue(customization.gradient_angle, 0, 360) || 135;
+            var startPos = clampValue(customization.gradient_start_pos, 0, 100);
+            var endPos = clampValue(customization.gradient_end_pos, 0, 100);
+            var startColor = combineColorWithOpacity(customization.gradient_start, customization.gradient_start_opacity, customization.gradient_start);
+            var endColor = combineColorWithOpacity(customization.gradient_end, customization.gradient_end_opacity, customization.gradient_end);
+            if (!startColor || !endColor) {
+                return '';
+            }
+            return type + '-gradient(' + angle + 'deg, ' + startColor + ' ' + startPos + '%, ' + endColor + ' ' + endPos + '%)';
+        }
+
+        function updateGradientSummaryPreview(customization) {
+            if (!$gradientSummaryPreview.length) {
+                return;
+            }
+            var config = customization || getTemplateCustomization(modalTemplateKey);
+            var gradient = buildGradientBackground(config);
+            if (gradient) {
+                $gradientSummaryPreview.css('background', gradient);
+            } else {
+                var fallback = combineColorWithOpacity(config.background_color, config.background_color_opacity, '#2b2b2b');
+                $gradientSummaryPreview.css('background', fallback || '#2b2b2b');
+            }
         }
 
         function buildWrapperStyle(customization, templateKey) {
@@ -445,11 +553,15 @@
             var previewWrapperClass = 'grp-template-modal-preview-inner grp-star-placement-' + modalStarPlacementValue;
             var previewWrapperAttr = previewWrapperStyles.length ? ' style="' + previewWrapperStyles.join('; ') + '"' : '';
 
+            var modalCustomization = getTemplateCustomization(modalTemplateKey);
+            var modalWrapperStyle = buildWrapperStyle(modalCustomization, modalTemplateKey);
+            var modalMessageText = modalCustomization.message_text || templateData.subtitle || templateData.tagline || '';
+            var modalLinkText = modalCustomization.link_text || safeTrimValue($linkTextInput) || 'Click here';
             var previewHtml = '<div class="' + previewWrapperClass + '"' + previewWrapperAttr + '>' +
                 renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml($('#grp_widget_button_default_text').val() || 'Leave us a review'),
-                subtitle: escapeHtml(templateData.subtitle || ''),
-                linkText: escapeHtml($linkTextInput.length ? $linkTextInput.val() : 'Click here'),
+                subtitle: escapeHtml(modalMessageText),
+                linkText: escapeHtml(modalLinkText),
                 showLogo: $modalShowLogo.is(':checked'),
                 starColor: modalStarColorValue,
                 starText: templateData.stars ? '★★★★★' : '',
@@ -459,6 +571,7 @@
                 linkColor: $linkColorText.length ? ($linkColorText.val() || '#111111') : '#111111',
                 logoScale: modalLogoScale,
                 showLink: templateData.show_link !== false,
+                wrapperStyle: modalWrapperStyle
             }) + '</div>';
             $templateEditorPreview.html(previewHtml);
             var $modalPreviewInner = $templateEditorPreview.find('.grp-template-modal-preview-inner');
@@ -489,18 +602,138 @@
                 modalRootStyles.push('background: linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
                 modalRootStyles.push('color: #fff');
             }
-            $modalTemplateRoot.attr('style', modalRootStyles.join('; '));
+            var combinedModalStyles = modalRootStyles.slice();
+            if (modalWrapperStyle) {
+                combinedModalStyles.push(modalWrapperStyle);
+            }
+            $modalTemplateRoot.attr('style', combinedModalStyles.join('; '));
 
             if ($modalGlassEffect.is(':checked')) {
                 $modalTemplateRoot.addClass('grp-glass-effect');
             } else {
                 $modalTemplateRoot.removeClass('grp-glass-effect');
             }
+            $templateEditorPreview.toggleClass('grp-glass-preview', $modalGlassEffect.is(':checked'));
+            updateGradientSummaryPreview(modalCustomization);
+        }
+
+        function persistTemplateCustomizations(templateKey) {
+            templateKey = templateKey || modalTemplateKey;
+            if (!modalDirty || !templateKey || typeof grpWidgets === 'undefined' || !grpWidgets.ajax_url) {
+                return;
+            }
+            var customization = templateCustomizations[templateKey];
+            if (!customization) {
+                return;
+            }
+            $.ajax({
+                url: grpWidgets.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'grp_save_template_customization',
+                    nonce: grpWidgets.nonce,
+                    template: templateKey,
+                    customizations: JSON.stringify(customization)
+                },
+                success: function(response) {
+                    if (response.success && response.data && response.data.customizations) {
+                        templateCustomizations[templateKey] = response.data.customizations;
+                        modalDirty = false;
+                        updateGradientSummaryPreview(response.data.customizations);
+                        updatePreview();
+                        updateModalPreview();
+                    } else {
+                        console.warn('Failed to save template customizations', response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Template customization save failed', status, error);
+                }
+            });
+        }
+
+        function populateGradientEditor(customization) {
+            var config = customization || getTemplateCustomization(modalTemplateKey);
+            var angle = clampValue(config.gradient_angle, 0, 360) || 135;
+            $gradientEditorType.val(config.gradient_type || 'linear');
+            $gradientEditorAngle.val(angle);
+            $gradientEditorAngleNumber.val(angle);
+            $gradientEditorStartPos.val(clampValue(config.gradient_start_pos, 0, 100));
+            $gradientEditorStartPosNumber.val(clampValue(config.gradient_start_pos, 0, 100));
+            $gradientEditorEndPos.val(clampValue(config.gradient_end_pos, 0, 100));
+            $gradientEditorEndPosNumber.val(clampValue(config.gradient_end_pos, 0, 100));
+            var startColor = config.gradient_start || '#0091ff';
+            var endColor = config.gradient_end || '#612c1f';
+            $gradientEditorStartColor.val(startColor);
+            $gradientEditorStartColorText.val(startColor);
+            $gradientEditorEndColor.val(endColor);
+            $gradientEditorEndColorText.val(endColor);
+            var startOpacity = clampValue(config.gradient_start_opacity, 0, 100) || 100;
+            var endOpacity = clampValue(config.gradient_end_opacity, 0, 100) || 100;
+            $gradientEditorStartOpacity.val(startOpacity);
+            $gradientEditorStartOpacityValue.text(startOpacity + '%');
+            $gradientEditorEndOpacity.val(endOpacity);
+            $gradientEditorEndOpacityValue.text(endOpacity + '%');
+            updateGradientEditorPreview();
+        }
+
+        function updateGradientEditorPreview() {
+            var previewData = {
+                gradient_type: $gradientEditorType.val(),
+                gradient_angle: clampValue($gradientEditorAngleNumber.val(), 0, 360) || 135,
+                gradient_start_pos: clampValue($gradientEditorStartPosNumber.val(), 0, 100),
+                gradient_end_pos: clampValue($gradientEditorEndPosNumber.val(), 0, 100),
+                gradient_start: $gradientEditorStartColor.val(),
+                gradient_end: $gradientEditorEndColor.val(),
+                gradient_start_opacity: clampValue($gradientEditorStartOpacity.val(), 0, 100),
+                gradient_end_opacity: clampValue($gradientEditorEndOpacity.val(), 0, 100),
+            };
+            var previewGradient = buildGradientBackground(previewData);
+            if (previewGradient) {
+                $gradientEditorPreview.css('background', previewGradient);
+            } else {
+                $gradientEditorPreview.css('background', '#232323');
+            }
+        }
+
+        function bindGradientEditorRange($range, $number, min, max) {
+            if (!$range.length || !$number.length) {
+                return;
+            }
+            $range.on('input change', function() {
+                var value = clampValue($(this).val(), min, max);
+                $(this).val(value);
+                $number.val(value);
+                updateGradientEditorPreview();
+            });
+            $number.on('input change', function() {
+                var value = clampValue($(this).val(), min, max);
+                $(this).val(value);
+                $range.val(value);
+                updateGradientEditorPreview();
+            });
+        }
+
+        function openGradientEditor() {
+            populateGradientEditor();
+            if ($gradientEditorModal.length) {
+                $gradientEditorModal.css('display', 'flex');
+            }
+        }
+
+        function closeGradientEditor() {
+            if ($gradientEditorModal.length) {
+                $gradientEditorModal.hide();
+            }
         }
 
         function closeTemplateModal() {
+            persistTemplateCustomizations(modalTemplateKey);
             $templateEditorModal.removeClass('grp-template-active');
             $templateEditorModal.css('display', 'none');
+            if ($gradientEditorModal.is(':visible')) {
+                $gradientEditorModal.hide();
+            }
         }
         
         function updatePreview() {
@@ -589,6 +822,7 @@
             toggleLinkRows(templateKey);
             updateCustomizeButtonVisibility(templateKey);
             updateModalPreview();
+            updateGradientSummaryPreview(customization);
 
             var sanitizedPreviewUrl = String(previewUrl || '').trim();
             if (templateData.qr && hasPlaceId && sanitizedPreviewUrl && sanitizedPreviewUrl !== '#') {
@@ -719,30 +953,6 @@
         $templateSelect.on('change', updatePreview);
         $starPlacementSelect.on('change', updatePreview);
         $logoToggle.on('change', updatePreview);
-        $gradientStartInput.on('change', function() {
-            var color = $(this).val();
-            $gradientStartText.val(color);
-            updatePreview();
-        });
-        $gradientStartText.on('input', function() {
-            var val = $(this).val();
-            if (/^#[0-9A-F]{6}$/i.test(val)) {
-                $gradientStartInput.val(val);
-            }
-            updatePreview();
-        });
-        $gradientEndInput.on('change', function() {
-            var color = $(this).val();
-            $gradientEndText.val(color);
-            updatePreview();
-        });
-        $gradientEndText.on('input', function() {
-            var val = $(this).val();
-            if (/^#[0-9A-F]{6}$/i.test(val)) {
-                $gradientEndInput.val(val);
-            }
-            updatePreview();
-        });
         $('#grp-template-editor-open').on('click', function() {
             if (!isPro) {
                 var proMessage = (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) ? grpWidgets.strings.templateProMessage : 'Upgrade to Pro to customize templates.';
@@ -770,8 +980,87 @@
 
         $('.grp-template-editor-close, #grp-template-editor-close').on('click', closeTemplateModal);
 
+        $gradientEditorOpen.on('click', function() {
+            if (!isPro) {
+                var proMessage = (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) ? grpWidgets.strings.templateProMessage : 'Upgrade to Pro to edit gradients.';
+                alert(proMessage);
+                return;
+            }
+            openGradientEditor();
+        });
+
+        $gradientEditorClose.on('click', closeGradientEditor);
+        $gradientEditorCancel.on('click', closeGradientEditor);
+        $gradientEditorModal.on('click', function(e) {
+            if ($(e.target).is($gradientEditorModal)) {
+                closeGradientEditor();
+            }
+        });
+        $gradientEditorType.on('change', updateGradientEditorPreview);
+        bindGradientEditorRange($gradientEditorAngle, $gradientEditorAngleNumber, 0, 360);
+        bindGradientEditorRange($gradientEditorStartPos, $gradientEditorStartPosNumber, 0, 100);
+        bindGradientEditorRange($gradientEditorEndPos, $gradientEditorEndPosNumber, 0, 100);
+        $gradientEditorStartColor.on('change', function() {
+            var color = $(this).val();
+            $gradientEditorStartColorText.val(color);
+            updateGradientEditorPreview();
+        });
+        $gradientEditorStartColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $gradientEditorStartColor.val(value);
+                updateGradientEditorPreview();
+            }
+        });
+        $gradientEditorEndColor.on('change', function() {
+            var color = $(this).val();
+            $gradientEditorEndColorText.val(color);
+            updateGradientEditorPreview();
+        });
+        $gradientEditorEndColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $gradientEditorEndColor.val(value);
+                updateGradientEditorPreview();
+            }
+        });
+        $gradientEditorStartOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $gradientEditorStartOpacityValue.text(value + '%');
+            updateGradientEditorPreview();
+        });
+        $gradientEditorEndOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $gradientEditorEndOpacityValue.text(value + '%');
+            updateGradientEditorPreview();
+        });
+        $gradientEditorDone.on('click', function() {
+            var templateKey = modalTemplateKey;
+            var startColor = $gradientEditorStartColor.val();
+            var endColor = $gradientEditorEndColor.val();
+            updateTemplateCustomizationValue('gradient_type', $gradientEditorType.val(), templateKey);
+            updateTemplateCustomizationValue('gradient_angle', clampValue($gradientEditorAngleNumber.val(), 0, 360), templateKey);
+            updateTemplateCustomizationValue('gradient_start_pos', clampValue($gradientEditorStartPosNumber.val(), 0, 100), templateKey);
+            updateTemplateCustomizationValue('gradient_end_pos', clampValue($gradientEditorEndPosNumber.val(), 0, 100), templateKey);
+            updateTemplateCustomizationValue('gradient_start', startColor, templateKey);
+            updateTemplateCustomizationValue('gradient_end', endColor, templateKey);
+            updateTemplateCustomizationValue('gradient_start_opacity', clampValue($gradientEditorStartOpacity.val(), 0, 100), templateKey);
+            updateTemplateCustomizationValue('gradient_end_opacity', clampValue($gradientEditorEndOpacity.val(), 0, 100), templateKey);
+            $gradientStartInput.val(startColor);
+            $gradientStartText.val(startColor);
+            $gradientEndInput.val(endColor);
+            $gradientEndText.val(endColor);
+            updateGradientSummaryPreview(getTemplateCustomization(templateKey));
+            updatePreview();
+            updateModalPreview();
+            closeGradientEditor();
+        });
+
         $modalShowLogo.on('change', function() {
             $logoToggle.prop('checked', $(this).is(':checked'));
+            updateTemplateCustomizationValue('show_logo', $(this).is(':checked') ? 1 : 0);
             updatePreview();
             updateModalPreview();
         });
@@ -868,11 +1157,33 @@
                 $('#grp-modal-border-bottom-right').val(customization.border_radius_bottom_right || 0);
                 $('#grp-modal-border-bottom-left').val(customization.border_radius_bottom_left || 0);
             }
+            if ($modalTextColorOpacity.length) {
+                var textOpacity = clampValue(customization.text_color_opacity, 0, 100) || 100;
+                $modalTextColorOpacity.val(textOpacity);
+                $modalTextColorOpacityValue.text(textOpacity + '%');
+            }
+            if ($modalBackgroundColorOpacity.length) {
+                var bgOpacity = clampValue(customization.background_color_opacity, 0, 100) || 100;
+                $modalBackgroundColorOpacity.val(bgOpacity);
+                $modalBackgroundColorOpacityValue.text(bgOpacity + '%');
+            }
+            if ($modalStarColorOpacity.length) {
+                var starOpacity = clampValue(customization.star_color_opacity, 0, 100) || 100;
+                $modalStarColorOpacity.val(starOpacity);
+                $modalStarColorOpacityValue.text(starOpacity + '%');
+            }
+            if ($modalLinkColorOpacity.length) {
+                var linkOpacity = clampValue(customization.link_color_opacity, 0, 100) || 100;
+                $modalLinkColorOpacity.val(linkOpacity);
+                $modalLinkColorOpacityValue.text(linkOpacity + '%');
+            }
+            updateGradientSummaryPreview(customization);
         }
 
         $modalTextColor.on('change', function() {
             var color = $(this).val();
             syncTextColor(color);
+            updateTemplateCustomizationValue('text_color', color);
             updatePreview();
             updateModalPreview();
         });
@@ -881,14 +1192,25 @@
             var value = $(this).val();
             if (isValidHex(value)) {
                 syncTextColor(value);
+                updateTemplateCustomizationValue('text_color', value);
                 updatePreview();
                 updateModalPreview();
             }
         });
 
+        $modalTextColorOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $modalTextColorOpacityValue.text(value + '%');
+            updateTemplateCustomizationValue('text_color_opacity', value);
+            updatePreview();
+            updateModalPreview();
+        });
+
         $modalLinkText.on('input', function() {
             var value = $(this).val();
             syncLinkText(value);
+            updateTemplateCustomizationValue('link_text', value);
             updatePreview();
             updateModalPreview();
         });
@@ -896,6 +1218,7 @@
         $modalLinkColor.on('change', function() {
             var color = $(this).val();
             syncLinkColor(color);
+            updateTemplateCustomizationValue('link_color', color);
             updatePreview();
             updateModalPreview();
         });
@@ -904,14 +1227,25 @@
             var value = $(this).val();
             if (isValidHex(value)) {
                 syncLinkColor(value);
+                updateTemplateCustomizationValue('link_color', value);
                 updatePreview();
                 updateModalPreview();
             }
         });
 
+        $modalLinkColorOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $modalLinkColorOpacityValue.text(value + '%');
+            updateTemplateCustomizationValue('link_color_opacity', value);
+            updatePreview();
+            updateModalPreview();
+        });
+
         $modalBackgroundColor.on('change', function() {
             var color = $(this).val();
             syncBackgroundColor(color);
+            updateTemplateCustomizationValue('background_color', color);
             updatePreview();
             updateModalPreview();
         });
@@ -920,19 +1254,31 @@
             var value = $(this).val();
             if (isValidHex(value)) {
                 syncBackgroundColor(value);
+                updateTemplateCustomizationValue('background_color', value);
                 updatePreview();
                 updateModalPreview();
             }
         });
 
+        $modalBackgroundColorOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $modalBackgroundColorOpacityValue.text(value + '%');
+            updateTemplateCustomizationValue('background_color_opacity', value);
+            updatePreview();
+            updateModalPreview();
+        });
+
         $modalGlassEffect.on('change', function() {
             $glassCheckbox.prop('checked', $(this).is(':checked'));
+            updateTemplateCustomizationValue('glass_effect', $(this).is(':checked') ? 1 : 0);
             updatePreview();
             updateModalPreview();
         });
 
         $modalBoxShadowEnabled.on('change', function() {
             $boxShadowCheckbox.prop('checked', $(this).is(':checked'));
+            updateTemplateCustomizationValue('box_shadow_enabled', $(this).is(':checked') ? 1 : 0);
             updatePreview();
             updateModalPreview();
         });
@@ -945,6 +1291,7 @@
             var value = $(this).val();
             logoScaleTouched = true;
             syncLogoScale(value);
+            updateTemplateCustomizationValue('logo_scale', parsePositiveInt(value));
             updatePreview();
             updateModalPreview();
         });
@@ -957,6 +1304,7 @@
             if (!isNaN(value) && value >= 10 && value <= 100) {
                 logoScaleTouched = true;
                 syncLogoScale(value);
+                updateTemplateCustomizationValue('logo_scale', parsePositiveInt(value));
                 updatePreview();
                 updateModalPreview();
             }
@@ -967,6 +1315,7 @@
             $modalStarColorText.val(color);
             $starColorInput.val(color);
             $starColorText.val(color);
+            updateTemplateCustomizationValue('star_color', color);
             updatePreview();
             updateModalPreview();
         });
@@ -977,16 +1326,42 @@
                 $modalStarColor.val(value);
                 $starColorInput.val(value);
                 $starColorText.val(value);
+                updateTemplateCustomizationValue('star_color', value);
                 updatePreview();
                 updateModalPreview();
             }
         });
 
-        $modalStarPlacement.on('change', function() {
-            $starPlacementSelect.val($(this).val());
+        $modalStarColorOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $modalStarColorOpacityValue.text(value + '%');
+            updateTemplateCustomizationValue('star_color_opacity', value);
             updatePreview();
             updateModalPreview();
         });
+
+        $modalStarPlacement.on('change', function() {
+            $starPlacementSelect.val($(this).val());
+            updateTemplateCustomizationValue('star_placement', $(this).val());
+            updatePreview();
+            updateModalPreview();
+        });
+
+        $modalMessageText.on('input', function() {
+            updateTemplateCustomizationValue('message_text', $(this).val());
+            updatePreview();
+            updateModalPreview();
+        });
+
+        bindModalNumberInput($modalPaddingTop, 'padding_top');
+        bindModalNumberInput($modalPaddingRight, 'padding_right');
+        bindModalNumberInput($modalPaddingBottom, 'padding_bottom');
+        bindModalNumberInput($modalPaddingLeft, 'padding_left');
+        bindModalNumberInput($modalBorderTopLeft, 'border_radius_top_left');
+        bindModalNumberInput($modalBorderTopRight, 'border_radius_top_right');
+        bindModalNumberInput($modalBorderBottomRight, 'border_radius_bottom_right');
+        bindModalNumberInput($modalBorderBottomLeft, 'border_radius_bottom_left');
 
         $modalFontFamily.on('change', function() {
             $fontFamilyInput.val($(this).val());
@@ -1033,12 +1408,34 @@
                 updateModalPreview();
             }
         });
-        $maxWidthInput.on('input', updatePreview);
-        $boxShadowCheckbox.on('change', updatePreview);
-        $boxShadowValue.on('input', updatePreview);
-        $glassCheckbox.on('change', updatePreview);
-        $fontFamilyInput.on('change input', updatePreview);
-        $maxHeightInput.on('input', updatePreview);
+        $maxWidthInput.on('input', function() {
+            var value = parsePositiveInt($(this).val());
+            updateTemplateCustomizationValue('max_width', value);
+            updatePreview();
+        });
+        $maxHeightInput.on('input', function() {
+            var value = parsePositiveInt($(this).val());
+            updateTemplateCustomizationValue('max_height', value);
+            updatePreview();
+        });
+        $fontFamilyInput.on('change input', function() {
+            var value = $(this).val();
+            updateTemplateCustomizationValue('font_family', value);
+            updatePreview();
+        });
+        $boxShadowCheckbox.on('change', function() {
+            var enabled = $(this).is(':checked') ? 1 : 0;
+            updateTemplateCustomizationValue('box_shadow_enabled', enabled);
+            updatePreview();
+        });
+        $boxShadowValue.on('input', function() {
+            updateTemplateCustomizationValue('box_shadow_value', $(this).val());
+            updatePreview();
+        });
+        $glassCheckbox.on('change', function() {
+            updateTemplateCustomizationValue('glass_effect', $(this).is(':checked') ? 1 : 0);
+            updatePreview();
+        });
 
         // Initialize preview on load
         updatePreview();
