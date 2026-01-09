@@ -129,6 +129,35 @@ $box_shadow_blur = get_option('grp_widget_template_box_shadow_blur', '35');
 $box_shadow_spread = get_option('grp_widget_template_box_shadow_spread', '0');
 $box_shadow_color = get_option('grp_widget_template_box_shadow_color', '#000000');
 $glass_effect = get_option('grp_widget_template_glass_effect', false);
+$font_sans_serif = array(
+    'Inter, sans-serif' => __('Inter', 'google-reviews-plugin'),
+    'Roboto, sans-serif' => __('Roboto', 'google-reviews-plugin'),
+    'Open Sans, sans-serif' => __('Open Sans', 'google-reviews-plugin'),
+    'Lato, sans-serif' => __('Lato', 'google-reviews-plugin'),
+    'Montserrat, sans-serif' => __('Montserrat', 'google-reviews-plugin'),
+    'Poppins, sans-serif' => __('Poppins', 'google-reviews-plugin'),
+    'Raleway, sans-serif' => __('Raleway', 'google-reviews-plugin'),
+    'Nunito, sans-serif' => __('Nunito', 'google-reviews-plugin'),
+    'Source Sans Pro, sans-serif' => __('Source Sans Pro', 'google-reviews-plugin'),
+    'Ubuntu, sans-serif' => __('Ubuntu', 'google-reviews-plugin'),
+    'Work Sans, sans-serif' => __('Work Sans', 'google-reviews-plugin'),
+    'DM Sans, sans-serif' => __('DM Sans', 'google-reviews-plugin'),
+);
+$font_serif = array(
+    'Merriweather, serif' => __('Merriweather', 'google-reviews-plugin'),
+    'Lora, serif' => __('Lora', 'google-reviews-plugin'),
+    'Playfair Display, serif' => __('Playfair Display', 'google-reviews-plugin'),
+    'PT Serif, serif' => __('PT Serif', 'google-reviews-plugin'),
+    'Crimson Text, serif' => __('Crimson Text', 'google-reviews-plugin'),
+    'Libre Baskerville, serif' => __('Libre Baskerville', 'google-reviews-plugin'),
+    'Bitter, serif' => __('Bitter', 'google-reviews-plugin'),
+    'Georgia, serif' => __('Georgia', 'google-reviews-plugin'),
+);
+$font_display = array(
+    'Oswald, sans-serif' => __('Oswald', 'google-reviews-plugin'),
+    'Bebas Neue, sans-serif' => __('Bebas Neue', 'google-reviews-plugin'),
+    'Righteous, cursive' => __('Righteous', 'google-reviews-plugin'),
+);
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
 $button_template_definition = isset($button_templates[$button_template]) ? $button_templates[$button_template] : $button_templates['basic'];
@@ -523,16 +552,23 @@ $is_pro = $license->is_pro();
                             </th>
                             <td>
                                 <select id="grp_widget_template_font_family" name="grp_widget_template_font_family">
-                                    <?php
-                                    $fonts = array(
-                                        'Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' => __('Inter / Space Grotesk', 'google-reviews-plugin'),
-                                        '"Roboto", "Helvetica Neue", sans-serif' => __('Roboto', 'google-reviews-plugin'),
-                                        '"Playfair Display", Georgia, serif' => __('Playfair Display', 'google-reviews-plugin'),
-                                        '"Lora", Georgia, serif' => __('Lora', 'google-reviews-plugin'),
-                                    );
-                                    foreach ($fonts as $value => $label): ?>
-                                        <option value="<?php echo esc_attr($value); ?>" <?php selected($font_family, $value); ?>><?php echo esc_html($label); ?></option>
-                                    <?php endforeach; ?>
+                                    <option value="" <?php selected($font_family, ''); ?>><?php esc_html_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>
+                                    <option value="inherit" <?php selected($font_family, 'inherit'); ?>><?php esc_html_e('Inherit', 'google-reviews-plugin'); ?></option>
+                                    <optgroup label="<?php esc_attr_e('Sans-Serif', 'google-reviews-plugin'); ?>">
+                                        <?php foreach ($font_sans_serif as $value => $label): ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($font_family, $value); ?>><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                    <optgroup label="<?php esc_attr_e('Serif', 'google-reviews-plugin'); ?>">
+                                        <?php foreach ($font_serif as $value => $label): ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($font_family, $value); ?>><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                    <optgroup label="<?php esc_attr_e('Display', 'google-reviews-plugin'); ?>">
+                                        <?php foreach ($font_display as $value => $label): ?>
+                                            <option value="<?php echo esc_attr($value); ?>" <?php selected($font_family, $value); ?>><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                 </select>
                             </td>
                         </tr>
@@ -738,10 +774,23 @@ $is_pro = $license->is_pro();
                             <span class="grp-template-editor-label"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
                                 <select id="grp-modal-font-family">
-                                    <option value='Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'><?php esc_html_e('Inter / Space Grotesk', 'google-reviews-plugin'); ?></option>
-                                    <option value='"Roboto", "Helvetica Neue", sans-serif'><?php esc_html_e('Roboto', 'google-reviews-plugin'); ?></option>
-                                    <option value='"Playfair Display", Georgia, serif'><?php esc_html_e('Playfair Display', 'google-reviews-plugin'); ?></option>
-                                    <option value='"Lora", Georgia, serif'><?php esc_html_e('Lora', 'google-reviews-plugin'); ?></option>
+                                    <option value=""><?php esc_html_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>
+                                    <option value="inherit"><?php esc_html_e('Inherit', 'google-reviews-plugin'); ?></option>
+                                    <optgroup label="<?php esc_attr_e('Sans-Serif', 'google-reviews-plugin'); ?>">
+                                        <?php foreach ($font_sans_serif as $value => $label): ?>
+                                            <option value="<?php echo esc_attr($value); ?>"><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                    <optgroup label="<?php esc_attr_e('Serif', 'google-reviews-plugin'); ?>">
+                                        <?php foreach ($font_serif as $value => $label): ?>
+                                            <option value="<?php echo esc_attr($value); ?>"><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                    <optgroup label="<?php esc_attr_e('Display', 'google-reviews-plugin'); ?>">
+                                        <?php foreach ($font_display as $value => $label): ?>
+                                            <option value="<?php echo esc_attr($value); ?>"><?php echo esc_html($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
