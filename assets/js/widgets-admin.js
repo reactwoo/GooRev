@@ -2,9 +2,9 @@
  * Review Widgets Admin JavaScript
  */
 
- (function($) {
+(function($) {
     'use strict';
-
+    
     $(document).ready(function() {
         var $templateSelect = $('#grp_widget_button_default_template');
         var $templateDescription = $('#grp-template-selected-description');
@@ -70,6 +70,8 @@
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
         });
+        var templateCustomizationDefaults = (typeof grpWidgets !== 'undefined' && grpWidgets.template_customization_defaults) ? grpWidgets.template_customization_defaults : {};
+        var templateCustomizations = (typeof grpWidgets !== 'undefined' && grpWidgets.template_customizations) ? grpWidgets.template_customizations : {};
         var logoScaleTouched = false;
         var modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
         var qrCache = {};
@@ -127,6 +129,96 @@
                 }
                 $templateProNote.text(text).toggle(!!text);
             }
+        }
+
+        function getTemplateCustomization(key) {
+            var defaults = templateCustomizationDefaults[key] || templateCustomizationDefaults.basic || {};
+            var stored = templateCustomizations[key] || {};
+            return $.extend({}, defaults, stored);
+        }
+
+        function combineColorWithOpacity(color, opacity, fallback) {
+            if (!color) {
+                return fallback || '';
+            }
+            var hex = color.replace('#', '');
+            if (/^(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) {
+                var r, g, b;
+                if (hex.length === 3) {
+                    r = parseInt(hex.charAt(0) + hex.charAt(0), 16);
+                    g = parseInt(hex.charAt(1) + hex.charAt(1), 16);
+                    b = parseInt(hex.charAt(2) + hex.charAt(2), 16);
+                } else {
+                    r = parseInt(hex.substr(0, 2), 16);
+                    g = parseInt(hex.substr(2, 2), 16);
+                    b = parseInt(hex.substr(4, 2), 16);
+                }
+                var opacityValue = (typeof opacity === 'undefined' || opacity === '' || opacity === null) ? 100 : parseInt(opacity, 10);
+                if (isNaN(opacityValue)) {
+                    opacityValue = 100;
+                }
+                if (opacityValue >= 100) {
+                    return '#' + hex;
+                }
+                var alpha = (opacityValue / 100).toFixed(2);
+                return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+            }
+            return color;
+        }
+
+        function buildGradientBackground(customization) {
+            if (!customization.gradient_start || !customization.gradient_end) {
+                return '';
+            }
+            var type = customization.gradient_type || 'linear';
+            var angle = customization.gradient_angle || 135;
+            var startPos = customization.gradient_start_pos || 0;
+            var endPos = customization.gradient_end_pos || 100;
+            return type + '-gradient(' + angle + 'deg, ' + customization.gradient_start + ' ' + startPos + '%, ' + customization.gradient_end + ' ' + endPos + '%)';
+        }
+
+        function buildWrapperStyle(customization, templateKey) {
+            var styles = [];
+            var paddingTop = customization.padding_top || 0;
+            var paddingRight = customization.padding_right || 0;
+            var paddingBottom = customization.padding_bottom || 0;
+            var paddingLeft = customization.padding_left || 0;
+            styles.push('padding:' + paddingTop + 'px ' + paddingRight + 'px ' + paddingBottom + 'px ' + paddingLeft + 'px');
+            var radius = [
+                (customization.border_radius_top_left || 0) + 'px',
+                (customization.border_radius_top_right || 0) + 'px',
+                (customization.border_radius_bottom_right || 0) + 'px',
+                (customization.border_radius_bottom_left || 0) + 'px'
+            ].join(' ');
+            styles.push('border-radius:' + radius);
+            if (customization.font_family) {
+                styles.push('font-family:' + customization.font_family);
+            }
+            if (customization.max_width && customization.max_width > 0) {
+                styles.push('max-width:' + customization.max_width + 'px');
+            }
+            if (customization.max_height && customization.max_height > 0) {
+                styles.push('max-height:' + customization.max_height + 'px');
+            }
+            if (customization.box_shadow_enabled && customization.box_shadow_value) {
+                styles.push('box-shadow:' + customization.box_shadow_value);
+            } else {
+                styles.push('box-shadow:none');
+            }
+            var customBackground = buildGradientBackground(customization);
+            if (templateKey === 'creative-pro' && customBackground) {
+                styles.push('background:' + customBackground);
+            } else {
+                var bgColor = combineColorWithOpacity(customization.background_color, customization.background_color_opacity, '');
+                if (bgColor) {
+                    styles.push('background-color:' + bgColor);
+                }
+            }
+            var textColor = combineColorWithOpacity(customization.text_color, customization.text_color_opacity, '');
+            if (textColor) {
+                styles.push('color:' + textColor);
+            }
+            return styles.join('; ');
         }
 
         function showPreviewQr(src) {
@@ -201,9 +293,10 @@
             var linkColor = options.linkColor || '#111111';
             var showLink = options.showLink !== false;
             var linkHtml = showLink && options.reviewUrl ? '<a href="' + options.reviewUrl + '" target="_blank" rel="noopener" style="color:' + linkColor + ';">' + escapeHtml(options.linkText || 'Click here') + '</a>' : '';
+            var wrapperStyleAttr = options.wrapperStyle ? ' style="' + options.wrapperStyle + '"' : '';
 
             if (templateType === 'layout1') {
-                return '<div class="grp-layout1-preview">' +
+                return '<div class="grp-layout1-preview"' + wrapperStyleAttr + '>' +
                     '<div class="grp-layout1-qr">' + qrHtml + '</div>' +
                     '<div class="grp-layout1-details">' +
                         (options.showLogo && options.logoIconUrl ? '<img src="' + options.logoIconUrl + '" class="grp-layout1-logo-img" alt="Google" style="width:' + options.logoScale + '%;">' : '') +
@@ -218,7 +311,7 @@
 
             if (templateType === 'layout2') {
                 var darkClass = templateData.dark ? ' grp-layout-dark' : '';
-                return '<div class="grp-layout2-preview' + darkClass + '">' +
+                return '<div class="grp-layout2-preview' + darkClass + '"' + wrapperStyleAttr + '>' +
                     (options.showLogo && options.logoClassicUrl ? '<img src="' + options.logoClassicUrl + '" class="grp-layout2-logo-img" alt="Google" style="width:' + options.logoScale + '%;">' : '') +
                     '<div class="grp-layout2-stars-qr">' +
                         '<div class="grp-layout2-stars" style="color:' + options.starColor + ';">' + options.starText + '</div>' +
@@ -232,7 +325,7 @@
             }
 
             if (templateType === 'card') {
-                var inner = '<div class="grp-review-card">';
+                var inner = '<div class="grp-review-card"' + wrapperStyleAttr + '>';
                 if (options.showLogo && options.logoClassicUrl) {
                     inner += '<img src="' + options.logoClassicUrl + '" class="grp-card-logo-img" alt="Google" style="width:' + options.logoScale + '%;">';
                 }
@@ -296,60 +389,20 @@
         function populateTemplateModal() {
             modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(modalTemplateKey);
+            var customization = getTemplateCustomization(modalTemplateKey);
             var isCreative = modalTemplateKey === 'creative-pro';
 
             $modalGradientSection.toggle(isCreative);
-
             toggleLinkRows(modalTemplateKey);
-
-            $modalShowLogo.prop('checked', $logoToggle.is(':checked'));
-            var logoScaleValue = parseInt($logoScaleSlider.val(), 10);
-            if (isNaN(logoScaleValue) || logoScaleValue <= 0) {
-                logoScaleValue = 50;
-            }
-            $modalLogoScaleSlider.val(logoScaleValue);
-            $modalLogoScaleNumber.val(logoScaleValue);
-
-            var starColorValue = $starColorText.val() || '#FBBD05';
-            $modalStarColor.val(starColorValue);
-            $modalStarColorText.val(starColorValue);
-            $modalStarPlacement.val($starPlacementSelect.val() || 'below');
-
-            $modalFontFamily.val($fontFamilyInput.val() || '');
-
-            var textColorValue = $modalTextColorText.val() || $('#grp_widget_button_default_color_text').val() || '#ffffff';
-            $modalTextColor.val(textColorValue);
-            $modalTextColorText.val(textColorValue);
-
-            var backgroundColorValue = $modalBackgroundColorText.val() || $('#grp_widget_button_default_bg_color_text').val() || '#2b2b2b';
-            $modalBackgroundColor.val(backgroundColorValue);
-            $modalBackgroundColorText.val(backgroundColorValue);
-
-            $modalGlassEffect.prop('checked', $glassCheckbox.is(':checked'));
-
-            var linkTextValue = safeTrimValue($linkTextInput) || templateData.link_text || 'Click here';
-            syncLinkText(linkTextValue);
-
-            var linkColorValue = $linkColorText.length ? $linkColorText.val() : '';
-            if (!isValidHex(linkColorValue)) {
-                linkColorValue = '#111111';
-            }
-            syncLinkColor(linkColorValue);
-
-            var gradientStartValue = $gradientStartText.val() || '#24a1ff';
-            var gradientEndValue = $gradientEndText.val() || '#ff7b5a';
-            $modalGradientStart.val(gradientStartValue);
-            $modalGradientStartText.val(gradientStartValue);
-            $modalGradientEnd.val(gradientEndValue);
-            $modalGradientEndText.val(gradientEndValue);
+            applyCustomizationToDom(modalTemplateKey);
 
             console.log('[GRP DEBUG] populateTemplateModal', {
                 template: modalTemplateKey,
                 showLink: templateData.show_link !== false,
                 isCreative: isCreative,
-                logoScale: logoScaleValue,
+                customization: customization
             });
-            $modalBoxShadowEnabled.prop('checked', $boxShadowCheckbox.is(':checked'));
+            $modalBoxShadowEnabled.prop('checked', !!customization.box_shadow_enabled);
             updateModalPreview();
         }
 
@@ -449,43 +502,26 @@
             $templateEditorModal.removeClass('grp-template-active');
             $templateEditorModal.css('display', 'none');
         }
-
+        
         function updatePreview() {
             var text = $('#grp_widget_button_default_text').val();
             var style = $('#grp_widget_button_default_style').val();
             var size = $('#grp_widget_button_default_size').val();
-            var textColor = safeTrimValue($('#grp_widget_button_default_color_text'));
-            var bgColor = safeTrimValue($('#grp_widget_button_default_bg_color_text'));
             var templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
             var templateData = getTemplateData(templateKey);
+            applyCustomizationToDom(templateKey);
+            var customization = getTemplateCustomization(templateKey);
             var previewUrl = $previewBtn.attr('href') || '#';
-            var starColor = $starColorText.val() || '#FBBD05';
-            var starPlacement = $starPlacementSelect.val() || 'below';
-            var showLogo = $logoToggle.is(':checked');
-            var fontFamily = $fontFamilyInput.val();
-            var maxHeight = parseInt($maxHeightInput.val(), 10) || 0;
-            var maxWidth = parseInt($maxWidthInput.val(), 10) || 0;
-            var linkColorRaw = $linkColorText.length ? safeTrimValue($linkColorText) : '';
-            var linkColor = linkColorRaw || '#ffffff';
-            var gradientStart = $gradientStartText.length ? $gradientStartText.val() : '#24a1ff';
-            var gradientEnd = $gradientEndText.length ? $gradientEndText.val() : '#ff7b5a';
-            var logoScale = parseInt($logoScaleSlider.val(), 10);
-            if (!logoScaleTouched) {
-                if (templateKey === 'layout1') {
-                    logoScale = 15;
-                } else if (templateKey === 'layout2' || templateKey === 'layout3') {
-                    logoScale = 30;
-                }
-                $logoScaleSlider.val(logoScale);
-                $logoScaleText.val(logoScale);
-            }
-            if (isNaN(logoScale) || logoScale <= 0) {
-                logoScale = 50;
-            }
-            var linkText = safeTrimValue($linkTextInput) || 'Click here';
-            var boxShadowEnabled = $boxShadowCheckbox.is(':checked');
-            var boxShadowValue = safeTrimValue($boxShadowValue);
-            var glassEffect = $glassCheckbox.is(':checked');
+            var starPlacement = customization.star_placement || 'below';
+            var normalizedPlacement = starPlacement === 'bottom' ? 'below' : starPlacement;
+            var linkText = customization.link_text || safeTrimValue($linkTextInput) || 'Click here';
+            var subtitleText = customization.message_text || templateData.subtitle || templateData.tagline || 'Scan the QR code to leave a review!';
+            var logoScale = customization.logo_scale || parseInt($logoScaleSlider.val(), 10) || 30;
+            var glassEffect = !!customization.glass_effect;
+            var computedTextColor = combineColorWithOpacity(customization.text_color, customization.text_color_opacity, '#ffffff');
+            var computedBackgroundColor = combineColorWithOpacity(customization.background_color, customization.background_color_opacity, '#2b2b2b');
+            var computedStarColor = combineColorWithOpacity(customization.star_color, customization.star_color_opacity, '#FBBD05');
+            var computedLinkColor = combineColorWithOpacity(customization.link_color, customization.link_color_opacity, '#ffffff');
 
             // Update template description/pro note
             updateTemplateDescription(templateKey);
@@ -493,7 +529,7 @@
             var classes = [
                 'grp-review-button',
                 'grp-review-button-template-' + templateKey,
-                'grp-star-placement-' + starPlacement
+                'grp-star-placement-' + normalizedPlacement
             ];
             if (templateData.type === 'button') {
                 classes.splice(1, 0, 'grp-review-button-' + style);
@@ -507,46 +543,43 @@
             }
 
             var styles = [];
-            if (textColor && /^#[0-9A-F]{6}$/i.test(textColor)) {
-                styles.push('color: ' + textColor);
+            if (computedTextColor) {
+                styles.push('color: ' + computedTextColor);
             }
-            var isSimpleButton = templateData.type === 'button';
-            if (bgColor && /^#[0-9A-F]{6}$/i.test(bgColor) && isSimpleButton) {
-                styles.push('background-color: ' + bgColor);
-            }
-            if (fontFamily && isSimpleButton) {
-                styles.push('font-family: ' + fontFamily);
-            }
-            if (isSimpleButton) {
-                if (maxHeight > 0) {
-                    styles.push('max-height: ' + maxHeight + 'px');
+            if (templateData.type === 'button') {
+                if (computedBackgroundColor) {
+                    styles.push('background-color: ' + computedBackgroundColor);
                 }
-                if (maxWidth > 0) {
-                    styles.push('max-width: ' + maxWidth + 'px');
+                if (customization.font_family) {
+                    styles.push('font-family: ' + customization.font_family);
                 }
-                if (boxShadowEnabled && boxShadowValue) {
-                    styles.push('box-shadow: ' + boxShadowValue);
+                if (customization.max_height > 0) {
+                    styles.push('max-height: ' + customization.max_height + 'px');
                 }
-            }
-            if (templateData.type === 'card' && templateKey === 'creative-pro' && /^#[0-9A-F]{6}$/i.test(gradientStart) && /^#[0-9A-F]{6}$/i.test(gradientEnd)) {
-                styles.push('background: linear-gradient(135deg, ' + gradientStart + ', ' + gradientEnd + ')');
+                if (customization.max_width > 0) {
+                    styles.push('max-width: ' + customization.max_width + 'px');
+                }
+                if (customization.box_shadow_enabled && customization.box_shadow_value) {
+                    styles.push('box-shadow: ' + customization.box_shadow_value);
+                }
             }
             $previewBtn.attr('style', styles.join('; '));
 
-            var subtitleText = templateData.tagline || templateData.subtitle || 'Scan the QR code below to leave a review!';
+            var wrapperStyle = buildWrapperStyle(customization, templateKey);
             var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
                 title: escapeHtml(text || 'Leave us a review'),
                 subtitle: escapeHtml(subtitleText),
                 linkText: escapeHtml(linkText),
-                showLogo: showLogo,
-                starColor: starColor,
+                showLogo: !!customization.show_logo,
+                starColor: computedStarColor,
                 starText: templateData.stars ? '★★★★★' : '',
                 logoIconUrl: logoUrls.icon || '',
                 logoClassicUrl: logoUrls.classic || '',
                 reviewUrl: previewUrl,
-                linkColor: linkColor,
+                linkColor: computedLinkColor,
                 logoScale: logoScale,
                 showLink: templateData.show_link !== false,
+                wrapperStyle: wrapperStyle
             });
             $previewBtn.html(previewHtml);
 
@@ -563,7 +596,6 @@
             } else {
                 hidePreviewQr();
             }
-
         }
 
         function updateCustomizeButtonVisibility(templateKey) {
@@ -594,7 +626,7 @@
             $('#grp_widget_button_default_color_text').val(color);
             updatePreview();
         });
-
+        
         $('#grp_widget_button_default_color_text').on('input', function() {
             var val = $(this).val();
             if (/^#[0-9A-F]{6}$/i.test(val)) {
@@ -602,13 +634,13 @@
             }
             updatePreview();
         });
-
+        
         $('#grp_widget_button_default_bg_color').on('change', function() {
             var color = $(this).val();
             $('#grp_widget_button_default_bg_color_text').val(color);
             updatePreview();
         });
-
+        
         $('#grp_widget_button_default_bg_color_text').on('input', function() {
             var val = $(this).val();
             if (/^#[0-9A-F]{6}$/i.test(val)) {
@@ -668,18 +700,18 @@
             }
             updatePreview();
         });
-
+        
         // Clear color buttons
         $('#grp-clear-text-color').on('click', function() {
             $('#grp_widget_button_default_color_text').val('');
             updatePreview();
         });
-
+        
         $('#grp-clear-bg-color').on('click', function() {
             $('#grp_widget_button_default_bg_color_text').val('');
             updatePreview();
         });
-
+        
         // Update preview triggers
         $('#grp_widget_button_default_text').on('input', updatePreview);
         $('#grp_widget_button_default_style').on('change', updatePreview);
@@ -775,6 +807,67 @@
             $modalLinkColorText.val(value);
             $linkColorInput.val(value);
             $linkColorText.val(value);
+        }
+
+        function applyCustomizationToDom(templateKey) {
+            var customization = getTemplateCustomization(templateKey);
+            if (!customization) {
+                return;
+            }
+            $logoToggle.prop('checked', !!customization.show_logo);
+            syncLogoScale(customization.logo_scale || 30);
+            $fontFamilyInput.val(customization.font_family || '');
+            $modalFontFamily.val(customization.font_family || '');
+            syncTextColor(customization.text_color || '#ffffff');
+            syncBackgroundColor(customization.background_color || '#2b2b2b');
+            var starColor = customization.star_color || '#FBBD05';
+            $modalStarColor.val(starColor);
+            $modalStarColorText.val(starColor);
+            $starColorInput.val(starColor);
+            $starColorText.val(starColor);
+            var linkColor = customization.link_color || '#ffffff';
+            $modalLinkColor.val(linkColor);
+            $modalLinkColorText.val(linkColor);
+            $linkColorInput.val(linkColor);
+            $linkColorText.val(linkColor);
+            var linkText = customization.link_text || '';
+            $modalLinkText.val(linkText);
+            $linkTextInput.val(linkText);
+            var starPlacementValue = customization.star_placement || 'below';
+            $modalStarPlacement.val(starPlacementValue);
+            $starPlacementSelect.val(starPlacementValue);
+            $glassCheckbox.prop('checked', !!customization.glass_effect);
+            $modalGlassEffect.prop('checked', !!customization.glass_effect);
+            $boxShadowCheckbox.prop('checked', !!customization.box_shadow_enabled);
+            $modalBoxShadowEnabled.prop('checked', !!customization.box_shadow_enabled);
+            $boxShadowValue.val(customization.box_shadow_value || '');
+            var gradientStart = customization.gradient_start || '#0091ff';
+            var gradientEnd = customization.gradient_end || '#612c1f';
+            $modalGradientStart.val(gradientStart);
+            $modalGradientStartText.val(gradientStart);
+            $gradientStartInput.val(gradientStart);
+            $gradientStartText.val(gradientStart);
+            $modalGradientEnd.val(gradientEnd);
+            $modalGradientEndText.val(gradientEnd);
+            $gradientEndInput.val(gradientEnd);
+            $gradientEndText.val(gradientEnd);
+            $maxWidthInput.val(customization.max_width || 0);
+            $maxHeightInput.val(customization.max_height || 0);
+            if ($('#grp-modal-message-text').length) {
+                $('#grp-modal-message-text').val(customization.message_text || '');
+            }
+            if ($('#grp-modal-padding-top').length) {
+                $('#grp-modal-padding-top').val(customization.padding_top || 0);
+                $('#grp-modal-padding-right').val(customization.padding_right || 0);
+                $('#grp-modal-padding-bottom').val(customization.padding_bottom || 0);
+                $('#grp-modal-padding-left').val(customization.padding_left || 0);
+            }
+            if ($('#grp-modal-border-top-left').length) {
+                $('#grp-modal-border-top-left').val(customization.border_radius_top_left || 0);
+                $('#grp-modal-border-top-right').val(customization.border_radius_top_right || 0);
+                $('#grp-modal-border-bottom-right').val(customization.border_radius_bottom_right || 0);
+                $('#grp-modal-border-bottom-left').val(customization.border_radius_bottom_left || 0);
+            }
         }
 
         $modalTextColor.on('change', function() {

@@ -21,6 +21,11 @@ class GRP_Review_Widgets {
 	     * Button templates
 	     */
 	    private $button_templates = array();
+
+    /**
+     * Template customization defaults
+     */
+    private $template_customization_defaults = array();
     
     /**
      * Get instance
@@ -37,6 +42,7 @@ class GRP_Review_Widgets {
      */
     private function __construct() {
         $this->init_button_templates();
+        $this->init_template_customization_defaults();
         // Hook into addon enable/disable actions
         add_action('grp_addon_enabled', array($this, 'handle_addon_enabled'));
         add_action('grp_addon_disabled', array($this, 'handle_addon_disabled'));
@@ -81,6 +87,7 @@ class GRP_Review_Widgets {
         add_action('wp_ajax_nopriv_grp_generate_qr', array($this, 'ajax_generate_qr'));
         add_action('wp_ajax_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
         add_action('wp_ajax_nopriv_grp_track_widget_click', array($this, 'ajax_track_widget_click'));
+        add_action('wp_ajax_grp_save_template_customization', array($this, 'ajax_save_template_customization'));
         
         // Check if addon is enabled for frontend/admin functionality
         $addons = GRP_Addons::get_instance();
@@ -214,6 +221,127 @@ class GRP_Review_Widgets {
     }
 
     /**
+     * Initialize template customization defaults
+     */
+    private function init_template_customization_defaults() {
+        $fonts = array(
+            'Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            '"Roboto", "Helvetica Neue", sans-serif',
+            '"Playfair Display", Georgia, serif',
+            '"Lora", Georgia, serif',
+            '"Merriweather", serif',
+            '"Lora", serif',
+            '"Montserrat", sans-serif',
+            '"Poppins", sans-serif',
+            '"Raleway", sans-serif',
+        );
+        $default_font = 'Inter, "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+        $shared_defaults = array(
+            'show_logo' => 1,
+            'logo_scale' => 30,
+            'font_family' => $default_font,
+            'text_color' => '#ffffff',
+            'text_color_opacity' => 100,
+            'background_color' => '#2b2b2b',
+            'background_color_opacity' => 100,
+            'star_color' => '#FBBD05',
+            'star_color_opacity' => 100,
+            'link_color' => '#ffffff',
+            'link_color_opacity' => 100,
+            'link_text' => __('Click here', 'google-reviews-plugin'),
+            'message_text' => __('Scan the QR code to leave a review!', 'google-reviews-plugin'),
+            'star_placement' => 'below',
+            'padding_top' => 24,
+            'padding_right' => 24,
+            'padding_bottom' => 24,
+            'padding_left' => 24,
+            'border_radius_top_left' => 20,
+            'border_radius_top_right' => 20,
+            'border_radius_bottom_right' => 20,
+            'border_radius_bottom_left' => 20,
+            'glass_effect' => 0,
+            'box_shadow_enabled' => 1,
+            'box_shadow_value' => '0 18px 35px rgba(0,0,0,0.25)',
+            'box_shadow_h' => '0',
+            'box_shadow_v' => '18',
+            'box_shadow_blur' => '35',
+            'box_shadow_spread' => '0',
+            'box_shadow_color' => '#000000',
+            'gradient_start' => '#0091ff',
+            'gradient_end' => '#612c1f',
+            'gradient_type' => 'linear',
+            'gradient_angle' => 135,
+            'gradient_start_pos' => 0,
+            'gradient_end_pos' => 100,
+            'max_width' => 0,
+            'max_height' => 0,
+        );
+        $defaults = array(
+            'basic' => array_merge($shared_defaults, array(
+                'background_color' => '#ffffff',
+                'text_color' => '#111111',
+                'box_shadow_value' => '0 8px 20px rgba(0,0,0,0.2)',
+                'box_shadow_enabled' => 1,
+            )),
+            'layout1' => array_merge($shared_defaults, array(
+                'background_color' => '#111111',
+                'padding_top' => 28,
+                'padding_right' => 32,
+                'padding_bottom' => 28,
+                'padding_left' => 32,
+                'border_radius_top_left' => 26,
+                'border_radius_top_right' => 26,
+                'border_radius_bottom_right' => 26,
+                'border_radius_bottom_left' => 26,
+            )),
+            'layout2' => array_merge($shared_defaults, array(
+                'background_color' => '#ffffff',
+                'text_color' => '#111111',
+                'padding_top' => 30,
+                'padding_right' => 28,
+                'padding_bottom' => 30,
+                'padding_left' => 28,
+                'border_radius_top_left' => 20,
+                'border_radius_top_right' => 20,
+                'border_radius_bottom_right' => 20,
+                'border_radius_bottom_left' => 20,
+                'link_text' => __('Scan to review', 'google-reviews-plugin'),
+                'message_text' => __('Scan the QR code to leave a review', 'google-reviews-plugin'),
+            )),
+            'layout3' => array_merge($shared_defaults, array(
+                'background_color' => '#111111',
+                'text_color' => '#ffffff',
+                'padding_top' => 30,
+                'padding_right' => 28,
+                'padding_bottom' => 30,
+                'padding_left' => 28,
+                'border_radius_top_left' => 20,
+                'border_radius_top_right' => 20,
+                'border_radius_bottom_right' => 20,
+                'border_radius_bottom_left' => 20,
+                'link_text' => __('Scan to review', 'google-reviews-plugin'),
+                'message_text' => __('Scan the QR code to leave a review', 'google-reviews-plugin'),
+                'text_color' => '#ffffff',
+            )),
+            'creative-pro' => array_merge($shared_defaults, array(
+                'background_color' => '#0d0d0d',
+                'text_color' => '#ffffff',
+                'padding_top' => 36,
+                'padding_right' => 36,
+                'padding_bottom' => 36,
+                'padding_left' => 36,
+                'border_radius_top_left' => 40,
+                'border_radius_top_right' => 40,
+                'border_radius_bottom_right' => 40,
+                'border_radius_bottom_left' => 40,
+                'link_text' => __('Click here', 'google-reviews-plugin'),
+                'message_text' => __('Scan the QR code to leave a review', 'google-reviews-plugin'),
+            )),
+        );
+        $this->template_customization_defaults = $defaults;
+    }
+
+    /**
      * Get all registered button templates
      */
     public function get_button_templates() {
@@ -227,6 +355,131 @@ class GRP_Review_Widgets {
         return isset($this->button_templates[$key]) ? $this->button_templates[$key] : false;
     }
 
+    /**
+     * Get template customization defaults
+     */
+    public function get_template_customization_defaults() {
+        if (empty($this->template_customization_defaults)) {
+            $this->init_template_customization_defaults();
+        }
+        return $this->template_customization_defaults;
+    }
+
+    /**
+     * Get stored template customizations merged with defaults
+     */
+    public function get_template_customizations($template_key = '') {
+        $defaults = $this->get_template_customization_defaults();
+        $stored = get_option('grp_widget_template_customizations', array());
+        $result = array();
+        foreach ($defaults as $key => $default) {
+            $result[$key] = isset($stored[$key]) ? wp_parse_args($stored[$key], $default) : $default;
+        }
+        if ($template_key) {
+            $template_key = sanitize_title($template_key);
+            return isset($result[$template_key]) ? $result[$template_key] : $defaults['basic'];
+        }
+        return $result;
+    }
+
+    /**
+     * Update stored customizations for a template key
+     */
+    public function update_template_customizations($template_key, $customization) {
+        $template_key = sanitize_title($template_key);
+        $defaults = $this->get_template_customization_defaults();
+        if (!isset($defaults[$template_key])) {
+            return false;
+        }
+        $sanitized = $this->sanitize_template_customization_input($template_key, $customization);
+        $existing = get_option('grp_widget_template_customizations', array());
+        $existing[$template_key] = wp_parse_args($sanitized, $defaults[$template_key]);
+        update_option('grp_widget_template_customizations', $existing);
+        return $existing[$template_key];
+    }
+
+    /**
+     * Sanitize customization input
+     */
+    private function sanitize_template_customization_input($template_key, $customization) {
+        $defaults = $this->get_template_customization_defaults();
+        if (!isset($defaults[$template_key])) {
+            return array();
+        }
+        $bias = $defaults[$template_key];
+        $result = array();
+        foreach ($bias as $key => $default) {
+            $value = isset($customization[$key]) ? $customization[$key] : $default;
+            $result[$key] = $this->sanitize_template_customization_value($key, $value, $default);
+        }
+        return $result;
+    }
+
+    /**
+     * Sanitize individual field
+     */
+    private function sanitize_template_customization_value($key, $value, $default) {
+        $key = (string) $key;
+        switch ($key) {
+            case 'show_logo':
+            case 'glass_effect':
+            case 'box_shadow_enabled':
+                return !empty($value) ? 1 : 0;
+            case 'logo_scale':
+            case 'padding_top':
+            case 'padding_right':
+            case 'padding_bottom':
+            case 'padding_left':
+            case 'border_radius_top_left':
+            case 'border_radius_top_right':
+            case 'border_radius_bottom_right':
+            case 'border_radius_bottom_left':
+            case 'max_width':
+            case 'max_height':
+            case 'gradient_angle':
+            case 'gradient_start_pos':
+            case 'gradient_end_pos':
+                return absint($value);
+            case 'text_color_opacity':
+            case 'background_color_opacity':
+            case 'star_color_opacity':
+            case 'link_color_opacity':
+                $numeric = intval($value);
+                if ($numeric < 0) {
+                    $numeric = 0;
+                }
+                if ($numeric > 100) {
+                    $numeric = 100;
+                }
+                return $numeric;
+            case 'font_family':
+            case 'link_text':
+            case 'message_text':
+            case 'gradient_type':
+                return sanitize_text_field($value);
+            case 'star_placement':
+                $allowed = array('above', 'below', 'overlay', 'bottom');
+                $needle = sanitize_text_field($value);
+                return in_array($needle, $allowed, true) ? $needle : 'below';
+            case 'box_shadow_value':
+            case 'box_shadow_h':
+            case 'box_shadow_v':
+            case 'box_shadow_blur':
+            case 'box_shadow_spread':
+                return sanitize_text_field($value);
+            case 'box_shadow_color':
+            case 'background_color':
+            case 'text_color':
+            case 'star_color':
+            case 'link_color':
+            case 'gradient_start':
+            case 'gradient_end':
+                $sanitized = sanitize_hex_color($value);
+                return $sanitized ? $sanitized : $default;
+            default:
+                return $value;
+        }
+    }
     /**
      * Sanitize template key and fallback to default if invalid
      */
@@ -271,6 +524,8 @@ class GRP_Review_Widgets {
             'license_status' => $license->get_license_status(),
             'license_data' => $license->get_license_data(),
             'button_templates' => $this->get_button_templates(),
+            'template_customizations' => $this->get_template_customizations(),
+            'template_customization_defaults' => $this->get_template_customization_defaults(),
             'logo_urls' => array(
                 'icon' => GRP_PLUGIN_URL . 'assets/images/google-icon.svg',
                 'classic' => GRP_PLUGIN_URL . 'assets/images/google-wordmark.svg',
@@ -762,6 +1017,40 @@ class GRP_Review_Widgets {
         wp_send_json_success(array(
             'qr_url' => $qr_url,
             'review_url' => $review_url,
+        ));
+    }
+
+    /**
+     * AJAX: Save template customizations
+     */
+    public function ajax_save_template_customization() {
+        check_ajax_referer('grp_widgets_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(__('Insufficient permissions.', 'google-reviews-plugin'));
+        }
+
+        $template = isset($_POST['template']) ? sanitize_title($_POST['template']) : '';
+        if (empty($template)) {
+            wp_send_json_error(__('Template key is required.', 'google-reviews-plugin'));
+        }
+
+        $payload = array();
+        if (isset($_POST['customizations'])) {
+            $payload = is_string($_POST['customizations']) ? json_decode(stripslashes($_POST['customizations']), true) : $_POST['customizations'];
+        }
+        if (!is_array($payload)) {
+            $payload = array();
+        }
+
+        $updated = $this->update_template_customizations($template, $payload);
+        if (!$updated) {
+            wp_send_json_error(__('Unable to save customizations.', 'google-reviews-plugin'));
+        }
+
+        wp_send_json_success(array(
+            'template' => $template,
+            'customizations' => $updated,
         ));
     }
     
