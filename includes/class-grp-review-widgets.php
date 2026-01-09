@@ -307,7 +307,7 @@ class GRP_Review_Widgets {
                 'border_radius_top_right' => 20,
                 'border_radius_bottom_right' => 20,
                 'border_radius_bottom_left' => 20,
-                'link_text' => __('Scan to review', 'google-reviews-plugin'),
+            'link_text' => __('or click here', 'google-reviews-plugin'),
                 'message_text' => __('Scan the QR code to leave a review', 'google-reviews-plugin'),
             )),
             'layout3' => array_merge($shared_defaults, array(

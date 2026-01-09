@@ -595,10 +595,6 @@
             } else {
                 modalRootStyles.push('box-shadow: none');
             }
-            if (modalTemplateKey === 'creative-pro' && isValidHex(modalGradientStartValue) && isValidHex(modalGradientEndValue)) {
-                modalRootStyles.push('background: linear-gradient(135deg, ' + modalGradientStartValue + ', ' + modalGradientEndValue + ')');
-                modalRootStyles.push('color: #fff');
-            }
             var combinedModalStyles = modalRootStyles.slice();
             if (modalWrapperStyle) {
                 combinedModalStyles.push(modalWrapperStyle);
