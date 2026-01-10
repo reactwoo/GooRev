@@ -313,7 +313,25 @@ if (!class_exists('GRP_License')) {
             <?php endif; ?>
         </div>
     </div>
+    </div>
+
 </div>
+
+<?php include __DIR__ . '/partials/template-editor-modal.php'; ?>
+
+<script>
+    jQuery(function($) {
+        $('.grp-customize-style').on('click', function(event) {
+            event.preventDefault();
+            var templateKey = $(this).data('template') || 'layout1';
+            if (typeof grpOpenTemplateModal === 'function') {
+                grpOpenTemplateModal(templateKey);
+            } else {
+                console.warn('Template modal is not initialized yet.');
+            }
+        });
+    });
+</script>
 
 <style>
 .grp-styles-page {
@@ -996,193 +1014,6 @@ if (!class_exists('GRP_License')) {
 
 <?php include GRP_PLUGIN_DIR . 'includes/admin/views/partials/template-editor-modal.php'; ?>
 
-<script>
-jQuery(document).ready(function($) {
-    // Variant switching
-    $('.grp-variant-btn').on('click', function() {
-        var $btn = $(this);
-        var $card = $btn.closest('.grp-style-card');
-        var variant = $btn.data('variant');
-        
-        // Update active button
-        $card.find('.grp-variant-btn').removeClass('active');
-        $btn.addClass('active');
-        
-        // Update preview with theme class
-        var $preview = $card.find('.grp-style-preview');
-        $preview.removeClass('grp-theme-light grp-theme-dark grp-theme-auto').addClass('grp-theme-' + variant);
-        
-        // For creative style, add random gradient data attribute
-        if ($preview.hasClass('grp-style-creative')) {
-            var gradients = ['blue', 'red', 'yellow', 'green', 'purple'];
-            var randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
-            $preview.find('.grp-review').attr('data-gradient', randomGradient);
-        }
-    });
-    
-    // Use style - show usage modal
-    $('.grp-use-style').on('click', function(e) {
-        e.preventDefault();
-        var $btn = $(this);
-        
-        // Check if this is a Pro-only feature button
-        if ($btn.hasClass('grp-pro-feature')) {
-            var style = $btn.data('style');
-            var styleName = $btn.closest('.grp-style-card').find('h3').text();
-            
-            // Show upgrade modal for Pro-only templates
-            var upgradeModalHtml = '<div class="grp-modal-overlay" id="grp-upgrade-modal">' +
-                '<div class="grp-modal-content grp-upgrade-modal-content">' +
-                '<div class="grp-modal-header">' +
-                '<h2><?php esc_js_e('Upgrade to Pro', 'google-reviews-plugin'); ?></h2>' +
-                '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
-                '</div>' +
-                '<div class="grp-modal-body">' +
-                '<p class="grp-modal-intro"><?php esc_js_e('The', 'google-reviews-plugin'); ?> <strong>' + styleName + '</strong> <?php esc_js_e('style is available in the Pro version.', 'google-reviews-plugin'); ?></p>' +
-                '<div class="grp-upgrade-features">' +
-                '<h3><?php esc_js_e('With Pro, you get:', 'google-reviews-plugin'); ?></h3>' +
-                '<ul>' +
-                '<li>✓ <?php esc_js_e('Creative Style Template', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Advanced Gradient Customizer', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Google Fonts Integration', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Visual Style Customizer with live preview', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Custom CSS Editor', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Color Overrides (text, background, accent, stars)', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Typography Controls (font sizes, font families)', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Advanced Spacing & Layout Controls', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Multiple Locations Support', 'google-reviews-plugin'); ?></li>' +
-                '<li>✓ <?php esc_js_e('Priority Support', 'google-reviews-plugin'); ?></li>' +
-                '</ul>' +
-                '</div>' +
-                '</div>' +
-                '<div class="grp-modal-footer">' +
-                '<a href="https://reactwoo.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank"><?php esc_js_e('Upgrade to Pro', 'google-reviews-plugin'); ?></a>' +
-                '<button class="button grp-modal-close"><?php esc_js_e('Maybe Later', 'google-reviews-plugin'); ?></button>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
-            
-            $('body').append(upgradeModalHtml);
-            $('#grp-upgrade-modal').css('display', 'flex');
-            
-            // Close upgrade modal
-            $(document).off('click', '#grp-upgrade-modal .grp-modal-close, #grp-upgrade-modal');
-            $(document).on('click', '#grp-upgrade-modal .grp-modal-close, #grp-upgrade-modal', function(e) {
-                if ($(e.target).is('#grp-upgrade-modal') || $(e.target).hasClass('grp-modal-close')) {
-                    $('#grp-upgrade-modal').remove();
-                }
-            });
-            
-            $(document).off('click', '#grp-upgrade-modal .grp-modal-content');
-            $(document).on('click', '#grp-upgrade-modal .grp-modal-content', function(e) {
-                e.stopPropagation();
-            });
-            
-            return;
-        }
-        
-        var style = $(this).data('style');
-        var styleName = $(this).closest('.grp-style-card').find('h3').text();
-        var shortcode = '[google_reviews style="' + style + '"]';
-        
-        // Create and show modal
-        var modalHtml = '<div class="grp-modal-overlay" id="grp-use-style-modal">' +
-            '<div class="grp-modal-content">' +
-            '<div class="grp-modal-header">' +
-            '<h2><?php esc_js_e('How to Use This Style', 'google-reviews-plugin'); ?></h2>' +
-            '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
-            '</div>' +
-            '<div class="grp-modal-body">' +
-            '<p class="grp-modal-intro"><?php esc_js_e('You can use the', 'google-reviews-plugin'); ?> <strong>' + styleName + '</strong> <?php esc_js_e('style in several ways:', 'google-reviews-plugin'); ?></p>' +
-            
-            '<div class="grp-usage-tabs">' +
-            '<button class="grp-tab-btn active" data-tab="shortcode"><?php esc_js_e('Shortcode', 'google-reviews-plugin'); ?></button>' +
-            '<button class="grp-tab-btn" data-tab="gutenberg"><?php esc_js_e('Gutenberg', 'google-reviews-plugin'); ?></button>' +
-            '<button class="grp-tab-btn" data-tab="elementor"><?php esc_js_e('Elementor', 'google-reviews-plugin'); ?></button>' +
-            '</div>' +
-            
-            '<div class="grp-tab-content active" data-tab="shortcode">' +
-            '<h3><?php esc_js_e('Using Shortcode', 'google-reviews-plugin'); ?></h3>' +
-            '<p><?php esc_js_e('Copy and paste this shortcode anywhere on your site:', 'google-reviews-plugin'); ?></p>' +
-            '<div class="grp-code-block">' +
-            '<code id="grp-shortcode-text">' + shortcode + '</code>' +
-            '<button class="button button-primary grp-copy-shortcode" data-copy="' + shortcode + '"><?php esc_js_e('Copy Shortcode', 'google-reviews-plugin'); ?></button>' +
-            '</div>' +
-            '<p class="description"><?php esc_js_e('You can also add attributes like count, layout, theme, etc. Example:', 'google-reviews-plugin'); ?></p>' +
-            '<div class="grp-code-block grp-code-example">' +
-            '<code>' + shortcode.replace('"]', '" count="5" layout="carousel" theme="light"]') + '</code>' +
-            '</div>' +
-            '</div>' +
-            
-            '<div class="grp-tab-content" data-tab="gutenberg">' +
-            '<h3><?php esc_js_e('Using Gutenberg Block', 'google-reviews-plugin'); ?></h3>' +
-            '<ol>' +
-            '<li><?php esc_js_e('Go to any page or post editor', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('Click the + button to add a new block', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('Search for "Google Reviews" and select the block', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('In the block settings sidebar, select', 'google-reviews-plugin'); ?> <strong>' + styleName + '</strong> <?php esc_js_e('from the Style dropdown', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('Customize other options as needed (layout, count, theme, etc.)', 'google-reviews-plugin'); ?></li>' +
-            '</ol>' +
-            '</div>' +
-            
-            '<div class="grp-tab-content" data-tab="elementor">' +
-            '<h3><?php esc_js_e('Using Elementor Widget', 'google-reviews-plugin'); ?></h3>' +
-            '<ol>' +
-            '<li><?php esc_js_e('Edit a page with Elementor', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('Search for "Google Reviews" in the widget panel', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('Drag the Google Reviews widget to your page', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('In the Content tab, select', 'google-reviews-plugin'); ?> <strong>' + styleName + '</strong> <?php esc_js_e('from the Style dropdown', 'google-reviews-plugin'); ?></li>' +
-            '<li><?php esc_js_e('Customize layout, colors, fonts, and other options in the Style tab', 'google-reviews-plugin'); ?></li>' +
-            '</ol>' +
-            '</div>' +
-            
-            '</div>' +
-            '<div class="grp-modal-footer">' +
-            '<button class="button button-primary grp-modal-close"><?php esc_js_e('Got it!', 'google-reviews-plugin'); ?></button>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-        
-        $('body').append(modalHtml);
-        $('#grp-use-style-modal').css('display', 'flex');
-        
-        // Close modal handlers (use delegated events since modal is dynamically added)
-        $(document).off('click', '#grp-use-style-modal .grp-modal-close');
-        $(document).on('click', '#grp-use-style-modal .grp-modal-close', function(e) {
-            e.preventDefault();
-            $('#grp-use-style-modal').hide().remove();
-        });
-        
-        // Close on overlay click (but not on modal content)
-        $(document).off('click', '#grp-use-style-modal');
-        $(document).on('click', '#grp-use-style-modal', function(e) {
-            if ($(e.target).is('#grp-use-style-modal')) {
-                $('#grp-use-style-modal').fadeOut(200, function() {
-                    $(this).remove();
-                });
-            }
-        });
-        
-        // Prevent modal content clicks from closing
-        $(document).off('click', '#grp-use-style-modal .grp-modal-content');
-        $(document).on('click', '#grp-use-style-modal .grp-modal-content', function(e) {
-            e.stopPropagation();
-        });
-        
-        // Tab switching (delegated)
-        $(document).off('click', '#grp-use-style-modal .grp-tab-btn');
-        $(document).on('click', '#grp-use-style-modal .grp-tab-btn', function() {
-            var tab = $(this).data('tab');
-            $('#grp-use-style-modal .grp-tab-btn').removeClass('active');
-            $(this).addClass('active');
-            $('#grp-use-style-modal .grp-tab-content').removeClass('active');
-            $('#grp-use-style-modal .grp-tab-content[data-tab="' + tab + '"]').addClass('active');
-        });
-        
-        // Copy shortcode to clipboard (delegated)
-        $(document).off('click', '#grp-use-style-modal .grp-copy-shortcode');
-        $(document).on('click', '#grp-use-style-modal .grp-copy-shortcode', function() {
-            var shortcode = $(this).data('copy');
             var $button = $(this);
             var originalText = $button.text();
             
@@ -1205,365 +1036,27 @@ jQuery(document).ready(function($) {
         });
     });
     
-    // Customize button for Pro users - open visual style customizer modal
-    $('.grp-customize-style:not(.grp-pro-feature)').on('click', function(e) {
+    // Customize template - show shared modal or upgrade prompt
+    $('.grp-customize-style').on('click', function(e) {
         e.preventDefault();
-        var style = $(this).data('style');
-        var styleName = $(this).closest('.grp-style-card').find('h3').text();
+        var $trigger = $(this);
         
-        // Check if this is Creative style - use advanced customizer
-        if (style === 'creative') {
-            if (typeof window.openCreativeCustomizer === 'function') {
-                window.openCreativeCustomizer(style, styleName);
-            } else {
-                console.error('openCreativeCustomizer function not found. File may not be loaded.');
-                alert('<?php esc_js_e('Creative customizer is not available. Please refresh the page.', 'google-reviews-plugin'); ?>');
-            }
+        if ($trigger.hasClass('grp-pro-feature')) {
+            showStyleUpgradeModal($trigger);
             return;
         }
         
-        // Load existing custom CSS values if any
-        var existingCss = $('#grp-custom-css').val() || '';
-        
-        // Create standard customizer modal
-        var customizerModalHtml = '<div class="grp-modal-overlay" id="grp-customizer-modal">' +
-            '<div class="grp-modal-content grp-customizer-modal-content">' +
-            '<div class="grp-modal-header">' +
-            '<h2><?php esc_js_e('Customize', 'google-reviews-plugin'); ?> ' + styleName + '</h2>' +
-            '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
-            '</div>' +
-            '<div class="grp-modal-body grp-customizer-body">' +
-            '<div class="grp-customizer-tabs">' +
-            '<button class="grp-customizer-tab-btn active" data-tab="colors"><?php esc_js_e('Colors', 'google-reviews-plugin'); ?></button>' +
-            '<button class="grp-customizer-tab-btn" data-tab="typography"><?php esc_js_e('Typography', 'google-reviews-plugin'); ?></button>' +
-            '<button class="grp-customizer-tab-btn" data-tab="spacing"><?php esc_js_e('Spacing', 'google-reviews-plugin'); ?></button>' +
-            '</div>' +
-            
-            // Colors Tab
-            '<div class="grp-customizer-tab-content active" data-tab="colors">' +
-            '<h3><?php esc_js_e('Color Settings', 'google-reviews-plugin'); ?></h3>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Text Color', 'google-reviews-plugin'); ?></label>' +
-            '<div class="grp-color-control">' +
-            '<input type="color" id="grp-custom-text-color" class="grp-color-input" value="#111827">' +
-            '<input type="text" class="grp-color-text" value="#111827" placeholder="#111827">' +
-            '</div>' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Background Color', 'google-reviews-plugin'); ?></label>' +
-            '<div class="grp-color-control">' +
-            '<input type="color" id="grp-custom-bg-color" class="grp-color-input" value="#FFFFFF">' +
-            '<input type="text" class="grp-color-text" value="#FFFFFF" placeholder="#FFFFFF">' +
-            '</div>' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Star Color', 'google-reviews-plugin'); ?></label>' +
-            '<div class="grp-color-control">' +
-            '<input type="color" id="grp-custom-star-color" class="grp-color-input" value="#FBBC05">' +
-            '<input type="text" class="grp-color-text" value="#FBBC05" placeholder="#FBBC05">' +
-            '</div>' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Accent Color', 'google-reviews-plugin'); ?></label>' +
-            '<div class="grp-color-control">' +
-            '<input type="color" id="grp-custom-accent-color" class="grp-color-input" value="#4285F4">' +
-            '<input type="text" class="grp-color-text" value="#4285F4" placeholder="#4285F4">' +
-            '</div>' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Border Color', 'google-reviews-plugin'); ?></label>' +
-            '<div class="grp-color-control">' +
-            '<input type="color" id="grp-custom-border-color" class="grp-color-input" value="#D1D5DB">' +
-            '<input type="text" class="grp-color-text" value="#D1D5DB" placeholder="#D1D5DB">' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            
-            // Typography Tab
-            '<div class="grp-customizer-tab-content" data-tab="typography">' +
-            '<h3><?php esc_js_e('Typography Settings', 'google-reviews-plugin'); ?></h3>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Body Font Family', 'google-reviews-plugin'); ?></label>' +
-            '<select id="grp-custom-body-font" class="grp-font-select">' +
-            '<option value=""><?php esc_js_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>' +
-            '<optgroup label="<?php esc_js_e('Sans-Serif', 'google-reviews-plugin'); ?>">' +
-            '<option value="Inter, sans-serif">Inter</option>' +
-            '<option value="Roboto, sans-serif">Roboto</option>' +
-            '<option value="Open Sans, sans-serif">Open Sans</option>' +
-            '<option value="Lato, sans-serif">Lato</option>' +
-            '<option value="Montserrat, sans-serif">Montserrat</option>' +
-            '<option value="Poppins, sans-serif">Poppins</option>' +
-            '<option value="Raleway, sans-serif">Raleway</option>' +
-            '<option value="Nunito, sans-serif">Nunito</option>' +
-            '<option value="Source Sans Pro, sans-serif">Source Sans Pro</option>' +
-            '<option value="Ubuntu, sans-serif">Ubuntu</option>' +
-            '<option value="Work Sans, sans-serif">Work Sans</option>' +
-            '<option value="DM Sans, sans-serif">DM Sans</option>' +
-            '</optgroup>' +
-            '<optgroup label="<?php esc_js_e('Serif', 'google-reviews-plugin'); ?>">' +
-            '<option value="Merriweather, serif">Merriweather</option>' +
-            '<option value="Lora, serif">Lora</option>' +
-            '<option value="Playfair Display, serif">Playfair Display</option>' +
-            '<option value="PT Serif, serif">PT Serif</option>' +
-            '<option value="Crimson Text, serif">Crimson Text</option>' +
-            '<option value="Libre Baskerville, serif">Libre Baskerville</option>' +
-            '<option value="Bitter, serif">Bitter</option>' +
-            '<option value="Georgia, serif">Georgia</option>' +
-            '</optgroup>' +
-            '<optgroup label="<?php esc_js_e('Display', 'google-reviews-plugin'); ?>">' +
-            '<option value="Oswald, sans-serif">Oswald</option>' +
-            '<option value="Bebas Neue, sans-serif">Bebas Neue</option>' +
-            '<option value="Righteous, cursive">Righteous</option>' +
-            '</optgroup>' +
-            '</select>' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Name Font Family', 'google-reviews-plugin'); ?></label>' +
-            '<select id="grp-custom-name-font" class="grp-font-select">' +
-            '<option value=""><?php esc_js_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>' +
-            '<optgroup label="<?php esc_js_e('Sans-Serif', 'google-reviews-plugin'); ?>">' +
-            '<option value="Inter, sans-serif">Inter</option>' +
-            '<option value="Roboto, sans-serif">Roboto</option>' +
-            '<option value="Open Sans, sans-serif">Open Sans</option>' +
-            '<option value="Montserrat, sans-serif">Montserrat</option>' +
-            '<option value="Poppins, sans-serif">Poppins</option>' +
-            '<option value="Raleway, sans-serif">Raleway</option>' +
-            '<option value="Nunito, sans-serif">Nunito</option>' +
-            '<option value="Work Sans, sans-serif">Work Sans</option>' +
-            '<option value="DM Sans, sans-serif">DM Sans</option>' +
-            '<option value="Barlow, sans-serif">Barlow</option>' +
-            '<option value="Rubik, sans-serif">Rubik</option>' +
-            '</optgroup>' +
-            '<optgroup label="<?php esc_js_e('Serif', 'google-reviews-plugin'); ?>">' +
-            '<option value="Playfair Display, serif">Playfair Display</option>' +
-            '<option value="Merriweather, serif">Merriweather</option>' +
-            '<option value="Lora, serif">Lora</option>' +
-            '<option value="Crimson Text, serif">Crimson Text</option>' +
-            '<option value="Libre Baskerville, serif">Libre Baskerville</option>' +
-            '<option value="Georgia, serif">Georgia</option>' +
-            '</optgroup>' +
-            '<optgroup label="<?php esc_js_e('Display', 'google-reviews-plugin'); ?>">' +
-            '<option value="Oswald, sans-serif">Oswald</option>' +
-            '<option value="Bebas Neue, sans-serif">Bebas Neue</option>' +
-            '<option value="Righteous, cursive">Righteous</option>' +
-            '<option value="Fredoka One, cursive">Fredoka One</option>' +
-            '</optgroup>' +
-            '</select>' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Body Font Size', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-body-font-size-value">15px</span></label>' +
-            '<input type="range" id="grp-custom-body-font-size" class="grp-range-input" min="10" max="24" value="15" step="1">' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Name Font Size', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-name-font-size-value">14px</span></label>' +
-            '<input type="range" id="grp-custom-name-font-size" class="grp-range-input" min="10" max="20" value="14" step="1">' +
-            '</div>' +
-            '</div>' +
-            
-            // Spacing Tab
-            '<div class="grp-customizer-tab-content" data-tab="spacing">' +
-            '<h3><?php esc_js_e('Spacing Settings', 'google-reviews-plugin'); ?></h3>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Border Radius', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-border-radius-value">8px</span></label>' +
-            '<input type="range" id="grp-custom-border-radius" class="grp-range-input" min="0" max="30" value="8" step="1">' +
-            '</div>' +
-            '<div class="grp-customizer-control">' +
-            '<label><?php esc_js_e('Padding', 'google-reviews-plugin'); ?> <span class="grp-value-display" id="grp-padding-value">20px</span></label>' +
-            '<input type="range" id="grp-custom-padding" class="grp-range-input" min="10" max="50" value="20" step="2">' +
-            '</div>' +
-            '</div>' +
-            
-            '</div>' +
-            '<div class="grp-modal-footer">' +
-            '<button class="button grp-preview-css"><?php esc_js_e('Preview CSS', 'google-reviews-plugin'); ?></button>' +
-            '<button class="button button-primary grp-save-customizations" data-style="' + style + '"><?php esc_js_e('Save Customizations', 'google-reviews-plugin'); ?></button>' +
-            '<button class="button grp-modal-close"><?php esc_js_e('Cancel', 'google-reviews-plugin'); ?></button>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-        
-        $('body').append(customizerModalHtml);
-        $('#grp-customizer-modal').css('display', 'flex');
-        
-        // Function to generate CSS from form values (must be defined before use)
-        function generateCustomCss(style) {
-            var css = '/* Custom styles for ' + styleName + ' style - Generated on ' + new Date().toLocaleDateString() + ' */\n\n';
-            css += '.grp-style-' + style + ' .grp-review {\n';
-            
-            var bgColor = $('#grp-custom-bg-color').val();
-            if (bgColor && bgColor !== '#FFFFFF') {
-                css += '    background-color: ' + bgColor + ' !important;\n';
-            }
-            
-            var borderColor = $('#grp-custom-border-color').val();
-            if (borderColor && borderColor !== '#D1D5DB') {
-                css += '    border-color: ' + borderColor + ' !important;\n';
-            }
-            
-            var borderRadius = $('#grp-custom-border-radius').val();
-            if (borderRadius && borderRadius !== '8') {
-                css += '    border-radius: ' + borderRadius + 'px !important;\n';
-            }
-            
-            var padding = $('#grp-custom-padding').val();
-            if (padding && padding !== '20') {
-                css += '    padding: ' + padding + 'px !important;\n';
-            }
-            
-            css += '}\n\n';
-            
-            css += '.grp-style-' + style + ' .grp-review-text,\n';
-            css += '.grp-style-' + style + ' .grp-author-name {\n';
-            var textColor = $('#grp-custom-text-color').val();
-            if (textColor && textColor !== '#111827') {
-                css += '    color: ' + textColor + ' !important;\n';
-            }
-            var bodyFont = $('#grp-custom-body-font').val();
-            if (bodyFont) {
-                css += '    font-family: ' + bodyFont + ' !important;\n';
-            }
-            var bodyFontSize = $('#grp-custom-body-font-size').val();
-            if (bodyFontSize && bodyFontSize !== '15') {
-                css += '    font-size: ' + bodyFontSize + 'px !important;\n';
-            }
-            css += '}\n\n';
-            
-            css += '.grp-style-' + style + ' .grp-author-name {\n';
-            var nameFont = $('#grp-custom-name-font').val();
-            if (nameFont) {
-                css += '    font-family: ' + nameFont + ' !important;\n';
-            }
-            var nameFontSize = $('#grp-custom-name-font-size').val();
-            if (nameFontSize && nameFontSize !== '14') {
-                css += '    font-size: ' + nameFontSize + 'px !important;\n';
-            }
-            css += '}\n\n';
-            
-            css += '.grp-style-' + style + ' .grp-star {\n';
-            var starColor = $('#grp-custom-star-color').val();
-            if (starColor && starColor !== '#FBBC05') {
-                css += '    color: ' + starColor + ' !important;\n';
-            }
-            css += '}\n\n';
-            
-            var accentColor = $('#grp-custom-accent-color').val();
-            if (accentColor && accentColor !== '#4285F4') {
-                css += '.grp-style-' + style + ' .grp-review {\n';
-                css += '    --grp-accent: ' + accentColor + ';\n';
-                css += '}\n';
-            }
-            
-            return css;
+        if (typeof window.grpOpenTemplateModal === 'function') {
+            var templateKey = $trigger.data('template') || 'layout1';
+            grpOpenTemplateModal(templateKey);
+        } else {
+            console.error('grpOpenTemplateModal is not defined. Make sure widgets-admin.js is properly enqueued.');
+            alert('<?php esc_js_e('An error occurred. Please refresh the page and try again.', 'google-reviews-plugin'); ?>');
         }
-        
-        // Color input sync
-        $(document).off('input change', '#grp-customizer-modal .grp-color-input');
-        $(document).on('input change', '#grp-customizer-modal .grp-color-input', function() {
-            $(this).siblings('.grp-color-text').val($(this).val());
-        });
-        
-        $(document).off('input change', '#grp-customizer-modal .grp-color-text');
-        $(document).on('input change', '#grp-customizer-modal .grp-color-text', function() {
-            var val = $(this).val();
-            if (/^#[0-9A-F]{6}$/i.test(val)) {
-                $(this).siblings('.grp-color-input').val(val);
-            }
-        });
-        
-        // Range input value display
-        $(document).off('input', '#grp-customizer-modal .grp-range-input');
-        $(document).on('input', '#grp-customizer-modal .grp-range-input', function() {
-            var value = $(this).val();
-            var unit = $(this).attr('id').includes('font-size') ? 'px' : 'px';
-            $(this).closest('.grp-customizer-control').find('.grp-value-display').text(value + unit);
-        });
-        
-        // Tab switching
-        $(document).off('click', '#grp-customizer-modal .grp-customizer-tab-btn');
-        $(document).on('click', '#grp-customizer-modal .grp-customizer-tab-btn', function() {
-            var tab = $(this).data('tab');
-            $('#grp-customizer-modal .grp-customizer-tab-btn').removeClass('active');
-            $(this).addClass('active');
-            $('#grp-customizer-modal .grp-customizer-tab-content').removeClass('active');
-            $('#grp-customizer-modal .grp-customizer-tab-content[data-tab="' + tab + '"]').addClass('active');
-        });
-        
-        // Generate and save CSS
-        $(document).off('click', '#grp-customizer-modal .grp-save-customizations');
-        $(document).on('click', '#grp-customizer-modal .grp-save-customizations', function() {
-            var style = $(this).data('style');
-            var css = generateCustomCss(style);
-            
-            $.post(ajaxurl, {
-                action: 'grp_save_custom_css',
-                nonce: grp_admin.nonce,
-                css: css
-            }, function(response) {
-                if (response.success) {
-                    // Update the CSS textarea if it exists
-                    if ($('#grp-custom-css').length) {
-                        $('#grp-custom-css').val(css);
-                    }
-                    alert('<?php esc_js_e('Customizations saved successfully!', 'google-reviews-plugin'); ?>');
-                    $('#grp-customizer-modal').hide().remove();
-                } else {
-                    alert('<?php esc_js_e('Failed to save customizations.', 'google-reviews-plugin'); ?>');
-                }
-            });
-        });
-        
-        // Preview CSS
-        $(document).off('click', '#grp-customizer-modal .grp-preview-css');
-        $(document).on('click', '#grp-customizer-modal .grp-preview-css', function() {
-            var style = $(this).siblings('.grp-save-customizations').data('style');
-            var css = generateCustomCss(style);
-            
-            var previewModalHtml = '<div class="grp-modal-overlay" id="grp-css-preview-modal" style="display: flex;">' +
-                '<div class="grp-modal-content" style="max-width: 900px; width: 90%; display: flex; flex-direction: column; max-height: 90vh;">' +
-                '<div class="grp-modal-header">' +
-                '<h2><?php esc_js_e('Generated CSS Preview', 'google-reviews-plugin'); ?></h2>' +
-                '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
-                '</div>' +
-                '<div class="grp-modal-body" style="flex: 1; min-height: 0; overflow-y: auto;">' +
-                '<textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px; box-sizing: border-box; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: none;">' + css + '</textarea>' +
-                '</div>' +
-                '<div class="grp-modal-footer" style="flex-shrink: 0;">' +
-                '<button class="button grp-modal-close"><?php esc_js_e('Close', 'google-reviews-plugin'); ?></button>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
-            
-            $('body').append(previewModalHtml);
-            
-            // Close preview modal
-            $(document).off('click', '#grp-css-preview-modal .grp-modal-close, #grp-css-preview-modal');
-            $(document).on('click', '#grp-css-preview-modal .grp-modal-close, #grp-css-preview-modal', function(e) {
-                if ($(e.target).is('#grp-css-preview-modal') || $(e.target).hasClass('grp-modal-close')) {
-                    $('#grp-css-preview-modal').hide().remove();
-                }
-            });
-        });
-        
-        // Close modal
-        $(document).off('click', '#grp-customizer-modal .grp-modal-close, #grp-customizer-modal');
-        $(document).on('click', '#grp-customizer-modal .grp-modal-close, #grp-customizer-modal', function(e) {
-            if ($(e.target).is('#grp-customizer-modal') || $(e.target).hasClass('grp-modal-close')) {
-                $('#grp-customizer-modal').hide().remove();
-            }
-        });
-        
-        $(document).off('click', '#grp-customizer-modal .grp-modal-content');
-        $(document).on('click', '#grp-customizer-modal .grp-modal-content', function(e) {
-            e.stopPropagation();
-        });
     });
-    
-    // Customize button - show Pro upgrade modal for free users
-    $('.grp-customize-style.grp-pro-feature').on('click', function(e) {
-        e.preventDefault();
-        var style = $(this).data('style');
-        var styleName = $(this).closest('.grp-style-card').find('h3').text();
-        
+
+    function showStyleUpgradeModal($trigger) {
+        var styleName = $trigger.closest('.grp-style-card').find('h3').text();
         var upgradeModalHtml = '<div class="grp-modal-overlay" id="grp-upgrade-modal">' +
             '<div class="grp-modal-content grp-upgrade-modal-content">' +
             '<div class="grp-modal-header">' +
@@ -1591,17 +1084,16 @@ jQuery(document).ready(function($) {
             '</div>' +
             '</div>' +
             '</div>';
-        
+
         $('body').append(upgradeModalHtml);
         $('#grp-upgrade-modal').show();
-        
-        // Close modal handlers
+
         $(document).off('click', '#grp-upgrade-modal .grp-modal-close');
         $(document).on('click', '#grp-upgrade-modal .grp-modal-close', function(e) {
             e.preventDefault();
             $('#grp-upgrade-modal').hide().remove();
         });
-        
+
         $(document).off('click', '#grp-upgrade-modal');
         $(document).on('click', '#grp-upgrade-modal', function(e) {
             if ($(e.target).is('#grp-upgrade-modal')) {
@@ -1610,13 +1102,13 @@ jQuery(document).ready(function($) {
                 });
             }
         });
-        
+
         $(document).off('click', '#grp-upgrade-modal .grp-modal-content');
         $(document).on('click', '#grp-upgrade-modal .grp-modal-content', function(e) {
             e.stopPropagation();
         });
-    });
-    
+    }
+
     // Save custom CSS
     $('#grp-save-css').on('click', function() {
         var css = $('#grp-custom-css').val();
@@ -1662,21 +1154,7 @@ jQuery(document).ready(function($) {
 });
 </script>
 
-<script>
-    jQuery(function($) {
-        $('.grp-customize-style').off('click.grpCustomModal');
-        $('.grp-customize-style').on('click.grpCustomModal', function(e) {
-            e.preventDefault();
-            if ($(this).hasClass('grp-pro-feature')) {
-                return;
-            }
-            if (typeof window.grpOpenTemplateModal === 'function') {
-                var templateKey = $(this).data('template') || 'layout1';
-                grpOpenTemplateModal(templateKey);
-            }
-        });
-    });
-</script>
+
 
 <?php
 // Include Creative customizer JavaScript function

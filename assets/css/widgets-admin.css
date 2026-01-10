@@ -369,6 +369,32 @@
     min-width: 0;
 }
 
+.grp-template-editor-row.grp-inline-spacing-row {
+    justify-content: flex-start;
+}
+
+.grp-spacing-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.grp-spacing-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70px;
+    font-size: 12px;
+    color: #555;
+}
+
+.grp-spacing-input input {
+    width: 100%;
+    text-align: center;
+}
+
 .grp-template-editor-field > input[type="text"],
 .grp-template-editor-field > input[type="number"] {
     max-width: 130px;

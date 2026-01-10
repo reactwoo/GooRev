@@ -27,7 +27,6 @@
         var $boxShadowCheckbox = $('#grp_widget_template_box_shadow_enabled');
         var $boxShadowValue = $('#grp_widget_template_box_shadow_value');
         var $boxShadowEditTrigger = $('#grp-box-shadow-edit');
-        var $bgColorRow = $('.grp-bg-color-row');
         var $glassCheckbox = $('#grp_widget_template_glass_effect');
         var $templateEditorModal = $('#grp-template-editor-modal');
         var $templateEditorPreview = $('#grp-template-editor-preview');
@@ -69,7 +68,6 @@
         var $modalLinkText = $('#grp-modal-link-text');
         var $modalLinkColor = $('#grp-modal-link-color');
         var $modalLinkColorText = $('#grp-modal-link-color-text');
-        var $modalLinkRows = $('.grp-modal-link-row');
         var $modalTextColorOpacity = $('#grp-modal-text-color-opacity');
         var $modalTextColorOpacityValue = $('#grp-modal-text-color-opacity-value');
         var $modalBackgroundColorOpacity = $('#grp-modal-background-color-opacity');
@@ -97,6 +95,7 @@
         var $buttonStyleRows = $('.grp-button-style-row');
         var $buttonSizeRows = $('.grp-button-size-row');
         var $buttonTextColorRows = $('.grp-button-text-color-row');
+        var $templateControlNodes = $templateEditorModal.find('[data-templates]');
         var templateMeta = (typeof grpWidgets !== 'undefined' && grpWidgets.button_templates) ? grpWidgets.button_templates : {};
         var templateClassList = Object.keys(templateMeta).map(function(key) {
             return 'grp-review-button-template-' + key;
@@ -335,6 +334,11 @@
                 $previewQr.addClass('has-qr');
             }
             $previewBtn.find('.grp-card-qr img, .grp-layout1-qr img, .grp-layout2-qr img').attr('src', src);
+            if ($templateEditorPreview.length) {
+                $templateEditorPreview
+                    .find('.grp-card-qr img, .grp-layout1-qr img, .grp-layout2-qr img, .grp-qr-frame img')
+                    .attr('src', src);
+            }
         }
 
         function hidePreviewQr() {
@@ -343,6 +347,11 @@
                 $previewQrImg.attr('src', blankQr);
             }
             $previewBtn.find('.grp-card-qr img, .grp-layout1-qr img, .grp-layout2-qr img').attr('src', blankQr);
+            if ($templateEditorPreview.length) {
+                $templateEditorPreview
+                    .find('.grp-card-qr img, .grp-layout1-qr img, .grp-layout2-qr img, .grp-qr-frame img')
+                    .attr('src', blankQr);
+            }
         }
 
         function fetchPreviewQr(size) {
@@ -455,39 +464,21 @@
                 '</div>';
         }
 
-        function toggleGradientControls(templateKey) {
-            if (templateKey === 'creative-pro') {
-                $gradientRows.show();
-            } else {
-                $gradientRows.hide();
-            }
-        }
-
-        function toggleBackgroundColorRow(templateKey) {
-            if (!$bgColorRow.length) {
+        function toggleTemplateControls(templateKey) {
+            if (!$templateControlNodes.length || !templateKey) {
                 return;
             }
-            var templateData = getTemplateData(templateKey);
-            $bgColorRow.toggle(templateData.type === 'button');
-        }
-
-        function toggleButtonControls(templateKey) {
-            if (!$buttonStyleRows.length && !$buttonSizeRows.length && !$buttonTextColorRows.length) {
-                return;
-            }
-            var templateData = getTemplateData(templateKey);
-            var showButtonSettings = templateData.type === 'button';
-            $buttonStyleRows.toggle(showButtonSettings);
-            $buttonSizeRows.toggle(showButtonSettings);
-            $buttonTextColorRows.toggle(showButtonSettings);
-        }
-
-        function toggleLinkRows(templateKey) {
-            if (!$modalLinkRows.length) {
-                return;
-            }
-            var templateData = getTemplateData(templateKey);
-            $modalLinkRows.toggle(templateData.show_link !== false);
+            $templateControlNodes.each(function() {
+                var $node = $(this);
+                var templates = $node.data('templates');
+                if (!templates) {
+                    $node.show();
+                    return;
+                }
+                var templateList = templates.toString().trim().split(/\\s+/);
+                var show = templateList.indexOf(templateKey) !== -1;
+                $node.toggle(show);
+            });
         }
 
         function isValidHex(color) {
@@ -500,16 +491,9 @@
             var customization = getTemplateCustomization(modalTemplateKey);
             var isCreative = modalTemplateKey === 'creative-pro';
 
-            $modalGradientSection.toggle(isCreative);
-            toggleLinkRows(modalTemplateKey);
+            toggleTemplateControls(modalTemplateKey);
             applyCustomizationToDom(modalTemplateKey);
 
-            console.log('[GRP DEBUG] populateTemplateModal', {
-                template: modalTemplateKey,
-                showLink: templateData.show_link !== false,
-                isCreative: isCreative,
-                customization: customization
-            });
             $modalBoxShadowEnabled.prop('checked', !!customization.box_shadow_enabled);
             updateModalPreview();
         }
@@ -608,6 +592,10 @@
             }
             $templateEditorPreview.toggleClass('grp-glass-preview', $modalGlassEffect.is(':checked'));
             updateGradientSummaryPreview(modalCustomization);
+            var sanitizedModalPreviewUrl = String(previewUrl || '').trim();
+            if (templateData.qr && hasPlaceId && sanitizedModalPreviewUrl && sanitizedModalPreviewUrl !== '#') {
+                fetchPreviewQr(templateData.qr_size || 135);
+            }
         }
 
         function persistTemplateCustomizations(templateKey) {
@@ -809,10 +797,7 @@
             });
             $previewBtn.html(previewHtml);
 
-            toggleGradientControls(templateKey);
-            toggleBackgroundColorRow(templateKey);
-            toggleButtonControls(templateKey);
-            toggleLinkRows(templateKey);
+            toggleTemplateControls(templateKey);
             updateCustomizeButtonVisibility(templateKey);
             updateModalPreview();
             updateGradientSummaryPreview(customization);
@@ -1059,10 +1044,6 @@
             updateTemplateCustomizationValue('gradient_end', endColor, templateKey);
             updateTemplateCustomizationValue('gradient_start_opacity', clampValue($gradientEditorStartOpacity.val(), 0, 100), templateKey);
             updateTemplateCustomizationValue('gradient_end_opacity', clampValue($gradientEditorEndOpacity.val(), 0, 100), templateKey);
-            $gradientStartInput.val(startColor);
-            $gradientStartText.val(startColor);
-            $gradientEndInput.val(endColor);
-            $gradientEndText.val(endColor);
             updateGradientSummaryPreview(getTemplateCustomization(templateKey));
             updatePreview();
             updateModalPreview();
@@ -1365,7 +1346,9 @@
         bindModalNumberInput($modalBorderBottomLeft, 'border_radius_bottom_left');
 
         $modalFontFamily.on('change', function() {
-            $fontFamilyInput.val($(this).val());
+            var value = $(this).val();
+            $fontFamilyInput.val(value);
+            updateTemplateCustomizationValue('font_family', value);
             updatePreview();
             updateModalPreview();
         });
@@ -1374,29 +1357,35 @@
             var value = parsePositiveInt($(this).val());
             updateTemplateCustomizationValue('max_width', value);
             updatePreview();
+            updateModalPreview();
         });
         $maxHeightInput.on('input', function() {
             var value = parsePositiveInt($(this).val());
             updateTemplateCustomizationValue('max_height', value);
             updatePreview();
+            updateModalPreview();
         });
         $fontFamilyInput.on('change input', function() {
             var value = $(this).val();
             updateTemplateCustomizationValue('font_family', value);
             updatePreview();
+            updateModalPreview();
         });
         $boxShadowCheckbox.on('change', function() {
             var enabled = $(this).is(':checked') ? 1 : 0;
             updateTemplateCustomizationValue('box_shadow_enabled', enabled);
             updatePreview();
+            updateModalPreview();
         });
         $boxShadowValue.on('input', function() {
             updateTemplateCustomizationValue('box_shadow_value', $(this).val());
             updatePreview();
+            updateModalPreview();
         });
         $glassCheckbox.on('change', function() {
             updateTemplateCustomizationValue('glass_effect', $(this).is(':checked') ? 1 : 0);
             updatePreview();
+            updateModalPreview();
         });
 
         // Initialize preview on load

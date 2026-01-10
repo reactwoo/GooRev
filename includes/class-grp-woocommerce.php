@@ -753,7 +753,7 @@ Enjoy and we hope to serve you again soon!', 'google-reviews-plugin')
         return wp_mail($to, $subject, $body, $headers);
     }
 
-    private function add_ten_minute_schedule($schedules) {
+    public function add_ten_minute_schedule($schedules) {
         $schedules['ten_minutes'] = array(
             'interval' => 600,
             'display' => __('Every Ten Minutes', 'google-reviews-plugin')
