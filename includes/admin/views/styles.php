@@ -316,23 +316,6 @@ if (!class_exists('GRP_License')) {
     </div>
 
 </div>
-
-<?php include __DIR__ . '/partials/template-editor-modal.php'; ?>
-
-<script>
-    jQuery(function($) {
-        $('.grp-customize-style').on('click', function(event) {
-            event.preventDefault();
-            var templateKey = $(this).data('template') || 'layout1';
-            if (typeof grpOpenTemplateModal === 'function') {
-                grpOpenTemplateModal(templateKey);
-            } else {
-                console.warn('Template modal is not initialized yet.');
-            }
-        });
-    });
-</script>
-
 <style>
 .grp-styles-page {
     max-width: 1400px;

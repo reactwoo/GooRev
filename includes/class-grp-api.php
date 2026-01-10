@@ -57,6 +57,16 @@ class GRP_API {
      * Retry counter to prevent infinite retry loops
      */
     private $retry_count = 0;
+
+    /**
+     * Transient key for API server backoff
+     */
+    const API_SERVER_BACKOFF_TRANSIENT = 'grp_api_server_backoff_until';
+
+    /**
+     * How long to pause retries after the API service is unavailable (seconds)
+     */
+    const API_SERVER_BACKOFF_DURATION = 900; // 15 minutes
     
     /**
      * Constructor
@@ -75,6 +85,32 @@ class GRP_API {
         
         $this->access_token = get_option('grp_google_access_token', '');
         $this->refresh_token = get_option('grp_google_refresh_token', '');
+    }
+
+    /**
+     * Get the timestamp (UTC) when API server backoff expires.
+     *
+     * @return int Unix timestamp the backoff expires at, or 0 if none.
+     */
+    private function get_api_server_backoff_until() {
+        $backoff_until = get_transient(self::API_SERVER_BACKOFF_TRANSIENT);
+        if (!$backoff_until || $backoff_until <= time()) {
+            delete_transient(self::API_SERVER_BACKOFF_TRANSIENT);
+            return 0;
+        }
+        return (int) $backoff_until;
+    }
+
+    /**
+     * Activate the API server backoff for the configured duration.
+     *
+     * @return int Timestamp when the backoff ends.
+     */
+    private function activate_api_server_backoff() {
+        $backoff_until = time() + self::API_SERVER_BACKOFF_DURATION;
+        set_transient(self::API_SERVER_BACKOFF_TRANSIENT, $backoff_until, self::API_SERVER_BACKOFF_DURATION);
+        error_log('[GRP API] Cloud server unavailable—pausing retries until ' . date('c', $backoff_until));
+        return $backoff_until;
     }
     
     /**
@@ -135,6 +171,16 @@ class GRP_API {
         // Reset retry count at start of new request
         $this->retry_count = 0;
         
+        $backoff_until = $this->get_api_server_backoff_until();
+        if ($backoff_until) {
+            $remaining_minutes = ceil(($backoff_until - time()) / MINUTE_IN_SECONDS);
+            $remaining_minutes = max(1, $remaining_minutes);
+            return new WP_Error('api_service_backoff', sprintf(
+                __('The cloud API is temporarily paused due to recent failures. The next automatic check will occur in %s minute(s).', 'google-reviews-plugin'),
+                $remaining_minutes
+            ));
+        }
+
         return $this->make_api_server_request_internal($endpoint, $data, $method);
     }
     
@@ -337,6 +383,8 @@ class GRP_API {
         // Handle 503 - Service Unavailable (cloud server is down)
         if ($status_code === 503) {
             $error_message = isset($decoded['message']) ? $decoded['message'] : __('Service temporarily unavailable. The cloud server may be restarting or under maintenance. Please try again in a few minutes.', 'google-reviews-plugin');
+            $error_message .= ' ' . __('Next automatic retry will happen in 15 minutes.', 'google-reviews-plugin');
+            $this->activate_api_server_backoff();
             return new WP_Error('service_unavailable', $error_message);
         }
         

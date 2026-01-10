@@ -486,7 +486,11 @@
         }
 
         function populateTemplateModal() {
-            modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
+            // Widgets page has a template selector; styles page (and other callers) can set modalTemplateKey
+            // directly via grpOpenTemplateModal(templateKey). Do not overwrite it when selector isn't present.
+            modalTemplateKey = $templateSelect.length
+                ? ($templateSelect.val() || 'basic')
+                : (modalTemplateKey || 'basic');
             var templateData = getTemplateData(modalTemplateKey);
             var customization = getTemplateCustomization(modalTemplateKey);
             var isCreative = modalTemplateKey === 'creative-pro';
