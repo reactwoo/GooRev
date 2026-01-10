@@ -100,9 +100,13 @@ if (!isset($font_display)) {
     <div class="grp-template-editor-content">
         <button type="button" class="grp-template-editor-close button-link">×</button>
         <h3><?php esc_html_e('Customize Template', 'google-reviews-plugin'); ?></h3>
-        <div id="grp-template-editor-preview" class="grp-template-editor-preview"></div>
-        <div class="grp-template-editor-controls">
-            <div class="grp-template-editor-column">
+        <div class="grp-template-editor-body">
+            <div class="grp-template-editor-preview-col">
+                <div id="grp-template-editor-preview" class="grp-template-editor-preview"></div>
+            </div>
+            <div class="grp-template-editor-controls-col">
+                <div class="grp-template-editor-controls">
+                    <div class="grp-template-editor-column">
                 <div class="grp-template-editor-row" data-templates="layout1 layout2 layout3 creative-pro">
                     <span class="grp-template-editor-label"><?php esc_html_e('Show logo/icon', 'google-reviews-plugin'); ?></span>
                     <div class="grp-template-editor-field">
@@ -166,8 +170,8 @@ if (!isset($font_display)) {
                         <input type="text" id="grp-modal-message-text" placeholder="<?php esc_attr_e('Scan the QR code to leave a review', 'google-reviews-plugin'); ?>">
                     </div>
                 </div>
-            </div>
-            <div class="grp-template-editor-column">
+                    </div>
+                    <div class="grp-template-editor-column">
                 <div class="grp-template-editor-row" data-templates="basic layout1 layout2 layout3 creative-pro">
                     <span class="grp-template-editor-label"><?php esc_html_e('Background Color', 'google-reviews-plugin'); ?></span>
                     <div class="grp-template-editor-field grp-template-color-field">
@@ -230,10 +234,10 @@ if (!isset($font_display)) {
                         <button type="button" class="button" id="grp-template-editor-box-shadow-edit"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div class="grp-template-editor-controls">
-            <div class="grp-template-editor-column">
+                    </div>
+                </div>
+                <div class="grp-template-editor-controls">
+                    <div class="grp-template-editor-column">
                 <div class="grp-template-editor-row grp-inline-spacing-row" data-templates="layout1 layout2 layout3 creative-pro">
                     <span class="grp-template-editor-label"><?php esc_html_e('Padding', 'google-reviews-plugin'); ?></span>
                     <div class="grp-template-editor-field grp-spacing-group">
@@ -255,8 +259,8 @@ if (!isset($font_display)) {
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="grp-template-editor-column">
+                    </div>
+                    <div class="grp-template-editor-column">
                 <div class="grp-template-editor-row grp-inline-spacing-row" data-templates="layout1 layout2 layout3 creative-pro">
                     <span class="grp-template-editor-label"><?php esc_html_e('Border Radius', 'google-reviews-plugin'); ?></span>
                     <div class="grp-template-editor-field grp-spacing-group">
@@ -278,19 +282,21 @@ if (!isset($font_display)) {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div id="grp-template-editor-gradient-section" class="grp-template-editor-section" data-templates="creative-pro">
-            <div class="grp-template-editor-row grp-gradient-summary-row">
-                <span class="grp-template-editor-label"><?php esc_html_e('Gradient', 'google-reviews-plugin'); ?></span>
-                <div class="grp-template-editor-field grp-gradient-summary-field">
-                    <div id="grp-gradient-summary-preview" class="grp-gradient-summary-preview"></div>
-                    <button type="button" class="button" id="grp-gradient-editor-open"><?php esc_html_e('Edit Gradient', 'google-reviews-plugin'); ?></button>
+                    </div>
+                </div>
+                <div id="grp-template-editor-gradient-section" class="grp-template-editor-section" data-templates="creative-pro">
+                    <div class="grp-template-editor-row grp-gradient-summary-row">
+                        <span class="grp-template-editor-label"><?php esc_html_e('Gradient', 'google-reviews-plugin'); ?></span>
+                        <div class="grp-template-editor-field grp-gradient-summary-field">
+                            <div id="grp-gradient-summary-preview" class="grp-gradient-summary-preview"></div>
+                            <button type="button" class="button" id="grp-gradient-editor-open"><?php esc_html_e('Edit Gradient', 'google-reviews-plugin'); ?></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="grp-template-editor-footer">
+                    <button type="button" class="button" id="grp-template-editor-close"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>
                 </div>
             </div>
-        </div>
-        <div class="grp-template-editor-footer">
-            <button type="button" class="button" id="grp-template-editor-close"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>
         </div>
     </div>
 </div>

@@ -272,6 +272,19 @@
     max-height: calc(100vh - 40px);
 }
 
+.grp-template-editor-body {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.grp-template-editor-controls-col {
+    max-height: calc(100vh - 170px);
+    overflow: auto;
+    padding-right: 6px;
+}
+
 .grp-template-editor-close {
     position: absolute;
     right: 18px;
@@ -328,6 +341,18 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+}
+
+@media (max-width: 900px) {
+    .grp-template-editor-body {
+        grid-template-columns: 1fr;
+    }
+
+    .grp-template-editor-controls-col {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+    }
 }
 
 .grp-template-editor-column {
