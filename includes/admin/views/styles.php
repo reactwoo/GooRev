@@ -995,11 +995,11 @@ if (!class_exists('GRP_License')) {
 }
 </style>
 
-<?php include GRP_PLUGIN_DIR . 'includes/admin/views/partials/template-editor-modal.php'; ?>
+<?php include GRP_PLUGIN_DIR . 'includes/admin/views/partials/style-editor-modal.php'; ?>
 
 <script>
 jQuery(function($) {
-    // Customize template - show shared modal or upgrade prompt
+    // Style customize (opens style editor modal; review-widget template modal is not used on this page)
     $(document).on('click', '.grp-customize-style', function(e) {
         e.preventDefault();
         var $trigger = $(this);
@@ -1009,11 +1009,14 @@ jQuery(function($) {
             return;
         }
 
-        var templateKey = $trigger.data('template') || 'layout1';
-        if (typeof window.grpOpenTemplateModal === 'function') {
-            window.grpOpenTemplateModal(templateKey);
+        var styleKey = $trigger.data('style') || '';
+        var $card = $trigger.closest('.grp-style-card');
+        var variant = ($card.find('.grp-variant-btn.active').data('variant') || 'light');
+
+        if (typeof window.grpOpenStyleModal === 'function') {
+            window.grpOpenStyleModal(styleKey, variant);
         } else {
-            console.error('grpOpenTemplateModal is not defined. Make sure widgets-admin.js is properly enqueued.');
+            console.error('grpOpenStyleModal is not defined. Make sure widgets-admin.js is properly enqueued.');
             alert('<?php echo esc_js(__('An error occurred. Please refresh the page and try again.', 'google-reviews-plugin')); ?>');
         }
     });

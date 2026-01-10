@@ -518,6 +518,16 @@ class GRP_Review_Widgets {
         $place_id_auto = get_option('grp_gbp_place_id_default', '');
         $has_place_id = !empty($place_id) || !empty($place_id_auto);
         $license = new GRP_License();
+        $styles_obj = null;
+        if (class_exists('Google_Reviews_Plugin')) {
+            $plugin = Google_Reviews_Plugin::get_instance();
+            if ($plugin && isset($plugin->styles) && $plugin->styles instanceof GRP_Styles) {
+                $styles_obj = $plugin->styles;
+            }
+        }
+        if (!$styles_obj && class_exists('GRP_Styles')) {
+            $styles_obj = new GRP_Styles();
+        }
 
         wp_localize_script('grp-widgets-admin', 'grpWidgets', array(
             'ajax_url' => admin_url('admin-ajax.php'),
@@ -530,6 +540,8 @@ class GRP_Review_Widgets {
             'button_templates' => $this->get_button_templates(),
             'template_customizations' => $this->get_template_customizations(),
             'template_customization_defaults' => $this->get_template_customization_defaults(),
+            'style_customizations' => $styles_obj ? $styles_obj->get_style_customizations_all() : array(),
+            'style_customization_defaults' => $styles_obj ? $styles_obj->get_style_customization_defaults() : array(),
             'logo_urls' => array(
                 'icon' => GRP_PLUGIN_URL . 'assets/images/google-icon.svg',
                 'classic' => GRP_PLUGIN_URL . 'assets/images/google-wordmark.svg',

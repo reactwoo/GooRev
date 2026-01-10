@@ -92,6 +92,28 @@
         var $logoScaleText = $('#grp_widget_template_logo_scale_text');
         var $gradientRows = $('.grp-gradient-row');
         var $customizeButton = $('#grp-template-editor-open');
+        // Styles page (review styles) editor modal
+        var $styleEditorModal = $('#grp-style-editor-modal');
+        var $styleEditorPreview = $('#grp-style-editor-preview');
+        var $styleVariantSelect = $('#grp-style-variant');
+        var $styleBgColor = $('#grp-style-background-color');
+        var $styleBgText = $('#grp-style-background-text');
+        var $styleCardBg = $('#grp-style-card-background');
+        var $styleTextColor = $('#grp-style-text-color');
+        var $styleTextText = $('#grp-style-text-text');
+        var $styleMutedColor = $('#grp-style-muted-color');
+        var $styleMutedText = $('#grp-style-muted-text');
+        var $styleBorderColor = $('#grp-style-border-color');
+        var $styleBorderText = $('#grp-style-border-text');
+        var $styleAccentColor = $('#grp-style-accent-color');
+        var $styleAccentText = $('#grp-style-accent-text');
+        var $styleStarColor = $('#grp-style-star-color');
+        var $styleStarText = $('#grp-style-star-text');
+        var $styleSampleReviewText = $('#grp-style-sample-review-text');
+        var $styleSampleAuthorName = $('#grp-style-sample-author-name');
+        var $styleSave = $('#grp-style-editor-save');
+        var $styleReset = $('#grp-style-editor-reset');
+        var $styleClose = $('#grp-style-editor-close, #grp-style-editor-close-x');
         var $buttonStyleRows = $('.grp-button-style-row');
         var $buttonSizeRows = $('.grp-button-size-row');
         var $buttonTextColorRows = $('.grp-button-text-color-row');
@@ -102,6 +124,8 @@
         });
         var templateCustomizationDefaults = (typeof grpWidgets !== 'undefined' && grpWidgets.template_customization_defaults) ? grpWidgets.template_customization_defaults : {};
         var templateCustomizations = (typeof grpWidgets !== 'undefined' && grpWidgets.template_customizations) ? grpWidgets.template_customizations : {};
+        var styleCustomizations = (typeof grpWidgets !== 'undefined' && grpWidgets.style_customizations) ? grpWidgets.style_customizations : {};
+        var styleCustomizationDefaults = (typeof grpWidgets !== 'undefined' && grpWidgets.style_customization_defaults) ? grpWidgets.style_customization_defaults : {};
         var logoScaleTouched = false;
         var modalTemplateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
         var qrCache = {};
@@ -122,6 +146,212 @@
                     isPro = true;
                 }
             }
+        }
+
+        // ---------------------------
+        // Styles page: Style editor modal (review style preview + CSS variable overrides)
+        // ---------------------------
+        var activeStyleKey = '';
+        var activeStyleVariant = 'light';
+
+        function isValidHexOrShort(color) {
+            return /^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(String(color || '').trim());
+        }
+
+        function toCssVarMap(overrides) {
+            var map = {};
+            if (!overrides) return map;
+            if (overrides.background) map['--grp-background'] = overrides.background;
+            if (overrides.background_alt) map['--grp-background_alt'] = overrides.background_alt;
+            if (overrides.text) map['--grp-text'] = overrides.text;
+            if (overrides.muted) map['--grp-muted'] = overrides.muted;
+            if (overrides.border) map['--grp-border'] = overrides.border;
+            if (overrides.star) map['--grp-star'] = overrides.star;
+            if (overrides.accent) map['--grp-accent'] = overrides.accent;
+            if (overrides.card_background) map['--grp-card_background'] = overrides.card_background;
+            if (overrides.gradient_blue) map['--grp-gradient_blue'] = overrides.gradient_blue;
+            if (overrides.gradient_red) map['--grp-gradient_red'] = overrides.gradient_red;
+            if (overrides.gradient_yellow) map['--grp-gradient_yellow'] = overrides.gradient_yellow;
+            if (overrides.gradient_green) map['--grp-gradient_green'] = overrides.gradient_green;
+            return map;
+        }
+
+        function applyStyleVars($node, vars) {
+            if (!$node || !$node.length) return;
+            Object.keys(vars || {}).forEach(function(key) {
+                $node.css(key, vars[key]);
+            });
+        }
+
+        function getStyleDefaults(styleKey, variant) {
+            if (!styleCustomizationDefaults || !styleCustomizationDefaults[styleKey]) return {};
+            if (styleCustomizationDefaults[styleKey][variant]) return styleCustomizationDefaults[styleKey][variant];
+            return styleCustomizationDefaults[styleKey].light || {};
+        }
+
+        function getStyleStored(styleKey, variant) {
+            if (!styleCustomizations || !styleCustomizations[styleKey] || !styleCustomizations[styleKey][variant]) return {};
+            return styleCustomizations[styleKey][variant] || {};
+        }
+
+        function getEffectiveStyle(styleKey, variant) {
+            return $.extend({}, getStyleDefaults(styleKey, variant), getStyleStored(styleKey, variant));
+        }
+
+        function syncColorPair($color, $text) {
+            var val = String($text.val() || '').trim();
+            if (isValidHexOrShort(val)) {
+                $color.val(val);
+            }
+        }
+
+        function updateStyleEditorPreviewFromInputs() {
+            if (!$styleEditorPreview.length) return;
+            var $previewInner = $styleEditorPreview.find('.grp-style-preview').first();
+            if (!$previewInner.length) return;
+
+            var overrides = {
+                background: String($styleBgText.val() || '').trim(),
+                text: String($styleTextText.val() || '').trim(),
+                muted: String($styleMutedText.val() || '').trim(),
+                border: String($styleBorderText.val() || '').trim(),
+                accent: String($styleAccentText.val() || '').trim(),
+                star: String($styleStarText.val() || '').trim(),
+                card_background: String($styleCardBg.val() || '').trim()
+            };
+            applyStyleVars($previewInner, toCssVarMap(overrides));
+
+            var sampleText = String($styleSampleReviewText.val() || '').trim();
+            if (sampleText) $previewInner.find('.grp-review-text').text(sampleText);
+            var sampleName = String($styleSampleAuthorName.val() || '').trim();
+            if (sampleName) $previewInner.find('.grp-author-name').text(sampleName);
+        }
+
+        function populateStyleEditor(styleKey, variant) {
+            if (!$styleEditorModal.length || !$styleEditorPreview.length) return;
+            if (!styleKey) return;
+            activeStyleKey = styleKey;
+            activeStyleVariant = variant || 'light';
+            $styleVariantSelect.val(activeStyleVariant);
+
+            var $source = $('.grp-style-card[data-style="' + styleKey + '"]').find('.grp-style-preview').first();
+            var $cloned = $source.clone(true, true);
+            if (!$cloned.length) {
+                $cloned = $('<div class="grp-style-preview grp-style-' + styleKey + ' grp-theme-' + activeStyleVariant + '"><div class="grp-review"><div class="grp-review-rating"><span class="grp-star grp-star-full">★</span><span class="grp-star grp-star-full">★</span><span class="grp-star grp-star-full">★</span><span class="grp-star grp-star-full">★</span><span class="grp-star grp-star-full">★</span></div><div class="grp-review-text">Sample review</div><div class="grp-review-meta"><div class="grp-author-name">John Doe</div><div class="grp-review-date">Jan 1, 2026</div></div></div></div>');
+            }
+
+            $cloned.removeClass('grp-theme-light grp-theme-dark grp-theme-auto').addClass('grp-theme-' + activeStyleVariant);
+
+            var effective = getEffectiveStyle(styleKey, activeStyleVariant);
+            $styleBgText.val(effective.background || '');
+            $styleTextText.val(effective.text || '');
+            $styleMutedText.val(effective.muted || '');
+            $styleBorderText.val(effective.border || '');
+            $styleAccentText.val(effective.accent || '');
+            $styleStarText.val(effective.star || '');
+            $styleCardBg.val(effective.card_background || '');
+
+            if (isValidHexOrShort($styleBgText.val())) $styleBgColor.val($styleBgText.val());
+            if (isValidHexOrShort($styleTextText.val())) $styleTextColor.val($styleTextText.val());
+            if (isValidHexOrShort($styleMutedText.val())) $styleMutedColor.val($styleMutedText.val());
+            if (isValidHexOrShort($styleBorderText.val())) $styleBorderColor.val($styleBorderText.val());
+            if (isValidHexOrShort($styleAccentText.val())) $styleAccentColor.val($styleAccentText.val());
+            if (isValidHexOrShort($styleStarText.val())) $styleStarColor.val($styleStarText.val());
+
+            $styleEditorPreview.empty().append($cloned);
+            applyStyleVars($cloned, toCssVarMap(effective));
+            updateStyleEditorPreviewFromInputs();
+        }
+
+        function closeStyleEditor() {
+            if ($styleEditorModal.length) {
+                $styleEditorModal.removeClass('grp-template-active').hide();
+            }
+        }
+
+        function persistStyleCustomizations(styleKey, variant, data, onDone) {
+            if (!styleKey || !variant) return;
+            $.post((typeof grpWidgets !== 'undefined' ? grpWidgets.ajax_url : ajaxurl), {
+                action: 'grp_save_style_customization',
+                nonce: (typeof grpWidgets !== 'undefined' ? grpWidgets.nonce : ''),
+                style: styleKey,
+                variant: variant,
+                data: data || {}
+            }, function(resp) {
+                if (resp && resp.success) {
+                    if (!styleCustomizations[styleKey]) styleCustomizations[styleKey] = {};
+                    styleCustomizations[styleKey][variant] = (resp.data && resp.data.data) ? resp.data.data : (data || {});
+                    var $cardPreview = $('.grp-style-card[data-style="' + styleKey + '"]').find('.grp-style-preview').first();
+                    applyStyleVars($cardPreview, toCssVarMap(getEffectiveStyle(styleKey, variant)));
+                }
+                if (typeof onDone === 'function') onDone(resp);
+            });
+        }
+
+        window.grpOpenStyleModal = function(styleKey, variant) {
+            if (!$styleEditorModal.length) return;
+            populateStyleEditor(styleKey, variant || 'light');
+            $styleEditorModal.css('display', 'flex').addClass('grp-template-active');
+        };
+
+        // Wire modal controls if present
+        if ($styleEditorModal.length) {
+            $styleVariantSelect.on('change', function() {
+                populateStyleEditor(activeStyleKey, $(this).val() || 'light');
+            });
+
+            $styleBgColor.on('change', function() { $styleBgText.val($(this).val()); updateStyleEditorPreviewFromInputs(); });
+            $styleTextColor.on('change', function() { $styleTextText.val($(this).val()); updateStyleEditorPreviewFromInputs(); });
+            $styleMutedColor.on('change', function() { $styleMutedText.val($(this).val()); updateStyleEditorPreviewFromInputs(); });
+            $styleBorderColor.on('change', function() { $styleBorderText.val($(this).val()); updateStyleEditorPreviewFromInputs(); });
+            $styleAccentColor.on('change', function() { $styleAccentText.val($(this).val()); updateStyleEditorPreviewFromInputs(); });
+            $styleStarColor.on('change', function() { $styleStarText.val($(this).val()); updateStyleEditorPreviewFromInputs(); });
+
+            $styleBgText.on('input', function() { syncColorPair($styleBgColor, $styleBgText); updateStyleEditorPreviewFromInputs(); });
+            $styleTextText.on('input', function() { syncColorPair($styleTextColor, $styleTextText); updateStyleEditorPreviewFromInputs(); });
+            $styleMutedText.on('input', function() { syncColorPair($styleMutedColor, $styleMutedText); updateStyleEditorPreviewFromInputs(); });
+            $styleBorderText.on('input', function() { syncColorPair($styleBorderColor, $styleBorderText); updateStyleEditorPreviewFromInputs(); });
+            $styleAccentText.on('input', function() { syncColorPair($styleAccentColor, $styleAccentText); updateStyleEditorPreviewFromInputs(); });
+            $styleStarText.on('input', function() { syncColorPair($styleStarColor, $styleStarText); updateStyleEditorPreviewFromInputs(); });
+            $styleCardBg.on('input', updateStyleEditorPreviewFromInputs);
+            $styleSampleReviewText.on('input', updateStyleEditorPreviewFromInputs);
+            $styleSampleAuthorName.on('input', updateStyleEditorPreviewFromInputs);
+
+            $styleSave.on('click', function() {
+                var payload = {
+                    background: String($styleBgText.val() || '').trim(),
+                    text: String($styleTextText.val() || '').trim(),
+                    muted: String($styleMutedText.val() || '').trim(),
+                    border: String($styleBorderText.val() || '').trim(),
+                    accent: String($styleAccentText.val() || '').trim(),
+                    star: String($styleStarText.val() || '').trim(),
+                    card_background: String($styleCardBg.val() || '').trim()
+                };
+                persistStyleCustomizations(activeStyleKey, ($styleVariantSelect.val() || 'light'), payload, function(resp) {
+                    if (resp && resp.success) {
+                        alert('Style saved.');
+                    } else {
+                        alert('Failed to save style.');
+                    }
+                });
+            });
+
+            $styleReset.on('click', function() {
+                persistStyleCustomizations(activeStyleKey, ($styleVariantSelect.val() || 'light'), {}, function() {
+                    populateStyleEditor(activeStyleKey, ($styleVariantSelect.val() || 'light'));
+                });
+            });
+
+            $styleClose.on('click', function(e) {
+                e.preventDefault();
+                closeStyleEditor();
+            });
+
+            $styleEditorModal.on('click', function(e) {
+                if ($(e.target).is($styleEditorModal)) {
+                    closeStyleEditor();
+                }
+            });
         }
 
         window.updateGRPPreview = function() {
@@ -944,12 +1174,16 @@
         $starPlacementSelect.on('change', updatePreview);
         $logoToggle.on('change', updatePreview);
         $('#grp-template-editor-open').on('click', function() {
-            if (!isPro) {
-                var proMessage = (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) ? grpWidgets.strings.templateProMessage : 'Upgrade to Pro to customize templates.';
-                alert(proMessage);
+            if (!$templateEditorModal.length) {
                 return;
             }
-            if (!$templateEditorModal.length) {
+            // Only gate Pro-only templates. Layout 1/2/3 are customizable without Pro.
+            var activeKey = ($(this).attr('data-template-key') || '').toString().trim() || ($templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic');
+            var activeTemplate = getTemplateData(activeKey) || {};
+            var requiresPro = !!activeTemplate.pro;
+            if (requiresPro && !isPro) {
+                var proMessage = (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) ? grpWidgets.strings.templateProMessage : 'Upgrade to Pro to unlock this layout.';
+                alert(proMessage);
                 return;
             }
             console.log('[GRP DEBUG] Customize modal click', {
@@ -958,13 +1192,20 @@
                 licensePackage: typeof grpWidgets !== 'undefined' ? (grpWidgets.license_data || {}).packageType : undefined,
             });
             populateTemplateModal();
-        $templateEditorModal.css('display', 'flex');
-        $templateEditorModal.addClass('grp-template-active');
+            $templateEditorModal.css('display', 'flex');
+            $templateEditorModal.addClass('grp-template-active');
         });
 
         window.grpOpenTemplateModal = function(templateKey) {
             if (!templateKey) {
                 templateKey = $templateSelect.length ? ($templateSelect.val() || 'basic') : 'basic';
+            }
+            // Gate only Pro-only templates.
+            var requested = getTemplateData(templateKey) || {};
+            if (requested.pro && !isPro) {
+                var proMessage = (typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage) ? grpWidgets.strings.templateProMessage : 'Upgrade to Pro to unlock this layout.';
+                alert(proMessage);
+                return;
             }
             modalTemplateKey = templateKey;
             populateTemplateModal();

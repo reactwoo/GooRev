@@ -285,6 +285,16 @@
     padding-right: 6px;
 }
 
+.grp-style-editor-preview .grp-style-preview,
+#grp-style-editor-preview .grp-style-preview {
+    margin: 0;
+    padding: 0;
+}
+
+.grp-style-editor-modal .grp-template-editor-preview {
+    background: transparent;
+}
+
 .grp-template-editor-close {
     position: absolute;
     right: 18px;
@@ -301,13 +311,18 @@
     margin-bottom: 18px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center !important;
     padding: 0;
     background: #fff;
     box-shadow: none;
     margin-left: auto;
     margin-right: auto;
     transition: background-color 0.2s ease;
+}
+
+.grp-template-editor-preview-col {
+    display: flex;
+    justify-content: center;
 }
 
 .grp-template-editor-preview.grp-glass-preview {

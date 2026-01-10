@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 class GRP_Styles {
+    const STYLE_CUSTOMIZATIONS_OPTION = 'grp_review_style_customizations';
     
     /**
      * Available styles
@@ -30,6 +31,7 @@ class GRP_Styles {
     private function init_hooks() {
         add_action('wp_head', array($this, 'output_custom_css'));
         add_action('admin_head', array($this, 'output_admin_css'));
+        add_action('wp_ajax_grp_save_style_customization', array($this, 'ajax_save_style_customization'));
     }
     
     /**
@@ -131,8 +133,8 @@ class GRP_Styles {
      */
     private function get_variant_css_variables($style_name, $variant) {
         // Use generic light/dark palettes; can be customized per style later
-        $light = $this->get_variant_colors($style_name, 'light');
-        $dark = $this->get_variant_colors($style_name, 'dark');
+        $light = $this->get_effective_variant_colors($style_name, 'light');
+        $dark = $this->get_effective_variant_colors($style_name, 'dark');
 
         if ($variant === 'auto') {
             $css_vars = "
@@ -253,6 +255,119 @@ class GRP_Styles {
         ";
         
         return $css_vars;
+    }
+
+    /**
+     * Get all stored style customizations.
+     */
+    public function get_style_customizations_all() {
+        $all = get_option(self::STYLE_CUSTOMIZATIONS_OPTION, array());
+        return is_array($all) ? $all : array();
+    }
+
+    /**
+     * Get stored style customizations for a style + variant.
+     */
+    public function get_style_customizations($style, $variant) {
+        $style = sanitize_key($style);
+        $variant = sanitize_key($variant);
+        $all = $this->get_style_customizations_all();
+        if (!isset($all[$style]) || !is_array($all[$style])) {
+            return array();
+        }
+        if (!isset($all[$style][$variant]) || !is_array($all[$style][$variant])) {
+            return array();
+        }
+        return $all[$style][$variant];
+    }
+
+    /**
+     * Defaults used by the style editor UI.
+     */
+    public function get_style_customization_defaults() {
+        $defaults = array();
+        foreach ($this->styles as $style_name => $style_data) {
+            $defaults[$style_name] = array();
+            foreach ($style_data['variants'] as $variant) {
+                if ($variant === 'auto') {
+                    // Editor will map auto to light/dark behind the scenes.
+                    $defaults[$style_name][$variant] = $this->get_variant_colors($style_name, 'light');
+                    continue;
+                }
+                $defaults[$style_name][$variant] = $this->get_variant_colors($style_name, $variant);
+            }
+        }
+        return $defaults;
+    }
+
+    private function get_effective_variant_colors($style, $variant) {
+        $defaults = $this->get_variant_colors($style, $variant);
+        $stored = $this->get_style_customizations($style, $variant);
+        if (!is_array($defaults) || empty($defaults) || !is_array($stored) || empty($stored)) {
+            return $defaults;
+        }
+        $stored_whitelisted = array_intersect_key($stored, $defaults);
+        return array_merge($defaults, $stored_whitelisted);
+    }
+
+    private function sanitize_style_customization_value($value) {
+        $value = is_string($value) ? trim($value) : '';
+        if ($value === '') {
+            return '';
+        }
+        if ($value === 'transparent') {
+            return 'transparent';
+        }
+        $hex = sanitize_hex_color($value);
+        if ($hex) {
+            return $hex;
+        }
+        // Allow rgb/rgba() (basic validation)
+        if (preg_match('/^rgba?\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}(\\s*,\\s*(0|1|0?\\.\\d+)\\s*)?\\)$/', $value)) {
+            return $value;
+        }
+        return '';
+    }
+
+    public function ajax_save_style_customization() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('Insufficient permissions.', 'google-reviews-plugin')));
+        }
+        check_ajax_referer('grp_widgets_nonce', 'nonce');
+
+        $style = isset($_POST['style']) ? sanitize_key(wp_unslash($_POST['style'])) : '';
+        $variant = isset($_POST['variant']) ? sanitize_key(wp_unslash($_POST['variant'])) : 'light';
+        $data = isset($_POST['data']) ? (array) $_POST['data'] : array();
+
+        if (empty($style) || !isset($this->styles[$style])) {
+            wp_send_json_error(array('message' => __('Invalid style.', 'google-reviews-plugin')));
+        }
+        if (!in_array($variant, array('light', 'dark', 'auto'), true)) {
+            $variant = 'light';
+        }
+
+        $sanitized = array();
+        foreach ($data as $key => $val) {
+            $key = sanitize_key($key);
+            $val = is_string($val) ? wp_unslash($val) : '';
+            $clean = $this->sanitize_style_customization_value($val);
+            if ($clean !== '') {
+                $sanitized[$key] = $clean;
+            }
+        }
+
+        $all = $this->get_style_customizations_all();
+        if (!isset($all[$style]) || !is_array($all[$style])) {
+            $all[$style] = array();
+        }
+        $all[$style][$variant] = $sanitized;
+        update_option(self::STYLE_CUSTOMIZATIONS_OPTION, $all, false);
+
+        wp_send_json_success(array(
+            'style' => $style,
+            'variant' => $variant,
+            'data' => $sanitized,
+        ));
     }
     
     /**
