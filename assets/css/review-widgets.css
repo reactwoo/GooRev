@@ -119,13 +119,45 @@
     width: 100%;
 }
 
-.grp-review-button-template-layout2 .grp-review-button {
+/* When a layout template is applied directly to the anchor element (admin preview does this),
+   reset the base button styling so the layout card isn't rendered inside a "second button frame". */
+.grp-review-button.grp-review-button-template-layout1,
+.grp-review-button.grp-review-button-template-layout2,
+.grp-review-button.grp-review-button-template-layout3,
+.grp-review-button.grp-review-button-template-creative-pro {
     background: transparent;
     border: none;
     box-shadow: none;
     padding: 0;
     border-radius: 0;
     color: inherit;
+    transform: none;
+}
+
+.grp-review-button.grp-review-button-template-layout1:hover,
+.grp-review-button.grp-review-button-template-layout2:hover,
+.grp-review-button.grp-review-button-template-layout3:hover,
+.grp-review-button.grp-review-button-template-creative-pro:hover,
+.grp-review-button.grp-review-button-template-layout1:active,
+.grp-review-button.grp-review-button-template-layout2:active,
+.grp-review-button.grp-review-button-template-layout3:active,
+.grp-review-button.grp-review-button-template-creative-pro:active {
+    box-shadow: none;
+    transform: none;
+}
+
+/* Frontend wrapper markup may apply the template class to a parent wrapper. Keep this too. */
+.grp-review-button-template-layout2 .grp-review-button,
+.grp-review-button-template-layout3 .grp-review-button,
+.grp-review-button-template-layout1 .grp-review-button,
+.grp-review-button-template-creative-pro .grp-review-button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
+    color: inherit;
+    transform: none;
 }
 
 .grp-layout2-preview {

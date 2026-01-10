@@ -997,142 +997,25 @@ if (!class_exists('GRP_License')) {
 
 <?php include GRP_PLUGIN_DIR . 'includes/admin/views/partials/template-editor-modal.php'; ?>
 
-            var $button = $(this);
-            var originalText = $button.text();
-            
-            // Create temporary textarea for copying
-            var $temp = $('<textarea>');
-            $('body').append($temp);
-            $temp.val(shortcode).select();
-            
-            try {
-                document.execCommand('copy');
-                $button.text('<?php esc_js_e('Copied!', 'google-reviews-plugin'); ?>').addClass('copied');
-                setTimeout(function() {
-                    $button.text(originalText).removeClass('copied');
-                }, 2000);
-            } catch (err) {
-                alert('<?php esc_js_e('Failed to copy. Please copy manually.', 'google-reviews-plugin'); ?>');
-            }
-            
-            $temp.remove();
-        });
-    });
-    
+<script>
+jQuery(function($) {
     // Customize template - show shared modal or upgrade prompt
-    $('.grp-customize-style').on('click', function(e) {
+    $(document).on('click', '.grp-customize-style', function(e) {
         e.preventDefault();
         var $trigger = $(this);
-        
+
         if ($trigger.hasClass('grp-pro-feature')) {
-            showStyleUpgradeModal($trigger);
+            alert('<?php echo esc_js(__('Upgrade to Pro to customize styles.', 'google-reviews-plugin')); ?>');
             return;
         }
-        
+
+        var templateKey = $trigger.data('template') || 'layout1';
         if (typeof window.grpOpenTemplateModal === 'function') {
-            var templateKey = $trigger.data('template') || 'layout1';
-            grpOpenTemplateModal(templateKey);
+            window.grpOpenTemplateModal(templateKey);
         } else {
             console.error('grpOpenTemplateModal is not defined. Make sure widgets-admin.js is properly enqueued.');
-            alert('<?php esc_js_e('An error occurred. Please refresh the page and try again.', 'google-reviews-plugin'); ?>');
+            alert('<?php echo esc_js(__('An error occurred. Please refresh the page and try again.', 'google-reviews-plugin')); ?>');
         }
-    });
-
-    function showStyleUpgradeModal($trigger) {
-        var styleName = $trigger.closest('.grp-style-card').find('h3').text();
-        var upgradeModalHtml = '<div class="grp-modal-overlay" id="grp-upgrade-modal">' +
-            '<div class="grp-modal-content grp-upgrade-modal-content">' +
-            '<div class="grp-modal-header">' +
-            '<h2><?php esc_js_e('Unlock Style Customization', 'google-reviews-plugin'); ?></h2>' +
-            '<button class="grp-modal-close" aria-label="<?php esc_attr_e('Close', 'google-reviews-plugin'); ?>">&times;</button>' +
-            '</div>' +
-            '<div class="grp-modal-body">' +
-            '<p class="grp-modal-intro"><?php esc_js_e('The', 'google-reviews-plugin'); ?> <strong>' + styleName + '</strong> <?php esc_js_e('style customization is a Pro feature.', 'google-reviews-plugin'); ?></p>' +
-            '<div class="grp-upgrade-features">' +
-            '<h3><?php esc_js_e('With Pro, you get:', 'google-reviews-plugin'); ?></h3>' +
-            '<ul>' +
-            '<li>✓ <?php esc_js_e('Visual Style Customizer with live preview', 'google-reviews-plugin'); ?></li>' +
-            '<li>✓ <?php esc_js_e('Custom CSS Editor', 'google-reviews-plugin'); ?></li>' +
-            '<li>✓ <?php esc_js_e('Color Overrides (text, background, accent, stars)', 'google-reviews-plugin'); ?></li>' +
-            '<li>✓ <?php esc_js_e('Typography Controls (font sizes, font families)', 'google-reviews-plugin'); ?></li>' +
-            '<li>✓ <?php esc_js_e('Advanced Spacing & Layout Controls', 'google-reviews-plugin'); ?></li>' +
-            '<li>✓ <?php esc_js_e('Multiple Locations Support', 'google-reviews-plugin'); ?></li>' +
-            '<li>✓ <?php esc_js_e('Priority Support', 'google-reviews-plugin'); ?></li>' +
-            '</ul>' +
-            '</div>' +
-            '</div>' +
-            '<div class="grp-modal-footer">' +
-            '<a href="https://reactwoo.com/google-reviews-plugin-pro/" class="button button-primary" target="_blank"><?php esc_js_e('Upgrade to Pro', 'google-reviews-plugin'); ?></a>' +
-            '<button class="button grp-modal-close"><?php esc_js_e('Maybe Later', 'google-reviews-plugin'); ?></button>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-
-        $('body').append(upgradeModalHtml);
-        $('#grp-upgrade-modal').show();
-
-        $(document).off('click', '#grp-upgrade-modal .grp-modal-close');
-        $(document).on('click', '#grp-upgrade-modal .grp-modal-close', function(e) {
-            e.preventDefault();
-            $('#grp-upgrade-modal').hide().remove();
-        });
-
-        $(document).off('click', '#grp-upgrade-modal');
-        $(document).on('click', '#grp-upgrade-modal', function(e) {
-            if ($(e.target).is('#grp-upgrade-modal')) {
-                $('#grp-upgrade-modal').fadeOut(200, function() {
-                    $(this).remove();
-                });
-            }
-        });
-
-        $(document).off('click', '#grp-upgrade-modal .grp-modal-content');
-        $(document).on('click', '#grp-upgrade-modal .grp-modal-content', function(e) {
-            e.stopPropagation();
-        });
-    }
-
-    // Save custom CSS
-    $('#grp-save-css').on('click', function() {
-        var css = $('#grp-custom-css').val();
-        
-        $.post(ajaxurl, {
-            action: 'grp_save_custom_css',
-            nonce: '<?php echo wp_create_nonce('grp_admin_nonce'); ?>',
-            css: css
-        }, function(response) {
-            if (response.success) {
-                alert('<?php esc_js('Custom CSS saved!', 'google-reviews-plugin'); ?>');
-            } else {
-                alert('<?php esc_js('Failed to save CSS.', 'google-reviews-plugin'); ?>');
-            }
-        });
-    });
-    
-    // Reset CSS
-    $('#grp-reset-css').on('click', function() {
-        if (confirm('<?php esc_js('Are you sure you want to reset the custom CSS?', 'google-reviews-plugin'); ?>')) {
-            $('#grp-custom-css').val('');
-        }
-    });
-    
-    // Save style settings
-    $('#grp-style-settings').on('submit', function(e) {
-        e.preventDefault();
-        
-        var formData = $(this).serialize();
-        
-        $.post(ajaxurl, {
-            action: 'grp_save_style_settings',
-            nonce: grp_admin.nonce,
-            data: formData
-        }, function(response) {
-            if (response.success) {
-                alert('<?php esc_js('Settings saved!', 'google-reviews-plugin'); ?>');
-            } else {
-                alert('<?php esc_js('Failed to save settings.', 'google-reviews-plugin'); ?>');
-            }
-        });
     });
 });
 </script>
