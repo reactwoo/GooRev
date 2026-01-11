@@ -698,6 +698,14 @@
             if (!$templateControlNodes.length || !templateKey) {
                 return;
             }
+            templateKey = String(templateKey || '').trim();
+            if (!templateKey) return;
+
+            // Normalize older aliases just in case.
+            if (templateKey === 'layout-1') templateKey = 'layout1';
+            if (templateKey === 'layout-2') templateKey = 'layout2';
+            if (templateKey === 'layout-3') templateKey = 'layout3';
+
             $templateControlNodes.each(function() {
                 var $node = $(this);
                 var templates = $node.data('templates');
@@ -709,6 +717,16 @@
                 var show = templateList.indexOf(templateKey) !== -1;
                 $node.toggle(show);
             });
+
+            // Safety net: if we somehow hid everything (bad template key or bad data attr),
+            // show all controls rather than rendering an empty modal.
+            var $visible = $templateEditorModal.find('.grp-template-editor-controls [data-templates]:visible');
+            if ($visible.length === 0) {
+                console.warn('[GRP] No template controls matched key; showing all controls as fallback', {
+                    templateKey: templateKey
+                });
+                $templateEditorModal.find('.grp-template-editor-controls [data-templates]').show();
+            }
         }
 
         function isValidHex(color) {
