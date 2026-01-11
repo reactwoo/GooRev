@@ -367,6 +367,11 @@ class GRP_Styles {
             --grp-gradient_green: {$colors['gradient_green']};
         ";
         }
+        if (isset($colors['gradient_css']) && $colors['gradient_css'] !== '') {
+            $css_vars .= "
+            --grp-gradient_css: {$colors['gradient_css']};
+        ";
+        }
 
         // Shape + typography vars
         if (isset($colors['card_radius'])) {
@@ -568,6 +573,14 @@ class GRP_Styles {
             if (strlen($value) > 140) return '';
             if (!preg_match('/^[0-9a-zA-Z#(),.%\\s+\\-]+$/', $value)) return '';
             return $value;
+        }
+        if ($key === 'gradient_css') {
+            // Conservative allowlist: gradients only, no url(), var(), etc.
+            $v = trim($value);
+            if (strlen($v) > 220) return '';
+            if (!preg_match('/^(linear-gradient\\(|radial-gradient\\()/', $v)) return '';
+            if (!preg_match('/^[0-9a-zA-Z#(),.%\\s+\\-]+$/', $v)) return '';
+            return $v;
         }
         if ($key === 'glass_blur') {
             $n = is_numeric($value) ? (float) $value : null;
@@ -1078,7 +1091,7 @@ class GRP_Styles {
             margin-bottom: 30px;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335));
+            background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
             box-shadow: var(--grp-card_shadow, 0 8px 24px rgba(0, 0, 0, 0.15));
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }

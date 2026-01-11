@@ -74,6 +74,9 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     $box_shadow_blur = isset($_POST['grp_widget_template_box_shadow_blur']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_blur']) : '35';
     $box_shadow_spread = isset($_POST['grp_widget_template_box_shadow_spread']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_spread']) : '0';
     $box_shadow_color = isset($_POST['grp_widget_template_box_shadow_color']) ? sanitize_text_field($_POST['grp_widget_template_box_shadow_color']) : '#000000';
+    $box_shadow_opacity = isset($_POST['grp_widget_template_box_shadow_opacity']) ? absint($_POST['grp_widget_template_box_shadow_opacity']) : 25;
+    if ($box_shadow_opacity < 0) $box_shadow_opacity = 0;
+    if ($box_shadow_opacity > 100) $box_shadow_opacity = 100;
     $glass_effect = isset($_POST['grp_widget_template_glass_effect']) ? 1 : 0;
     
     update_option('grp_widget_template_star_color', $star_color);
@@ -93,6 +96,7 @@ if (isset($_POST['grp_widgets_submit']) && check_admin_referer('grp_widgets_sett
     update_option('grp_widget_template_box_shadow_blur', $box_shadow_blur);
     update_option('grp_widget_template_box_shadow_spread', $box_shadow_spread);
     update_option('grp_widget_template_box_shadow_color', $box_shadow_color);
+    update_option('grp_widget_template_box_shadow_opacity', $box_shadow_opacity);
     update_option('grp_widget_template_logo_scale', $logo_scale);
     update_option('grp_widget_template_glass_effect', $glass_effect);
     $template = isset($_POST['grp_widget_button_default_template']) ? sanitize_text_field($_POST['grp_widget_button_default_template']) : 'basic';
@@ -128,6 +132,7 @@ $box_shadow_v = get_option('grp_widget_template_box_shadow_v', '18');
 $box_shadow_blur = get_option('grp_widget_template_box_shadow_blur', '35');
 $box_shadow_spread = get_option('grp_widget_template_box_shadow_spread', '0');
 $box_shadow_color = get_option('grp_widget_template_box_shadow_color', '#000000');
+$box_shadow_opacity = get_option('grp_widget_template_box_shadow_opacity', 25);
 $glass_effect = get_option('grp_widget_template_glass_effect', false);
 $button_template = GRP_Review_Widgets::get_instance()->sanitize_button_template(get_option('grp_widget_button_default_template', 'basic'));
 $button_templates = GRP_Review_Widgets::get_instance()->get_button_templates();
@@ -597,6 +602,7 @@ $is_pro = $license->is_pro();
                                 <input type="hidden" id="grp_widget_template_box_shadow_blur" name="grp_widget_template_box_shadow_blur" value="<?php echo esc_attr($box_shadow_blur); ?>">
                                 <input type="hidden" id="grp_widget_template_box_shadow_spread" name="grp_widget_template_box_shadow_spread" value="<?php echo esc_attr($box_shadow_spread); ?>">
                                 <input type="hidden" id="grp_widget_template_box_shadow_color" name="grp_widget_template_box_shadow_color" value="<?php echo esc_attr($box_shadow_color); ?>">
+                                <input type="hidden" id="grp_widget_template_box_shadow_opacity" name="grp_widget_template_box_shadow_opacity" value="<?php echo esc_attr($box_shadow_opacity); ?>">
                                 <p class="description"><?php esc_html_e('Open the editor to adjust the shadow sliders (horizontal, vertical, blur, spread, color).', 'google-reviews-plugin'); ?></p>
                             </td>
                         </tr>
@@ -712,6 +718,13 @@ $is_pro = $license->is_pro();
                             <?php esc_html_e('Color', 'google-reviews-plugin'); ?>
                             <input type="color" id="grp-box-shadow-color-picker" value="<?php echo esc_attr($box_shadow_color); ?>">
                         </label>
+                        <div class="grp-box-shadow-controls" style="margin-top: 12px;">
+                            <div class="grp-shadow-control">
+                                <span class="grp-shadow-label"><?php esc_html_e('Opacity', 'google-reviews-plugin'); ?></span>
+                                <input type="range" class="grp-shadow-range" data-target="opacity" min="0" max="100" value="<?php echo esc_attr($box_shadow_opacity); ?>">
+                                <input type="number" class="grp-shadow-number" data-target="opacity" min="0" max="100" value="<?php echo esc_attr($box_shadow_opacity); ?>">
+                            </div>
+                        </div>
                         <div class="grp-box-shadow-controls">
                             <?php
                             $controls = array(
@@ -896,14 +909,29 @@ jQuery(document).ready(function($) {
     var $hiddenBlur = $('#grp_widget_template_box_shadow_blur');
     var $hiddenSpread = $('#grp_widget_template_box_shadow_spread');
     var $hiddenColor = $('#grp_widget_template_box_shadow_color');
+    var $hiddenOpacity = $('#grp_widget_template_box_shadow_opacity');
     var $hiddenValue = $('#grp_widget_template_box_shadow_value');
+
+    function hexToRgba(hex, opacityPercent) {
+        var h = String(hex || '').replace('#', '').trim();
+        if (h.length === 3) {
+            h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        }
+        if (h.length !== 6) return 'rgba(0,0,0,' + (opacityPercent/100) + ')';
+        var r = parseInt(h.substring(0,2), 16);
+        var g = parseInt(h.substring(2,4), 16);
+        var b = parseInt(h.substring(4,6), 16);
+        var a = Math.max(0, Math.min(100, parseInt(opacityPercent || 0, 10))) / 100;
+        return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+    }
 
     function updateBoxShadowString() {
         var h = $hiddenH.val() || 0;
         var v = $hiddenV.val() || 0;
         var blur = $hiddenBlur.val() || 0;
         var spread = $hiddenSpread.val() || 0;
-        var color = $hiddenColor.val() || '#000000';
+        var opacity = $hiddenOpacity.val();
+        var color = hexToRgba(($hiddenColor.val() || '#000000'), opacity);
         // CSS box-shadow requires units for lengths
         $hiddenValue.val(h + 'px ' + v + 'px ' + blur + 'px ' + spread + 'px ' + color);
     }
@@ -915,6 +943,7 @@ jQuery(document).ready(function($) {
         if (target === 'v') $hiddenV.val(value);
         if (target === 'blur') $hiddenBlur.val(value);
         if (target === 'spread') $hiddenSpread.val(value);
+        if (target === 'opacity') $hiddenOpacity.val(value);
         updateBoxShadowString();
     }
 
@@ -939,6 +968,7 @@ jQuery(document).ready(function($) {
         syncControl('v', $hiddenV.val());
         syncControl('blur', $hiddenBlur.val());
         syncControl('spread', $hiddenSpread.val());
+        syncControl('opacity', $hiddenOpacity.val() || 25);
         $boxShadowColorPicker.val($hiddenColor.val());
     });
 

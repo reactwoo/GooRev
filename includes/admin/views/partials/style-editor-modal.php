@@ -142,24 +142,11 @@ if (!defined('ABSPATH')) {
                         </div>
 
                         <div class="grp-template-editor-row grp-style-creative-only">
-                            <span class="grp-template-editor-label"><?php esc_html_e('Gradient Colors', 'google-reviews-plugin'); ?></span>
-                            <div class="grp-template-editor-field">
-                                <div class="grp-template-color-field">
-                                    <input type="color" id="grp-style-gradient-blue-color">
-                                    <input type="text" id="grp-style-gradient-blue-text" placeholder="#4285F4">
-                                </div>
-                                <div class="grp-template-color-field" style="margin-top: 8px;">
-                                    <input type="color" id="grp-style-gradient-red-color">
-                                    <input type="text" id="grp-style-gradient-red-text" placeholder="#EA4335">
-                                </div>
-                                <div class="grp-template-color-field" style="margin-top: 8px;">
-                                    <input type="color" id="grp-style-gradient-yellow-color">
-                                    <input type="text" id="grp-style-gradient-yellow-text" placeholder="#FBBC05">
-                                </div>
-                                <div class="grp-template-color-field" style="margin-top: 8px;">
-                                    <input type="color" id="grp-style-gradient-green-color">
-                                    <input type="text" id="grp-style-gradient-green-text" placeholder="#34A853">
-                                </div>
+                            <span class="grp-template-editor-label"><?php esc_html_e('Gradient', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field" style="display:flex; align-items:center; gap:10px;">
+                                <div id="grp-style-gradient-summary-preview" style="width: 92px; height: 28px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.12);"></div>
+                                <button type="button" class="button" id="grp-style-gradient-editor-open"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
+                                <input type="hidden" id="grp-style-gradient-css" value="">
                             </div>
                         </div>
 
@@ -243,6 +230,13 @@ if (!defined('ABSPATH')) {
             <?php esc_html_e('Color', 'google-reviews-plugin'); ?>
             <input type="color" id="grp-style-box-shadow-color-picker" value="#000000">
         </label>
+        <div class="grp-box-shadow-controls" style="margin-top: 12px;">
+            <div class="grp-shadow-control">
+                <span class="grp-shadow-label"><?php esc_html_e('Opacity', 'google-reviews-plugin'); ?></span>
+                <input type="range" id="grp-style-box-shadow-opacity" min="0" max="100" value="12">
+                <input type="number" id="grp-style-box-shadow-opacity-number" min="0" max="100" value="12">
+            </div>
+        </div>
         <div class="grp-box-shadow-controls">
             <?php foreach (array(
                 array('name' => 'Horizontal', 'id' => 'h', 'min' => -50, 'max' => 50, 'value' => 0),
@@ -259,6 +253,96 @@ if (!defined('ABSPATH')) {
         </div>
         <div class="grp-box-shadow-actions">
             <button type="button" id="grp-style-box-shadow-modal-close" class="button"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>
+        </div>
+    </div>
+</div>
+
+<!-- Gradient editor modal (reused UX: type, angle, positions, opacities) -->
+<div id="grp-gradient-editor-modal" class="grp-gradient-editor-modal" style="display: none;">
+    <div class="grp-gradient-editor-content">
+        <button type="button" class="grp-gradient-editor-close button-link">×</button>
+        <h3><?php esc_html_e('Gradient Background Settings', 'google-reviews-plugin'); ?></h3>
+        <div class="grp-gradient-editor-row">
+            <span><?php esc_html_e('Gradient Type', 'google-reviews-plugin'); ?></span>
+            <select id="grp-gradient-type">
+                <option value="linear"><?php esc_html_e('Linear', 'google-reviews-plugin'); ?></option>
+                <option value="radial"><?php esc_html_e('Radial', 'google-reviews-plugin'); ?></option>
+            </select>
+        </div>
+        <div class="grp-gradient-editor-row">
+            <span><?php esc_html_e('Gradient Angle', 'google-reviews-plugin'); ?></span>
+            <div class="grp-gradient-editor-range-group">
+                <input type="range" id="grp-gradient-angle" min="0" max="360">
+                <input type="number" id="grp-gradient-angle-number" min="0" max="360">
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row">
+            <span><?php esc_html_e('Start Position', 'google-reviews-plugin'); ?></span>
+            <div class="grp-gradient-editor-range-group">
+                <input type="range" id="grp-gradient-start-pos" min="0" max="100">
+                <input type="number" id="grp-gradient-start-pos-number" min="0" max="100">
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row">
+            <span><?php esc_html_e('End Position', 'google-reviews-plugin'); ?></span>
+            <div class="grp-gradient-editor-range-group">
+                <input type="range" id="grp-gradient-end-pos" min="0" max="100">
+                <input type="number" id="grp-gradient-end-pos-number" min="0" max="100">
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row grp-gradient-mid-toggle">
+            <span><?php esc_html_e('Mid Stop', 'google-reviews-plugin'); ?></span>
+            <div class="grp-gradient-editor-range-group" style="justify-content:flex-start;">
+                <label class="grp-template-checkbox" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" id="grp-gradient-mid-enabled" checked>
+                    <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                </label>
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row grp-gradient-mid-stop">
+            <span><?php esc_html_e('Mid Position', 'google-reviews-plugin'); ?></span>
+            <div class="grp-gradient-editor-range-group">
+                <input type="range" id="grp-gradient-mid-pos" min="0" max="100">
+                <input type="number" id="grp-gradient-mid-pos-number" min="0" max="100">
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row">
+            <span><?php esc_html_e('Start Color', 'google-reviews-plugin'); ?></span>
+            <div class="grp-template-color-field">
+                <input type="color" id="grp-gradient-start-color">
+                <input type="text" id="grp-gradient-start-color-text" style="width: 90px;">
+                <div class="grp-template-color-opacity">
+                    <input type="range" id="grp-gradient-start-opacity" min="0" max="100" value="100">
+                    <span id="grp-gradient-start-opacity-value">100%</span>
+                </div>
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row grp-gradient-mid-stop">
+            <span><?php esc_html_e('Mid Color', 'google-reviews-plugin'); ?></span>
+            <div class="grp-template-color-field">
+                <input type="color" id="grp-gradient-mid-color">
+                <input type="text" id="grp-gradient-mid-color-text" style="width: 90px;">
+                <div class="grp-template-color-opacity">
+                    <input type="range" id="grp-gradient-mid-opacity" min="0" max="100" value="100">
+                    <span id="grp-gradient-mid-opacity-value">100%</span>
+                </div>
+            </div>
+        </div>
+        <div class="grp-gradient-editor-row">
+            <span><?php esc_html_e('End Color', 'google-reviews-plugin'); ?></span>
+            <div class="grp-template-color-field">
+                <input type="color" id="grp-gradient-end-color">
+                <input type="text" id="grp-gradient-end-color-text" style="width: 90px;">
+                <div class="grp-template-color-opacity">
+                    <input type="range" id="grp-gradient-end-opacity" min="0" max="100" value="100">
+                    <span id="grp-gradient-end-opacity-value">100%</span>
+                </div>
+            </div>
+        </div>
+        <div class="grp-gradient-editor-preview" id="grp-gradient-editor-preview"></div>
+        <div class="grp-gradient-editor-actions">
+            <button type="button" class="button" id="grp-gradient-editor-cancel"><?php esc_html_e('Cancel', 'google-reviews-plugin'); ?></button>
+            <button type="button" class="button button-primary" id="grp-gradient-editor-done"><?php esc_html_e('Save', 'google-reviews-plugin'); ?></button>
         </div>
     </div>
 </div>

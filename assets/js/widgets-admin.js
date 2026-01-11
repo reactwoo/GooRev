@@ -56,10 +56,17 @@
         var $gradientEditorStartPosNumber = $('#grp-gradient-start-pos-number');
         var $gradientEditorEndPos = $('#grp-gradient-end-pos');
         var $gradientEditorEndPosNumber = $('#grp-gradient-end-pos-number');
+        var $gradientEditorMidPos = $('#grp-gradient-mid-pos');
+        var $gradientEditorMidPosNumber = $('#grp-gradient-mid-pos-number');
+        var $gradientEditorMidEnabled = $('#grp-gradient-mid-enabled');
         var $gradientEditorStartColor = $('#grp-gradient-start-color');
         var $gradientEditorStartColorText = $('#grp-gradient-start-color-text');
         var $gradientEditorStartOpacity = $('#grp-gradient-start-opacity');
         var $gradientEditorStartOpacityValue = $('#grp-gradient-start-opacity-value');
+        var $gradientEditorMidColor = $('#grp-gradient-mid-color');
+        var $gradientEditorMidColorText = $('#grp-gradient-mid-color-text');
+        var $gradientEditorMidOpacity = $('#grp-gradient-mid-opacity');
+        var $gradientEditorMidOpacityValue = $('#grp-gradient-mid-opacity-value');
         var $gradientEditorEndColor = $('#grp-gradient-end-color');
         var $gradientEditorEndColorText = $('#grp-gradient-end-color-text');
         var $gradientEditorEndOpacity = $('#grp-gradient-end-opacity');
@@ -111,14 +118,9 @@
         var $styleStarText = $('#grp-style-star-text');
         // Creative-only controls (styles modal)
         var $styleAvatarSize = $('#grp-style-avatar-size');
-        var $styleGradientBlueColor = $('#grp-style-gradient-blue-color');
-        var $styleGradientBlueText = $('#grp-style-gradient-blue-text');
-        var $styleGradientRedColor = $('#grp-style-gradient-red-color');
-        var $styleGradientRedText = $('#grp-style-gradient-red-text');
-        var $styleGradientYellowColor = $('#grp-style-gradient-yellow-color');
-        var $styleGradientYellowText = $('#grp-style-gradient-yellow-text');
-        var $styleGradientGreenColor = $('#grp-style-gradient-green-color');
-        var $styleGradientGreenText = $('#grp-style-gradient-green-text');
+        var $styleGradientSummaryPreview = $('#grp-style-gradient-summary-preview');
+        var $styleGradientEditorOpen = $('#grp-style-gradient-editor-open');
+        var $styleGradientCss = $('#grp-style-gradient-css');
         var $styleCardRadius = $('#grp-style-card-radius'); // hidden field (CSS border-radius value)
         var $styleCardRadiusTL = $('#grp-style-card-radius-tl');
         var $styleCardRadiusTR = $('#grp-style-card-radius-tr');
@@ -133,6 +135,8 @@
         var $styleShadowRanges = $('.grp-style-shadow-range');
         var $styleShadowNumbers = $('.grp-style-shadow-number');
         var $styleShadowColorPicker = $('#grp-style-box-shadow-color-picker');
+        var $styleShadowOpacity = $('#grp-style-box-shadow-opacity');
+        var $styleShadowOpacityNumber = $('#grp-style-box-shadow-opacity-number');
         var $styleFontFamily = $('#grp-style-font-family');
         var $styleHeadingWeight = $('#grp-style-heading-weight');
         var $styleBodyWeight = $('#grp-style-body-weight');
@@ -217,6 +221,7 @@
             if (overrides.gradient_red) map['--grp-gradient_red'] = overrides.gradient_red;
             if (overrides.gradient_yellow) map['--grp-gradient_yellow'] = overrides.gradient_yellow;
             if (overrides.gradient_green) map['--grp-gradient_green'] = overrides.gradient_green;
+            if (overrides.gradient_css) map['--grp-gradient_css'] = overrides.gradient_css;
             if (overrides.avatar_size !== undefined && overrides.avatar_size !== null && String(overrides.avatar_size) !== '') {
                 var asz = String(overrides.avatar_size).trim();
                 map['--grp-avatar_size'] = (/^-?\d+(\.\d+)?$/.test(asz) ? (asz + 'px') : asz);
@@ -311,6 +316,19 @@
             return String(h) + 'px ' + String(v) + 'px ' + String(blur) + 'px ' + String(spread) + 'px ' + c;
         }
 
+        function hexToRgba(hex, opacityPercent) {
+            var h = String(hex || '').replace('#', '').trim();
+            if (h.length === 3) {
+                h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+            }
+            if (h.length !== 6) return 'rgba(0,0,0,' + (opacityPercent/100) + ')';
+            var r = parseInt(h.substring(0,2), 16);
+            var g = parseInt(h.substring(2,4), 16);
+            var b = parseInt(h.substring(4,6), 16);
+            var a = Math.max(0, Math.min(100, parseInt(opacityPercent || 0, 10))) / 100;
+            return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+        }
+
         function updateStyleEditorPreviewFromInputs() {
             if (!$styleEditorPreview.length) return;
             var $previewInner = $styleEditorPreview.find('.grp-style-preview').first();
@@ -365,10 +383,7 @@
                 card_radius: String(radiusCss || '').trim(),
                 card_shadow: shadowCss,
                 avatar_size: String($styleAvatarSize.val() || '').trim(),
-                gradient_blue: String($styleGradientBlueText.val() || '').trim(),
-                gradient_red: String($styleGradientRedText.val() || '').trim(),
-                gradient_yellow: String($styleGradientYellowText.val() || '').trim(),
-                gradient_green: String($styleGradientGreenText.val() || '').trim(),
+                gradient_css: String($styleGradientCss.val() || '').trim(),
                 font_family: String($styleFontFamily.val() || '').trim(),
                 heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
                 body_font_weight: String($styleBodyWeight.val() || '').trim(),
@@ -409,10 +424,12 @@
             $styleCardBg.val(effective.card_background || '');
             // Creative-only defaults
             $styleAvatarSize.val(effective.avatar_size !== undefined ? effective.avatar_size : '');
-            $styleGradientBlueText.val(effective.gradient_blue || '');
-            $styleGradientRedText.val(effective.gradient_red || '');
-            $styleGradientYellowText.val(effective.gradient_yellow || '');
-            $styleGradientGreenText.val(effective.gradient_green || '');
+            if (activeStyleKey === 'creative') {
+                var fallbackGradient = 'linear-gradient(135deg, #4285F4 0%, #EA4335 100%)';
+                $styleGradientCss.val(effective.gradient_css || fallbackGradient);
+            } else {
+                $styleGradientCss.val(effective.gradient_css || '');
+            }
             // Radius: store as CSS border-radius value in hidden field, but edit as 4 corners
             var radiusCorners = parseRadiusToCorners(effective.card_radius, 14);
             $styleCardRadiusTL.val(radiusCorners.tl);
@@ -446,10 +463,11 @@
             if (isValidHexOrShort($styleBorderText.val())) $styleBorderColor.val($styleBorderText.val());
             if (isValidHexOrShort($styleAccentText.val())) $styleAccentColor.val($styleAccentText.val());
             if (isValidHexOrShort($styleStarText.val())) $styleStarColor.val($styleStarText.val());
-            if (isValidHexOrShort($styleGradientBlueText.val())) $styleGradientBlueColor.val($styleGradientBlueText.val());
-            if (isValidHexOrShort($styleGradientRedText.val())) $styleGradientRedColor.val($styleGradientRedText.val());
-            if (isValidHexOrShort($styleGradientYellowText.val())) $styleGradientYellowColor.val($styleGradientYellowText.val());
-            if (isValidHexOrShort($styleGradientGreenText.val())) $styleGradientGreenColor.val($styleGradientGreenText.val());
+            // Update gradient preview chip if provided
+            if ($styleGradientSummaryPreview.length) {
+                var gcss = String($styleGradientCss.val() || '').trim();
+                if (gcss) $styleGradientSummaryPreview.css('background', gcss);
+            }
 
             $styleEditorPreview.empty().append($cloned);
             applyStyleVars($cloned, toCssVarMap(effective));
@@ -512,20 +530,97 @@
             $styleCardBg.on('input', updateStyleEditorPreviewFromInputs);
             $styleAvatarSize.on('input', updateStyleEditorPreviewFromInputs);
 
-            function syncColorPairAny($color, $text) {
-                var val = String($text.val() || '').trim();
-                if (isValidHexOrShort(val)) {
-                    $color.val(val);
+            // Creative gradient editor (reuse existing modal UX)
+            function setStyleGradientCss(css) {
+                $styleGradientCss.val(css);
+                if ($styleGradientSummaryPreview.length) $styleGradientSummaryPreview.css('background', css || 'transparent');
+                updateStyleEditorPreviewFromInputs();
+            }
+
+            function parseGradientCssForEditor(css) {
+                // Best-effort parsing (fallback to defaults)
+                var out = {
+                    type: 'linear',
+                    angle: 135,
+                    startPos: 0,
+                    endPos: 100,
+                    startColor: '#4285F4',
+                    startOpacity: 100,
+                    endColor: '#EA4335',
+                    endOpacity: 100
+                };
+                var s = String(css || '').trim();
+                if (!s) return out;
+                // linear-gradient(135deg, rgba(...) 0%, rgba(...) 100%)
+                var mLin = s.match(/linear-gradient\(\s*([0-9.]+)deg\s*,\s*(.+)\s*\)/i);
+                if (mLin) {
+                    out.type = 'linear';
+                    out.angle = parseFloat(mLin[1]) || out.angle;
+                    var stops = mLin[2].split(',');
+                    // Not perfect, so keep defaults unless we can detect hex
+                    return out;
                 }
+                var mRad = s.match(/radial-gradient\(\s*circle\s*,\s*(.+)\s*\)/i);
+                if (mRad) {
+                    out.type = 'radial';
+                    return out;
+                }
+                return out;
             }
-            function hookGradientPair($color, $text) {
-                $text.on('input', function() { syncColorPairAny($color, $text); updateStyleEditorPreviewFromInputs(); });
-                $color.on('input', function() { $text.val($color.val()); updateStyleEditorPreviewFromInputs(); });
+
+            if ($styleGradientEditorOpen.length && $gradientEditorModal.length) {
+                $styleGradientEditorOpen.on('click', function(e) {
+                    e.preventDefault();
+                    if (activeStyleKey !== 'creative') return;
+
+                    var preset = parseGradientCssForEditor($styleGradientCss.val());
+                    $gradientEditorType.val(preset.type);
+                    $gradientEditorAngle.val(preset.angle);
+                    $gradientEditorAngleNumber.val(preset.angle);
+                    $gradientEditorStartPos.val(preset.startPos);
+                    $gradientEditorStartPosNumber.val(preset.startPos);
+                    $gradientEditorEndPos.val(preset.endPos);
+                    $gradientEditorEndPosNumber.val(preset.endPos);
+                    $gradientEditorStartColor.val(preset.startColor);
+                    $gradientEditorStartColorText.val(preset.startColor);
+                    $gradientEditorStartOpacity.val(preset.startOpacity);
+                    $gradientEditorStartOpacityValue.text(preset.startOpacity + '%');
+                    $gradientEditorEndColor.val(preset.endColor);
+                    $gradientEditorEndColorText.val(preset.endColor);
+                    $gradientEditorEndOpacity.val(preset.endOpacity);
+                    $gradientEditorEndOpacityValue.text(preset.endOpacity + '%');
+
+                    // 3-stop defaults for Creative
+                    if ($gradientEditorMidPos.length) {
+                        $gradientEditorMidPos.val(50);
+                        $gradientEditorMidPosNumber.val(50);
+                    }
+                    if ($gradientEditorMidColor.length) {
+                        $gradientEditorMidColor.val('#FBBC05');
+                        $gradientEditorMidColorText.val('#FBBC05');
+                    }
+                    if ($gradientEditorMidOpacity.length) {
+                        $gradientEditorMidOpacity.val(100);
+                        $gradientEditorMidOpacityValue.text('100%');
+                    }
+
+                    // Reuse existing preview update handler by triggering inputs
+                    $gradientEditorModal.show();
+                    $('.grp-gradient-mid-toggle').show();
+                    $('.grp-gradient-mid-stop').show();
+                    if ($gradientEditorMidEnabled.length) {
+                        $gradientEditorMidEnabled.prop('checked', true);
+                    }
+                    $gradientEditorStartColor.trigger('input');
+                    $gradientEditorEndColor.trigger('input');
+                    $gradientEditorAngle.trigger('input');
+                    $gradientEditorStartPos.trigger('input');
+                    $gradientEditorEndPos.trigger('input');
+
+                    // Mark context so done button writes to styles instead of templates
+                    $gradientEditorModal.data('grp-context', 'style');
+                });
             }
-            hookGradientPair($styleGradientBlueColor, $styleGradientBlueText);
-            hookGradientPair($styleGradientRedColor, $styleGradientRedText);
-            hookGradientPair($styleGradientYellowColor, $styleGradientYellowText);
-            hookGradientPair($styleGradientGreenColor, $styleGradientGreenText);
             $styleCardRadiusTL.on('input', updateStyleEditorPreviewFromInputs);
             $styleCardRadiusTR.on('input', updateStyleEditorPreviewFromInputs);
             $styleCardRadiusBR.on('input', updateStyleEditorPreviewFromInputs);
@@ -567,7 +662,16 @@
                 syncShadowControl('blur', blur);
                 syncShadowControl('spread', spread);
 
-                // If it's not a hex color, keep picker at black (we'll keep rgba in string)
+                // Opacity: if rgba(), extract alpha; otherwise use 12%
+                var op = 12;
+                var rgba = String(color || '').trim().match(/^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*(0|1|0?\.\d+)\s*\)$/i);
+                if (rgba && rgba[1] !== undefined) {
+                    op = Math.round(parseFloat(rgba[1]) * 100);
+                }
+                $styleShadowOpacity.val(op);
+                $styleShadowOpacityNumber.val(op);
+
+                // If it's not a hex color, keep picker at black (rgba will be reconstructed)
                 if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(color || '').trim())) {
                     $styleShadowColorPicker.val(color);
                 } else {
@@ -582,8 +686,10 @@
                 var v = $styleShadowNumbers.filter('[data-target="v"]').val() || 0;
                 var blur = $styleShadowNumbers.filter('[data-target="blur"]').val() || 0;
                 var spread = $styleShadowNumbers.filter('[data-target="spread"]').val() || 0;
-                // Prefer picker hex; allow rgba fallback by preserving previous if it was rgba()
-                var color = $styleShadowColorPicker.val() || '#000000';
+                var op = $styleShadowOpacityNumber.val() || $styleShadowOpacity.val() || 12;
+                $styleShadowOpacity.val(op);
+                $styleShadowOpacityNumber.val(op);
+                var color = hexToRgba(($styleShadowColorPicker.val() || '#000000'), op);
                 $styleCardShadow.val(buildBoxShadowString(h, v, blur, spread, color));
                 updateStyleEditorPreviewFromInputs();
             }
@@ -599,6 +705,14 @@
                 updateStyleShadowString();
             });
             $styleShadowColorPicker.on('input', updateStyleShadowString);
+            $styleShadowOpacity.on('input', function() {
+                $styleShadowOpacityNumber.val($(this).val());
+                updateStyleShadowString();
+            });
+            $styleShadowOpacityNumber.on('input', function() {
+                $styleShadowOpacity.val($(this).val());
+                updateStyleShadowString();
+            });
             $styleShadowClose.on('click', function() { $styleShadowModal.hide(); });
             $(window).on('click', function(ev) {
                 if ($styleShadowModal.is(ev.target)) $styleShadowModal.hide();
@@ -623,10 +737,7 @@
                     card_radius: String(radiusCss || '').trim(),
                     card_shadow: String($styleCardShadow.val() || '').trim(),
                     avatar_size: String($styleAvatarSize.val() || '').trim(),
-                    gradient_blue: String($styleGradientBlueText.val() || '').trim(),
-                    gradient_red: String($styleGradientRedText.val() || '').trim(),
-                    gradient_yellow: String($styleGradientYellowText.val() || '').trim(),
-                    gradient_green: String($styleGradientGreenText.val() || '').trim(),
+                    gradient_css: String($styleGradientCss.val() || '').trim(),
                     font_family: String($styleFontFamily.val() || '').trim(),
                     heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
                     body_font_weight: String($styleBodyWeight.val() || '').trim(),
@@ -804,7 +915,23 @@
             if (!startColor || !endColor) {
                 return '';
             }
-            return type + '-gradient(' + angle + 'deg, ' + startColor + ' ' + startPos + '%, ' + endColor + ' ' + endPos + '%)';
+            // Optional mid stop (used by Creative style editor; templates can ignore it)
+            var hasMid = !!customization.gradient_mid;
+            var midPos = clampValue(customization.gradient_mid_pos, 0, 100);
+            var midColor = combineColorWithOpacity(customization.gradient_mid, customization.gradient_mid_opacity, customization.gradient_mid);
+
+            if (type === 'radial') {
+                // radial-gradient(circle, color pos%, color pos%, ...)
+                var stops = [startColor + ' ' + startPos + '%'];
+                if (hasMid && midColor) stops.push(midColor + ' ' + midPos + '%');
+                stops.push(endColor + ' ' + endPos + '%');
+                return 'radial-gradient(circle, ' + stops.join(', ') + ')';
+            }
+
+            var stops2 = [startColor + ' ' + startPos + '%'];
+            if (hasMid && midColor) stops2.push(midColor + ' ' + midPos + '%');
+            stops2.push(endColor + ' ' + endPos + '%');
+            return 'linear-gradient(' + angle + 'deg, ' + stops2.join(', ') + ')';
         }
 
         function updateGradientSummaryPreview(customization) {
@@ -1225,10 +1352,26 @@
             $gradientEditorStartOpacityValue.text(startOpacity + '%');
             $gradientEditorEndOpacity.val(endOpacity);
             $gradientEditorEndOpacityValue.text(endOpacity + '%');
+            // Mid stop (optional; only shown for Creative style editor context)
+            if ($gradientEditorMidPos.length) {
+                $gradientEditorMidPos.val(clampValue(config.gradient_mid_pos, 0, 100) || 50);
+                $gradientEditorMidPosNumber.val(clampValue(config.gradient_mid_pos, 0, 100) || 50);
+            }
+            if ($gradientEditorMidColor.length) {
+                var midColor = config.gradient_mid || '#FBBC05';
+                $gradientEditorMidColor.val(midColor);
+                $gradientEditorMidColorText.val(midColor);
+            }
+            if ($gradientEditorMidOpacity.length) {
+                var midOpacity = clampValue(config.gradient_mid_opacity, 0, 100) || 100;
+                $gradientEditorMidOpacity.val(midOpacity);
+                $gradientEditorMidOpacityValue.text(midOpacity + '%');
+            }
             updateGradientEditorPreview();
         }
 
         function updateGradientEditorPreview() {
+            var ctx = $gradientEditorModal.data('grp-context') || 'template';
             var previewData = {
                 gradient_type: $gradientEditorType.val(),
                 gradient_angle: clampValue($gradientEditorAngleNumber.val(), 0, 360) || 135,
@@ -1239,6 +1382,11 @@
                 gradient_start_opacity: clampValue($gradientEditorStartOpacity.val(), 0, 100),
                 gradient_end_opacity: clampValue($gradientEditorEndOpacity.val(), 0, 100),
             };
+            if (ctx === 'style' && $gradientEditorMidColor.length && (!$gradientEditorMidEnabled.length || $gradientEditorMidEnabled.is(':checked'))) {
+                previewData.gradient_mid = $gradientEditorMidColor.val();
+                previewData.gradient_mid_pos = clampValue($gradientEditorMidPosNumber.val(), 0, 100);
+                previewData.gradient_mid_opacity = clampValue($gradientEditorMidOpacity.val(), 0, 100);
+            }
             var previewGradient = buildGradientBackground(previewData);
             if (previewGradient) {
                 $gradientEditorPreview.css('background', previewGradient);
@@ -1266,6 +1414,12 @@
         }
 
         function openGradientEditor() {
+            // Default context: template editor (2-stop gradient)
+            if ($gradientEditorModal.length) {
+                $gradientEditorModal.data('grp-context', 'template');
+            }
+            $('.grp-gradient-mid-stop').hide();
+            $('.grp-gradient-mid-toggle').hide();
             populateGradientEditor();
             if ($gradientEditorModal.length) {
                 $gradientEditorModal.css('display', 'flex');
@@ -1609,6 +1763,7 @@
         bindGradientEditorRange($gradientEditorAngle, $gradientEditorAngleNumber, 0, 360);
         bindGradientEditorRange($gradientEditorStartPos, $gradientEditorStartPosNumber, 0, 100);
         bindGradientEditorRange($gradientEditorEndPos, $gradientEditorEndPosNumber, 0, 100);
+        bindGradientEditorRange($gradientEditorMidPos, $gradientEditorMidPosNumber, 0, 100);
         $gradientEditorStartColor.on('change', function() {
             var color = $(this).val();
             $gradientEditorStartColorText.val(color);
@@ -1639,24 +1794,79 @@
             $gradientEditorStartOpacityValue.text(value + '%');
             updateGradientEditorPreview();
         });
+        $gradientEditorMidOpacity.on('input change', function() {
+            var value = clampValue($(this).val(), 0, 100);
+            $(this).val(value);
+            $gradientEditorMidOpacityValue.text(value + '%');
+            updateGradientEditorPreview();
+        });
         $gradientEditorEndOpacity.on('input change', function() {
             var value = clampValue($(this).val(), 0, 100);
             $(this).val(value);
             $gradientEditorEndOpacityValue.text(value + '%');
             updateGradientEditorPreview();
         });
+
+        $gradientEditorMidColor.on('input', function() {
+            var color = $(this).val();
+            $gradientEditorMidColorText.val(color);
+            updateGradientEditorPreview();
+        });
+        $gradientEditorMidColorText.on('input', function() {
+            var value = $(this).val();
+            if (isValidHex(value)) {
+                $gradientEditorMidColor.val(value);
+                updateGradientEditorPreview();
+            }
+        });
+
+        if ($gradientEditorMidEnabled.length) {
+            $gradientEditorMidEnabled.on('change', function() {
+                var enabled = $(this).is(':checked');
+                $('.grp-gradient-mid-stop').toggle(enabled);
+                updateGradientEditorPreview();
+            });
+        }
         $gradientEditorDone.on('click', function() {
-            var templateKey = modalTemplateKey;
+            var ctx = $gradientEditorModal.data('grp-context') || 'template';
             var startColor = $gradientEditorStartColor.val();
             var endColor = $gradientEditorEndColor.val();
-            updateTemplateCustomizationValue('gradient_type', $gradientEditorType.val(), templateKey);
-            updateTemplateCustomizationValue('gradient_angle', clampValue($gradientEditorAngleNumber.val(), 0, 360), templateKey);
-            updateTemplateCustomizationValue('gradient_start_pos', clampValue($gradientEditorStartPosNumber.val(), 0, 100), templateKey);
-            updateTemplateCustomizationValue('gradient_end_pos', clampValue($gradientEditorEndPosNumber.val(), 0, 100), templateKey);
-            updateTemplateCustomizationValue('gradient_start', startColor, templateKey);
-            updateTemplateCustomizationValue('gradient_end', endColor, templateKey);
-            updateTemplateCustomizationValue('gradient_start_opacity', clampValue($gradientEditorStartOpacity.val(), 0, 100), templateKey);
-            updateTemplateCustomizationValue('gradient_end_opacity', clampValue($gradientEditorEndOpacity.val(), 0, 100), templateKey);
+            var config = {
+                gradient_type: $gradientEditorType.val(),
+                gradient_angle: clampValue($gradientEditorAngleNumber.val(), 0, 360),
+                gradient_start_pos: clampValue($gradientEditorStartPosNumber.val(), 0, 100),
+                gradient_end_pos: clampValue($gradientEditorEndPosNumber.val(), 0, 100),
+                gradient_start: startColor,
+                gradient_end: endColor,
+                gradient_start_opacity: clampValue($gradientEditorStartOpacity.val(), 0, 100),
+                gradient_end_opacity: clampValue($gradientEditorEndOpacity.val(), 0, 100),
+            };
+            if (ctx === 'style') {
+                if ($gradientEditorMidColor.length && (!$gradientEditorMidEnabled.length || $gradientEditorMidEnabled.is(':checked'))) {
+                    config.gradient_mid = $gradientEditorMidColor.val();
+                    config.gradient_mid_pos = clampValue($gradientEditorMidPosNumber.val(), 0, 100);
+                    config.gradient_mid_opacity = clampValue($gradientEditorMidOpacity.val(), 0, 100);
+                }
+                var css = buildGradientBackground(config);
+                $styleGradientCss.val(css || '');
+                if ($styleGradientSummaryPreview.length) {
+                    $styleGradientSummaryPreview.css('background', css || 'transparent');
+                }
+                updateStyleEditorPreviewFromInputs();
+                $gradientEditorModal.removeData('grp-context');
+                closeGradientEditor();
+                return;
+            }
+
+            var templateKey = modalTemplateKey;
+            updateTemplateCustomizationValue('gradient_type', config.gradient_type, templateKey);
+            updateTemplateCustomizationValue('gradient_angle', config.gradient_angle, templateKey);
+            updateTemplateCustomizationValue('gradient_start_pos', config.gradient_start_pos, templateKey);
+            updateTemplateCustomizationValue('gradient_end_pos', config.gradient_end_pos, templateKey);
+            updateTemplateCustomizationValue('gradient_start', config.gradient_start, templateKey);
+            updateTemplateCustomizationValue('gradient_end', config.gradient_end, templateKey);
+            updateTemplateCustomizationValue('gradient_start_opacity', config.gradient_start_opacity, templateKey);
+            updateTemplateCustomizationValue('gradient_end_opacity', config.gradient_end_opacity, templateKey);
             updateGradientSummaryPreview(getTemplateCustomization(templateKey));
             updatePreview();
             updateModalPreview();

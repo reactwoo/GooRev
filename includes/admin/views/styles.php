@@ -379,8 +379,6 @@ if (!class_exists('GRP_License')) {
 
 .grp-style-preview {
     padding: 20px;
-    background: #f8f9fa;
-    border-bottom: 1px solid #eee;
 }
 
 .grp-preview-review {
