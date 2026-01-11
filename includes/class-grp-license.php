@@ -72,13 +72,80 @@ class GRP_License {
     public function get_license_data() {
         return get_option('grp_license_data', array());
     }
+
+    /**
+     * Best-effort decode of JWT payload (no signature verification; used only to derive tier for UI gating).
+     */
+    private function decode_jwt_payload($token) {
+        if (!is_string($token) || $token === '') {
+            return null;
+        }
+        $parts = explode('.', $token);
+        if (count($parts) < 2) {
+            return null;
+        }
+        $payload = $parts[1];
+        $payload = strtr($payload, '-_', '+/');
+        $pad = strlen($payload) % 4;
+        if ($pad) {
+            $payload .= str_repeat('=', 4 - $pad);
+        }
+        $json = base64_decode($payload);
+        if ($json === false) {
+            return null;
+        }
+        $data = json_decode($json, true);
+        return (json_last_error() === JSON_ERROR_NONE && is_array($data)) ? $data : null;
+    }
+
+    private function infer_package_type_from_tokens() {
+        $license_data = $this->get_license_data();
+        $token = $this->get_jwt_token();
+        if (empty($token) && isset($license_data['accessToken']) && is_string($license_data['accessToken'])) {
+            $token = $license_data['accessToken'];
+        }
+        $payload = $this->decode_jwt_payload($token);
+        if (!$payload) {
+            return '';
+        }
+        $package_type = $payload['packageType'] ?? $payload['package_type'] ?? $payload['package'] ?? $payload['plan'] ?? '';
+        return is_string($package_type) ? $package_type : '';
+    }
     
     /**
      * Check if any valid license is active (free, pro, or enterprise)
      */
     public function has_license() {
         $status = $this->get_license_status();
-        return $status === self::STATUS_VALID;
+        if ($status === self::STATUS_VALID) {
+            return true;
+        }
+
+        // If we explicitly know it's expired/deactivated, do not treat it as active.
+        if (in_array($status, array(self::STATUS_EXPIRED, self::STATUS_DEACTIVATED), true)) {
+            return false;
+        }
+
+        // Resiliency: sometimes the status transiently flips to invalid (network hiccup)
+        // even though we still have tokens/data from the last successful activation.
+        $license_key = $this->get_license_key();
+        $license_data = $this->get_license_data();
+        $jwt = $this->get_jwt_token();
+
+        if (!empty($license_key) && is_array($license_data) && !empty($license_data)) {
+            // If we have a token, consider it active.
+            if (!empty($jwt)) {
+                return true;
+            }
+
+            // If we at least have a known package type, consider it active for UI gating.
+            $package_type = $license_data['packageType'] ?? $license_data['package_type'] ?? '';
+            if (!empty($package_type)) {
+                return true;
+            }
+        }
+
+        return false;
     }
     
     /**
@@ -91,14 +158,28 @@ class GRP_License {
         
         $license_data = $this->get_license_data();
         $package_type = $license_data['packageType'] ?? $license_data['package_type'] ?? '';
+        if (empty($package_type)) {
+            $package_type = $this->infer_package_type_from_tokens();
+        }
         
         // Free licenses are not "pro"
         $package_type_lower = strtolower($package_type);
-        if (in_array($package_type_lower, array('free', 'goorev-free', 'basic'))) {
+        if (in_array($package_type_lower, array('free', 'goorev-free', 'basic'), true)) {
             return false;
         }
         
-        // Pro or Enterprise are both "pro" tier
+        // If missing, be conservative (don't unlock Pro features).
+        if (empty($package_type_lower)) {
+            return false;
+        }
+
+        // Pro or Enterprise (and legacy labels) are both "pro" tier
+        $pro_packages = array('pro', 'enterprise', 'goorev-pro', 'goorev-enterprise', 'pro_with_restricts');
+        if (in_array($package_type_lower, $pro_packages, true)) {
+            return true;
+        }
+
+        // Any non-free package type defaults to Pro tier for forward compatibility.
         return true;
     }
     
