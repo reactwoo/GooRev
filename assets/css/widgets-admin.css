@@ -284,9 +284,9 @@
     grid-template-columns: 1fr;
 }
 
-/* Styles modal: keep side-by-side layout */
+/* Styles modal: stack like the widgets modal (preview above controls) */
 #grp-style-editor-modal .grp-template-editor-body {
-    grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+    grid-template-columns: 1fr;
 }
 
 .grp-template-editor-controls-col {

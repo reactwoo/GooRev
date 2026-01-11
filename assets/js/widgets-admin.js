@@ -109,8 +109,13 @@
         var $styleAccentText = $('#grp-style-accent-text');
         var $styleStarColor = $('#grp-style-star-color');
         var $styleStarText = $('#grp-style-star-text');
-        var $styleSampleReviewText = $('#grp-style-sample-review-text');
-        var $styleSampleAuthorName = $('#grp-style-sample-author-name');
+        var $styleCardRadius = $('#grp-style-card-radius');
+        var $styleCardShadow = $('#grp-style-card-shadow');
+        var $styleFontFamily = $('#grp-style-font-family');
+        var $styleHeadingWeight = $('#grp-style-heading-weight');
+        var $styleBodyWeight = $('#grp-style-body-weight');
+        var $styleBodyLineHeight = $('#grp-style-body-line-height');
+        var $styleBodyLetterSpacing = $('#grp-style-body-letter-spacing');
         var $styleSave = $('#grp-style-editor-save');
         var $styleReset = $('#grp-style-editor-reset');
         var $styleClose = $('#grp-style-editor-close, #grp-style-editor-close-x');
@@ -169,6 +174,17 @@
             if (overrides.star) map['--grp-star'] = overrides.star;
             if (overrides.accent) map['--grp-accent'] = overrides.accent;
             if (overrides.card_background) map['--grp-card_background'] = overrides.card_background;
+            if (overrides.card_radius !== undefined && overrides.card_radius !== null && String(overrides.card_radius) !== '') {
+                map['--grp-card_radius'] = String(overrides.card_radius) + 'px';
+            }
+            if (overrides.card_shadow) map['--grp-card_shadow'] = overrides.card_shadow;
+            if (overrides.font_family) map['--grp-font_family'] = overrides.font_family;
+            if (overrides.heading_font_weight) map['--grp-heading_font_weight'] = String(overrides.heading_font_weight);
+            if (overrides.body_font_weight) map['--grp-body_font_weight'] = String(overrides.body_font_weight);
+            if (overrides.body_line_height) map['--grp-body_line_height'] = String(overrides.body_line_height);
+            if (overrides.body_letter_spacing !== undefined && overrides.body_letter_spacing !== null && String(overrides.body_letter_spacing) !== '') {
+                map['--grp-body_letter_spacing'] = String(overrides.body_letter_spacing) + 'px';
+            }
             if (overrides.gradient_blue) map['--grp-gradient_blue'] = overrides.gradient_blue;
             if (overrides.gradient_red) map['--grp-gradient_red'] = overrides.gradient_red;
             if (overrides.gradient_yellow) map['--grp-gradient_yellow'] = overrides.gradient_yellow;
@@ -217,14 +233,16 @@
                 border: String($styleBorderText.val() || '').trim(),
                 accent: String($styleAccentText.val() || '').trim(),
                 star: String($styleStarText.val() || '').trim(),
-                card_background: String($styleCardBg.val() || '').trim()
+                card_background: String($styleCardBg.val() || '').trim(),
+                card_radius: String($styleCardRadius.val() || '').trim(),
+                card_shadow: String($styleCardShadow.val() || '').trim(),
+                font_family: String($styleFontFamily.val() || '').trim(),
+                heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
+                body_font_weight: String($styleBodyWeight.val() || '').trim(),
+                body_line_height: String($styleBodyLineHeight.val() || '').trim(),
+                body_letter_spacing: String($styleBodyLetterSpacing.val() || '').trim()
             };
             applyStyleVars($previewInner, toCssVarMap(overrides));
-
-            var sampleText = String($styleSampleReviewText.val() || '').trim();
-            if (sampleText) $previewInner.find('.grp-review-text').text(sampleText);
-            var sampleName = String($styleSampleAuthorName.val() || '').trim();
-            if (sampleName) $previewInner.find('.grp-author-name').text(sampleName);
         }
 
         function populateStyleEditor(styleKey, variant) {
@@ -250,6 +268,13 @@
             $styleAccentText.val(effective.accent || '');
             $styleStarText.val(effective.star || '');
             $styleCardBg.val(effective.card_background || '');
+            $styleCardRadius.val(effective.card_radius !== undefined ? effective.card_radius : '');
+            $styleCardShadow.val(effective.card_shadow || '');
+            $styleFontFamily.val(effective.font_family || '');
+            $styleHeadingWeight.val(effective.heading_font_weight || '');
+            $styleBodyWeight.val(effective.body_font_weight || '');
+            $styleBodyLineHeight.val(effective.body_line_height || '');
+            $styleBodyLetterSpacing.val(effective.body_letter_spacing !== undefined ? effective.body_letter_spacing : '');
 
             if (isValidHexOrShort($styleBgText.val())) $styleBgColor.val($styleBgText.val());
             if (isValidHexOrShort($styleTextText.val())) $styleTextColor.val($styleTextText.val());
@@ -314,8 +339,13 @@
             $styleAccentText.on('input', function() { syncColorPair($styleAccentColor, $styleAccentText); updateStyleEditorPreviewFromInputs(); });
             $styleStarText.on('input', function() { syncColorPair($styleStarColor, $styleStarText); updateStyleEditorPreviewFromInputs(); });
             $styleCardBg.on('input', updateStyleEditorPreviewFromInputs);
-            $styleSampleReviewText.on('input', updateStyleEditorPreviewFromInputs);
-            $styleSampleAuthorName.on('input', updateStyleEditorPreviewFromInputs);
+            $styleCardRadius.on('input', updateStyleEditorPreviewFromInputs);
+            $styleCardShadow.on('input', updateStyleEditorPreviewFromInputs);
+            $styleFontFamily.on('change', updateStyleEditorPreviewFromInputs);
+            $styleHeadingWeight.on('change', updateStyleEditorPreviewFromInputs);
+            $styleBodyWeight.on('change', updateStyleEditorPreviewFromInputs);
+            $styleBodyLineHeight.on('input', updateStyleEditorPreviewFromInputs);
+            $styleBodyLetterSpacing.on('input', updateStyleEditorPreviewFromInputs);
 
             $styleSave.on('click', function() {
                 var payload = {
@@ -325,7 +355,14 @@
                     border: String($styleBorderText.val() || '').trim(),
                     accent: String($styleAccentText.val() || '').trim(),
                     star: String($styleStarText.val() || '').trim(),
-                    card_background: String($styleCardBg.val() || '').trim()
+                    card_background: String($styleCardBg.val() || '').trim(),
+                    card_radius: String($styleCardRadius.val() || '').trim(),
+                    card_shadow: String($styleCardShadow.val() || '').trim(),
+                    font_family: String($styleFontFamily.val() || '').trim(),
+                    heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
+                    body_font_weight: String($styleBodyWeight.val() || '').trim(),
+                    body_line_height: String($styleBodyLineHeight.val() || '').trim(),
+                    body_letter_spacing: String($styleBodyLetterSpacing.val() || '').trim()
                 };
                 persistStyleCustomizations(activeStyleKey, ($styleVariantSelect.val() || 'light'), payload, function(resp) {
                     if (resp && resp.success) {
@@ -720,8 +757,19 @@
 
             // Safety net: if we somehow hid everything (bad template key or bad data attr),
             // show all controls rather than rendering an empty modal.
-            var $visible = $templateEditorModal.find('.grp-template-editor-controls [data-templates]:visible');
-            if ($visible.length === 0) {
+            var matched = 0;
+            $templateControlNodes.each(function() {
+                var templates = $(this).data('templates');
+                if (!templates) {
+                    matched++;
+                    return;
+                }
+                var templateList = templates.toString().trim().split(/\\s+/);
+                if (templateList.indexOf(templateKey) !== -1) {
+                    matched++;
+                }
+            });
+            if (matched === 0) {
                 console.warn('[GRP] No template controls matched key; showing all controls as fallback', {
                     templateKey: templateKey
                 });

@@ -160,6 +160,44 @@ class GRP_Styles {
                 --grp-card_background: {$light['card_background']};
         ";
             }
+            if (isset($light['card_radius'])) {
+                $radius = is_numeric($light['card_radius']) ? (int) $light['card_radius'] : 0;
+                $css_vars .= "
+                --grp-card_radius: {$radius}px;
+        ";
+            }
+            if (isset($light['card_shadow'])) {
+                $css_vars .= "
+                --grp-card_shadow: {$light['card_shadow']};
+        ";
+            }
+            if (!empty($light['font_family'])) {
+                $css_vars .= "
+                --grp-font_family: {$light['font_family']};
+        ";
+            }
+            if (!empty($light['heading_font_weight'])) {
+                $css_vars .= "
+                --grp-heading_font_weight: {$light['heading_font_weight']};
+        ";
+            }
+            if (!empty($light['body_font_weight'])) {
+                $css_vars .= "
+                --grp-body_font_weight: {$light['body_font_weight']};
+        ";
+            }
+            if (!empty($light['body_line_height'])) {
+                $css_vars .= "
+                --grp-body_line_height: {$light['body_line_height']};
+        ";
+            }
+            if (isset($light['body_letter_spacing'])) {
+                $ls = is_numeric($light['body_letter_spacing']) ? (float) $light['body_letter_spacing'] : 0;
+                $ls = rtrim(rtrim(number_format($ls, 2, '.', ''), '0'), '.');
+                $css_vars .= "
+                --grp-body_letter_spacing: {$ls}px;
+        ";
+            }
             if (isset($light['gradient_blue'])) {
                 $css_vars .= "
                 --grp-gradient_blue: {$light['gradient_blue']};
@@ -191,6 +229,44 @@ class GRP_Styles {
             if (isset($dark['card_background'])) {
                 $css_vars .= "
                     --grp-card_background: {$dark['card_background']};
+        ";
+            }
+            if (isset($dark['card_radius'])) {
+                $radius = is_numeric($dark['card_radius']) ? (int) $dark['card_radius'] : 0;
+                $css_vars .= "
+                    --grp-card_radius: {$radius}px;
+        ";
+            }
+            if (isset($dark['card_shadow'])) {
+                $css_vars .= "
+                    --grp-card_shadow: {$dark['card_shadow']};
+        ";
+            }
+            if (!empty($dark['font_family'])) {
+                $css_vars .= "
+                    --grp-font_family: {$dark['font_family']};
+        ";
+            }
+            if (!empty($dark['heading_font_weight'])) {
+                $css_vars .= "
+                    --grp-heading_font_weight: {$dark['heading_font_weight']};
+        ";
+            }
+            if (!empty($dark['body_font_weight'])) {
+                $css_vars .= "
+                    --grp-body_font_weight: {$dark['body_font_weight']};
+        ";
+            }
+            if (!empty($dark['body_line_height'])) {
+                $css_vars .= "
+                    --grp-body_line_height: {$dark['body_line_height']};
+        ";
+            }
+            if (isset($dark['body_letter_spacing'])) {
+                $ls = is_numeric($dark['body_letter_spacing']) ? (float) $dark['body_letter_spacing'] : 0;
+                $ls = rtrim(rtrim(number_format($ls, 2, '.', ''), '0'), '.');
+                $css_vars .= "
+                    --grp-body_letter_spacing: {$ls}px;
         ";
             }
             if (isset($dark['gradient_blue'])) {
@@ -247,6 +323,47 @@ class GRP_Styles {
             --grp-gradient_red: {$colors['gradient_red']};
             --grp-gradient_yellow: {$colors['gradient_yellow']};
             --grp-gradient_green: {$colors['gradient_green']};
+        ";
+        }
+
+        // Shape + typography vars
+        if (isset($colors['card_radius'])) {
+            $radius = is_numeric($colors['card_radius']) ? (int) $colors['card_radius'] : 0;
+            $css_vars .= "
+            --grp-card_radius: {$radius}px;
+        ";
+        }
+        if (isset($colors['card_shadow'])) {
+            $shadow = $colors['card_shadow'];
+            $css_vars .= "
+            --grp-card_shadow: {$shadow};
+        ";
+        }
+        if (isset($colors['font_family']) && $colors['font_family'] !== '') {
+            $css_vars .= "
+            --grp-font_family: {$colors['font_family']};
+        ";
+        }
+        if (isset($colors['heading_font_weight']) && $colors['heading_font_weight'] !== '') {
+            $css_vars .= "
+            --grp-heading_font_weight: {$colors['heading_font_weight']};
+        ";
+        }
+        if (isset($colors['body_font_weight']) && $colors['body_font_weight'] !== '') {
+            $css_vars .= "
+            --grp-body_font_weight: {$colors['body_font_weight']};
+        ";
+        }
+        if (isset($colors['body_line_height']) && $colors['body_line_height'] !== '') {
+            $css_vars .= "
+            --grp-body_line_height: {$colors['body_line_height']};
+        ";
+        }
+        if (isset($colors['body_letter_spacing'])) {
+            $ls = is_numeric($colors['body_letter_spacing']) ? (float) $colors['body_letter_spacing'] : 0;
+            $ls = rtrim(rtrim(number_format($ls, 2, '.', ''), '0'), '.');
+            $css_vars .= "
+            --grp-body_letter_spacing: {$ls}px;
         ";
         }
         
@@ -310,13 +427,21 @@ class GRP_Styles {
         return array_merge($defaults, $stored_whitelisted);
     }
 
-    private function sanitize_style_customization_value($value) {
+    private function sanitize_style_customization_value($key, $value) {
+        $key = sanitize_key($key);
         $value = is_string($value) ? trim($value) : '';
         if ($value === '') {
             return '';
         }
+        // Prevent CSS injection primitives
+        if (preg_match('/[;{}]/', $value)) {
+            return '';
+        }
         if ($value === 'transparent') {
             return 'transparent';
+        }
+        if ($value === 'inherit') {
+            return 'inherit';
         }
         $hex = sanitize_hex_color($value);
         if ($hex) {
@@ -326,6 +451,59 @@ class GRP_Styles {
         if (preg_match('/^rgba?\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}(\\s*,\\s*(0|1|0?\\.\\d+)\\s*)?\\)$/', $value)) {
             return $value;
         }
+
+        // Numeric / typography / shape controls
+        if ($key === 'card_radius') {
+            $n = is_numeric($value) ? (int) $value : null;
+            if ($n === null) return '';
+            $n = max(0, min(80, $n));
+            return (string) $n;
+        }
+        if ($key === 'heading_font_weight' || $key === 'body_font_weight') {
+            $n = is_numeric($value) ? (int) $value : null;
+            if ($n === null) return '';
+            $allowed = array(300, 400, 500, 600, 700, 800, 900);
+            return in_array($n, $allowed, true) ? (string) $n : '';
+        }
+        if ($key === 'body_line_height') {
+            $n = is_numeric($value) ? (float) $value : null;
+            if ($n === null) return '';
+            if ($n < 1 || $n > 2.5) return '';
+            return rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
+        }
+        if ($key === 'body_letter_spacing') {
+            $n = is_numeric($value) ? (float) $value : null;
+            if ($n === null) return '';
+            if ($n < -2 || $n > 10) return '';
+            return rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
+        }
+        if ($key === 'font_family') {
+            $allowed = array(
+                '', 'inherit',
+                'Inter, sans-serif',
+                'Roboto, sans-serif',
+                'Open Sans, sans-serif',
+                'Lato, sans-serif',
+                'Montserrat, sans-serif',
+                'Poppins, sans-serif',
+                'Raleway, sans-serif',
+                'Nunito, sans-serif',
+                'Source Sans Pro, sans-serif',
+                'Ubuntu, sans-serif',
+                'Work Sans, sans-serif',
+                'DM Sans, sans-serif',
+                'Georgia, serif',
+            );
+            return in_array($value, $allowed, true) ? $value : '';
+        }
+        if ($key === 'card_shadow') {
+            if ($value === 'none') return 'none';
+            // Very conservative allowlist for box-shadow value
+            if (strlen($value) > 140) return '';
+            if (!preg_match('/^[0-9a-zA-Z#(),.%\\s+\\-]+$/', $value)) return '';
+            return $value;
+        }
+
         return '';
     }
 
@@ -350,7 +528,7 @@ class GRP_Styles {
         foreach ($data as $key => $val) {
             $key = sanitize_key($key);
             $val = is_string($val) ? wp_unslash($val) : '';
-            $clean = $this->sanitize_style_customization_value($val);
+            $clean = $this->sanitize_style_customization_value($key, $val);
             if ($clean !== '') {
                 $sanitized[$key] = $clean;
             }
@@ -1065,13 +1243,63 @@ class GRP_Styles {
                 'star' => '#ffc107'
             )
         );
-        
+
+        // Defaults for non-color customization knobs (per style).
+        $knobs = array(
+            'modern' => array(
+                'card_radius' => 14,
+                'card_shadow' => '0 8px 32px rgba(0, 0, 0, 0.12)',
+                'font_family' => 'inherit',
+                'heading_font_weight' => 600,
+                'body_font_weight' => 400,
+                'body_line_height' => 1.6,
+                'body_letter_spacing' => 0
+            ),
+            'classic' => array(
+                'card_radius' => 4,
+                'card_shadow' => 'none',
+                'font_family' => 'inherit',
+                'heading_font_weight' => 600,
+                'body_font_weight' => 400,
+                'body_line_height' => 1.6,
+                'body_letter_spacing' => 0
+            ),
+            'minimal' => array(
+                'card_radius' => 10,
+                'card_shadow' => '0 6px 20px rgba(0, 0, 0, 0.06)',
+                'font_family' => 'inherit',
+                'heading_font_weight' => 600,
+                'body_font_weight' => 400,
+                'body_line_height' => 1.6,
+                'body_letter_spacing' => 0
+            ),
+            'corporate' => array(
+                'card_radius' => 6,
+                'card_shadow' => '0 8px 24px rgba(0, 0, 0, 0.10)',
+                'font_family' => 'inherit',
+                'heading_font_weight' => 700,
+                'body_font_weight' => 400,
+                'body_line_height' => 1.6,
+                'body_letter_spacing' => 0
+            ),
+            'creative' => array(
+                'card_radius' => 16,
+                'card_shadow' => '0 8px 24px rgba(0, 0, 0, 0.15)',
+                'font_family' => 'inherit',
+                'heading_font_weight' => 700,
+                'body_font_weight' => 400,
+                'body_line_height' => 1.6,
+                'body_letter_spacing' => 0
+            )
+        );
+
         // Use style-specific colors if available, otherwise use defaults
-        if (isset($style_schemes[$style][$variant])) {
-            return $style_schemes[$style][$variant];
-        }
-        
-        return isset($default_schemes[$variant]) ? $default_schemes[$variant] : $default_schemes['light'];
+        $colors = isset($style_schemes[$style][$variant])
+            ? $style_schemes[$style][$variant]
+            : (isset($default_schemes[$variant]) ? $default_schemes[$variant] : $default_schemes['light']);
+
+        $k = isset($knobs[$style]) ? $knobs[$style] : $knobs['classic'];
+        return array_merge($colors, $k);
     }
     
     /**
@@ -1271,11 +1499,13 @@ class GRP_Styles {
         
         return "
         .grp-reviews {
-            font-family: {$font_family};
+            font-family: var(--grp-font_family, {$font_family});
         }
         
         .grp-review {
             position: relative;
+            border-radius: var(--grp-card_radius, 0px);
+            box-shadow: var(--grp-card_shadow, none);
         }
         
         .grp-review-rating {
@@ -1288,6 +1518,9 @@ class GRP_Styles {
         
         .grp-review-text {
             margin-bottom: 15px;
+            font-weight: var(--grp-body_font_weight, 400);
+            line-height: var(--grp-body_line_height, 1.6);
+            letter-spacing: var(--grp-body_letter_spacing, 0px);
         }
         
         .grp-review-meta {
@@ -1323,6 +1556,10 @@ class GRP_Styles {
             text-align: center;
             padding: 40px 20px;
             color: var(--grp-muted);
+        }
+        .grp-author-name,
+        .grp-review-header-text {
+            font-weight: var(--grp-heading_font_weight, 600);
         }
         ";
     }

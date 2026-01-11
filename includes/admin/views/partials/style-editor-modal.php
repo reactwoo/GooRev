@@ -61,6 +61,21 @@ if (!defined('ABSPATH')) {
                                 <input type="text" id="grp-style-muted-text" placeholder="#6B7280">
                             </div>
                         </div>
+
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Card Radius', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="number" id="grp-style-card-radius" min="0" max="80" step="1" placeholder="14">
+                                <span>px</span>
+                            </div>
+                        </div>
+
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Card Shadow', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="text" id="grp-style-card-shadow" placeholder="0 8px 32px rgba(0,0,0,0.12)">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="grp-template-editor-column">
@@ -89,16 +104,62 @@ if (!defined('ABSPATH')) {
                         </div>
 
                         <div class="grp-template-editor-row">
-                            <span class="grp-template-editor-label"><?php esc_html_e('Sample Review Text', 'google-reviews-plugin'); ?></span>
+                            <span class="grp-template-editor-label"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
-                                <input type="text" id="grp-style-sample-review-text" placeholder="<?php esc_attr_e('This is a sample review…', 'google-reviews-plugin'); ?>">
+                                <select id="grp-style-font-family">
+                                    <option value=""><?php esc_html_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>
+                                    <option value="inherit"><?php esc_html_e('Inherit', 'google-reviews-plugin'); ?></option>
+                                    <option value="Inter, sans-serif"><?php esc_html_e('Inter', 'google-reviews-plugin'); ?></option>
+                                    <option value="Roboto, sans-serif"><?php esc_html_e('Roboto', 'google-reviews-plugin'); ?></option>
+                                    <option value="Open Sans, sans-serif"><?php esc_html_e('Open Sans', 'google-reviews-plugin'); ?></option>
+                                    <option value="Lato, sans-serif"><?php esc_html_e('Lato', 'google-reviews-plugin'); ?></option>
+                                    <option value="Montserrat, sans-serif"><?php esc_html_e('Montserrat', 'google-reviews-plugin'); ?></option>
+                                    <option value="Poppins, sans-serif"><?php esc_html_e('Poppins', 'google-reviews-plugin'); ?></option>
+                                    <option value="Raleway, sans-serif"><?php esc_html_e('Raleway', 'google-reviews-plugin'); ?></option>
+                                    <option value="Nunito, sans-serif"><?php esc_html_e('Nunito', 'google-reviews-plugin'); ?></option>
+                                    <option value="Source Sans Pro, sans-serif"><?php esc_html_e('Source Sans Pro', 'google-reviews-plugin'); ?></option>
+                                    <option value="Ubuntu, sans-serif"><?php esc_html_e('Ubuntu', 'google-reviews-plugin'); ?></option>
+                                    <option value="Work Sans, sans-serif"><?php esc_html_e('Work Sans', 'google-reviews-plugin'); ?></option>
+                                    <option value="DM Sans, sans-serif"><?php esc_html_e('DM Sans', 'google-reviews-plugin'); ?></option>
+                                    <option value="Georgia, serif"><?php esc_html_e('Georgia', 'google-reviews-plugin'); ?></option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="grp-template-editor-row">
-                            <span class="grp-template-editor-label"><?php esc_html_e('Sample Author Name', 'google-reviews-plugin'); ?></span>
+                            <span class="grp-template-editor-label"><?php esc_html_e('Heading Weight', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
-                                <input type="text" id="grp-style-sample-author-name" placeholder="<?php esc_attr_e('John Doe', 'google-reviews-plugin'); ?>">
+                                <select id="grp-style-heading-weight">
+                                    <?php foreach (array(300,400,500,600,700,800,900) as $w): ?>
+                                        <option value="<?php echo esc_attr($w); ?>"><?php echo esc_html($w); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Body Weight', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <select id="grp-style-body-weight">
+                                    <?php foreach (array(300,400,500,600,700) as $w): ?>
+                                        <option value="<?php echo esc_attr($w); ?>"><?php echo esc_html($w); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Line Height', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="number" id="grp-style-body-line-height" min="1" max="2.5" step="0.1" placeholder="1.6">
+                            </div>
+                        </div>
+
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Letter Spacing', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="number" id="grp-style-body-letter-spacing" min="-2" max="10" step="0.1" placeholder="0">
+                                <span>px</span>
                             </div>
                         </div>
                     </div>
