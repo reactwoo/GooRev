@@ -904,7 +904,8 @@ jQuery(document).ready(function($) {
         var blur = $hiddenBlur.val() || 0;
         var spread = $hiddenSpread.val() || 0;
         var color = $hiddenColor.val() || '#000000';
-        $hiddenValue.val(h + ' ' + v + ' ' + blur + ' ' + spread + ' ' + color);
+        // CSS box-shadow requires units for lengths
+        $hiddenValue.val(h + 'px ' + v + 'px ' + blur + 'px ' + spread + 'px ' + color);
     }
 
     function syncControl(target, value) {

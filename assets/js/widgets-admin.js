@@ -109,8 +109,20 @@
         var $styleAccentText = $('#grp-style-accent-text');
         var $styleStarColor = $('#grp-style-star-color');
         var $styleStarText = $('#grp-style-star-text');
-        var $styleCardRadius = $('#grp-style-card-radius');
-        var $styleCardShadow = $('#grp-style-card-shadow');
+        var $styleCardRadius = $('#grp-style-card-radius'); // hidden field (CSS border-radius value)
+        var $styleCardRadiusTL = $('#grp-style-card-radius-tl');
+        var $styleCardRadiusTR = $('#grp-style-card-radius-tr');
+        var $styleCardRadiusBR = $('#grp-style-card-radius-br');
+        var $styleCardRadiusBL = $('#grp-style-card-radius-bl');
+        var $styleGlassEffect = $('#grp-style-glass-effect');
+        var $styleCardShadowEnabled = $('#grp-style-card-shadow-enabled');
+        var $styleCardShadow = $('#grp-style-card-shadow'); // hidden field (CSS box-shadow value)
+        var $styleCardShadowEdit = $('#grp-style-card-shadow-edit');
+        var $styleShadowModal = $('#grp-style-box-shadow-modal');
+        var $styleShadowClose = $('#grp-style-box-shadow-modal-close');
+        var $styleShadowRanges = $('.grp-style-shadow-range');
+        var $styleShadowNumbers = $('.grp-style-shadow-number');
+        var $styleShadowColorPicker = $('#grp-style-box-shadow-color-picker');
         var $styleFontFamily = $('#grp-style-font-family');
         var $styleHeadingWeight = $('#grp-style-heading-weight');
         var $styleBodyWeight = $('#grp-style-body-weight');
@@ -175,7 +187,9 @@
             if (overrides.accent) map['--grp-accent'] = overrides.accent;
             if (overrides.card_background) map['--grp-card_background'] = overrides.card_background;
             if (overrides.card_radius !== undefined && overrides.card_radius !== null && String(overrides.card_radius) !== '') {
-                map['--grp-card_radius'] = String(overrides.card_radius) + 'px';
+                var r = String(overrides.card_radius).trim();
+                // If it's numeric, treat as px; otherwise assume valid CSS border-radius value (e.g. "10px 20px 10px 20px")
+                map['--grp-card_radius'] = (/^-?\\d+(\\.\\d+)?$/.test(r) ? (r + 'px') : r);
             }
             if (overrides.card_shadow) map['--grp-card_shadow'] = overrides.card_shadow;
             if (overrides.font_family) map['--grp-font_family'] = overrides.font_family;
@@ -184,6 +198,10 @@
             if (overrides.body_line_height) map['--grp-body_line_height'] = String(overrides.body_line_height);
             if (overrides.body_letter_spacing !== undefined && overrides.body_letter_spacing !== null && String(overrides.body_letter_spacing) !== '') {
                 map['--grp-body_letter_spacing'] = String(overrides.body_letter_spacing) + 'px';
+            }
+            if (overrides.glass_blur !== undefined && overrides.glass_blur !== null && String(overrides.glass_blur) !== '') {
+                var gb = String(overrides.glass_blur).trim();
+                map['--grp-glass_blur'] = (/^-?\\d+(\\.\\d+)?$/.test(gb) ? (gb + 'px') : gb);
             }
             if (overrides.gradient_blue) map['--grp-gradient_blue'] = overrides.gradient_blue;
             if (overrides.gradient_red) map['--grp-gradient_red'] = overrides.gradient_red;
@@ -221,10 +239,72 @@
             }
         }
 
+        function clampNumber(val, min, max, fallback) {
+            var n = parseFloat(val);
+            if (isNaN(n)) return fallback;
+            if (typeof min === 'number') n = Math.max(min, n);
+            if (typeof max === 'number') n = Math.min(max, n);
+            return n;
+        }
+
+        function parseRadiusToCorners(value, fallback) {
+            var fb = (typeof fallback === 'number' ? fallback : 0);
+            var raw = String(value || '').trim();
+            if (!raw) {
+                return { tl: fb, tr: fb, br: fb, bl: fb };
+            }
+            // Accept "14", "14px", "14px 10px 8px 6px"
+            var parts = raw
+                .replace(/px/g, '')
+                .trim()
+                .split(/\s+/)
+                .map(function(p) { return clampNumber(p, 0, 80, fb); });
+            if (!parts.length) return { tl: fb, tr: fb, br: fb, bl: fb };
+            if (parts.length === 1) return { tl: parts[0], tr: parts[0], br: parts[0], bl: parts[0] };
+            if (parts.length === 2) return { tl: parts[0], tr: parts[1], br: parts[0], bl: parts[1] };
+            if (parts.length === 3) return { tl: parts[0], tr: parts[1], br: parts[2], bl: parts[1] };
+            return { tl: parts[0], tr: parts[1], br: parts[2], bl: parts[3] };
+        }
+
+        function updateStyleRadiusHidden() {
+            if (!$styleCardRadius.length) return '';
+            var tl = clampNumber($styleCardRadiusTL.val(), 0, 80, 0);
+            var tr = clampNumber($styleCardRadiusTR.val(), 0, 80, 0);
+            var br = clampNumber($styleCardRadiusBR.val(), 0, 80, 0);
+            var bl = clampNumber($styleCardRadiusBL.val(), 0, 80, 0);
+            var css = [tl + 'px', tr + 'px', br + 'px', bl + 'px'].join(' ');
+            $styleCardRadius.val(css);
+            return css;
+        }
+
+        function parseBoxShadowParts(shadow) {
+            // Expected: "0px 8px 32px 0px rgba(0,0,0,0.12)" or "... #000000"
+            var s = String(shadow || '').trim();
+            if (!s || s === 'none') return null;
+            var m = s.match(/(-?\d+(?:\.\d+)?)px\s+(-?\d+(?:\.\d+)?)px\s+(\d+(?:\.\d+)?)px\s+(-?\d+(?:\.\d+)?)px\s+(.+)$/);
+            if (!m) return null;
+            return {
+                h: m[1],
+                v: m[2],
+                blur: m[3],
+                spread: m[4],
+                color: String(m[5] || '').trim()
+            };
+        }
+
+        function buildBoxShadowString(h, v, blur, spread, color) {
+            var c = String(color || '#000000').trim();
+            return String(h) + 'px ' + String(v) + 'px ' + String(blur) + 'px ' + String(spread) + 'px ' + c;
+        }
+
         function updateStyleEditorPreviewFromInputs() {
             if (!$styleEditorPreview.length) return;
             var $previewInner = $styleEditorPreview.find('.grp-style-preview').first();
             if (!$previewInner.length) return;
+
+            var radiusCss = updateStyleRadiusHidden();
+            var shadowCss = String($styleCardShadow.val() || '').trim();
+            var glassBlur = $styleGlassEffect.is(':checked') ? 12 : 0;
 
             var overrides = {
                 background: String($styleBgText.val() || '').trim(),
@@ -234,15 +314,21 @@
                 accent: String($styleAccentText.val() || '').trim(),
                 star: String($styleStarText.val() || '').trim(),
                 card_background: String($styleCardBg.val() || '').trim(),
-                card_radius: String($styleCardRadius.val() || '').trim(),
-                card_shadow: String($styleCardShadow.val() || '').trim(),
+                card_radius: String(radiusCss || '').trim(),
+                card_shadow: shadowCss,
                 font_family: String($styleFontFamily.val() || '').trim(),
                 heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
                 body_font_weight: String($styleBodyWeight.val() || '').trim(),
                 body_line_height: String($styleBodyLineHeight.val() || '').trim(),
-                body_letter_spacing: String($styleBodyLetterSpacing.val() || '').trim()
+                body_letter_spacing: String($styleBodyLetterSpacing.val() || '').trim(),
+                glass_blur: String(glassBlur)
             };
             applyStyleVars($previewInner, toCssVarMap(overrides));
+
+            // Darken preview background when glass is enabled (like widgets template modal)
+            if ($styleEditorPreview.length) {
+                $styleEditorPreview.toggleClass('grp-glass-preview', $styleGlassEffect.is(':checked'));
+            }
         }
 
         function populateStyleEditor(styleKey, variant) {
@@ -268,8 +354,27 @@
             $styleAccentText.val(effective.accent || '');
             $styleStarText.val(effective.star || '');
             $styleCardBg.val(effective.card_background || '');
-            $styleCardRadius.val(effective.card_radius !== undefined ? effective.card_radius : '');
-            $styleCardShadow.val(effective.card_shadow || '');
+            // Radius: store as CSS border-radius value in hidden field, but edit as 4 corners
+            var radiusCorners = parseRadiusToCorners(effective.card_radius, 14);
+            $styleCardRadiusTL.val(radiusCorners.tl);
+            $styleCardRadiusTR.val(radiusCorners.tr);
+            $styleCardRadiusBR.val(radiusCorners.br);
+            $styleCardRadiusBL.val(radiusCorners.bl);
+            updateStyleRadiusHidden();
+
+            // Shadow: stored as CSS box-shadow value in hidden field
+            var shadow = String(effective.card_shadow || '').trim();
+            if (!shadow || shadow === 'none') {
+                $styleCardShadowEnabled.prop('checked', false);
+                $styleCardShadow.val('none');
+            } else {
+                $styleCardShadowEnabled.prop('checked', true);
+                $styleCardShadow.val(shadow);
+            }
+
+            // Glass: stored as blur amount (px) to allow pure-CSS application
+            var gb = clampNumber(effective.glass_blur, 0, 30, 0);
+            $styleGlassEffect.prop('checked', gb > 0);
             $styleFontFamily.val(effective.font_family || '');
             $styleHeadingWeight.val(effective.heading_font_weight || '');
             $styleBodyWeight.val(effective.body_font_weight || '');
@@ -339,8 +444,83 @@
             $styleAccentText.on('input', function() { syncColorPair($styleAccentColor, $styleAccentText); updateStyleEditorPreviewFromInputs(); });
             $styleStarText.on('input', function() { syncColorPair($styleStarColor, $styleStarText); updateStyleEditorPreviewFromInputs(); });
             $styleCardBg.on('input', updateStyleEditorPreviewFromInputs);
-            $styleCardRadius.on('input', updateStyleEditorPreviewFromInputs);
-            $styleCardShadow.on('input', updateStyleEditorPreviewFromInputs);
+            $styleCardRadiusTL.on('input', updateStyleEditorPreviewFromInputs);
+            $styleCardRadiusTR.on('input', updateStyleEditorPreviewFromInputs);
+            $styleCardRadiusBR.on('input', updateStyleEditorPreviewFromInputs);
+            $styleCardRadiusBL.on('input', updateStyleEditorPreviewFromInputs);
+            $styleGlassEffect.on('change', updateStyleEditorPreviewFromInputs);
+
+            $styleCardShadowEnabled.on('change', function() {
+                var enabled = $(this).is(':checked');
+                if (!enabled) {
+                    $styleCardShadow.val('none');
+                } else {
+                    // If blank, seed a reasonable default
+                    if (!String($styleCardShadow.val() || '').trim() || String($styleCardShadow.val() || '').trim() === 'none') {
+                        $styleCardShadow.val('0px 8px 32px 0px rgba(0,0,0,0.12)');
+                    }
+                }
+                updateStyleEditorPreviewFromInputs();
+            });
+
+            $styleCardShadowEdit.on('click', function(e) {
+                e.preventDefault();
+                if (!$styleShadowModal.length) return;
+                $styleCardShadowEnabled.prop('checked', true).trigger('change');
+
+                var parts = parseBoxShadowParts($styleCardShadow.val());
+                var h = parts ? parts.h : 0;
+                var v = parts ? parts.v : 8;
+                var blur = parts ? parts.blur : 32;
+                var spread = parts ? parts.spread : 0;
+                var color = parts ? parts.color : 'rgba(0,0,0,0.12)';
+
+                function syncShadowControl(target, value) {
+                    $styleShadowRanges.filter('[data-target="' + target + '"]').val(value);
+                    $styleShadowNumbers.filter('[data-target="' + target + '"]').val(value);
+                }
+
+                syncShadowControl('h', h);
+                syncShadowControl('v', v);
+                syncShadowControl('blur', blur);
+                syncShadowControl('spread', spread);
+
+                // If it's not a hex color, keep picker at black (we'll keep rgba in string)
+                if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(color || '').trim())) {
+                    $styleShadowColorPicker.val(color);
+                } else {
+                    $styleShadowColorPicker.val('#000000');
+                }
+
+                $styleShadowModal.show();
+            });
+
+            function updateStyleShadowString() {
+                var h = $styleShadowNumbers.filter('[data-target="h"]').val() || 0;
+                var v = $styleShadowNumbers.filter('[data-target="v"]').val() || 0;
+                var blur = $styleShadowNumbers.filter('[data-target="blur"]').val() || 0;
+                var spread = $styleShadowNumbers.filter('[data-target="spread"]').val() || 0;
+                // Prefer picker hex; allow rgba fallback by preserving previous if it was rgba()
+                var color = $styleShadowColorPicker.val() || '#000000';
+                $styleCardShadow.val(buildBoxShadowString(h, v, blur, spread, color));
+                updateStyleEditorPreviewFromInputs();
+            }
+
+            $styleShadowRanges.on('input', function() {
+                var target = $(this).data('target');
+                $styleShadowNumbers.filter('[data-target="' + target + '"]').val($(this).val());
+                updateStyleShadowString();
+            });
+            $styleShadowNumbers.on('input', function() {
+                var target = $(this).data('target');
+                $styleShadowRanges.filter('[data-target="' + target + '"]').val($(this).val());
+                updateStyleShadowString();
+            });
+            $styleShadowColorPicker.on('input', updateStyleShadowString);
+            $styleShadowClose.on('click', function() { $styleShadowModal.hide(); });
+            $(window).on('click', function(ev) {
+                if ($styleShadowModal.is(ev.target)) $styleShadowModal.hide();
+            });
             $styleFontFamily.on('change', updateStyleEditorPreviewFromInputs);
             $styleHeadingWeight.on('change', updateStyleEditorPreviewFromInputs);
             $styleBodyWeight.on('change', updateStyleEditorPreviewFromInputs);
@@ -348,6 +528,8 @@
             $styleBodyLetterSpacing.on('input', updateStyleEditorPreviewFromInputs);
 
             $styleSave.on('click', function() {
+                var radiusCss = updateStyleRadiusHidden();
+                var glassBlur = $styleGlassEffect.is(':checked') ? 12 : 0;
                 var payload = {
                     background: String($styleBgText.val() || '').trim(),
                     text: String($styleTextText.val() || '').trim(),
@@ -356,13 +538,14 @@
                     accent: String($styleAccentText.val() || '').trim(),
                     star: String($styleStarText.val() || '').trim(),
                     card_background: String($styleCardBg.val() || '').trim(),
-                    card_radius: String($styleCardRadius.val() || '').trim(),
+                    card_radius: String(radiusCss || '').trim(),
                     card_shadow: String($styleCardShadow.val() || '').trim(),
                     font_family: String($styleFontFamily.val() || '').trim(),
                     heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
                     body_font_weight: String($styleBodyWeight.val() || '').trim(),
                     body_line_height: String($styleBodyLineHeight.val() || '').trim(),
-                    body_letter_spacing: String($styleBodyLetterSpacing.val() || '').trim()
+                    body_letter_spacing: String($styleBodyLetterSpacing.val() || '').trim(),
+                    glass_blur: String(glassBlur)
                 };
                 persistStyleCustomizations(activeStyleKey, ($styleVariantSelect.val() || 'light'), payload, function(resp) {
                     if (resp && resp.success) {

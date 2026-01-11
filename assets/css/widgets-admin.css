@@ -299,6 +299,10 @@
 #grp-style-editor-preview .grp-style-preview {
     margin: 0;
     padding: 0;
+    max-width: 420px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .grp-style-editor-modal .grp-template-editor-preview {

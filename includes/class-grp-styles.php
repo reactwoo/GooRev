@@ -198,6 +198,13 @@ class GRP_Styles {
                 --grp-body_letter_spacing: {$ls}px;
         ";
             }
+            if (isset($light['glass_blur'])) {
+                $gb = is_numeric($light['glass_blur']) ? (float) $light['glass_blur'] : 0;
+                $gb = rtrim(rtrim(number_format($gb, 2, '.', ''), '0'), '.');
+                $css_vars .= "
+                --grp-glass_blur: {$gb}px;
+        ";
+            }
             if (isset($light['gradient_blue'])) {
                 $css_vars .= "
                 --grp-gradient_blue: {$light['gradient_blue']};
@@ -267,6 +274,13 @@ class GRP_Styles {
                 $ls = rtrim(rtrim(number_format($ls, 2, '.', ''), '0'), '.');
                 $css_vars .= "
                     --grp-body_letter_spacing: {$ls}px;
+        ";
+            }
+            if (isset($dark['glass_blur'])) {
+                $gb = is_numeric($dark['glass_blur']) ? (float) $dark['glass_blur'] : 0;
+                $gb = rtrim(rtrim(number_format($gb, 2, '.', ''), '0'), '.');
+                $css_vars .= "
+                    --grp-glass_blur: {$gb}px;
         ";
             }
             if (isset($dark['gradient_blue'])) {
@@ -454,10 +468,20 @@ class GRP_Styles {
 
         // Numeric / typography / shape controls
         if ($key === 'card_radius') {
-            $n = is_numeric($value) ? (int) $value : null;
-            if ($n === null) return '';
-            $n = max(0, min(80, $n));
-            return (string) $n;
+            // Allow "14", "14px", or "14px 12px 10px 8px"
+            $v = str_replace('px', '', strtolower($value));
+            $v = trim(preg_replace('/\\s+/', ' ', $v));
+            if ($v === '') return '';
+            if (!preg_match('/^\\d{1,2}(?:\\.\\d+)?(?:\\s+\\d{1,2}(?:\\.\\d+)?){0,3}$/', $v)) {
+                return '';
+            }
+            $parts = array_map('floatval', explode(' ', $v));
+            $parts = array_map(function($n){
+                $n = max(0, min(80, $n));
+                $n = rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
+                return $n . 'px';
+            }, $parts);
+            return implode(' ', $parts);
         }
         if ($key === 'heading_font_weight' || $key === 'body_font_weight') {
             $n = is_numeric($value) ? (int) $value : null;
@@ -502,6 +526,12 @@ class GRP_Styles {
             if (strlen($value) > 140) return '';
             if (!preg_match('/^[0-9a-zA-Z#(),.%\\s+\\-]+$/', $value)) return '';
             return $value;
+        }
+        if ($key === 'glass_blur') {
+            $n = is_numeric($value) ? (float) $value : null;
+            if ($n === null) return '';
+            if ($n < 0 || $n > 30) return '';
+            return rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
         }
 
         return '';
@@ -558,7 +588,7 @@ class GRP_Styles {
         
         return "
         .grp-style-modern .grp-reviews {
-            font-family: {$font_family};
+            font-family: var(--grp-font_family, {$font_family});
             background: var(--grp-background);
         }
         
@@ -567,17 +597,17 @@ class GRP_Styles {
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--grp-border, rgba(255, 255, 255, 0.15));
-            border-radius: 14px;
+            border-radius: var(--grp-card_radius, 14px);
             padding: 24px;
             margin-bottom: 24px;
             position: relative;
             transition: all 200ms ease;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            box-shadow: var(--grp-card_shadow, 0 8px 32px rgba(0, 0, 0, 0.12));
         }
         
         .grp-style-modern .grp-review:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            box-shadow: var(--grp-card_shadow, 0 12px 40px rgba(0, 0, 0, 0.18));
         }
         
         .grp-style-modern .grp-review-avatar {
@@ -618,7 +648,9 @@ class GRP_Styles {
         .grp-style-modern .grp-review-text {
             color: var(--grp-text);
             font-size: clamp(14px, 1vw, 15px);
-            line-height: 1.6;
+            line-height: var(--grp-body_line_height, 1.6);
+            letter-spacing: var(--grp-body_letter_spacing, 0px);
+            font-weight: var(--grp-body_font_weight, 400);
             margin-bottom: 20px;
             transition: all 200ms ease;
         }
@@ -645,7 +677,7 @@ class GRP_Styles {
         }
         
         .grp-style-modern .grp-author-name {
-            font-weight: 600;
+            font-weight: var(--grp-heading_font_weight, 600);
             color: var(--grp-text);
             font-size: clamp(13px, 1vw, 14px);
             transition: all 200ms ease;
@@ -682,17 +714,17 @@ class GRP_Styles {
         
         return "
         .grp-style-classic .grp-reviews {
-            font-family: {$font_family_base};
+            font-family: var(--grp-font_family, {$font_family_base});
             background: var(--grp-background);
         }
         
         .grp-style-classic .grp-review {
             background: var(--grp-background);
             border: 1px solid var(--grp-border, #D1D5DB);
-            border-radius: 4px;
+            border-radius: var(--grp-card_radius, 4px);
             padding: 24px;
             margin-bottom: 24px;
-            box-shadow: none;
+            box-shadow: var(--grp-card_shadow, none);
         }
         
         .grp-style-classic .grp-review-rating {
@@ -709,9 +741,11 @@ class GRP_Styles {
         .grp-style-classic .grp-review-text {
             color: var(--grp-text, #111827);
             font-size: 15px;
-            line-height: 1.6;
+            line-height: var(--grp-body_line_height, 1.6);
+            letter-spacing: var(--grp-body_letter_spacing, 0px);
+            font-weight: var(--grp-body_font_weight, 400);
             margin-bottom: 20px;
-            font-family: {$font_family_base};
+            font-family: var(--grp-font_family, {$font_family_base});
         }
         
         .grp-style-classic .grp-review-meta {
@@ -742,10 +776,10 @@ class GRP_Styles {
         }
         
         .grp-style-classic .grp-author-name {
-            font-weight: 600;
+            font-weight: var(--grp-heading_font_weight, 600);
             color: var(--grp-text, #111827);
             font-size: 15px;
-            font-family: {$font_family_name};
+            font-family: var(--grp-font_family, {$font_family_name});
             line-height: 1.4;
         }
         
@@ -768,16 +802,16 @@ class GRP_Styles {
         
         return "
         .grp-style-minimal .grp-reviews {
-            font-family: {$font_family};
+            font-family: var(--grp-font_family, {$font_family});
         }
         
         .grp-style-minimal .grp-review {
             background: var(--grp-background);
             border: none;
-            border-radius: 10px;
+            border-radius: var(--grp-card_radius, 10px);
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            box-shadow: var(--grp-card_shadow, 0 6px 20px rgba(0, 0, 0, 0.06));
             max-width: 420px;
             width: 100%;
         }
@@ -800,9 +834,10 @@ class GRP_Styles {
         .grp-style-minimal .grp-review-text {
             color: var(--grp-text);
             font-size: 14px;
-            line-height: 1.5;
+            line-height: var(--grp-body_line_height, 1.5);
+            letter-spacing: var(--grp-body_letter_spacing, 0px);
+            font-weight: var(--grp-body_font_weight, 400);
             margin-bottom: 16px;
-            font-weight: 400;
         }
         
         .grp-style-minimal .grp-review-meta {
@@ -830,7 +865,7 @@ class GRP_Styles {
         }
         
         .grp-style-minimal .grp-author-name {
-            font-weight: 600;
+            font-weight: var(--grp-heading_font_weight, 600);
             color: var(--grp-text);
             font-size: 14px;
             line-height: 1.4;
@@ -854,7 +889,7 @@ class GRP_Styles {
         
         return "
         .grp-style-corporate .grp-reviews {
-            font-family: {$font_family};
+            font-family: var(--grp-font_family, {$font_family});
             background: var(--grp-background);
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -864,12 +899,13 @@ class GRP_Styles {
         .grp-style-corporate .grp-review {
             background: var(--grp-card_background, var(--grp-background_alt));
             border: 1px solid var(--grp-border);
-            border-radius: 6px;
+            border-radius: var(--grp-card_radius, 6px);
             padding: 0;
             margin: 0;
             display: flex;
             flex-direction: column;
             height: 100%;
+            box-shadow: var(--grp-card_shadow, none);
         }
         
         .grp-style-corporate .grp-review-header {
@@ -882,7 +918,7 @@ class GRP_Styles {
         
         .grp-style-corporate .grp-review-header-text {
             font-size: 13px;
-            font-weight: 600;
+            font-weight: var(--grp-heading_font_weight, 600);
             color: var(--grp-text);
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -913,7 +949,9 @@ class GRP_Styles {
         .grp-style-corporate .grp-review-text {
             color: var(--grp-text);
             font-size: 14px;
-            line-height: 1.6;
+            line-height: var(--grp-body_line_height, 1.6);
+            letter-spacing: var(--grp-body_letter_spacing, 0px);
+            font-weight: var(--grp-body_font_weight, 400);
             margin-bottom: 20px;
         }
         
@@ -932,7 +970,7 @@ class GRP_Styles {
         }
         
         .grp-style-corporate .grp-author-name {
-            font-weight: 500;
+            font-weight: var(--grp-heading_font_weight, 500);
             color: var(--grp-text);
             font-size: 13px;
             text-transform: uppercase;
@@ -982,24 +1020,24 @@ class GRP_Styles {
         
         return "
         .grp-style-creative .grp-reviews {
-            font-family: {$font_family};
+            font-family: var(--grp-font_family, {$font_family});
         }
         
         .grp-style-creative .grp-review {
             border: none;
-            border-radius: 16px;
+            border-radius: var(--grp-card_radius, 16px);
             padding: 35px 30px;
             margin-bottom: 30px;
             position: relative;
             overflow: hidden;
             background: linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335));
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--grp-card_shadow, 0 8px 24px rgba(0, 0, 0, 0.15));
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         
         .grp-style-creative .grp-review:hover {
             transform: scale(1.02);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--grp-card_shadow, 0 12px 32px rgba(0, 0, 0, 0.2));
         }
         
         /* Random gradient variations - use data attributes for different colors */
@@ -1049,11 +1087,12 @@ class GRP_Styles {
         .grp-style-creative .grp-review-text {
             color: var(--grp-text);
             font-size: 20px;
-            line-height: 1.6;
+            line-height: var(--grp-body_line_height, 1.6);
+            letter-spacing: var(--grp-body_letter_spacing, 0px);
+            font-weight: var(--grp-body_font_weight, 400);
             margin-bottom: 30px;
             position: relative;
             z-index: 1;
-            font-weight: 400;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         
@@ -1085,7 +1124,7 @@ class GRP_Styles {
         }
         
         .grp-style-creative .grp-author-name {
-            font-weight: 700;
+            font-weight: var(--grp-heading_font_weight, 700);
             color: var(--grp-text);
             font-size: 18px;
             letter-spacing: 0.5px;
@@ -1253,7 +1292,8 @@ class GRP_Styles {
                 'heading_font_weight' => 600,
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
-                'body_letter_spacing' => 0
+                'body_letter_spacing' => 0,
+                'glass_blur' => 0
             ),
             'classic' => array(
                 'card_radius' => 4,
@@ -1262,7 +1302,8 @@ class GRP_Styles {
                 'heading_font_weight' => 600,
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
-                'body_letter_spacing' => 0
+                'body_letter_spacing' => 0,
+                'glass_blur' => 0
             ),
             'minimal' => array(
                 'card_radius' => 10,
@@ -1271,7 +1312,8 @@ class GRP_Styles {
                 'heading_font_weight' => 600,
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
-                'body_letter_spacing' => 0
+                'body_letter_spacing' => 0,
+                'glass_blur' => 0
             ),
             'corporate' => array(
                 'card_radius' => 6,
@@ -1280,7 +1322,8 @@ class GRP_Styles {
                 'heading_font_weight' => 700,
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
-                'body_letter_spacing' => 0
+                'body_letter_spacing' => 0,
+                'glass_blur' => 0
             ),
             'creative' => array(
                 'card_radius' => 16,
@@ -1289,7 +1332,8 @@ class GRP_Styles {
                 'heading_font_weight' => 700,
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
-                'body_letter_spacing' => 0
+                'body_letter_spacing' => 0,
+                'glass_blur' => 0
             )
         );
 
@@ -1506,6 +1550,8 @@ class GRP_Styles {
             position: relative;
             border-radius: var(--grp-card_radius, 0px);
             box-shadow: var(--grp-card_shadow, none);
+            backdrop-filter: blur(var(--grp-glass_blur, 0px));
+            -webkit-backdrop-filter: blur(var(--grp-glass_blur, 0px));
         }
         
         .grp-review-rating {
@@ -1521,6 +1567,10 @@ class GRP_Styles {
             font-weight: var(--grp-body_font_weight, 400);
             line-height: var(--grp-body_line_height, 1.6);
             letter-spacing: var(--grp-body_letter_spacing, 0px);
+        }
+
+        .grp-reviews a {
+            color: var(--grp-accent, #4285F4);
         }
         
         .grp-review-meta {
