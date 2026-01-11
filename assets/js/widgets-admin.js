@@ -1239,6 +1239,12 @@
             e.preventDefault();
 
             var $trigger = $(this);
+            console.log('[GRP] styles customize click', {
+                hasStyleModal: !!$styleEditorModal.length,
+                hasOpenFn: (typeof window.grpOpenStyleModal === 'function'),
+                styleKey: $trigger.data('style'),
+                isProBlocked: $trigger.hasClass('grp-pro-feature')
+            });
             if ($trigger.hasClass('grp-pro-feature')) {
                 alert((typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage)
                     ? grpWidgets.strings.templateProMessage

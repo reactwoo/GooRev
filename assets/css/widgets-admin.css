@@ -466,6 +466,11 @@
     color: #555;
 }
 
+.grp-spacing-input span {
+    white-space: nowrap;
+    line-height: 1.1;
+}
+
 .grp-spacing-input input {
     width: 100%;
     text-align: center;
