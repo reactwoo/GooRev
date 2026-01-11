@@ -161,10 +161,16 @@ class GRP_Styles {
         ";
             }
             if (isset($light['card_radius'])) {
-                $radius = is_numeric($light['card_radius']) ? (int) $light['card_radius'] : 0;
-                $css_vars .= "
+                $radius = $light['card_radius'];
+                if (is_numeric($radius)) {
+                    $css_vars .= "
                 --grp-card_radius: {$radius}px;
         ";
+                } else {
+                    $css_vars .= "
+                --grp-card_radius: {$radius};
+        ";
+                }
             }
             if (isset($light['card_shadow'])) {
                 $css_vars .= "
@@ -205,6 +211,14 @@ class GRP_Styles {
                 --grp-glass_blur: {$gb}px;
         ";
             }
+            if (isset($light['avatar_size'])) {
+                $av = is_numeric($light['avatar_size']) ? (int) $light['avatar_size'] : 0;
+                if ($av > 0) {
+                    $css_vars .= "
+                --grp-avatar_size: {$av}px;
+        ";
+                }
+            }
             if (isset($light['gradient_blue'])) {
                 $css_vars .= "
                 --grp-gradient_blue: {$light['gradient_blue']};
@@ -239,10 +253,16 @@ class GRP_Styles {
         ";
             }
             if (isset($dark['card_radius'])) {
-                $radius = is_numeric($dark['card_radius']) ? (int) $dark['card_radius'] : 0;
-                $css_vars .= "
+                $radius = $dark['card_radius'];
+                if (is_numeric($radius)) {
+                    $css_vars .= "
                     --grp-card_radius: {$radius}px;
         ";
+                } else {
+                    $css_vars .= "
+                    --grp-card_radius: {$radius};
+        ";
+                }
             }
             if (isset($dark['card_shadow'])) {
                 $css_vars .= "
@@ -282,6 +302,14 @@ class GRP_Styles {
                 $css_vars .= "
                     --grp-glass_blur: {$gb}px;
         ";
+            }
+            if (isset($dark['avatar_size'])) {
+                $av = is_numeric($dark['avatar_size']) ? (int) $dark['avatar_size'] : 0;
+                if ($av > 0) {
+                    $css_vars .= "
+                    --grp-avatar_size: {$av}px;
+        ";
+                }
             }
             if (isset($dark['gradient_blue'])) {
                 $css_vars .= "
@@ -342,10 +370,16 @@ class GRP_Styles {
 
         // Shape + typography vars
         if (isset($colors['card_radius'])) {
-            $radius = is_numeric($colors['card_radius']) ? (int) $colors['card_radius'] : 0;
-            $css_vars .= "
+            $radius = $colors['card_radius'];
+            if (is_numeric($radius)) {
+                $css_vars .= "
             --grp-card_radius: {$radius}px;
         ";
+            } else {
+                $css_vars .= "
+            --grp-card_radius: {$radius};
+        ";
+            }
         }
         if (isset($colors['card_shadow'])) {
             $shadow = $colors['card_shadow'];
@@ -379,6 +413,14 @@ class GRP_Styles {
             $css_vars .= "
             --grp-body_letter_spacing: {$ls}px;
         ";
+        }
+        if (isset($colors['avatar_size'])) {
+            $av = is_numeric($colors['avatar_size']) ? (int) $colors['avatar_size'] : 0;
+            if ($av > 0) {
+                $css_vars .= "
+            --grp-avatar_size: {$av}px;
+        ";
+            }
         }
         
         $css_vars .= "
@@ -532,6 +574,12 @@ class GRP_Styles {
             if ($n === null) return '';
             if ($n < 0 || $n > 30) return '';
             return rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
+        }
+        if ($key === 'avatar_size') {
+            $n = is_numeric($value) ? (int) $value : null;
+            if ($n === null) return '';
+            $n = max(20, min(120, $n));
+            return (string) $n;
         }
 
         return '';
@@ -1110,8 +1158,8 @@ class GRP_Styles {
         }
         
         .grp-style-creative .grp-review-avatar img {
-            width: 80px;
-            height: 80px;
+            width: var(--grp-avatar_size, 80px);
+            height: var(--grp-avatar_size, 80px);
             border-radius: 50%;
             object-fit: cover;
             border: 4px solid rgba(255, 255, 255, 0.4);
@@ -1287,7 +1335,7 @@ class GRP_Styles {
         $knobs = array(
             'modern' => array(
                 'card_radius' => 14,
-                'card_shadow' => '0 8px 32px rgba(0, 0, 0, 0.12)',
+                'card_shadow' => '0px 8px 32px 0px rgba(0, 0, 0, 0.12)',
                 'font_family' => 'inherit',
                 'heading_font_weight' => 600,
                 'body_font_weight' => 400,
@@ -1307,7 +1355,7 @@ class GRP_Styles {
             ),
             'minimal' => array(
                 'card_radius' => 10,
-                'card_shadow' => '0 6px 20px rgba(0, 0, 0, 0.06)',
+                'card_shadow' => '0px 6px 20px 0px rgba(0, 0, 0, 0.06)',
                 'font_family' => 'inherit',
                 'heading_font_weight' => 600,
                 'body_font_weight' => 400,
@@ -1317,7 +1365,7 @@ class GRP_Styles {
             ),
             'corporate' => array(
                 'card_radius' => 6,
-                'card_shadow' => '0 8px 24px rgba(0, 0, 0, 0.10)',
+                'card_shadow' => '0px 8px 24px 0px rgba(0, 0, 0, 0.10)',
                 'font_family' => 'inherit',
                 'heading_font_weight' => 700,
                 'body_font_weight' => 400,
@@ -1327,13 +1375,14 @@ class GRP_Styles {
             ),
             'creative' => array(
                 'card_radius' => 16,
-                'card_shadow' => '0 8px 24px rgba(0, 0, 0, 0.15)',
+                'card_shadow' => '0px 8px 24px 0px rgba(0, 0, 0, 0.15)',
                 'font_family' => 'inherit',
                 'heading_font_weight' => 700,
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
                 'body_letter_spacing' => 0,
-                'glass_blur' => 0
+                'glass_blur' => 0,
+                'avatar_size' => 80
             )
         );
 

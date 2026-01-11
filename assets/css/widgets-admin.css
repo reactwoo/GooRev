@@ -207,6 +207,10 @@
     display: none;
 }
 
+.grp-style-creative-only {
+    display: none;
+}
+
 .grp-hidden-setting {
     display: none;
 }
@@ -225,7 +229,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    /* Must be above the template editor modal (10001) */
+    z-index: 10002;
 }
 
 .grp-box-shadow-modal-content {
@@ -299,7 +304,7 @@
 #grp-style-editor-preview .grp-style-preview {
     margin: 0;
     padding: 0;
-    max-width: 420px;
+    max-width: 390px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;

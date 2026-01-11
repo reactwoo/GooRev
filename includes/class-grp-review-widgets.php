@@ -509,10 +509,17 @@ class GRP_Review_Widgets {
             return;
         }
         
-        wp_enqueue_style('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/css/widgets-admin.css', array(), GRP_PLUGIN_VERSION);
+        $widgets_admin_css = GRP_PLUGIN_DIR . 'assets/css/widgets-admin.css';
+        $review_widgets_css = GRP_PLUGIN_DIR . 'assets/css/review-widgets.css';
+        $widgets_admin_js = GRP_PLUGIN_DIR . 'assets/js/widgets-admin.js';
+        $ver_css = file_exists($widgets_admin_css) ? filemtime($widgets_admin_css) : GRP_PLUGIN_VERSION;
+        $ver_review_css = file_exists($review_widgets_css) ? filemtime($review_widgets_css) : GRP_PLUGIN_VERSION;
+        $ver_js = file_exists($widgets_admin_js) ? filemtime($widgets_admin_js) : GRP_PLUGIN_VERSION;
+
+        wp_enqueue_style('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/css/widgets-admin.css', array(), $ver_css);
         // Also load frontend styles in admin for preview
-        wp_enqueue_style('grp-review-widgets', GRP_PLUGIN_URL . 'assets/css/review-widgets.css', array(), GRP_PLUGIN_VERSION);
-        wp_enqueue_script('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/js/widgets-admin.js', array('jquery'), GRP_PLUGIN_VERSION, true);
+        wp_enqueue_style('grp-review-widgets', GRP_PLUGIN_URL . 'assets/css/review-widgets.css', array(), $ver_review_css);
+        wp_enqueue_script('grp-widgets-admin', GRP_PLUGIN_URL . 'assets/js/widgets-admin.js', array('jquery'), $ver_js, true);
         
         $place_id = get_option('grp_place_id', '');
         $place_id_auto = get_option('grp_gbp_place_id_default', '');

@@ -62,18 +62,48 @@ if (!defined('ABSPATH')) {
                             </div>
                         </div>
 
-                        <div class="grp-template-editor-row">
+                        <div class="grp-template-editor-row grp-inline-spacing-row">
                             <span class="grp-template-editor-label"><?php esc_html_e('Card Radius', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field grp-spacing-group">
+                                <div class="grp-spacing-input">
+                                    <input type="number" id="grp-style-card-radius-tl" min="0" step="1" value="0">
+                                    <span><?php esc_html_e('Top-left', 'google-reviews-plugin'); ?></span>
+                                </div>
+                                <div class="grp-spacing-input">
+                                    <input type="number" id="grp-style-card-radius-tr" min="0" step="1" value="0">
+                                    <span><?php esc_html_e('Top-right', 'google-reviews-plugin'); ?></span>
+                                </div>
+                                <div class="grp-spacing-input">
+                                    <input type="number" id="grp-style-card-radius-br" min="0" step="1" value="0">
+                                    <span><?php esc_html_e('Bottom-right', 'google-reviews-plugin'); ?></span>
+                                </div>
+                                <div class="grp-spacing-input">
+                                    <input type="number" id="grp-style-card-radius-bl" min="0" step="1" value="0">
+                                    <span><?php esc_html_e('Bottom-left', 'google-reviews-plugin'); ?></span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="grp-style-card-radius" value="">
+                        </div>
+
+                        <div class="grp-template-editor-row">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Glass Effect', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
-                                <input type="number" id="grp-style-card-radius" min="0" max="80" step="1" placeholder="14">
-                                <span>px</span>
+                                <label class="grp-template-checkbox">
+                                    <input type="checkbox" id="grp-style-glass-effect">
+                                    <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                                </label>
                             </div>
                         </div>
 
                         <div class="grp-template-editor-row">
                             <span class="grp-template-editor-label"><?php esc_html_e('Card Shadow', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
-                                <input type="text" id="grp-style-card-shadow" placeholder="0 8px 32px rgba(0,0,0,0.12)">
+                                <label class="grp-template-checkbox">
+                                    <input type="checkbox" id="grp-style-card-shadow-enabled">
+                                    <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                                </label>
+                                <button type="button" class="button" id="grp-style-card-shadow-edit"><?php esc_html_e('Edit', 'google-reviews-plugin'); ?></button>
+                                <input type="hidden" id="grp-style-card-shadow" value="">
                             </div>
                         </div>
                     </div>
@@ -100,6 +130,36 @@ if (!defined('ABSPATH')) {
                             <div class="grp-template-editor-field grp-template-color-field">
                                 <input type="color" id="grp-style-star-color">
                                 <input type="text" id="grp-style-star-text" placeholder="#FBBC05">
+                            </div>
+                        </div>
+
+                        <div class="grp-template-editor-row grp-style-creative-only">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Avatar Size', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <input type="number" id="grp-style-avatar-size" min="20" max="120" step="1" placeholder="80">
+                                <span>px</span>
+                            </div>
+                        </div>
+
+                        <div class="grp-template-editor-row grp-style-creative-only">
+                            <span class="grp-template-editor-label"><?php esc_html_e('Gradient Colors', 'google-reviews-plugin'); ?></span>
+                            <div class="grp-template-editor-field">
+                                <div class="grp-template-color-field">
+                                    <input type="color" id="grp-style-gradient-blue-color">
+                                    <input type="text" id="grp-style-gradient-blue-text" placeholder="#4285F4">
+                                </div>
+                                <div class="grp-template-color-field" style="margin-top: 8px;">
+                                    <input type="color" id="grp-style-gradient-red-color">
+                                    <input type="text" id="grp-style-gradient-red-text" placeholder="#EA4335">
+                                </div>
+                                <div class="grp-template-color-field" style="margin-top: 8px;">
+                                    <input type="color" id="grp-style-gradient-yellow-color">
+                                    <input type="text" id="grp-style-gradient-yellow-text" placeholder="#FBBC05">
+                                </div>
+                                <div class="grp-template-color-field" style="margin-top: 8px;">
+                                    <input type="color" id="grp-style-gradient-green-color">
+                                    <input type="text" id="grp-style-gradient-green-text" placeholder="#34A853">
+                                </div>
                             </div>
                         </div>
 
@@ -171,6 +231,34 @@ if (!defined('ABSPATH')) {
                     <button type="button" class="button" id="grp-style-editor-close"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reuse the same shadow editor UX as the widgets page -->
+<div id="grp-style-box-shadow-modal" class="grp-box-shadow-modal" style="display: none;">
+    <div class="grp-box-shadow-modal-content">
+        <h3><?php esc_html_e('Box Shadow Editor', 'google-reviews-plugin'); ?></h3>
+        <label>
+            <?php esc_html_e('Color', 'google-reviews-plugin'); ?>
+            <input type="color" id="grp-style-box-shadow-color-picker" value="#000000">
+        </label>
+        <div class="grp-box-shadow-controls">
+            <?php foreach (array(
+                array('name' => 'Horizontal', 'id' => 'h', 'min' => -50, 'max' => 50, 'value' => 0),
+                array('name' => 'Vertical', 'id' => 'v', 'min' => -50, 'max' => 50, 'value' => 8),
+                array('name' => 'Blur', 'id' => 'blur', 'min' => 0, 'max' => 100, 'value' => 32),
+                array('name' => 'Spread', 'id' => 'spread', 'min' => -50, 'max' => 50, 'value' => 0),
+            ) as $control): ?>
+                <div class="grp-shadow-control">
+                    <span class="grp-shadow-label"><?php echo esc_html($control['name']); ?></span>
+                    <input type="range" class="grp-style-shadow-range" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
+                    <input type="number" class="grp-style-shadow-number" data-target="<?php echo esc_attr($control['id']); ?>" min="<?php echo esc_attr($control['min']); ?>" max="<?php echo esc_attr($control['max']); ?>" value="<?php echo esc_attr($control['value']); ?>">
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <div class="grp-box-shadow-actions">
+            <button type="button" id="grp-style-box-shadow-modal-close" class="button"><?php esc_html_e('Done', 'google-reviews-plugin'); ?></button>
         </div>
     </div>
 </div>

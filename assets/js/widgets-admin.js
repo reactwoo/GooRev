@@ -109,6 +109,16 @@
         var $styleAccentText = $('#grp-style-accent-text');
         var $styleStarColor = $('#grp-style-star-color');
         var $styleStarText = $('#grp-style-star-text');
+        // Creative-only controls (styles modal)
+        var $styleAvatarSize = $('#grp-style-avatar-size');
+        var $styleGradientBlueColor = $('#grp-style-gradient-blue-color');
+        var $styleGradientBlueText = $('#grp-style-gradient-blue-text');
+        var $styleGradientRedColor = $('#grp-style-gradient-red-color');
+        var $styleGradientRedText = $('#grp-style-gradient-red-text');
+        var $styleGradientYellowColor = $('#grp-style-gradient-yellow-color');
+        var $styleGradientYellowText = $('#grp-style-gradient-yellow-text');
+        var $styleGradientGreenColor = $('#grp-style-gradient-green-color');
+        var $styleGradientGreenText = $('#grp-style-gradient-green-text');
         var $styleCardRadius = $('#grp-style-card-radius'); // hidden field (CSS border-radius value)
         var $styleCardRadiusTL = $('#grp-style-card-radius-tl');
         var $styleCardRadiusTR = $('#grp-style-card-radius-tr');
@@ -207,6 +217,10 @@
             if (overrides.gradient_red) map['--grp-gradient_red'] = overrides.gradient_red;
             if (overrides.gradient_yellow) map['--grp-gradient_yellow'] = overrides.gradient_yellow;
             if (overrides.gradient_green) map['--grp-gradient_green'] = overrides.gradient_green;
+            if (overrides.avatar_size !== undefined && overrides.avatar_size !== null && String(overrides.avatar_size) !== '') {
+                var asz = String(overrides.avatar_size).trim();
+                map['--grp-avatar_size'] = (/^-?\d+(\.\d+)?$/.test(asz) ? (asz + 'px') : asz);
+            }
             return map;
         }
 
@@ -306,6 +320,40 @@
             var shadowCss = String($styleCardShadow.val() || '').trim();
             var glassBlur = $styleGlassEffect.is(':checked') ? 12 : 0;
 
+            // When glass is enabled, auto-adjust the key colors if the user hasn't changed them away from defaults.
+            var defaults = getStyleDefaults(activeStyleKey, activeStyleVariant) || {};
+            var autoGlassBackground = '#0F172A';
+            var autoGlassCardBg = 'rgba(255,255,255,0.08)';
+            var autoGlassBorder = 'rgba(255,255,255,0.15)';
+
+            if ($styleGlassEffect.is(':checked')) {
+                if (String($styleBgText.val() || '').trim() === String(defaults.background || '').trim()) {
+                    $styleBgText.val(autoGlassBackground);
+                    $styleBgColor.val(autoGlassBackground);
+                }
+                if (String($styleCardBg.val() || '').trim() === String(defaults.card_background || '').trim()) {
+                    $styleCardBg.val(autoGlassCardBg);
+                }
+                if (String($styleBorderText.val() || '').trim() === String(defaults.border || '').trim()) {
+                    $styleBorderText.val(autoGlassBorder);
+                    // Keep picker in a sane state (can't show rgba)
+                    $styleBorderColor.val('#ffffff');
+                }
+            } else {
+                // When glass is turned off, revert auto values back to defaults (only if still on the auto values)
+                if (String($styleBgText.val() || '').trim() === autoGlassBackground && defaults.background) {
+                    $styleBgText.val(defaults.background);
+                    if (isValidHexOrShort(defaults.background)) $styleBgColor.val(defaults.background);
+                }
+                if (String($styleCardBg.val() || '').trim() === autoGlassCardBg && defaults.card_background) {
+                    $styleCardBg.val(defaults.card_background);
+                }
+                if (String($styleBorderText.val() || '').trim() === autoGlassBorder && defaults.border) {
+                    $styleBorderText.val(defaults.border);
+                    if (isValidHexOrShort(defaults.border)) $styleBorderColor.val(defaults.border);
+                }
+            }
+
             var overrides = {
                 background: String($styleBgText.val() || '').trim(),
                 text: String($styleTextText.val() || '').trim(),
@@ -316,6 +364,11 @@
                 card_background: String($styleCardBg.val() || '').trim(),
                 card_radius: String(radiusCss || '').trim(),
                 card_shadow: shadowCss,
+                avatar_size: String($styleAvatarSize.val() || '').trim(),
+                gradient_blue: String($styleGradientBlueText.val() || '').trim(),
+                gradient_red: String($styleGradientRedText.val() || '').trim(),
+                gradient_yellow: String($styleGradientYellowText.val() || '').trim(),
+                gradient_green: String($styleGradientGreenText.val() || '').trim(),
                 font_family: String($styleFontFamily.val() || '').trim(),
                 heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
                 body_font_weight: String($styleBodyWeight.val() || '').trim(),
@@ -354,6 +407,12 @@
             $styleAccentText.val(effective.accent || '');
             $styleStarText.val(effective.star || '');
             $styleCardBg.val(effective.card_background || '');
+            // Creative-only defaults
+            $styleAvatarSize.val(effective.avatar_size !== undefined ? effective.avatar_size : '');
+            $styleGradientBlueText.val(effective.gradient_blue || '');
+            $styleGradientRedText.val(effective.gradient_red || '');
+            $styleGradientYellowText.val(effective.gradient_yellow || '');
+            $styleGradientGreenText.val(effective.gradient_green || '');
             // Radius: store as CSS border-radius value in hidden field, but edit as 4 corners
             var radiusCorners = parseRadiusToCorners(effective.card_radius, 14);
             $styleCardRadiusTL.val(radiusCorners.tl);
@@ -387,10 +446,17 @@
             if (isValidHexOrShort($styleBorderText.val())) $styleBorderColor.val($styleBorderText.val());
             if (isValidHexOrShort($styleAccentText.val())) $styleAccentColor.val($styleAccentText.val());
             if (isValidHexOrShort($styleStarText.val())) $styleStarColor.val($styleStarText.val());
+            if (isValidHexOrShort($styleGradientBlueText.val())) $styleGradientBlueColor.val($styleGradientBlueText.val());
+            if (isValidHexOrShort($styleGradientRedText.val())) $styleGradientRedColor.val($styleGradientRedText.val());
+            if (isValidHexOrShort($styleGradientYellowText.val())) $styleGradientYellowColor.val($styleGradientYellowText.val());
+            if (isValidHexOrShort($styleGradientGreenText.val())) $styleGradientGreenColor.val($styleGradientGreenText.val());
 
             $styleEditorPreview.empty().append($cloned);
             applyStyleVars($cloned, toCssVarMap(effective));
             updateStyleEditorPreviewFromInputs();
+
+            // Show/hide creative-only controls
+            $styleEditorModal.find('.grp-style-creative-only').toggle(activeStyleKey === 'creative');
         }
 
         function closeStyleEditor() {
@@ -444,6 +510,22 @@
             $styleAccentText.on('input', function() { syncColorPair($styleAccentColor, $styleAccentText); updateStyleEditorPreviewFromInputs(); });
             $styleStarText.on('input', function() { syncColorPair($styleStarColor, $styleStarText); updateStyleEditorPreviewFromInputs(); });
             $styleCardBg.on('input', updateStyleEditorPreviewFromInputs);
+            $styleAvatarSize.on('input', updateStyleEditorPreviewFromInputs);
+
+            function syncColorPairAny($color, $text) {
+                var val = String($text.val() || '').trim();
+                if (isValidHexOrShort(val)) {
+                    $color.val(val);
+                }
+            }
+            function hookGradientPair($color, $text) {
+                $text.on('input', function() { syncColorPairAny($color, $text); updateStyleEditorPreviewFromInputs(); });
+                $color.on('input', function() { $text.val($color.val()); updateStyleEditorPreviewFromInputs(); });
+            }
+            hookGradientPair($styleGradientBlueColor, $styleGradientBlueText);
+            hookGradientPair($styleGradientRedColor, $styleGradientRedText);
+            hookGradientPair($styleGradientYellowColor, $styleGradientYellowText);
+            hookGradientPair($styleGradientGreenColor, $styleGradientGreenText);
             $styleCardRadiusTL.on('input', updateStyleEditorPreviewFromInputs);
             $styleCardRadiusTR.on('input', updateStyleEditorPreviewFromInputs);
             $styleCardRadiusBR.on('input', updateStyleEditorPreviewFromInputs);
@@ -540,6 +622,11 @@
                     card_background: String($styleCardBg.val() || '').trim(),
                     card_radius: String(radiusCss || '').trim(),
                     card_shadow: String($styleCardShadow.val() || '').trim(),
+                    avatar_size: String($styleAvatarSize.val() || '').trim(),
+                    gradient_blue: String($styleGradientBlueText.val() || '').trim(),
+                    gradient_red: String($styleGradientRedText.val() || '').trim(),
+                    gradient_yellow: String($styleGradientYellowText.val() || '').trim(),
+                    gradient_green: String($styleGradientGreenText.val() || '').trim(),
                     font_family: String($styleFontFamily.val() || '').trim(),
                     heading_font_weight: String($styleHeadingWeight.val() || '').trim(),
                     body_font_weight: String($styleBodyWeight.val() || '').trim(),
