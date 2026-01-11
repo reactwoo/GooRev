@@ -292,6 +292,24 @@ class GRP_Admin {
         
         wp_enqueue_style('grp-admin', GRP_PLUGIN_URL . 'assets/css/admin.css', array(), GRP_PLUGIN_VERSION);
         wp_enqueue_script('grp-admin', GRP_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), GRP_PLUGIN_VERSION, true);
+
+        // Ensure widgets/styles admin tooling is available on Styles + Widgets pages.
+        // (Styles page relies on widgets-admin.js for the shared modals + live preview logic.)
+        if (class_exists('GRP_Review_Widgets') && in_array($hook, array(
+            'google-reviews_page_google-reviews-widgets',
+            'google-reviews_page_google-reviews-styles',
+        ), true)) {
+            try {
+                $widgets = GRP_Review_Widgets::get_instance();
+                if ($widgets && method_exists($widgets, 'enqueue_admin_assets')) {
+                    $widgets->enqueue_admin_assets($hook);
+                }
+            } catch (Exception $e) {
+                // Best-effort: do not block page render if assets enqueue fails.
+            } catch (Error $e) {
+                // Best-effort: do not block page render if assets enqueue fails.
+            }
+        }
         
         wp_localize_script('grp-admin', 'grp_admin', array(
             'ajax_url' => admin_url('admin-ajax.php'),

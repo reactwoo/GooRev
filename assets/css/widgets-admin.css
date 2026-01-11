@@ -323,6 +323,7 @@
 .grp-template-editor-preview-col {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .grp-template-editor-preview.grp-glass-preview {
@@ -332,6 +333,31 @@
 .grp-template-editor-preview .grp-review-button {
     width: auto;
     max-width: 100%;
+}
+
+/* In the modal preview, force layout/card roots to shrink-to-fit so they can be centered */
+.grp-template-editor-preview .grp-layout1-preview,
+.grp-template-editor-preview .grp-layout2-preview,
+.grp-template-editor-preview .grp-review-card {
+    width: auto !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.grp-template-editor-preview .grp-template-modal-preview-inner {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Make license-blocked controls look truly disabled (but still clickable for upgrade messaging) */
+.grp-pro-feature {
+    opacity: 0.55;
+    filter: grayscale(0.25);
+    cursor: not-allowed;
+}
+.grp-pro-feature:hover {
+    opacity: 0.55;
 }
 
 .grp-template-modal-preview-inner {

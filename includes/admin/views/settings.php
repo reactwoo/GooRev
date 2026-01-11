@@ -137,23 +137,29 @@ if (!defined('ABSPATH')) {
                 $license = new GRP_License();
                 $has_license = $license->has_license();
                 $is_free = $license->is_free();
+                $is_pro = $license->is_pro();
+                $is_enterprise = $license->is_enterprise();
                 ?>
                 <?php if ($has_license): ?>
                     <div class="grp-license-status">
                         <?php if ($is_free): ?>
                             <span class="grp-status-connected">✓ <?php esc_html_e('Free License Active', 'google-reviews-plugin'); ?></span>
+                        <?php elseif ($is_enterprise): ?>
+                            <span class="grp-status-connected">✓ <?php esc_html_e('Enterprise License Active', 'google-reviews-plugin'); ?></span>
                         <?php elseif ($is_pro): ?>
                             <span class="grp-status-connected">✓ <?php esc_html_e('Pro License Active', 'google-reviews-plugin'); ?></span>
                         <?php else: ?>
-                            <span class="grp-status-connected">✓ <?php esc_html_e('Enterprise License Active', 'google-reviews-plugin'); ?></span>
+                            <span class="grp-status-connected">✓ <?php esc_html_e('License Active', 'google-reviews-plugin'); ?></span>
                         <?php endif; ?>
                     </div>
                     <?php if ($is_free): ?>
                         <p><?php esc_html_e('You have access to free features. Upgrade to Pro or Enterprise for advanced features.', 'google-reviews-plugin'); ?></p>
+                    <?php elseif ($is_enterprise): ?>
+                        <p><?php esc_html_e('You have access to all Enterprise features including AI-powered review responses.', 'google-reviews-plugin'); ?></p>
                     <?php elseif ($is_pro): ?>
                         <p><?php esc_html_e('You have access to all Pro features.', 'google-reviews-plugin'); ?></p>
                     <?php else: ?>
-                        <p><?php esc_html_e('You have access to all Enterprise features including AI-powered review responses.', 'google-reviews-plugin'); ?></p>
+                        <p><?php esc_html_e('Your license is active, but the tier could not be determined. Please refresh token or reactivate your license.', 'google-reviews-plugin'); ?></p>
                     <?php endif; ?>
                     <form method="post" action="" style="margin-top: 15px;">
                         <?php wp_nonce_field('grp_license_nonce'); ?>
