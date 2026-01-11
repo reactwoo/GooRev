@@ -1231,6 +1231,32 @@
             $templateEditorModal.addClass('grp-template-active');
         };
 
+        // Styles page: ensure the Customize button always opens the style editor modal.
+        // (Even if the inline script in styles.php is cached/blocked for any reason.)
+        $(document).on('click', '.grp-customize-style', function(e) {
+            // Only handle on pages where the style editor modal exists.
+            if (!$styleEditorModal.length) return;
+            e.preventDefault();
+
+            var $trigger = $(this);
+            if ($trigger.hasClass('grp-pro-feature')) {
+                alert((typeof grpWidgets !== 'undefined' && grpWidgets.strings && grpWidgets.strings.templateProMessage)
+                    ? grpWidgets.strings.templateProMessage
+                    : 'Upgrade to Pro to customize styles.');
+                return;
+            }
+
+            var styleKey = ($trigger.data('style') || '').toString();
+            var $card = $trigger.closest('.grp-style-card');
+            var variant = ($card.find('.grp-variant-btn.active').data('variant') || 'light');
+
+            if (typeof window.grpOpenStyleModal === 'function') {
+                window.grpOpenStyleModal(styleKey, variant);
+            } else {
+                console.error('grpOpenStyleModal is not defined. widgets-admin.js may have failed to initialize.');
+            }
+        });
+
         $templateEditorModal.on('click', function(e) {
             if ($(e.target).is($templateEditorModal)) {
                 closeTemplateModal();

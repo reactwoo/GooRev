@@ -279,6 +279,16 @@
     align-items: start;
 }
 
+/* Widgets modal: stack preview above controls (as requested) */
+#grp-template-editor-modal .grp-template-editor-body {
+    grid-template-columns: 1fr;
+}
+
+/* Styles modal: keep side-by-side layout */
+#grp-style-editor-modal .grp-template-editor-body {
+    grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr);
+}
+
 .grp-template-editor-controls-col {
     max-height: calc(100vh - 170px);
     overflow: auto;
