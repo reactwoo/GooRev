@@ -322,6 +322,7 @@ $is_pro = $license->is_pro();
                 if (!$preview_template) {
                     $preview_template = $review_widgets->get_button_template('basic');
                 }
+                $preview_url = $has_place_id ? GRP_Review_Widgets::get_instance()->generate_review_url('', 'button', 'preview') : '#';
                 $preview_qr_url = '';
                 if ($has_place_id && !empty($preview_template['qr'])) {
                     $qr_size = isset($preview_template['qr_size']) ? absint($preview_template['qr_size']) : 125;
@@ -338,7 +339,6 @@ $is_pro = $license->is_pro();
                 ?>
                 <div id="grp-button-preview" class="grp-preview-shell" style="padding: 30px; background: #f9f9f9; border-radius: 4px; margin: 20px 0; text-align: center;">
                     <?php
-                    $preview_url = $has_place_id ? GRP_Review_Widgets::get_instance()->generate_review_url('', 'button', 'preview') : '#';
                     $preview_styles = array();
                     $preview_classes = array('grp-review-button', 'grp-review-button-template-' . sanitize_title($button_template));
                     $is_card = isset($preview_template['type']) && $preview_template['type'] === 'card';
@@ -522,6 +522,44 @@ $is_pro = $license->is_pro();
                                 <label for="grp_widget_template_font_family"><?php esc_html_e('Font Family', 'google-reviews-plugin'); ?></label>
                             </th>
                             <td>
+                                <?php
+                                // Ensure font lists exist (used for the font-family selector)
+                                if (!isset($font_sans_serif) || !is_array($font_sans_serif)) {
+                                    $font_sans_serif = array(
+                                        'Inter, sans-serif' => __('Inter', 'google-reviews-plugin'),
+                                        'Roboto, sans-serif' => __('Roboto', 'google-reviews-plugin'),
+                                        'Open Sans, sans-serif' => __('Open Sans', 'google-reviews-plugin'),
+                                        'Lato, sans-serif' => __('Lato', 'google-reviews-plugin'),
+                                        'Montserrat, sans-serif' => __('Montserrat', 'google-reviews-plugin'),
+                                        'Poppins, sans-serif' => __('Poppins', 'google-reviews-plugin'),
+                                        'Raleway, sans-serif' => __('Raleway', 'google-reviews-plugin'),
+                                        'Nunito, sans-serif' => __('Nunito', 'google-reviews-plugin'),
+                                        'Source Sans Pro, sans-serif' => __('Source Sans Pro', 'google-reviews-plugin'),
+                                        'Ubuntu, sans-serif' => __('Ubuntu', 'google-reviews-plugin'),
+                                        'Work Sans, sans-serif' => __('Work Sans', 'google-reviews-plugin'),
+                                        'DM Sans, sans-serif' => __('DM Sans', 'google-reviews-plugin'),
+                                    );
+                                }
+                                if (!isset($font_serif) || !is_array($font_serif)) {
+                                    $font_serif = array(
+                                        'Merriweather, serif' => __('Merriweather', 'google-reviews-plugin'),
+                                        'Lora, serif' => __('Lora', 'google-reviews-plugin'),
+                                        'Playfair Display, serif' => __('Playfair Display', 'google-reviews-plugin'),
+                                        'PT Serif, serif' => __('PT Serif', 'google-reviews-plugin'),
+                                        'Crimson Text, serif' => __('Crimson Text', 'google-reviews-plugin'),
+                                        'Libre Baskerville, serif' => __('Libre Baskerville', 'google-reviews-plugin'),
+                                        'Bitter, serif' => __('Bitter', 'google-reviews-plugin'),
+                                        'Georgia, serif' => __('Georgia', 'google-reviews-plugin'),
+                                    );
+                                }
+                                if (!isset($font_display) || !is_array($font_display)) {
+                                    $font_display = array(
+                                        'Oswald, sans-serif' => __('Oswald', 'google-reviews-plugin'),
+                                        'Bebas Neue, sans-serif' => __('Bebas Neue', 'google-reviews-plugin'),
+                                        'Righteous, cursive' => __('Righteous', 'google-reviews-plugin'),
+                                    );
+                                }
+                                ?>
                                 <select id="grp_widget_template_font_family" name="grp_widget_template_font_family">
                                     <option value="" <?php selected($font_family, ''); ?>><?php esc_html_e('Inherit (Theme Font)', 'google-reviews-plugin'); ?></option>
                                     <option value="inherit" <?php selected($font_family, 'inherit'); ?>><?php esc_html_e('Inherit', 'google-reviews-plugin'); ?></option>

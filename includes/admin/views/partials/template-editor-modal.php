@@ -266,19 +266,19 @@ if (!isset($font_display)) {
                     <div class="grp-template-editor-field grp-spacing-group">
                         <div class="grp-spacing-input">
                             <input type="number" id="grp-modal-border-top-left" min="0" step="1" value="0">
-                            <span><?php esc_html_e('Top Left', 'google-reviews-plugin'); ?></span>
+                            <span><?php esc_html_e('Top-left', 'google-reviews-plugin'); ?></span>
                         </div>
                         <div class="grp-spacing-input">
                             <input type="number" id="grp-modal-border-top-right" min="0" step="1" value="0">
-                            <span><?php esc_html_e('Top Right', 'google-reviews-plugin'); ?></span>
+                            <span><?php esc_html_e('Top-right', 'google-reviews-plugin'); ?></span>
                         </div>
                         <div class="grp-spacing-input">
                             <input type="number" id="grp-modal-border-bottom-right" min="0" step="1" value="0">
-                            <span><?php esc_html_e('Bottom Right', 'google-reviews-plugin'); ?></span>
+                            <span><?php esc_html_e('Bottom-right', 'google-reviews-plugin'); ?></span>
                         </div>
                         <div class="grp-spacing-input">
                             <input type="number" id="grp-modal-border-bottom-left" min="0" step="1" value="0">
-                            <span><?php esc_html_e('Bottom Left', 'google-reviews-plugin'); ?></span>
+                            <span><?php esc_html_e('Bottom-left', 'google-reviews-plugin'); ?></span>
                         </div>
                     </div>
                 </div>

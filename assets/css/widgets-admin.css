@@ -237,7 +237,7 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-#grp-template-editor-modal {
+.grp-template-editor-modal {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
@@ -254,7 +254,7 @@
     overflow-y: auto;
 }
 
-#grp-template-editor-modal.grp-template-active {
+.grp-template-editor-modal.grp-template-active {
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
@@ -392,6 +392,11 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
+}
+
+/* Space between grouped control grids (e.g. shadow group above spacing group) */
+.grp-template-editor-controls + .grp-template-editor-controls {
+    margin-top: 18px;
 }
 
 @media (max-width: 900px) {
