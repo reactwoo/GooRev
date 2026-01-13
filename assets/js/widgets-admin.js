@@ -112,6 +112,12 @@
         var $styleMutedText = $('#grp-style-muted-text');
         var $styleBorderColor = $('#grp-style-border-color');
         var $styleBorderText = $('#grp-style-border-text');
+        var $styleBorderEnabled = $('#grp-style-border-enabled');
+        var $styleBorderTop = $('#grp-style-border-top');
+        var $styleBorderRight = $('#grp-style-border-right');
+        var $styleBorderBottom = $('#grp-style-border-bottom');
+        var $styleBorderLeft = $('#grp-style-border-left');
+        var $styleBorderWidthsWrap = $('#grp-style-border-widths');
         var $styleAccentColor = $('#grp-style-accent-color');
         var $styleAccentText = $('#grp-style-accent-text');
         var $styleStarColor = $('#grp-style-star-color');
@@ -197,6 +203,10 @@
             if (overrides.text) map['--grp-text'] = overrides.text;
             if (overrides.muted) map['--grp-muted'] = overrides.muted;
             if (overrides.border) map['--grp-border'] = overrides.border;
+            if (overrides.border_top !== undefined && overrides.border_top !== null && String(overrides.border_top) !== '') map['--grp-border_width_top'] = String(overrides.border_top) + 'px';
+            if (overrides.border_right !== undefined && overrides.border_right !== null && String(overrides.border_right) !== '') map['--grp-border_width_right'] = String(overrides.border_right) + 'px';
+            if (overrides.border_bottom !== undefined && overrides.border_bottom !== null && String(overrides.border_bottom) !== '') map['--grp-border_width_bottom'] = String(overrides.border_bottom) + 'px';
+            if (overrides.border_left !== undefined && overrides.border_left !== null && String(overrides.border_left) !== '') map['--grp-border_width_left'] = String(overrides.border_left) + 'px';
             if (overrides.star) map['--grp-star'] = overrides.star;
             if (overrides.accent) map['--grp-accent'] = overrides.accent;
             if (overrides.card_background) map['--grp-card_background'] = overrides.card_background;
@@ -371,12 +381,24 @@
                     if (isValidHexOrShort(defaults.border)) $styleBorderColor.val(defaults.border);
                 }
             }
+            var borderEnabled = $styleBorderEnabled.is(':checked');
+            var bwTop = borderEnabled ? clampNumber($styleBorderTop.val(), 0, 20, 0) : 0;
+            var bwRight = borderEnabled ? clampNumber($styleBorderRight.val(), 0, 20, 0) : 0;
+            var bwBottom = borderEnabled ? clampNumber($styleBorderBottom.val(), 0, 20, 0) : 0;
+            var bwLeft = borderEnabled ? clampNumber($styleBorderLeft.val(), 0, 20, 0) : 0;
+            if ($styleBorderWidthsWrap.length) {
+                $styleBorderWidthsWrap.css('opacity', borderEnabled ? '1' : '0.5');
+            }
 
             var overrides = {
                 background: String($styleBgText.val() || '').trim(),
                 text: String($styleTextText.val() || '').trim(),
                 muted: String($styleMutedText.val() || '').trim(),
                 border: String($styleBorderText.val() || '').trim(),
+                border_top: bwTop,
+                border_right: bwRight,
+                border_bottom: bwBottom,
+                border_left: bwLeft,
                 accent: String($styleAccentText.val() || '').trim(),
                 star: String($styleStarText.val() || '').trim(),
                 card_background: String($styleCardBg.val() || '').trim(),
@@ -419,6 +441,16 @@
             $styleTextText.val(effective.text || '');
             $styleMutedText.val(effective.muted || '');
             $styleBorderText.val(effective.border || '');
+            // Border widths (defaults depend on style; fallback to 0)
+            var bTop = clampNumber(effective.border_top, 0, 20, 0);
+            var bRight = clampNumber(effective.border_right, 0, 20, 0);
+            var bBottom = clampNumber(effective.border_bottom, 0, 20, 0);
+            var bLeft = clampNumber(effective.border_left, 0, 20, 0);
+            $styleBorderTop.val(bTop);
+            $styleBorderRight.val(bRight);
+            $styleBorderBottom.val(bBottom);
+            $styleBorderLeft.val(bLeft);
+            $styleBorderEnabled.prop('checked', (bTop + bRight + bBottom + bLeft) > 0);
             $styleAccentText.val(effective.accent || '');
             $styleStarText.val(effective.star || '');
             $styleCardBg.val(effective.card_background || '');
@@ -473,8 +505,15 @@
             applyStyleVars($cloned, toCssVarMap(effective));
             updateStyleEditorPreviewFromInputs();
 
-            // Show/hide creative-only controls
-            $styleEditorModal.find('.grp-style-creative-only').toggle(activeStyleKey === 'creative');
+            // Show/hide creative-only vs non-creative controls
+            var isCreative = (activeStyleKey === 'creative');
+            $styleEditorModal.toggleClass('grp-style-is-creative', isCreative);
+            $styleEditorModal.find('.grp-style-creative-only').toggle(isCreative);
+            $styleEditorModal.find('.grp-style-non-creative-only').toggle(!isCreative);
+            if (isCreative) {
+                // Creative: lock variant and hide selector (stored under light)
+                $styleVariantSelect.val('light');
+            }
         }
 
         function closeStyleEditor() {
@@ -528,6 +567,11 @@
             $styleAccentText.on('input', function() { syncColorPair($styleAccentColor, $styleAccentText); updateStyleEditorPreviewFromInputs(); });
             $styleStarText.on('input', function() { syncColorPair($styleStarColor, $styleStarText); updateStyleEditorPreviewFromInputs(); });
             $styleCardBg.on('input', updateStyleEditorPreviewFromInputs);
+            $styleBorderEnabled.on('change', updateStyleEditorPreviewFromInputs);
+            $styleBorderTop.on('input', updateStyleEditorPreviewFromInputs);
+            $styleBorderRight.on('input', updateStyleEditorPreviewFromInputs);
+            $styleBorderBottom.on('input', updateStyleEditorPreviewFromInputs);
+            $styleBorderLeft.on('input', updateStyleEditorPreviewFromInputs);
             $styleAvatarSize.on('input', updateStyleEditorPreviewFromInputs);
 
             // Creative gradient editor (reuse existing modal UX)
@@ -605,7 +649,7 @@
                     }
 
                     // Reuse existing preview update handler by triggering inputs
-                    $gradientEditorModal.show();
+                    $gradientEditorModal.addClass('grp-active').css('display', 'flex');
                     $('.grp-gradient-mid-toggle').show();
                     $('.grp-gradient-mid-stop').show();
                     if ($gradientEditorMidEnabled.length) {
@@ -619,6 +663,7 @@
 
                     // Mark context so done button writes to styles instead of templates
                     $gradientEditorModal.data('grp-context', 'style');
+                    updateGradientEditorPreview();
                 });
             }
             $styleCardRadiusTL.on('input', updateStyleEditorPreviewFromInputs);
@@ -726,11 +771,20 @@
             $styleSave.on('click', function() {
                 var radiusCss = updateStyleRadiusHidden();
                 var glassBlur = $styleGlassEffect.is(':checked') ? 12 : 0;
+                var borderEnabled = $styleBorderEnabled.is(':checked');
+                var bwTop = borderEnabled ? clampNumber($styleBorderTop.val(), 0, 20, 0) : 0;
+                var bwRight = borderEnabled ? clampNumber($styleBorderRight.val(), 0, 20, 0) : 0;
+                var bwBottom = borderEnabled ? clampNumber($styleBorderBottom.val(), 0, 20, 0) : 0;
+                var bwLeft = borderEnabled ? clampNumber($styleBorderLeft.val(), 0, 20, 0) : 0;
                 var payload = {
                     background: String($styleBgText.val() || '').trim(),
                     text: String($styleTextText.val() || '').trim(),
                     muted: String($styleMutedText.val() || '').trim(),
                     border: String($styleBorderText.val() || '').trim(),
+                    border_top: String(bwTop),
+                    border_right: String(bwRight),
+                    border_bottom: String(bwBottom),
+                    border_left: String(bwLeft),
                     accent: String($styleAccentText.val() || '').trim(),
                     star: String($styleStarText.val() || '').trim(),
                     card_background: String($styleCardBg.val() || '').trim(),
@@ -1422,13 +1476,13 @@
             $('.grp-gradient-mid-toggle').hide();
             populateGradientEditor();
             if ($gradientEditorModal.length) {
-                $gradientEditorModal.css('display', 'flex');
+                $gradientEditorModal.addClass('grp-active').css('display', 'flex');
             }
         }
 
         function closeGradientEditor() {
             if ($gradientEditorModal.length) {
-                $gradientEditorModal.hide();
+                $gradientEditorModal.removeClass('grp-active').hide();
             }
         }
 

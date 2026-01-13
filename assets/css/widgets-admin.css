@@ -211,6 +211,18 @@
     display: none;
 }
 
+.grp-style-non-creative-only {
+    display: block;
+}
+
+/* Hard safety: when editing Creative style, hide non-creative fields no matter what */
+#grp-style-editor-modal.grp-style-is-creative .grp-style-non-creative-only {
+    display: none !important;
+}
+#grp-style-editor-modal.grp-style-is-creative .grp-style-creative-only {
+    display: block !important;
+}
+
 .grp-hidden-setting {
     display: none;
 }

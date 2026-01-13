@@ -210,6 +210,11 @@ class GRP_Styles {
                 $css_vars .= "
                 --grp-glass_blur: {$gb}px;
         ";
+                // For Creative "glass", make the gradient semi-transparent so blur shows through (Apple-like).
+                $grad_op = ($gb > 0) ? '0.35' : '1';
+                $css_vars .= "
+                --grp-gradient_opacity: {$grad_op};
+        ";
             }
             if (isset($light['avatar_size'])) {
                 $av = is_numeric($light['avatar_size']) ? (int) $light['avatar_size'] : 0;
@@ -301,6 +306,10 @@ class GRP_Styles {
                 $gb = rtrim(rtrim(number_format($gb, 2, '.', ''), '0'), '.');
                 $css_vars .= "
                     --grp-glass_blur: {$gb}px;
+        ";
+                $grad_op = ($gb > 0) ? '0.35' : '1';
+                $css_vars .= "
+                    --grp-gradient_opacity: {$grad_op};
         ";
             }
             if (isset($dark['avatar_size'])) {
@@ -417,6 +426,27 @@ class GRP_Styles {
             $ls = rtrim(rtrim(number_format($ls, 2, '.', ''), '0'), '.');
             $css_vars .= "
             --grp-body_letter_spacing: {$ls}px;
+        ";
+        }
+        // Border widths (px)
+        if (isset($colors['border_top'])) {
+            $css_vars .= "
+            --grp-border_width_top: " . ((int) $colors['border_top']) . "px;
+        ";
+        }
+        if (isset($colors['border_right'])) {
+            $css_vars .= "
+            --grp-border_width_right: " . ((int) $colors['border_right']) . "px;
+        ";
+        }
+        if (isset($colors['border_bottom'])) {
+            $css_vars .= "
+            --grp-border_width_bottom: " . ((int) $colors['border_bottom']) . "px;
+        ";
+        }
+        if (isset($colors['border_left'])) {
+            $css_vars .= "
+            --grp-border_width_left: " . ((int) $colors['border_left']) . "px;
         ";
         }
         if (isset($colors['avatar_size'])) {
@@ -594,6 +624,12 @@ class GRP_Styles {
             $n = max(20, min(120, $n));
             return (string) $n;
         }
+        if ($key === 'border_top' || $key === 'border_right' || $key === 'border_bottom' || $key === 'border_left') {
+            $n = is_numeric($value) ? (int) $value : null;
+            if ($n === null) return '';
+            $n = max(0, min(20, $n));
+            return (string) $n;
+        }
 
         return '';
     }
@@ -657,7 +693,9 @@ class GRP_Styles {
             background: var(--grp-card_background, rgba(255, 255, 255, 0.08));
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--grp-border, rgba(255, 255, 255, 0.15));
+            border-style: solid;
+            border-color: var(--grp-border, rgba(255, 255, 255, 0.15));
+            border-width: var(--grp-border_width_top, 1px) var(--grp-border_width_right, 1px) var(--grp-border_width_bottom, 1px) var(--grp-border_width_left, 1px);
             border-radius: var(--grp-card_radius, 14px);
             padding: 24px;
             margin-bottom: 24px;
@@ -781,7 +819,9 @@ class GRP_Styles {
         
         .grp-style-classic .grp-review {
             background: var(--grp-background);
-            border: 1px solid var(--grp-border, #D1D5DB);
+            border-style: solid;
+            border-color: var(--grp-border, #D1D5DB);
+            border-width: var(--grp-border_width_top, 1px) var(--grp-border_width_right, 1px) var(--grp-border_width_bottom, 1px) var(--grp-border_width_left, 1px);
             border-radius: var(--grp-card_radius, 4px);
             padding: 24px;
             margin-bottom: 24px;
@@ -868,7 +908,9 @@ class GRP_Styles {
         
         .grp-style-minimal .grp-review {
             background: var(--grp-background);
-            border: none;
+            border-style: solid;
+            border-color: var(--grp-border, transparent);
+            border-width: var(--grp-border_width_top, 0px) var(--grp-border_width_right, 0px) var(--grp-border_width_bottom, 0px) var(--grp-border_width_left, 0px);
             border-radius: var(--grp-card_radius, 10px);
             padding: 20px;
             margin-bottom: 20px;
@@ -959,7 +1001,9 @@ class GRP_Styles {
         
         .grp-style-corporate .grp-review {
             background: var(--grp-card_background, var(--grp-background_alt));
-            border: 1px solid var(--grp-border);
+            border-style: solid;
+            border-color: var(--grp-border, #E5E7EB);
+            border-width: var(--grp-border_width_top, 1px) var(--grp-border_width_right, 1px) var(--grp-border_width_bottom, 1px) var(--grp-border_width_left, 1px);
             border-radius: var(--grp-card_radius, 6px);
             padding: 0;
             margin: 0;
@@ -1085,15 +1129,31 @@ class GRP_Styles {
         }
         
         .grp-style-creative .grp-review {
-            border: none;
+            border-style: solid;
+            border-color: var(--grp-border, transparent);
+            border-width: var(--grp-border_width_top, 0px) var(--grp-border_width_right, 0px) var(--grp-border_width_bottom, 0px) var(--grp-border_width_left, 0px);
             border-radius: var(--grp-card_radius, 16px);
             padding: 35px 30px;
             margin-bottom: 30px;
             position: relative;
             overflow: hidden;
-            background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+            background: transparent;
             box-shadow: var(--grp-card_shadow, 0 8px 24px rgba(0, 0, 0, 0.15));
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .grp-style-creative .grp-review::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+            opacity: var(--grp-gradient_opacity, 1);
+            z-index: 0;
+        }
+
+        .grp-style-creative .grp-review > * {
+            position: relative;
+            z-index: 1;
         }
         
         .grp-style-creative .grp-review:hover {
@@ -1103,23 +1163,23 @@ class GRP_Styles {
         
         /* Random gradient variations - use data attributes for different colors */
         .grp-style-creative .grp-review[data-gradient='blue'] {
-            background: linear-gradient(135deg, #4285F4, #34A853);
+            --grp-gradient_css: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
         }
         
         .grp-style-creative .grp-review[data-gradient='red'] {
-            background: linear-gradient(135deg, #EA4335, #FBBC05);
+            --grp-gradient_css: linear-gradient(135deg, #EA4335 0%, #FBBC05 100%);
         }
         
         .grp-style-creative .grp-review[data-gradient='yellow'] {
-            background: linear-gradient(135deg, #FBBC05, #EA4335);
+            --grp-gradient_css: linear-gradient(135deg, #FBBC05 0%, #EA4335 100%);
         }
         
         .grp-style-creative .grp-review[data-gradient='green'] {
-            background: linear-gradient(135deg, #34A853, #4285F4);
+            --grp-gradient_css: linear-gradient(135deg, #34A853 0%, #4285F4 100%);
         }
         
         .grp-style-creative .grp-review[data-gradient='purple'] {
-            background: linear-gradient(135deg, #9C27B0, #E91E63);
+            --grp-gradient_css: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
         }
         
         .grp-style-creative .grp-review-quote {
@@ -1354,7 +1414,11 @@ class GRP_Styles {
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
                 'body_letter_spacing' => 0,
-                'glass_blur' => 0
+                'glass_blur' => 0,
+                'border_top' => 1,
+                'border_right' => 1,
+                'border_bottom' => 1,
+                'border_left' => 1
             ),
             'classic' => array(
                 'card_radius' => 4,
@@ -1364,7 +1428,11 @@ class GRP_Styles {
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
                 'body_letter_spacing' => 0,
-                'glass_blur' => 0
+                'glass_blur' => 0,
+                'border_top' => 1,
+                'border_right' => 1,
+                'border_bottom' => 1,
+                'border_left' => 1
             ),
             'minimal' => array(
                 'card_radius' => 10,
@@ -1374,7 +1442,11 @@ class GRP_Styles {
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
                 'body_letter_spacing' => 0,
-                'glass_blur' => 0
+                'glass_blur' => 0,
+                'border_top' => 0,
+                'border_right' => 0,
+                'border_bottom' => 0,
+                'border_left' => 0
             ),
             'corporate' => array(
                 'card_radius' => 6,
@@ -1384,7 +1456,11 @@ class GRP_Styles {
                 'body_font_weight' => 400,
                 'body_line_height' => 1.6,
                 'body_letter_spacing' => 0,
-                'glass_blur' => 0
+                'glass_blur' => 0,
+                'border_top' => 1,
+                'border_right' => 1,
+                'border_bottom' => 1,
+                'border_left' => 1
             ),
             'creative' => array(
                 'card_radius' => 16,
@@ -1395,7 +1471,11 @@ class GRP_Styles {
                 'body_line_height' => 1.6,
                 'body_letter_spacing' => 0,
                 'glass_blur' => 0,
-                'avatar_size' => 80
+                'avatar_size' => 80,
+                'border_top' => 0,
+                'border_right' => 0,
+                'border_bottom' => 0,
+                'border_left' => 0
             )
         );
 

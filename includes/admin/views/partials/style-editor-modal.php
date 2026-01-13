@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
             <div class="grp-template-editor-controls-col">
                 <div class="grp-template-editor-controls">
                     <div class="grp-template-editor-column">
-                        <div class="grp-template-editor-row">
+                        <div class="grp-template-editor-row grp-style-non-creative-only">
                             <span class="grp-template-editor-label"><?php esc_html_e('Variant', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
                                 <select id="grp-style-variant">
@@ -31,7 +31,7 @@ if (!defined('ABSPATH')) {
                             </div>
                         </div>
 
-                        <div class="grp-template-editor-row">
+                        <div class="grp-template-editor-row grp-style-non-creative-only">
                             <span class="grp-template-editor-label"><?php esc_html_e('Background', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field grp-template-color-field">
                                 <input type="color" id="grp-style-background-color">
@@ -39,7 +39,7 @@ if (!defined('ABSPATH')) {
                             </div>
                         </div>
 
-                        <div class="grp-template-editor-row">
+                        <div class="grp-template-editor-row grp-style-non-creative-only">
                             <span class="grp-template-editor-label"><?php esc_html_e('Card Background', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field">
                                 <input type="text" id="grp-style-card-background" placeholder="rgba(255,255,255,0.95)">
@@ -109,15 +109,41 @@ if (!defined('ABSPATH')) {
                     </div>
 
                     <div class="grp-template-editor-column">
-                        <div class="grp-template-editor-row">
+                        <div class="grp-template-editor-row grp-inline-spacing-row">
                             <span class="grp-template-editor-label"><?php esc_html_e('Border', 'google-reviews-plugin'); ?></span>
-                            <div class="grp-template-editor-field grp-template-color-field">
-                                <input type="color" id="grp-style-border-color">
-                                <input type="text" id="grp-style-border-text" placeholder="#E5E7EB">
+                            <div class="grp-template-editor-field" style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                    <label class="grp-template-checkbox" style="display:flex; align-items:center; gap:8px;">
+                                        <input type="checkbox" id="grp-style-border-enabled">
+                                        <span><?php esc_html_e('Enable', 'google-reviews-plugin'); ?></span>
+                                    </label>
+                                    <div class="grp-template-color-field">
+                                        <input type="color" id="grp-style-border-color">
+                                        <input type="text" id="grp-style-border-text" placeholder="#E5E7EB">
+                                    </div>
+                                </div>
+                                <div class="grp-spacing-group" id="grp-style-border-widths" style="opacity: 0.8;">
+                                    <div class="grp-spacing-input">
+                                        <input type="number" id="grp-style-border-top" min="0" step="1" value="0">
+                                        <span><?php esc_html_e('Top', 'google-reviews-plugin'); ?></span>
+                                    </div>
+                                    <div class="grp-spacing-input">
+                                        <input type="number" id="grp-style-border-right" min="0" step="1" value="0">
+                                        <span><?php esc_html_e('Right', 'google-reviews-plugin'); ?></span>
+                                    </div>
+                                    <div class="grp-spacing-input">
+                                        <input type="number" id="grp-style-border-bottom" min="0" step="1" value="0">
+                                        <span><?php esc_html_e('Bottom', 'google-reviews-plugin'); ?></span>
+                                    </div>
+                                    <div class="grp-spacing-input">
+                                        <input type="number" id="grp-style-border-left" min="0" step="1" value="0">
+                                        <span><?php esc_html_e('Left', 'google-reviews-plugin'); ?></span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="grp-template-editor-row">
+                        <div class="grp-template-editor-row grp-style-non-creative-only">
                             <span class="grp-template-editor-label"><?php esc_html_e('Accent', 'google-reviews-plugin'); ?></span>
                             <div class="grp-template-editor-field grp-template-color-field">
                                 <input type="color" id="grp-style-accent-color">
