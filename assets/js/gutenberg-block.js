@@ -90,19 +90,31 @@
             var attributes = props.attributes;
             var setAttributes = props.setAttributes;
             
-            var styleOptions = grp_gutenberg.styles.map(function(style) {
-                return {
-                    label: style.label,
-                    value: style.value
-                };
-            });
-            
+            // Check if user has pro license (passed from PHP)
+            var isProUser = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro === true);
+
+            var styleOptions = grp_gutenberg.styles
+                .filter(function(style) {
+                    // Filter out creative style for free users
+                    return isProUser || style.value !== 'creative';
+                })
+                .map(function(style) {
+                    return {
+                        label: style.label,
+                        value: style.value
+                    };
+                });
+
             var layoutOptions = [
-                { label: i18n.__('Carousel', 'google-reviews-plugin'), value: 'carousel' },
+                { label: i18n.__('Carousel (3 columns)', 'google-reviews-plugin'), value: 'carousel' },
                 { label: i18n.__('List', 'google-reviews-plugin'), value: 'list' },
-                { label: i18n.__('Grid', 'google-reviews-plugin'), value: 'grid' },
-                { label: i18n.__('Grid Carousel', 'google-reviews-plugin'), value: 'grid_carousel' }
+                { label: i18n.__('Grid', 'google-reviews-plugin'), value: 'grid' }
             ];
+
+            // Add grid_carousel only for pro users
+            if (isProUser) {
+                layoutOptions.push({ label: i18n.__('Grid Carousel', 'google-reviews-plugin'), value: 'grid_carousel' });
+            }
 
             var themeOptions = [
                 { label: i18n.__('Light', 'google-reviews-plugin'), value: 'light' },
@@ -152,42 +164,61 @@
                                 setAttributes({ layout: value });
                             }
                         }),
-                        el(RangeControl, {
-                            label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
-                            value: attributes.cols_desktop || 3,
-                            onChange: function(value) {
-                                setAttributes({ cols_desktop: value });
-                            },
-                            min: 1,
-                            max: 6
-                        }),
-                        el(RangeControl, {
-                            label: i18n.__('Columns (Tablet)', 'google-reviews-plugin'),
-                            value: attributes.cols_tablet || 2,
-                            onChange: function(value) {
-                                setAttributes({ cols_tablet: value });
-                            },
-                            min: 1,
-                            max: 4
-                        }),
-                        el(RangeControl, {
-                            label: i18n.__('Columns (Mobile)', 'google-reviews-plugin'),
-                            value: attributes.cols_mobile || 1,
-                            onChange: function(value) {
-                                setAttributes({ cols_mobile: value });
-                            },
-                            min: 1,
-                            max: 3
-                        }),
-                        el(RangeControl, {
-                            label: i18n.__('Gap (px)', 'google-reviews-plugin'),
-                            value: attributes.gap || 20,
-                            onChange: function(value) {
-                                setAttributes({ gap: value });
-                            },
-                            min: 0,
-                            max: 60
-                        }),
+                        isProUser ? [
+                            el(RangeControl, {
+                                label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
+                                value: attributes.cols_desktop || 3,
+                                onChange: function(value) {
+                                    setAttributes({ cols_desktop: value });
+                                },
+                                min: 1,
+                                max: 6
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Columns (Tablet)', 'google-reviews-plugin'),
+                                value: attributes.cols_tablet || 2,
+                                onChange: function(value) {
+                                    setAttributes({ cols_tablet: value });
+                                },
+                                min: 1,
+                                max: 4
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Columns (Mobile)', 'google-reviews-plugin'),
+                                value: attributes.cols_mobile || 1,
+                                onChange: function(value) {
+                                    setAttributes({ cols_mobile: value });
+                                },
+                                min: 1,
+                                max: 3
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Gap (px)', 'google-reviews-plugin'),
+                                value: attributes.gap || 20,
+                                onChange: function(value) {
+                                    setAttributes({ gap: value });
+                                },
+                                min: 0,
+                                max: 60
+                            })
+                        ] : el('div', {
+                            style: {
+                                background: '#f0f8ff',
+                                border: '1px solid #007cba',
+                                padding: '10px',
+                                marginBottom: '10px',
+                                borderRadius: '4px'
+                            }
+                        },
+                            el('strong', {}, '📐 Column Controls'),
+                            el('br'),
+                            el('span', {}, 'Upgrade to Pro to customize column counts and gap spacing for each device. '),
+                            el('a', {
+                                href: 'https://reactwoo.com/google-reviews-plugin-pro/',
+                                target: '_blank',
+                                style: { color: '#007cba', textDecoration: 'underline' }
+                            }, 'Learn More')
+                        ),
                         el(RangeControl, {
                             label: i18n.__('Number of Reviews', 'google-reviews-plugin'),
                             value: attributes.count,
@@ -254,134 +285,172 @@
                         })
                     ),
                     
-                    el(PanelBody, { 
-                        title: i18n.__('Carousel Options', 'google-reviews-plugin'), 
+                    el(PanelBody, {
+                        title: i18n.__('Carousel Options', 'google-reviews-plugin'),
                         initialOpen: false,
                         className: (attributes.layout !== 'carousel' && attributes.layout !== 'grid_carousel') ? 'grp-hidden' : ''
                     },
-                        el(ToggleControl, {
-                            label: i18n.__('Autoplay', 'google-reviews-plugin'),
-                            checked: attributes.autoplay,
-                            onChange: function(value) {
-                                setAttributes({ autoplay: value });
+                        isProUser ? [
+                            el(ToggleControl, {
+                                label: i18n.__('Autoplay', 'google-reviews-plugin'),
+                                checked: attributes.autoplay,
+                                onChange: function(value) {
+                                    setAttributes({ autoplay: value });
+                                }
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Speed (ms)', 'google-reviews-plugin'),
+                                value: attributes.speed,
+                                onChange: function(value) {
+                                    setAttributes({ speed: value });
+                                },
+                                min: 1000,
+                                max: 10000,
+                                step: 500,
+                                disabled: !attributes.autoplay
+                            }),
+                            el(ToggleControl, {
+                                label: i18n.__('Show Dots', 'google-reviews-plugin'),
+                                checked: attributes.dots,
+                                onChange: function(value) {
+                                    setAttributes({ dots: value });
+                                }
+                            }),
+                            el(ToggleControl, {
+                                label: i18n.__('Show Arrows', 'google-reviews-plugin'),
+                                checked: attributes.arrows,
+                                onChange: function(value) {
+                                    setAttributes({ arrows: value });
+                                }
+                            })
+                        ] : el('div', {
+                            style: {
+                                background: '#f0f8ff',
+                                border: '1px solid #007cba',
+                                padding: '10px',
+                                marginBottom: '10px',
+                                borderRadius: '4px'
                             }
-                        }),
-                        el(RangeControl, {
-                            label: i18n.__('Speed (ms)', 'google-reviews-plugin'),
-                            value: attributes.speed,
-                            onChange: function(value) {
-                                setAttributes({ speed: value });
-                            },
-                            min: 1000,
-                            max: 10000,
-                            step: 500,
-                            disabled: !attributes.autoplay
-                        }),
-                        el(ToggleControl, {
-                            label: i18n.__('Show Dots', 'google-reviews-plugin'),
-                            checked: attributes.dots,
-                            onChange: function(value) {
-                                setAttributes({ dots: value });
-                            }
-                        }),
-                        el(ToggleControl, {
-                            label: i18n.__('Show Arrows', 'google-reviews-plugin'),
-                            checked: attributes.arrows,
-                            onChange: function(value) {
-                                setAttributes({ arrows: value });
-                            }
-                        })
+                        },
+                            el('strong', {}, '⚙️ Carousel Controls'),
+                            el('br'),
+                            el('span', {}, 'Upgrade to Pro to customize autoplay speed, show/hide dots and arrows. '),
+                            el('a', {
+                                href: 'https://reactwoo.com/google-reviews-plugin-pro/',
+                                target: '_blank',
+                                style: { color: '#007cba', textDecoration: 'underline' }
+                            }, 'Learn More')
+                        )
                     ),
                     
-                    el(PanelBody, { 
-                        title: i18n.__('Style Customization', 'google-reviews-plugin'), 
+                    el(PanelBody, {
+                        title: i18n.__('Style Customization', 'google-reviews-plugin'),
                         initialOpen: false
                     },
-                        el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
-                                i18n.__('Text Color', 'google-reviews-plugin')
+                        isProUser ? [
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                    i18n.__('Text Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.custom_text_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ custom_text_color: value });
+                                    },
+                                    placeholder: '#111827'
+                                })
                             ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.custom_text_color || '',
-                                onChange: function(value) {
-                                    setAttributes({ custom_text_color: value });
-                                },
-                                placeholder: '#111827'
-                            })
-                        ),
-                        el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
-                                i18n.__('Card Background Color', 'google-reviews-plugin')
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                    i18n.__('Card Background Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.custom_background_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ custom_background_color: value });
+                                    },
+                                    placeholder: '#FFFFFF'
+                                })
                             ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.custom_background_color || '',
-                                onChange: function(value) {
-                                    setAttributes({ custom_background_color: value });
-                                },
-                                placeholder: '#FFFFFF'
-                            })
-                        ),
-                        (attributes.style === 'classic' || attributes.style === 'corporate') ? el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
-                                i18n.__('Border Color', 'google-reviews-plugin')
+                            (attributes.style === 'classic' || attributes.style === 'corporate') ? el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                    i18n.__('Border Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.custom_border_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ custom_border_color: value });
+                                    },
+                                    placeholder: '#D1D5DB'
+                                })
+                            ) : null,
+                            (attributes.style === 'modern' || attributes.style === 'corporate' || attributes.style === 'minimal') ? el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                    i18n.__('Accent Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.custom_accent_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ custom_accent_color: value });
+                                    },
+                                    placeholder: '#4285F4'
+                                })
+                            ) : null,
+                            el('div', { style: { marginBottom: '16px' } },
+                                el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                    i18n.__('Star Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.custom_star_color || '',
+                                    onChange: function(value) {
+                                        setAttributes({ custom_star_color: value });
+                                    },
+                                    placeholder: '#FBBC05'
+                                })
                             ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.custom_border_color || '',
+                            el(RangeControl, {
+                                label: i18n.__('Body Text Size (px)', 'google-reviews-plugin'),
+                                value: attributes.custom_font_size || 15,
                                 onChange: function(value) {
-                                    setAttributes({ custom_border_color: value });
+                                    setAttributes({ custom_font_size: value });
                                 },
-                                placeholder: '#D1D5DB'
-                            })
-                        ) : null,
-                        (attributes.style === 'modern' || attributes.style === 'corporate' || attributes.style === 'minimal') ? el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
-                                i18n.__('Accent Color', 'google-reviews-plugin')
-                            ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.custom_accent_color || '',
+                                min: 10,
+                                max: 24,
+                                step: 1
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Name Text Size (px)', 'google-reviews-plugin'),
+                                value: attributes.custom_name_font_size || 14,
                                 onChange: function(value) {
-                                    setAttributes({ custom_accent_color: value });
+                                    setAttributes({ custom_name_font_size: value });
                                 },
-                                placeholder: '#4285F4'
+                                min: 10,
+                                max: 20,
+                                step: 1
                             })
-                        ) : null,
-                        el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } }, 
-                                i18n.__('Star Color', 'google-reviews-plugin')
-                            ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.custom_star_color || '',
-                                onChange: function(value) {
-                                    setAttributes({ custom_star_color: value });
-                                },
-                                placeholder: '#FBBC05'
-                            })
-                        ),
-                        el(RangeControl, {
-                            label: i18n.__('Body Text Size (px)', 'google-reviews-plugin'),
-                            value: attributes.custom_font_size || 15,
-                            onChange: function(value) {
-                                setAttributes({ custom_font_size: value });
-                            },
-                            min: 10,
-                            max: 24,
-                            step: 1
-                        }),
-                        el(RangeControl, {
-                            label: i18n.__('Name Text Size (px)', 'google-reviews-plugin'),
-                            value: attributes.custom_name_font_size || 14,
-                            onChange: function(value) {
-                                setAttributes({ custom_name_font_size: value });
-                            },
-                            min: 10,
-                            max: 20,
-                            step: 1
-                        })
+                        ] : el('div', {
+                            style: {
+                                background: '#fff3cd',
+                                border: '1px solid #ffc107',
+                                padding: '15px',
+                                marginBottom: '10px',
+                                borderRadius: '4px'
+                            }
+                        },
+                            el('strong', {}, '🎨 Advanced Styling'),
+                            el('br'),
+                            el('span', {}, 'Unlock unlimited customization options: colors, fonts, spacing, borders, and more. '),
+                            el('a', {
+                                href: 'https://reactwoo.com/google-reviews-plugin-pro/',
+                                target: '_blank',
+                                style: { color: '#856404', textDecoration: 'underline', fontWeight: 'bold' }
+                            }, 'Upgrade to Pro')
+                        )
                     )
                 ),
                 

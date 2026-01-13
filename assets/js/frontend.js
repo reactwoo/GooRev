@@ -31,7 +31,7 @@
             // Set up carousel
             if (totalItems > 1) {
                 setupCarousel();
-                
+
                 // Auto-play if enabled
                 if (options.autoplay) {
                     startAutoplay();
@@ -55,49 +55,66 @@
         var $prev = $carousel.find('.grp-carousel-prev');
         var $next = $carousel.find('.grp-carousel-next');
         var $dots = $carousel.find('.grp-dot');
-        
+
         var currentIndex = 0;
         var totalItems = $items.length;
         var options = $carousel.data('options') || {};
-        
+
+        // Get current columns per view based on screen size
+        function getColumnsPerView() {
+            var width = window.innerWidth;
+            if (width <= 640) return 1; // Mobile
+            if (width <= 1024) return 2; // Tablet
+            return 3; // Desktop
+        }
+
         // Update carousel position
         function updateCarousel() {
-            var translateX = -currentIndex * 100;
+            var columnsPerView = getColumnsPerView();
+            var translateX = -currentIndex * (100 / columnsPerView);
             $wrapper.css('transform', 'translateX(' + translateX + '%)');
-            
-            // Update dots
+
+            // Update dots - calculate which group is active
+            var activeGroup = Math.floor(currentIndex / columnsPerView);
             $dots.removeClass('active');
-            $dots.eq(currentIndex).addClass('active');
-            
-            // Update arrows
+            $dots.eq(activeGroup).addClass('active');
+
+            // Update arrows - disable when at start/end groups
+            var maxIndex = Math.max(0, totalItems - columnsPerView);
             $prev.prop('disabled', currentIndex === 0);
-            $next.prop('disabled', currentIndex === totalItems - 1);
+            $next.prop('disabled', currentIndex >= maxIndex);
         }
-        
-        // Go to specific slide
+
+        // Go to specific slide group
         function goToSlide(index) {
-            if (index >= 0 && index < totalItems) {
+            var columnsPerView = getColumnsPerView();
+            var maxIndex = Math.max(0, totalItems - columnsPerView);
+            if (index >= 0 && index <= maxIndex) {
                 currentIndex = index;
                 updateCarousel();
             }
         }
-        
-        // Next slide
+
+        // Next slide group
         function nextSlide() {
-            if (currentIndex < totalItems - 1) {
+            var columnsPerView = getColumnsPerView();
+            var maxIndex = Math.max(0, totalItems - columnsPerView);
+            if (currentIndex < maxIndex) {
                 currentIndex++;
             } else {
-                currentIndex = 0; // Loop to first
+                currentIndex = 0; // Loop to first group
             }
             updateCarousel();
         }
-        
-        // Previous slide
+
+        // Previous slide group
         function prevSlide() {
             if (currentIndex > 0) {
                 currentIndex--;
             } else {
-                currentIndex = totalItems - 1; // Loop to last
+                var columnsPerView = getColumnsPerView();
+                var maxIndex = Math.max(0, totalItems - columnsPerView);
+                currentIndex = maxIndex; // Loop to last group
             }
             updateCarousel();
         }
@@ -138,8 +155,9 @@
         
         $dots.on('click', function(e) {
             e.preventDefault();
-            var index = $(this).data('index');
-            goToSlide(index);
+            var groupIndex = $(this).data('index');
+            var slideIndex = groupIndex * 3; // Convert group index to slide index
+            goToSlide(slideIndex);
             if (options.autoplay) {
                 stopAutoplay();
                 startAutoplay();
@@ -199,6 +217,25 @@
             }
         });
         
+        // Generate dots based on current columns
+        function updateDots() {
+            var columnsPerView = getColumnsPerView();
+            var totalGroups = Math.ceil(totalItems / columnsPerView);
+            $dots.empty();
+            for (var i = 0; i < totalGroups; i++) {
+                $dots.append('<button class="grp-dot' + (i === 0 ? ' active' : '') + '" data-index="' + i + '"></button>');
+            }
+            $dots = $carousel.find('.grp-dot'); // Re-select after adding
+        }
+
+        updateDots();
+
+        // Handle resize
+        $(window).on('resize.carousel', function() {
+            updateDots();
+            updateCarousel();
+        });
+
         // Initialize
         updateCarousel();
     }

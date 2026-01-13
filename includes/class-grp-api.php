@@ -57,7 +57,7 @@ class GRP_API {
      * Retry counter to prevent infinite retry loops
      */
     private $retry_count = 0;
-
+    
     /**
      * Transient key for API server backoff
      */
@@ -180,7 +180,7 @@ class GRP_API {
                 $remaining_minutes
             ));
         }
-
+        
         return $this->make_api_server_request_internal($endpoint, $data, $method);
     }
     

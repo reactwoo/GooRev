@@ -305,9 +305,14 @@ class GRP_Gutenberg {
         $addons = GRP_Addons::get_instance();
         $review_button_enabled = $addons->is_addon_enabled('review-widgets');
         
+        // Check license status
+        $license = new GRP_License();
+        $is_pro = $license->is_pro();
+
         wp_localize_script('grp-gutenberg-block', 'grp_gutenberg', array(
             'styles' => $this->get_style_options(),
             'reviewButtonEnabled' => $review_button_enabled,
+            'isPro' => $is_pro,
             'strings' => array(
                 'block_title' => __('Google Reviews', 'google-reviews-plugin'),
                 'block_description' => __('Display Google Business reviews', 'google-reviews-plugin'),

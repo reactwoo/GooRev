@@ -7,11 +7,11 @@
 
 .grp-review {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
-    padding: 20px;
+    padding: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -22,7 +22,7 @@
 }
 
 .grp-review-rating {
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .grp-star {
@@ -48,15 +48,16 @@
 
 .grp-review-text {
     color: #333;
-    font-size: 16px;
-    line-height: 1.6;
-    margin-bottom: 15px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
 }
 
 .grp-review-meta {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    margin-top: 8px;
 }
 
 .grp-review-avatar img {
@@ -70,7 +71,7 @@
 .grp-author-name {
     font-weight: 600;
     color: #333;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .grp-review-date {
@@ -123,8 +124,27 @@
 }
 
 .grp-layout-carousel .grp-review-item {
-    flex: 0 0 100%;
+    flex: 0 0 calc(100% / 3);
     padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.grp-layout-carousel .grp-review {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+/* Responsive carousel columns */
+@media (max-width: 1024px) {
+    .grp-layout-carousel .grp-review-item {
+        flex: 0 0 50%; /* 2 columns on tablet */
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-layout-carousel .grp-review-item {
+        flex: 0 0 100%; /* 1 column on mobile */
+    }
 }
 
 .grp-layout-carousel .grp-carousel-prev,
@@ -132,11 +152,11 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     color: white;
     border: none;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
@@ -144,20 +164,20 @@
     align-items: center;
     justify-content: center;
     transition: background 0.3s ease;
-    font-size: 18px;
+    font-size: 14px;
 }
 
 .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-layout-carousel .grp-carousel-next:hover {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
 }
 
 .grp-layout-carousel .grp-carousel-prev {
-    left: 10px;
+    left: -16px;
 }
 
 .grp-layout-carousel .grp-carousel-next {
-    right: 10px;
+    right: -16px;
 }
 
 .grp-layout-carousel .grp-carousel-dots {

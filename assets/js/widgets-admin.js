@@ -1555,7 +1555,7 @@
                     styles.push('box-shadow: ' + customization.box_shadow_value);
                 }
             }
-            $previewBtn.attr('style', styles.join('; '));
+                $previewBtn.attr('style', styles.join('; '));
 
             var wrapperStyle = buildWrapperStyle(customization, templateKey);
             var previewHtml = renderPreviewContent(templateData.type || 'button', templateData, {
