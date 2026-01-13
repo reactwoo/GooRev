@@ -117,6 +117,10 @@ class GRP_Gutenberg {
                     'type' => 'boolean',
                     'default' => true,
                 ),
+                'consistent_height' => array(
+                    'type' => 'boolean',
+                    'default' => false,
+                ),
                 'theme' => array(
                     'type' => 'string',
                     'default' => 'light',
@@ -403,6 +407,7 @@ class GRP_Gutenberg {
             'speed' => $attributes['speed'],
             'dots' => $attributes['dots'] ? 'true' : 'false',
             'arrows' => $attributes['arrows'] ? 'true' : 'false',
+            'consistent_height' => $attributes['consistent_height'] ? 'true' : 'false',
             'class' => 'grp-gutenberg-block'
         );
         

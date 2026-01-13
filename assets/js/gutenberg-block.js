@@ -83,6 +83,10 @@
             arrows: {
                 type: 'boolean',
                 default: true
+            },
+            consistent_height: {
+                type: 'boolean',
+                default: false
             }
         },
         
@@ -281,6 +285,13 @@
                             checked: attributes.show_reply,
                             onChange: function(value) {
                                 setAttributes({ show_reply: value });
+                            }
+                        }),
+                        el(ToggleControl, {
+                            label: i18n.__('Consistent Card Height', 'google-reviews-plugin'),
+                            checked: attributes.consistent_height || false,
+                            onChange: function(value) {
+                                setAttributes({ consistent_height: value });
                             }
                         })
                     ),

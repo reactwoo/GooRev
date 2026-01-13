@@ -64,6 +64,7 @@ class GRP_Shortcode {
             'dots' => 'true',
             'arrows' => 'true',
             'responsive' => 'true',
+            'consistent_height' => 'false',
             'class' => '',
             'id' => ''
         ), $atts, 'google_reviews');
@@ -142,14 +143,16 @@ class GRP_Shortcode {
         $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
         $layout_class = 'grp-layout-carousel';
         $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
+        $height_class = $atts['consistent_height'] === 'true' ? 'grp-consistent-height' : '';
         $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
-        
+
         $classes = array_filter(array(
             'grp-reviews',
             $style_class,
             $theme_class,
             $layout_class,
             $responsive_class,
+            $height_class,
             $custom_class
         ));
         
@@ -212,14 +215,16 @@ class GRP_Shortcode {
         $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
         $layout_class = 'grp-layout-list';
         $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
+        $height_class = $atts['consistent_height'] === 'true' ? 'grp-consistent-height' : '';
         $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
-        
+
         $classes = array_filter(array(
             'grp-reviews',
             $style_class,
             $theme_class,
             $layout_class,
             $responsive_class,
+            $height_class,
             $custom_class
         ));
         
@@ -249,6 +254,7 @@ class GRP_Shortcode {
         $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
         $layout_class = 'grp-layout-grid';
         $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
+        $height_class = $atts['consistent_height'] === 'true' ? 'grp-consistent-height' : '';
         $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
 
         $classes = array_filter(array(
@@ -257,6 +263,7 @@ class GRP_Shortcode {
             $theme_class,
             $layout_class,
             $responsive_class,
+            $height_class,
             $custom_class
         ));
 
@@ -293,6 +300,7 @@ class GRP_Shortcode {
         $theme_class = 'grp-theme-' . sanitize_html_class($atts['theme']);
         $layout_class = 'grp-layout-grid_carousel';
         $responsive_class = $atts['responsive'] ? 'grp-responsive' : '';
+        $height_class = $atts['consistent_height'] === 'true' ? 'grp-consistent-height' : '';
         $custom_class = !empty($atts['class']) ? sanitize_html_class($atts['class']) : '';
 
         $classes = array_filter(array(
@@ -301,6 +309,7 @@ class GRP_Shortcode {
             $theme_class,
             $layout_class,
             $responsive_class,
+            $height_class,
             $custom_class
         ));
 

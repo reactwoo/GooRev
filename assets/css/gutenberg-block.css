@@ -149,6 +149,29 @@
     display: none !important;
 }
 
+/* Consistent Height */
+.grp-gutenberg-block.grp-consistent-height .grp-review {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.grp-gutenberg-block.grp-consistent-height .grp-review-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.grp-gutenberg-block.grp-consistent-height .grp-review-text p {
+    flex: 1;
+    margin: 0;
+}
+
+/* Ensure minimum height for consistency */
+.grp-gutenberg-block.grp-consistent-height .grp-review {
+    min-height: 200px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {

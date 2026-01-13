@@ -267,11 +267,17 @@
 
             function updateWidths() {
                 var perView = getItemsPerView();
-                var itemWidthPercent = (100 / perView);
+                // Set data attribute for CSS calculations
+                $carousel.attr('data-cols', perView);
+                $carousel.css({
+                    '--grp-cols': perView,
+                    '--grp-gap': gap + 'px'
+                });
+
+                // Remove any padding that might interfere with flexbox gap
                 $items.css({
-                    width: itemWidthPercent + '%',
-                    paddingLeft: (gap/2) + 'px',
-                    paddingRight: (gap/2) + 'px'
+                    paddingLeft: '',
+                    paddingRight: ''
                 });
             }
 

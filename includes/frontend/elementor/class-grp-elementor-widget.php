@@ -358,6 +358,19 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        $this->add_control(
+            'consistent_height',
+            array(
+                'label' => __('Consistent Card Height', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'label_on' => __('Yes', 'google-reviews-plugin'),
+                'label_off' => __('No', 'google-reviews-plugin'),
+                'return_value' => 'true',
+                'default' => 'false',
+                'description' => __('Make all cards the same height for uniform appearance', 'google-reviews-plugin'),
+            )
+        );
+
         $this->end_controls_section();
         
         // Carousel Options Section
@@ -825,6 +838,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'speed' => $settings['speed'],
             'dots' => $settings['dots'],
             'arrows' => $settings['arrows'],
+            'consistent_height' => isset($settings['consistent_height']) ? $settings['consistent_height'] : 'false',
             'class' => 'grp-elementor-widget'
         );
         

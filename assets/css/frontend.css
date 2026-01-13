@@ -116,6 +116,8 @@
     position: relative;
     overflow: hidden;
     border-radius: 8px;
+    max-width: 1200px; /* Constrain max width */
+    margin: 0 auto; /* Center the carousel */
 }
 
 .grp-layout-carousel .grp-carousel-wrapper {
@@ -124,13 +126,13 @@
 }
 
 .grp-layout-carousel .grp-review-item {
-    flex: 0 0 calc(100% / 3);
-    padding: 0 10px;
+    flex: 0 0 100%;
+    padding: 0 20px;
     box-sizing: border-box;
 }
 
 .grp-layout-carousel .grp-review {
-    max-width: 100%;
+    max-width: 600px; /* Constrain individual card width */
     margin: 0 auto;
 }
 
@@ -155,29 +157,32 @@
     background: rgba(0, 0, 0, 0.4);
     color: white;
     border: none;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.3s ease;
-    font-size: 14px;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-layout-carousel .grp-carousel-next:hover {
     background: rgba(0, 0, 0, 0.6);
+    transform: translateY(-50%) scale(1.1);
 }
 
 .grp-layout-carousel .grp-carousel-prev {
-    left: -16px;
+    left: 10px;
 }
 
 .grp-layout-carousel .grp-carousel-next {
-    right: -16px;
+    right: 10px;
 }
 
 .grp-layout-carousel .grp-carousel-dots {
@@ -234,15 +239,126 @@
 /* Grid Carousel */
 .grp-layout-grid_carousel .grp-grid-carousel-viewport {
     overflow: hidden;
+    position: relative;
 }
 
 .grp-layout-grid_carousel .grp-grid-carousel-track {
     display: flex;
     transition: transform 0.5s ease;
+    gap: var(--grp-gap, 20px);
 }
 
 .grp-layout-grid_carousel .grp-review-item {
     box-sizing: border-box;
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
+    min-width: 0; /* Prevent flex item from overflowing */
+}
+
+/* Ensure proper spacing for different column counts */
+.grp-layout-grid_carousel[data-cols="1"] .grp-review-item {
+    flex: 0 0 100%;
+}
+
+.grp-layout-grid_carousel[data-cols="2"] .grp-review-item {
+    flex: 0 0 calc((100% - var(--grp-gap, 20px)) / 2);
+}
+
+.grp-layout-grid_carousel[data-cols="3"] .grp-review-item {
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * 2) / 3);
+}
+
+.grp-layout-grid_carousel[data-cols="4"] .grp-review-item {
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * 3) / 4);
+}
+
+.grp-layout-grid_carousel[data-cols="5"] .grp-review-item {
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * 4) / 5);
+}
+
+.grp-layout-grid_carousel[data-cols="6"] .grp-review-item {
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * 5) / 6);
+}
+
+/* Grid Carousel Controls */
+.grp-layout-grid_carousel .grp-carousel-prev,
+.grp-layout-grid_carousel .grp-carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+    font-size: 14px;
+}
+
+.grp-layout-grid_carousel .grp-carousel-prev:hover,
+.grp-layout-grid_carousel .grp-carousel-next:hover {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.grp-layout-grid_carousel .grp-carousel-prev {
+    left: -16px;
+}
+
+.grp-layout-grid_carousel .grp-carousel-next {
+    right: -16px;
+}
+
+.grp-layout-grid_carousel .grp-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.grp-layout-grid_carousel .grp-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    background: #ccc;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.grp-layout-grid_carousel .grp-dot.active {
+    background: #007cba;
+}
+
+.grp-layout-grid_carousel .grp-dot:hover {
+    background: #999;
+}
+
+/* Consistent Height */
+.grp-consistent-height .grp-review {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.grp-consistent-height .grp-review-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.grp-consistent-height .grp-review-text p {
+    flex: 1;
+    margin: 0;
+}
+
+/* Ensure minimum height for consistency */
+.grp-consistent-height .grp-review {
+    min-height: 200px;
 }
 
 /* Responsive Design */
