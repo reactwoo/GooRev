@@ -842,9 +842,6 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                             'unit' => 'deg',
                             'size' => 135,
                         ),
-                        'selectors' => array(
-                            '{{WRAPPER}} .grp-style-creative .grp-review' => 'background: linear-gradient({{SIZE}}{{UNIT}}, {{color.VALUE}} {{color_stop.SIZE}}{{color_stop.UNIT}}, {{color_b.VALUE}} {{color_b_stop.SIZE}}{{color_b_stop.UNIT}})',
-                        ),
                     ),
                     'color' => array(
                         'default' => '#4285F4',

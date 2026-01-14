@@ -145,21 +145,9 @@ class GRP_Shortcode {
         // Generate unique ID for this instance
         $instance_id = 'grp-' . uniqid();
 
-        // Generate custom CSS for creative style gradients
+        // Generate custom CSS for creative style (Elementor handles gradients)
         $custom_css = '';
         if ($atts['style'] === 'creative') {
-            $bg_data = isset($atts['creative_background']) ? $atts['creative_background'] : array();
-            $gradient_type = isset($bg_data['type']) ? $bg_data['type'] : 'linear';
-            $start_color = isset($bg_data['start_color']) ? $bg_data['start_color'] : '#4285F4';
-            $end_color = isset($bg_data['end_color']) ? $bg_data['end_color'] : '#EA4335';
-
-            if ($gradient_type === 'linear') {
-                $angle = isset($bg_data['angle']) ? intval($bg_data['angle']) : 135;
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
-            } else {
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
-            }
-
             // Glass effect (Apple-style)
             if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
                 $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }';

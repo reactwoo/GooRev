@@ -361,32 +361,38 @@
     min-height: 200px;
 }
 
-/* Box Shadow Spacing - Enhanced for better visibility */
-.grp-review {
+/* Box Shadow Spacing - Applied to parent container for proper visibility */
+.grp-review-item {
     /* Add margin when box shadow is present to ensure visibility */
     transition: margin 0.3s ease;
 }
 
-/* Dynamic margin based on box shadow values */
-.grp-review[style*="box-shadow"] {
+/* Dynamic margin based on box shadow values on child elements */
+.grp-review-item:has(.grp-review[style*="box-shadow"]) {
     margin: 30px !important;
 }
 
 /* Even more margin for large blur/spread values */
-.grp-review[style*="blur(20px)"] {
+.grp-review-item:has(.grp-review[style*="blur(20px)"]) {
     margin: 40px !important;
 }
 
-.grp-review[style*="blur(30px)"] {
+.grp-review-item:has(.grp-review[style*="blur(30px)"]) {
     margin: 50px !important;
 }
 
-.grp-review[style*="spread(20px)"] {
+.grp-review-item:has(.grp-review[style*="spread(20px)"]) {
     margin: 45px !important;
 }
 
-.grp-review[style*="spread(30px)"] {
+.grp-review-item:has(.grp-review[style*="spread(30px)"]) {
     margin: 60px !important;
+}
+
+/* Fallback for browsers without :has() support */
+.grp-review[style*="box-shadow"] {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    margin: 20px !important;
 }
 
 /* Specific adjustments for different layouts */
@@ -399,19 +405,29 @@
     /* Grid items already have gaps, reduce additional margin */
 }
 
-.grp-layout-grid .grp-review[style*="box-shadow"],
-.grp-layout-grid_carousel .grp-review[style*="box-shadow"] {
+.grp-layout-grid .grp-review-item:has(.grp-review[style*="box-shadow"]),
+.grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="box-shadow"]) {
     margin: 15px !important;
 }
 
-.grp-layout-grid .grp-review[style*="blur(20px)"],
-.grp-layout-grid_carousel .grp-review[style*="blur(20px)"] {
+.grp-layout-grid .grp-review-item:has(.grp-review[style*="blur(20px)"]),
+.grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="blur(20px)"]) {
     margin: 25px !important;
 }
 
-.grp-layout-grid .grp-review[style*="blur(30px)"],
-.grp-layout-grid_carousel .grp-review[style*="blur(30px)"] {
+.grp-layout-grid .grp-review-item:has(.grp-review[style*="blur(30px)"]),
+.grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="blur(30px)"]) {
     margin: 35px !important;
+}
+
+/* Ensure creative gradients are applied with high specificity */
+.grp-style-creative .grp-review {
+    /* This ensures Elementor gradients take precedence */
+}
+
+/* Force gradient display for creative style */
+.grp-style-creative .grp-review[style*="background"] {
+    /* Make sure gradients are visible */
 }
 
 /* Responsive Design */
