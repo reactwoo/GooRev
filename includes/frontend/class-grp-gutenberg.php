@@ -403,10 +403,10 @@ class GRP_Gutenberg {
         }
         
         // Check if reviews are available
-        $reviews = new GRP_Reviews();
-        $has_reviews = $reviews->has_reviews();
-        
-        if (!$has_reviews) {
+        $reviews_instance = new GRP_Reviews();
+        $stored_reviews = $reviews_instance->get_stored_reviews(array('limit' => 1));
+
+        if (empty($stored_reviews)) {
             return '<div class="grp-gutenberg-block grp-no-reviews"><p>' . __('No reviews available. Please connect your Google Business Profile and sync reviews.', 'google-reviews-plugin') . '</p></div>';
         }
         // Build custom CSS for style overrides
@@ -500,26 +500,26 @@ class GRP_Gutenberg {
         }
         
         $shortcode_atts = array(
-            'style' => $attributes['style'],
+            'style' => isset($attributes['style']) ? $attributes['style'] : 'modern',
             'theme' => isset($attributes['theme']) ? $attributes['theme'] : 'light',
-            'layout' => $attributes['layout'],
+            'layout' => isset($attributes['layout']) ? $attributes['layout'] : 'carousel',
             'cols_desktop' => isset($attributes['cols_desktop']) ? $attributes['cols_desktop'] : 3,
             'cols_tablet' => isset($attributes['cols_tablet']) ? $attributes['cols_tablet'] : 2,
             'cols_mobile' => isset($attributes['cols_mobile']) ? $attributes['cols_mobile'] : 1,
             'gap' => isset($attributes['gap']) ? $attributes['gap'] : 20,
-            'count' => $attributes['count'],
-            'min_rating' => $attributes['min_rating'],
-            'max_rating' => $attributes['max_rating'],
-            'sort_by' => $attributes['sort_by'],
-            'show_avatar' => $attributes['show_avatar'] ? 'true' : 'false',
-            'show_date' => $attributes['show_date'] ? 'true' : 'false',
-            'show_rating' => $attributes['show_rating'] ? 'true' : 'false',
-            'show_reply' => $attributes['show_reply'] ? 'true' : 'false',
-            'autoplay' => $attributes['autoplay'] ? 'true' : 'false',
-            'speed' => $attributes['speed'],
-            'dots' => $attributes['dots'] ? 'true' : 'false',
-            'arrows' => $attributes['arrows'] ? 'true' : 'false',
-            'consistent_height' => $attributes['consistent_height'] ? 'true' : 'false',
+            'count' => isset($attributes['count']) ? $attributes['count'] : 10,
+            'min_rating' => isset($attributes['min_rating']) ? $attributes['min_rating'] : 1,
+            'max_rating' => isset($attributes['max_rating']) ? $attributes['max_rating'] : 5,
+            'sort_by' => isset($attributes['sort_by']) ? $attributes['sort_by'] : 'newest',
+            'show_avatar' => isset($attributes['show_avatar']) && $attributes['show_avatar'] ? 'true' : 'false',
+            'show_date' => isset($attributes['show_date']) && $attributes['show_date'] ? 'true' : 'false',
+            'show_rating' => isset($attributes['show_rating']) && $attributes['show_rating'] ? 'true' : 'false',
+            'show_reply' => isset($attributes['show_reply']) && $attributes['show_reply'] ? 'true' : 'false',
+            'autoplay' => isset($attributes['autoplay']) && $attributes['autoplay'] ? 'true' : 'false',
+            'speed' => isset($attributes['speed']) ? $attributes['speed'] : 5000,
+            'dots' => isset($attributes['dots']) && $attributes['dots'] ? 'true' : 'false',
+            'arrows' => isset($attributes['arrows']) && $attributes['arrows'] ? 'true' : 'false',
+            'consistent_height' => isset($attributes['consistent_height']) && $attributes['consistent_height'] ? 'true' : 'false',
             // Creative style specific options
             'creative_gradient_type' => isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear',
             'creative_gradient_angle' => isset($attributes['creative_gradient_angle']) ? $attributes['creative_gradient_angle'] : 135,
