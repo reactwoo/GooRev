@@ -145,9 +145,23 @@ class GRP_Shortcode {
         // Generate unique ID for this instance
         $instance_id = 'grp-' . uniqid();
 
-        // Generate custom CSS for creative style (Elementor handles gradients)
+        // Generate custom CSS for creative style
         $custom_css = '';
         if ($atts['style'] === 'creative') {
+            // Handle gradient background (from Elementor or Gutenberg controls)
+            $bg_data = isset($atts['creative_background']) ? $atts['creative_background'] : array();
+            $gradient_type = isset($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
+            $start_color = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
+            $end_color = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
+
+            // Generate gradient CSS
+            $custom_css .= '/* Creative gradient applied */ ';
+            if ($gradient_type === 'linear') {
+                $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; background-size: cover !important; background-repeat: no-repeat !important; background-attachment: initial !important; }';
+            } else {
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; background-size: cover !important; background-repeat: no-repeat !important; background-attachment: initial !important; }';
+            }
             // Glass effect (Apple-style)
             if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
                 $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }';

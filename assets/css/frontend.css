@@ -363,30 +363,50 @@
 
 /* Box Shadow Spacing - Applied to parent container for proper visibility */
 .grp-review-item {
-    /* Add margin when box shadow is present to ensure visibility */
-    transition: margin 0.3s ease;
+    /* Add padding when box shadow is present to ensure visibility */
+    transition: padding 0.3s ease;
 }
 
-/* Dynamic margin based on box shadow values on child elements */
+/* Dynamic padding based on box shadow values on child elements */
 .grp-review-item:has(.grp-review[style*="box-shadow"]) {
-    margin: 30px !important;
+    padding: 30px !important;
 }
 
-/* Even more margin for large blur/spread values */
+.grp-review-item:has(.grp-review[style*="box-shadow"]) .grp-review {
+    margin: -30px !important;
+}
+
+/* Even more padding for large blur/spread values */
 .grp-review-item:has(.grp-review[style*="blur(20px)"]) {
-    margin: 40px !important;
+    padding: 40px !important;
+}
+
+.grp-review-item:has(.grp-review[style*="blur(20px)"]) .grp-review {
+    margin: -40px !important;
 }
 
 .grp-review-item:has(.grp-review[style*="blur(30px)"]) {
-    margin: 50px !important;
+    padding: 50px !important;
+}
+
+.grp-review-item:has(.grp-review[style*="blur(30px)"]) .grp-review {
+    margin: -50px !important;
 }
 
 .grp-review-item:has(.grp-review[style*="spread(20px)"]) {
-    margin: 45px !important;
+    padding: 45px !important;
+}
+
+.grp-review-item:has(.grp-review[style*="spread(20px)"]) .grp-review {
+    margin: -45px !important;
 }
 
 .grp-review-item:has(.grp-review[style*="spread(30px)"]) {
-    margin: 60px !important;
+    padding: 60px !important;
+}
+
+.grp-review-item:has(.grp-review[style*="spread(30px)"]) .grp-review {
+    margin: -60px !important;
 }
 
 /* Fallback for browsers without :has() support */
@@ -400,6 +420,14 @@
     padding: 0 10px;
 }
 
+/* Ensure containers don't clip shadows */
+.grp-layout-carousel .grp-carousel-container,
+.grp-layout-grid .grp-reviews-grid,
+.grp-layout-grid_carousel .grp-grid-carousel-viewport,
+.grp-layout-list .grp-reviews-list {
+    overflow: visible !important;
+}
+
 .grp-layout-grid .grp-review-item,
 .grp-layout-grid_carousel .grp-review-item {
     /* Grid items already have gaps, reduce additional margin */
@@ -407,27 +435,56 @@
 
 .grp-layout-grid .grp-review-item:has(.grp-review[style*="box-shadow"]),
 .grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="box-shadow"]) {
-    margin: 15px !important;
+    padding: 15px !important;
+}
+
+.grp-layout-grid .grp-review-item:has(.grp-review[style*="box-shadow"]) .grp-review,
+.grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="box-shadow"]) .grp-review {
+    margin: -15px !important;
 }
 
 .grp-layout-grid .grp-review-item:has(.grp-review[style*="blur(20px)"]),
 .grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="blur(20px)"]) {
-    margin: 25px !important;
+    padding: 25px !important;
+}
+
+.grp-layout-grid .grp-review-item:has(.grp-review[style*="blur(20px)"]) .grp-review,
+.grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="blur(20px)"]) .grp-review {
+    margin: -25px !important;
 }
 
 .grp-layout-grid .grp-review-item:has(.grp-review[style*="blur(30px)"]),
 .grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="blur(30px)"]) {
-    margin: 35px !important;
+    padding: 35px !important;
+}
+
+.grp-layout-grid .grp-review-item:has(.grp-review[style*="blur(30px)"]) .grp-review,
+.grp-layout-grid_carousel .grp-review-item:has(.grp-review[style*="blur(30px)"]) .grp-review {
+    margin: -35px !important;
 }
 
 /* Ensure creative gradients are applied with high specificity */
 .grp-style-creative .grp-review {
     /* This ensures Elementor gradients take precedence */
+    background-attachment: initial !important;
+    background-clip: initial !important;
+    background-origin: initial !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
 }
 
 /* Force gradient display for creative style */
 .grp-style-creative .grp-review[style*="background"] {
     /* Make sure gradients are visible */
+    background-attachment: initial !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+}
+
+/* Debug: Force creative background visibility */
+.grp-style-creative .grp-review {
+    /* Ensure background is not overridden */
+    min-height: 150px !important; /* Ensure cards have height for gradient visibility */
 }
 
 /* Responsive Design */

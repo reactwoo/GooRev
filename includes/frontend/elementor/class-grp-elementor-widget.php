@@ -836,30 +836,39 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 'fields_options' => array(
                     'gradient_type' => array(
                         'default' => 'linear',
+                        'label' => __('Type', 'google-reviews-plugin'),
                     ),
                     'gradient_angle' => array(
                         'default' => array(
                             'unit' => 'deg',
                             'size' => 135,
                         ),
+                        'label' => __('Angle', 'google-reviews-plugin'),
+                        'selectors' => array(
+                            '{{WRAPPER}} .grp-style-creative .grp-review' => 'background: linear-gradient({{SIZE}}{{UNIT}}, {{color.VALUE}} {{color_stop.SIZE}}{{color_stop.UNIT}}, {{color_b.VALUE}} {{color_b_stop.SIZE}}{{color_b_stop.UNIT}})',
+                        ),
                     ),
                     'color' => array(
                         'default' => '#4285F4',
+                        'label' => __('Start Color', 'google-reviews-plugin'),
                     ),
                     'color_stop' => array(
                         'default' => array(
                             'unit' => '%',
                             'size' => 0,
                         ),
+                        'label' => __('Start Position', 'google-reviews-plugin'),
                     ),
                     'color_b' => array(
                         'default' => '#EA4335',
+                        'label' => __('End Color', 'google-reviews-plugin'),
                     ),
                     'color_b_stop' => array(
                         'default' => array(
                             'unit' => '%',
                             'size' => 100,
                         ),
+                        'label' => __('End Position', 'google-reviews-plugin'),
                     ),
                 ),
             )
@@ -1060,8 +1069,12 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'arrows' => $settings['arrows'],
             'consistent_height' => isset($settings['consistent_height']) ? $settings['consistent_height'] : 'false',
             // Creative style specific options
-            // Creative background handled by Elementor Group_Control_Background
+            // Creative background - extract gradient data from Elementor control
             'creative_background' => isset($settings['creative_background']) ? $settings['creative_background'] : array(),
+            'creative_gradient_type' => isset($settings['creative_background']['gradient_type']) ? $settings['creative_background']['gradient_type'] : 'linear',
+            'creative_gradient_angle' => isset($settings['creative_background']['gradient_angle']['size']) ? $settings['creative_background']['gradient_angle']['size'] : 135,
+            'creative_gradient_start' => isset($settings['creative_background']['color']) ? $settings['creative_background']['color'] : '#4285F4',
+            'creative_gradient_end' => isset($settings['creative_background']['color_b']) ? $settings['creative_background']['color_b'] : '#EA4335',
             'creative_text_color' => isset($settings['creative_text_color']) ? $settings['creative_text_color'] : '#ffffff',
             'creative_date_color' => isset($settings['creative_date_color']) ? $settings['creative_date_color'] : '#ffffff',
             'creative_star_color' => isset($settings['creative_star_color']) ? $settings['creative_star_color'] : '#FFD700',

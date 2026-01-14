@@ -419,8 +419,20 @@ class GRP_Gutenberg {
             $start_color = isset($bg_data['start_color']) ? $bg_data['start_color'] : '#4285F4';
             $end_color = isset($bg_data['end_color']) ? $bg_data['end_color'] : '#EA4335';
 
-            if ($gradient_type === 'linear') {
+            // Also check for Elementor-style data structure
+            if (empty($start_color) && isset($bg_data['color'])) {
+                $start_color = $bg_data['color'];
+            }
+            if (empty($end_color) && isset($bg_data['color_b'])) {
+                $end_color = $bg_data['color_b'];
+            }
+            if ($gradient_type === 'linear' && isset($bg_data['gradient_angle'])) {
+                $angle = isset($bg_data['gradient_angle']['size']) ? intval($bg_data['gradient_angle']['size']) : 135;
+            } elseif ($gradient_type === 'linear') {
                 $angle = isset($bg_data['angle']) ? intval($bg_data['angle']) : 135;
+            }
+
+            if ($gradient_type === 'linear') {
                 $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
             } else {
                 $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
