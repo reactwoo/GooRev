@@ -154,14 +154,22 @@ class GRP_Shortcode {
             $start_color = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
             $end_color = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
 
-            // Generate gradient CSS
+            // Generate gradient CSS - only apply when controls are used
             $custom_css .= '/* Creative gradient applied */ ';
             if ($gradient_type === 'linear') {
                 $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; background-size: cover !important; background-repeat: no-repeat !important; background-attachment: initial !important; }';
+                // Only apply gradient if custom colors are provided (not defaults)
+                if ($start_color !== '#4285F4' || $end_color !== '#EA4335' || $angle !== 135) {
+                    $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
+                }
             } else {
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; background-size: cover !important; background-repeat: no-repeat !important; background-attachment: initial !important; }';
+                // Only apply gradient if custom colors are provided
+                if ($start_color !== '#4285F4' || $end_color !== '#EA4335') {
+                    $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
+                }
             }
+            // Always apply background properties for creative style
+            $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background-size: cover; background-repeat: no-repeat; background-attachment: initial; }';
             // Glass effect (Apple-style)
             if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
                 $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }';

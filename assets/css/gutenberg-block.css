@@ -1,5 +1,59 @@
 /* Google Reviews Plugin - Gutenberg Block Styles */
 
+/* Block Placeholders */
+.grp-block-placeholder {
+    background: #f8f9fa;
+    border: 2px dashed #e1e5e9;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.grp-preview-header h3 {
+    margin: 0 0 10px 0;
+    color: #1d2327;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.grp-preview-content p {
+    margin: 8px 0;
+    color: #646970;
+    font-size: 14px;
+}
+
+.grp-button-preview-sample {
+    background: #007cba !important;
+    color: white !important;
+    padding: 12px 24px !important;
+    border-radius: 4px !important;
+    display: inline-block !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    margin: 10px auto !important;
+}
+
+/* Block alignment styles */
+.wp-block-google-reviews-reviews.aligncenter {
+    text-align: center;
+}
+
+.wp-block-google-reviews-reviews.alignwide {
+    max-width: 100%;
+}
+
+.wp-block-google-reviews-review-button.aligncenter {
+    text-align: center;
+}
+
+.wp-block-google-reviews-review-button.alignwide {
+    max-width: 100%;
+}
+
 .grp-gutenberg-block {
     margin: 20px 0;
 }

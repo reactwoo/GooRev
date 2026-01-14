@@ -4,7 +4,13 @@
 
 (function(blocks, element, components, i18n, serverSideRender) {
     'use strict';
-    
+
+    // Check if required components are available
+    if (!blocks || !element || !components || !i18n) {
+        console.error('Google Reviews Gutenberg: Required dependencies not available');
+        return;
+    }
+
     var el = element.createElement;
     var registerBlockType = blocks.registerBlockType;
     var InspectorControls = blocks.InspectorControls;
@@ -14,9 +20,20 @@
     var RangeControl = components.RangeControl;
     var TextControl = components.TextControl;
     // ServerSideRender is now a separate package in newer WordPress versions
-    var ServerSideRender = serverSideRender || blocks.ServerSideRender || null;
+    var ServerSideRender = serverSideRender || (wp && wp.serverSideRender) || (blocks && blocks.ServerSideRender) || null;
     
-    registerBlockType('google-reviews/reviews', {
+    console.log('Google Reviews Gutenberg: Starting block registration...');
+
+    // Check if registerBlockType is available
+    if (typeof registerBlockType === 'undefined') {
+        console.error('Google Reviews Gutenberg: registerBlockType is not available');
+        return;
+    }
+
+    console.log('Registering Google Reviews Gutenberg block...');
+
+    try {
+        registerBlockType('google-reviews/reviews', {
         title: i18n.__('Google Reviews', 'google-reviews-plugin'),
         description: i18n.__('Display Google Business reviews with customizable styles and layouts.', 'google-reviews-plugin'),
         icon: 'star-filled',
@@ -92,8 +109,10 @@
             creative_background: {
                 type: 'object',
                 default: {
-                    type: 'gradient',
-                    gradient: 'linear-gradient(135deg, #4285F4 0%, #EA4335 100%)'
+                    type: 'linear',
+                    angle: 135,
+                    start_color: '#4285F4',
+                    end_color: '#EA4335'
                 }
             },
             creative_text_color: {
@@ -523,7 +542,7 @@
                                     }
                                 })
                             ),
-                            (attributes.creative_background?.type === 'linear' || (!attributes.creative_background?.type && attributes.creative_background?.angle !== undefined)) ? el(RangeControl, {
+                            (attributes.creative_background?.type === 'linear' || attributes.creative_background?.type === undefined) ? el(RangeControl, {
                                 label: i18n.__('Angle (degrees)', 'google-reviews-plugin'),
                                 value: attributes.creative_background?.angle || 135,
                                 onChange: function(value) {
@@ -648,11 +667,14 @@
                             i18n.__('layout', 'google-reviews-plugin')
                         )
                     ),
-                    ServerSideRender ? el(ServerSideRender, {
-                        block: 'google-reviews/reviews',
-                        attributes: attributes
-                    }) : el('div', { className: 'grp-block-placeholder' },
-                        el('p', {}, i18n.__('Preview will be available after saving.', 'google-reviews-plugin'))
+                    el('div', { className: 'grp-block-placeholder grp-block-preview' },
+                        el('div', { className: 'grp-preview-header' },
+                            el('h3', {}, i18n.__('Google Reviews Block', 'google-reviews-plugin'))
+                        ),
+                        el('div', { className: 'grp-preview-content' },
+                            el('p', {}, i18n.__('Configure your reviews display options in the sidebar.', 'google-reviews-plugin')),
+                            el('p', {}, i18n.__('Preview will be available after saving the post.', 'google-reviews-plugin'))
+                        )
                     )
                 ),
             ];
@@ -663,10 +685,16 @@
             return null;
         }
     });
+    } catch (error) {
+        console.error('Google Reviews Gutenberg: Error registering reviews block:', error);
+    }
     
     // Register Review Button block if addon is enabled
     // Check if the block is registered on PHP side by checking if grp_gutenberg has reviewButtonEnabled
     if (typeof grp_gutenberg !== 'undefined' && grp_gutenberg.reviewButtonEnabled) {
+    console.log('Registering Google Reviews Button Gutenberg block...');
+
+    try {
         registerBlockType('google-reviews/review-button', {
             title: i18n.__('Review Button', 'google-reviews-plugin'),
             description: i18n.__('Add a button that links to your Google Business Profile review page.', 'google-reviews-plugin'),
@@ -793,11 +821,17 @@
                     ),
                     
                     el('div', { className: 'grp-review-button-block-editor', style: { textAlign: attributes.align || 'left', padding: '20px' } },
-                        ServerSideRender ? el(ServerSideRender, {
-                            block: 'google-reviews/review-button',
-                            attributes: attributes
-                        }) : el('div', { className: 'grp-block-placeholder' },
-                            el('p', {}, i18n.__('Preview will be available after saving.', 'google-reviews-plugin'))
+                        el('div', { className: 'grp-block-placeholder grp-button-preview' },
+                            el('div', { className: 'grp-preview-header' },
+                                el('h3', {}, i18n.__('Review Button Block', 'google-reviews-plugin'))
+                            ),
+                            el('div', { className: 'grp-preview-content' },
+                                el('p', {}, i18n.__('Configure your button options in the sidebar.', 'google-reviews-plugin')),
+                                el('div', { className: 'grp-button-preview-sample', style: { padding: '10px', background: '#f0f0f0', borderRadius: '4px', textAlign: 'center', margin: '10px 0' } },
+                                    i18n.__('Leave a Review', 'google-reviews-plugin')
+                                ),
+                                el('p', {}, i18n.__('Preview will be available after saving the post.', 'google-reviews-plugin'))
+                            )
                         )
                     )
                 ];
@@ -808,6 +842,9 @@
                 return null;
             }
         });
+    } catch (error) {
+        console.error('Google Reviews Gutenberg: Error registering review button block:', error);
+    }
     }
     
 })(

@@ -324,18 +324,18 @@ class GRP_Gutenberg {
      * Enqueue block editor assets
      */
     public function enqueue_block_editor_assets() {
-        // Register dependencies - include server-side-render for newer WordPress versions
-        $dependencies = array('wp-blocks', 'wp-element', 'wp-components', 'wp-i18n');
-        
+        // Register dependencies - updated for WordPress compatibility
+        $dependencies = array('wp-blocks', 'wp-i18n', 'wp-element', 'wp-components');
+
         // Add wp-editor for older WordPress versions, wp-block-editor for newer ones
         if (function_exists('wp_enqueue_block_editor_assets')) {
             $dependencies[] = 'wp-block-editor';
         } else {
             $dependencies[] = 'wp-editor';
         }
-        
-        // Add server-side-render if available (WordPress 5.3+)
-        if (function_exists('register_block_type') && class_exists('WP_Block_Editor_Context')) {
+
+        // Try to add server-side-render if available
+        if (wp_script_is('wp-server-side-render', 'registered') || function_exists('wp_enqueue_script') && wp_scripts()->query('wp-server-side-render')) {
             $dependencies[] = 'wp-server-side-render';
         }
         
@@ -432,11 +432,18 @@ class GRP_Gutenberg {
                 $angle = isset($bg_data['angle']) ? intval($bg_data['angle']) : 135;
             }
 
+            // Only apply gradient if custom values are set
             if ($gradient_type === 'linear') {
-                $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
+                if ($angle !== 135 || $start_color !== '#4285F4' || $end_color !== '#EA4335') {
+                    $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
+                }
             } else {
-                $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
+                if ($start_color !== '#4285F4' || $end_color !== '#EA4335') {
+                    $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
+                }
             }
+            // Always apply background properties
+            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background-size: cover; background-repeat: no-repeat; background-attachment: initial; }';
 
             // Glass effect
             if (isset($attributes['creative_glass_effect']) && $attributes['creative_glass_effect'] === 'yes') {

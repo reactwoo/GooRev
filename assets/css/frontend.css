@@ -463,28 +463,15 @@
     margin: -35px !important;
 }
 
-/* Ensure creative gradients are applied with high specificity */
+/* Creative style background properties - supports Elementor gradients */
 .grp-style-creative .grp-review {
-    /* This ensures Elementor gradients take precedence */
-    background-attachment: initial !important;
-    background-clip: initial !important;
-    background-origin: initial !important;
-    background-repeat: no-repeat !important;
-    background-size: cover !important;
-}
-
-/* Force gradient display for creative style */
-.grp-style-creative .grp-review[style*="background"] {
-    /* Make sure gradients are visible */
-    background-attachment: initial !important;
-    background-repeat: no-repeat !important;
-    background-size: cover !important;
-}
-
-/* Debug: Force creative background visibility */
-.grp-style-creative .grp-review {
-    /* Ensure background is not overridden */
-    min-height: 150px !important; /* Ensure cards have height for gradient visibility */
+    /* Ensure proper background rendering for gradients */
+    background-attachment: initial;
+    background-clip: initial;
+    background-origin: initial;
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-height: 150px; /* Ensure cards have height for gradient visibility */
 }
 
 /* Responsive Design */
