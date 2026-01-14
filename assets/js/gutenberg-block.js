@@ -516,18 +516,18 @@
                                         { label: i18n.__('Radial', 'google-reviews-plugin'), value: 'radial' }
                                     ],
                                     onChange: function(value) {
-                                        var currentBg = attributes.creative_background || {};
+                                        var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
                                         setAttributes({
                                             creative_background: Object.assign({}, currentBg, { type: value })
                                         });
                                     }
                                 })
                             ),
-                            (attributes.creative_background?.type === 'linear') ? el(RangeControl, {
+                            (attributes.creative_background?.type === 'linear' || (!attributes.creative_background?.type && attributes.creative_background?.angle !== undefined)) ? el(RangeControl, {
                                 label: i18n.__('Angle (degrees)', 'google-reviews-plugin'),
                                 value: attributes.creative_background?.angle || 135,
                                 onChange: function(value) {
-                                    var currentBg = attributes.creative_background || {};
+                                    var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
                                     setAttributes({
                                         creative_background: Object.assign({}, currentBg, { angle: value })
                                     });
@@ -544,7 +544,7 @@
                                     type: 'color',
                                     value: attributes.creative_background?.start_color || '#4285F4',
                                     onChange: function(value) {
-                                        var currentBg = attributes.creative_background || {};
+                                        var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
                                         setAttributes({
                                             creative_background: Object.assign({}, currentBg, { start_color: value })
                                         });
@@ -559,7 +559,7 @@
                                     type: 'color',
                                     value: attributes.creative_background?.end_color || '#EA4335',
                                     onChange: function(value) {
-                                        var currentBg = attributes.creative_background || {};
+                                        var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
                                         setAttributes({
                                             creative_background: Object.assign({}, currentBg, { end_color: value })
                                         });

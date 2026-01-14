@@ -561,17 +561,6 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 )
             );
 
-            // Star Color (all styles)
-            $this->add_control(
-                'custom_star_color',
-                array(
-                    'label' => __('Star Color', 'google-reviews-plugin'),
-                    'type' => \Elementor\Controls_Manager::COLOR,
-                    'selectors' => array(
-                        '{{WRAPPER}} .grp-star' => 'color: {{VALUE}} !important;',
-                    ),
-                )
-            );
 
         // Border Radius (all styles except Classic and Creative)
         $this->add_control(
@@ -792,12 +781,6 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 )
             );
 
-            $this->add_control(
-                'custom_star_color',
-                array(
-                    'type' => \Elementor\Controls_Manager::HIDDEN,
-                )
-            );
 
             $this->add_control(
                 'custom_border_radius',
@@ -851,9 +834,6 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 'types' => array('gradient'),
                 'selector' => '{{WRAPPER}} .grp-style-creative .grp-review',
                 'fields_options' => array(
-                    'background' => array(
-                        'default' => 'gradient',
-                    ),
                     'gradient_type' => array(
                         'default' => 'linear',
                     ),
@@ -862,9 +842,9 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                             'unit' => 'deg',
                             'size' => 135,
                         ),
-                    ),
-                    'gradient_position' => array(
-                        'default' => 'center center',
+                        'selectors' => array(
+                            '{{WRAPPER}} .grp-style-creative .grp-review' => 'background: linear-gradient({{SIZE}}{{UNIT}}, {{color.VALUE}} {{color_stop.SIZE}}{{color_stop.UNIT}}, {{color_b.VALUE}} {{color_b_stop.SIZE}}{{color_b_stop.UNIT}})',
+                        ),
                     ),
                     'color' => array(
                         'default' => '#4285F4',
@@ -882,11 +862,6 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                         'default' => array(
                             'unit' => '%',
                             'size' => 100,
-                        ),
-                    ),
-                    'gradient_angle' => array(
-                        'selectors' => array(
-                            '{{WRAPPER}} .grp-style-creative .grp-review' => 'background: linear-gradient({{SIZE}}{{UNIT}}, {{color.VALUE}} {{color_stop.SIZE}}{{color_stop.UNIT}}, {{color_b.VALUE}} {{color_b_stop.SIZE}}{{color_b_stop.UNIT}})',
                         ),
                     ),
                 ),
@@ -1058,80 +1033,6 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
 
         $this->end_controls_section();
 
-        // Typography Section
-        if ($this->is_pro()) {
-            $this->start_controls_section(
-                'typography_section',
-                array(
-                    'label' => __('Typography', 'google-reviews-plugin'),
-                    'tab' => \Elementor\Controls_Manager::TAB_STYLE,
-                )
-            );
-
-            // Body Font Family
-            $this->add_control(
-                'body_font_family',
-                array(
-                    'label' => __('Body Font Family', 'google-reviews-plugin'),
-                    'type' => \Elementor\Controls_Manager::FONT,
-                    'selectors' => array(
-                        '{{WRAPPER}} .grp-review-text' => 'font-family: {{VALUE}};',
-                    ),
-                )
-            );
-
-            // Name Font Family (especially for Classic style)
-            $this->add_control(
-                'name_font_family',
-                array(
-                    'label' => __('Name Font Family', 'google-reviews-plugin'),
-                    'type' => \Elementor\Controls_Manager::FONT,
-                    'condition' => array(
-                        'style' => 'classic',
-                    ),
-                    'selectors' => array(
-                        '{{WRAPPER}} .grp-author-name' => 'font-family: {{VALUE}};',
-                    ),
-                )
-            );
-
-            $this->end_controls_section();
-        } else {
-            // Free version - show upgrade notice for typography
-            $this->start_controls_section(
-                'typography_section_free',
-                array(
-                    'label' => __('Typography', 'google-reviews-plugin'),
-                    'tab' => \Elementor\Controls_Manager::TAB_STYLE,
-                )
-            );
-
-            $this->add_control(
-                'free_typography_notice',
-                array(
-                    'type' => \Elementor\Controls_Manager::RAW_HTML,
-                    'raw' => '<div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-bottom: 10px; border-radius: 4px;"><strong>🔤 Custom Fonts</strong><br>Choose from Google Fonts and customize typography for the perfect look. <a href="https://reactwoo.com/google-reviews-plugin-pro/" target="_blank" style="color: #007cba; text-decoration: underline;">Upgrade to Pro</a></div>',
-                    'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
-                )
-            );
-
-            // Hidden controls for free version
-            $this->add_control(
-                'body_font_family',
-                array(
-                    'type' => \Elementor\Controls_Manager::HIDDEN,
-                )
-            );
-
-            $this->add_control(
-                'name_font_family',
-                array(
-                    'type' => \Elementor\Controls_Manager::HIDDEN,
-                )
-            );
-
-            $this->end_controls_section();
-        }
     }
     
     /**

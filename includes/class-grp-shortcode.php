@@ -72,6 +72,12 @@ class GRP_Shortcode {
                 'start_color' => '#4285F4',
                 'end_color' => '#EA4335'
             ),
+            'creative_glass_effect' => 'no',
+            'creative_box_shadow' => array(),
+            'creative_border' => array(),
+            'creative_border_radius' => array(),
+            'creative_avatar_size' => 80,
+            'creative_star_size' => 32,
             'creative_text_color' => '#ffffff',
             'creative_date_color' => '#ffffff',
             'creative_star_color' => '#FFD700',

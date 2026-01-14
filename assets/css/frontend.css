@@ -361,14 +361,32 @@
     min-height: 200px;
 }
 
-/* Box Shadow Spacing */
+/* Box Shadow Spacing - Enhanced for better visibility */
 .grp-review {
     /* Add margin when box shadow is present to ensure visibility */
     transition: margin 0.3s ease;
 }
 
+/* Dynamic margin based on box shadow values */
 .grp-review[style*="box-shadow"] {
-    margin: 20px !important;
+    margin: 30px !important;
+}
+
+/* Even more margin for large blur/spread values */
+.grp-review[style*="blur(20px)"] {
+    margin: 40px !important;
+}
+
+.grp-review[style*="blur(30px)"] {
+    margin: 50px !important;
+}
+
+.grp-review[style*="spread(20px)"] {
+    margin: 45px !important;
+}
+
+.grp-review[style*="spread(30px)"] {
+    margin: 60px !important;
 }
 
 /* Specific adjustments for different layouts */
@@ -383,7 +401,17 @@
 
 .grp-layout-grid .grp-review[style*="box-shadow"],
 .grp-layout-grid_carousel .grp-review[style*="box-shadow"] {
-    margin: 10px !important;
+    margin: 15px !important;
+}
+
+.grp-layout-grid .grp-review[style*="blur(20px)"],
+.grp-layout-grid_carousel .grp-review[style*="blur(20px)"] {
+    margin: 25px !important;
+}
+
+.grp-layout-grid .grp-review[style*="blur(30px)"],
+.grp-layout-grid_carousel .grp-review[style*="blur(30px)"] {
+    margin: 35px !important;
 }
 
 /* Responsive Design */
