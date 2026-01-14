@@ -89,21 +89,12 @@
                 default: false
             },
             // Creative style specific attributes
-            creative_gradient_type: {
-                type: 'string',
-                default: 'linear'
-            },
-            creative_gradient_angle: {
-                type: 'number',
-                default: 135
-            },
-            creative_gradient_start: {
-                type: 'string',
-                default: '#4285F4'
-            },
-            creative_gradient_end: {
-                type: 'string',
-                default: '#EA4335'
+            creative_background: {
+                type: 'object',
+                default: {
+                    type: 'gradient',
+                    gradient: 'linear-gradient(135deg, #4285F4 0%, #EA4335 100%)'
+                }
             },
             creative_text_color: {
                 type: 'string',
@@ -511,55 +502,70 @@
                         initialOpen: false,
                         className: (attributes.style !== 'creative') ? 'grp-hidden' : ''
                     },
-                        // Gradient Controls
-                        el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
-                                i18n.__('Gradient Type', 'google-reviews-plugin')
+                        // Gradient Background Section
+                        el('div', { style: { marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '4px' } },
+                            el('h4', { style: { margin: '0 0 10px 0', color: '#23282d' } }, i18n.__('Gradient Background', 'google-reviews-plugin')),
+                            el('div', { style: { marginBottom: '12px' } },
+                                el('label', { style: { display: 'block', marginBottom: '5px', fontWeight: 'bold' } },
+                                    i18n.__('Gradient Type', 'google-reviews-plugin')
+                                ),
+                                el(SelectControl, {
+                                    value: attributes.creative_background?.type || 'linear',
+                                    options: [
+                                        { label: i18n.__('Linear', 'google-reviews-plugin'), value: 'linear' },
+                                        { label: i18n.__('Radial', 'google-reviews-plugin'), value: 'radial' }
+                                    ],
+                                    onChange: function(value) {
+                                        var currentBg = attributes.creative_background || {};
+                                        setAttributes({
+                                            creative_background: Object.assign({}, currentBg, { type: value })
+                                        });
+                                    }
+                                })
                             ),
-                            el(SelectControl, {
-                                value: attributes.creative_gradient_type || 'linear',
-                                options: [
-                                    { label: i18n.__('Linear', 'google-reviews-plugin'), value: 'linear' },
-                                    { label: i18n.__('Radial', 'google-reviews-plugin'), value: 'radial' }
-                                ],
+                            (attributes.creative_background?.type === 'linear') ? el(RangeControl, {
+                                label: i18n.__('Angle (degrees)', 'google-reviews-plugin'),
+                                value: attributes.creative_background?.angle || 135,
                                 onChange: function(value) {
-                                    setAttributes({ creative_gradient_type: value });
-                                }
-                            })
-                        ),
-                        (attributes.creative_gradient_type === 'linear') ? el(RangeControl, {
-                            label: i18n.__('Gradient Angle (deg)', 'google-reviews-plugin'),
-                            value: attributes.creative_gradient_angle || 135,
-                            onChange: function(value) {
-                                setAttributes({ creative_gradient_angle: value });
-                            },
-                            min: 0,
-                            max: 360,
-                            step: 1
-                        }) : null,
-                        el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
-                                i18n.__('Gradient Start Color', 'google-reviews-plugin')
+                                    var currentBg = attributes.creative_background || {};
+                                    setAttributes({
+                                        creative_background: Object.assign({}, currentBg, { angle: value })
+                                    });
+                                },
+                                min: 0,
+                                max: 360,
+                                step: 1
+                            }) : null,
+                            el('div', { style: { marginBottom: '12px' } },
+                                el('label', { style: { display: 'block', marginBottom: '5px', fontWeight: 'bold' } },
+                                    i18n.__('Start Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.creative_background?.start_color || '#4285F4',
+                                    onChange: function(value) {
+                                        var currentBg = attributes.creative_background || {};
+                                        setAttributes({
+                                            creative_background: Object.assign({}, currentBg, { start_color: value })
+                                        });
+                                    }
+                                })
                             ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.creative_gradient_start || '#4285F4',
-                                onChange: function(value) {
-                                    setAttributes({ creative_gradient_start: value });
-                                }
-                            })
-                        ),
-                        el('div', { style: { marginBottom: '16px' } },
-                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
-                                i18n.__('Gradient End Color', 'google-reviews-plugin')
-                            ),
-                            el(TextControl, {
-                                type: 'color',
-                                value: attributes.creative_gradient_end || '#EA4335',
-                                onChange: function(value) {
-                                    setAttributes({ creative_gradient_end: value });
-                                }
-                            })
+                            el('div', { style: { marginBottom: '12px' } },
+                                el('label', { style: { display: 'block', marginBottom: '5px', fontWeight: 'bold' } },
+                                    i18n.__('End Color', 'google-reviews-plugin')
+                                ),
+                                el(TextControl, {
+                                    type: 'color',
+                                    value: attributes.creative_background?.end_color || '#EA4335',
+                                    onChange: function(value) {
+                                        var currentBg = attributes.creative_background || {};
+                                        setAttributes({
+                                            creative_background: Object.assign({}, currentBg, { end_color: value })
+                                        });
+                                    }
+                                })
+                            )
                         ),
                         // Text Colors
                         el('div', { style: { marginBottom: '16px' } },

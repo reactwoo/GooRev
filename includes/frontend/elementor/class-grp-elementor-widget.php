@@ -516,17 +516,20 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 )
             );
 
-            // Background Color (all styles)
-            $this->add_control(
-                'custom_background_color',
-                array(
-                    'label' => __('Card Background Color', 'google-reviews-plugin'),
-                    'type' => \Elementor\Controls_Manager::COLOR,
-                    'selectors' => array(
-                        '{{WRAPPER}} .grp-review' => 'background-color: {{VALUE}} !important;',
-                    ),
-                )
-            );
+        // Background Color (all styles except creative)
+        $this->add_control(
+            'custom_background_color',
+            array(
+                'label' => __('Card Background Color', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'condition' => array(
+                    'style!' => 'creative',
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review' => 'background-color: {{VALUE}} !important;',
+                ),
+            )
+        );
 
             // Border Color (Classic, Corporate styles)
             $this->add_control(
@@ -570,21 +573,21 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 )
             );
 
-            // Border Radius (all styles except Classic)
-            $this->add_control(
-                'custom_border_radius',
-                array(
-                    'label' => __('Border Radius', 'google-reviews-plugin'),
-                    'type' => \Elementor\Controls_Manager::DIMENSIONS,
-                    'size_units' => array('px', '%'),
-                    'condition' => array(
-                        'style!' => 'classic',
-                    ),
-                    'selectors' => array(
-                        '{{WRAPPER}} .grp-review' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}} !important;',
-                    ),
-                )
-            );
+        // Border Radius (all styles except Classic and Creative)
+        $this->add_control(
+            'custom_border_radius',
+            array(
+                'label' => __('Border Radius', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                'size_units' => array('px', '%'),
+                'condition' => array(
+                    'style!' => array('classic', 'creative'),
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}} !important;',
+                ),
+            )
+        );
 
             // Padding Override
             $this->add_control(
@@ -624,32 +627,123 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 )
             );
 
-            // Name Font Size
-            $this->add_control(
-                'custom_name_font_size',
-                array(
-                    'label' => __('Name Text Size', 'google-reviews-plugin'),
-                    'type' => \Elementor\Controls_Manager::SLIDER,
-                    'size_units' => array('px', 'em', 'rem'),
-                    'range' => array(
-                        'px' => array(
-                            'min' => 10,
-                            'max' => 20,
-                            'step' => 1,
-                        ),
-                        'em' => array(
-                            'min' => 0.5,
-                            'max' => 1.5,
-                            'step' => 0.1,
-                        ),
+        // Name Font Size
+        $this->add_control(
+            'custom_name_font_size',
+            array(
+                'label' => __('Name Text Size', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => array('px', 'em', 'rem'),
+                'range' => array(
+                    'px' => array(
+                        'min' => 10,
+                        'max' => 20,
+                        'step' => 1,
                     ),
+                    'em' => array(
+                        'min' => 0.5,
+                        'max' => 1.5,
+                        'step' => 0.1,
+                    ),
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-author-name' => 'font-size: {{SIZE}}{{UNIT}} !important;',
+                ),
+            )
+        );
+
+        // Text Alignment
+        $this->add_control(
+            'text_alignment',
+            array(
+                'label' => __('Text Alignment', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::CHOOSE,
+                'options' => array(
+                    'left' => array(
+                        'title' => __('Left', 'google-reviews-plugin'),
+                        'icon' => 'eicon-text-align-left',
+                    ),
+                    'center' => array(
+                        'title' => __('Center', 'google-reviews-plugin'),
+                        'icon' => 'eicon-text-align-center',
+                    ),
+                    'right' => array(
+                        'title' => __('Right', 'google-reviews-plugin'),
+                        'icon' => 'eicon-text-align-right',
+                    ),
+                ),
+                'default' => 'left',
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review-text' => 'text-align: {{VALUE}};',
+                    '{{WRAPPER}} .grp-review-meta' => 'text-align: {{VALUE}};',
+                ),
+            )
+        );
+
+        // Typography Controls
+        if ($this->is_pro()) {
+            $this->add_control(
+                'typography_heading',
+                array(
+                    'label' => __('Typography', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::HEADING,
+                    'separator' => 'before',
+                )
+            );
+
+            // Body Font Family
+            $this->add_control(
+                'body_font_family',
+                array(
+                    'label' => __('Body Font Family', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::FONT,
                     'selectors' => array(
-                        '{{WRAPPER}} .grp-author-name' => 'font-size: {{SIZE}}{{UNIT}} !important;',
+                        '{{WRAPPER}} .grp-review-text' => 'font-family: {{VALUE}};',
                     ),
                 )
             );
 
-            $this->end_controls_section();
+            // Name Font Family (especially for Classic style)
+            $this->add_control(
+                'name_font_family',
+                array(
+                    'label' => __('Name Font Family', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::FONT,
+                    'condition' => array(
+                        'style' => 'classic',
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-author-name' => 'font-family: {{VALUE}};',
+                    ),
+                )
+            );
+        } else {
+            $this->add_control(
+                'free_typography_notice',
+                array(
+                    'type' => \Elementor\Controls_Manager::RAW_HTML,
+                    'raw' => '<div style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; margin-top: 15px; border-radius: 4px;"><strong>🔤 Custom Fonts</strong><br>Choose from Google Fonts and customize typography for the perfect look. <a href="https://reactwoo.com/google-reviews-plugin-pro/" target="_blank" style="color: #007cba; text-decoration: underline;">Upgrade to Pro</a></div>',
+                    'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
+                )
+            );
+
+            // Hidden controls for free version
+            $this->add_control(
+                'body_font_family',
+                array(
+                    'type' => \Elementor\Controls_Manager::HIDDEN,
+                )
+            );
+
+            $this->add_control(
+                'name_font_family',
+                array(
+                    'type' => \Elementor\Controls_Manager::HIDDEN,
+                )
+            );
+        }
+
+        $this->end_controls_section();
         } else {
             // Free version - show upgrade notice for style customization
             $this->start_controls_section(
@@ -748,58 +842,54 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
-        // Gradient Background Controls
-        $this->add_control(
-            'creative_gradient_type',
+        // Advanced Gradient Background Controls (Elementor-style)
+        $this->add_group_control(
+            \Elementor\Group_Control_Background::get_type(),
             array(
-                'label' => __('Gradient Type', 'google-reviews-plugin'),
-                'type' => \Elementor\Controls_Manager::SELECT,
-                'default' => 'linear',
-                'options' => array(
-                    'linear' => __('Linear', 'google-reviews-plugin'),
-                    'radial' => __('Radial', 'google-reviews-plugin'),
-                ),
-            )
-        );
-
-        $this->add_control(
-            'creative_gradient_angle',
-            array(
-                'label' => __('Gradient Angle', 'google-reviews-plugin'),
-                'type' => \Elementor\Controls_Manager::SLIDER,
-                'size_units' => array('deg'),
-                'range' => array(
-                    'deg' => array(
-                        'min' => 0,
-                        'max' => 360,
-                        'step' => 1,
+                'name' => 'creative_background',
+                'label' => __('Background', 'google-reviews-plugin'),
+                'types' => array('gradient'),
+                'selector' => '{{WRAPPER}} .grp-style-creative .grp-review',
+                'fields_options' => array(
+                    'background' => array(
+                        'default' => 'gradient',
+                    ),
+                    'gradient_type' => array(
+                        'default' => 'linear',
+                    ),
+                    'gradient_angle' => array(
+                        'default' => array(
+                            'unit' => 'deg',
+                            'size' => 135,
+                        ),
+                    ),
+                    'gradient_position' => array(
+                        'default' => 'center center',
+                    ),
+                    'color' => array(
+                        'default' => '#4285F4',
+                    ),
+                    'color_stop' => array(
+                        'default' => array(
+                            'unit' => '%',
+                            'size' => 0,
+                        ),
+                    ),
+                    'color_b' => array(
+                        'default' => '#EA4335',
+                    ),
+                    'color_b_stop' => array(
+                        'default' => array(
+                            'unit' => '%',
+                            'size' => 100,
+                        ),
+                    ),
+                    'gradient_angle' => array(
+                        'selectors' => array(
+                            '{{WRAPPER}} .grp-style-creative .grp-review' => 'background: linear-gradient({{SIZE}}{{UNIT}}, {{color.VALUE}} {{color_stop.SIZE}}{{color_stop.UNIT}}, {{color_b.VALUE}} {{color_b_stop.SIZE}}{{color_b_stop.UNIT}})',
+                        ),
                     ),
                 ),
-                'default' => array(
-                    'unit' => 'deg',
-                    'size' => 135,
-                ),
-                'condition' => array(
-                    'creative_gradient_type' => 'linear',
-                ),
-            )
-        );
-
-        $this->add_control(
-            'creative_gradient_start',
-            array(
-                'label' => __('Gradient Start Color', 'google-reviews-plugin'),
-                'type' => \Elementor\Controls_Manager::COLOR,
-                'default' => '#4285F4',
-            )
-        );
-
-        $this->add_control(
-            'creative_gradient_end',
-            array(
-                'label' => __('Gradient End Color', 'google-reviews-plugin'),
-                'type' => \Elementor\Controls_Manager::COLOR,
-                'default' => '#EA4335',
             )
         );
 
@@ -853,7 +943,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
-        // Background Effects
+        // Glass Effect (Apple-style)
         $this->add_control(
             'creative_glass_effect',
             array(
@@ -863,16 +953,28 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 'label_off' => __('No', 'google-reviews-plugin'),
                 'return_value' => 'yes',
                 'default' => 'no',
+                'description' => __('Apple-style glass morphism effect with backdrop blur and transparency', 'google-reviews-plugin'),
             )
         );
 
-        // Box Shadow
+        // Box Shadow with proper margins
         $this->add_group_control(
             \Elementor\Group_Control_Box_Shadow::get_type(),
             array(
                 'name' => 'creative_box_shadow',
                 'label' => __('Box Shadow', 'google-reviews-plugin'),
                 'selector' => '{{WRAPPER}} .grp-style-creative .grp-review',
+                'fields_options' => array(
+                    'box_shadow' => array(
+                        'default' => array(
+                            'horizontal' => 0,
+                            'vertical' => 4,
+                            'blur' => 8,
+                            'spread' => 0,
+                            'color' => 'rgba(0, 0, 0, 0.1)',
+                        ),
+                    ),
+                ),
             )
         );
 
@@ -886,6 +988,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        // Border Radius
         $this->add_control(
             'creative_border_radius',
             array(
@@ -905,6 +1008,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        // Avatar Size
         $this->add_control(
             'creative_avatar_size',
             array(
@@ -928,6 +1032,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        // Star Size
         $this->add_control(
             'creative_star_size',
             array(
@@ -1057,10 +1162,8 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'arrows' => $settings['arrows'],
             'consistent_height' => isset($settings['consistent_height']) ? $settings['consistent_height'] : 'false',
             // Creative style specific options
-            'creative_gradient_type' => isset($settings['creative_gradient_type']) ? $settings['creative_gradient_type'] : 'linear',
-            'creative_gradient_angle' => isset($settings['creative_gradient_angle']['size']) ? $settings['creative_gradient_angle']['size'] : 135,
-            'creative_gradient_start' => isset($settings['creative_gradient_start']) ? $settings['creative_gradient_start'] : '#4285F4',
-            'creative_gradient_end' => isset($settings['creative_gradient_end']) ? $settings['creative_gradient_end'] : '#EA4335',
+            // Creative background handled by Elementor Group_Control_Background
+            'creative_background' => isset($settings['creative_background']) ? $settings['creative_background'] : array(),
             'creative_text_color' => isset($settings['creative_text_color']) ? $settings['creative_text_color'] : '#ffffff',
             'creative_date_color' => isset($settings['creative_date_color']) ? $settings['creative_date_color'] : '#ffffff',
             'creative_star_color' => isset($settings['creative_star_color']) ? $settings['creative_star_color'] : '#FFD700',

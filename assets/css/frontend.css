@@ -361,6 +361,31 @@
     min-height: 200px;
 }
 
+/* Box Shadow Spacing */
+.grp-review {
+    /* Add margin when box shadow is present to ensure visibility */
+    transition: margin 0.3s ease;
+}
+
+.grp-review[style*="box-shadow"] {
+    margin: 20px !important;
+}
+
+/* Specific adjustments for different layouts */
+.grp-layout-carousel .grp-review-item {
+    padding: 0 10px;
+}
+
+.grp-layout-grid .grp-review-item,
+.grp-layout-grid_carousel .grp-review-item {
+    /* Grid items already have gaps, reduce additional margin */
+}
+
+.grp-layout-grid .grp-review[style*="box-shadow"],
+.grp-layout-grid_carousel .grp-review[style*="box-shadow"] {
+    margin: 10px !important;
+}
+
 /* Responsive Design */
 .grp-responsive .grp-review {
     margin-bottom: 15px;
