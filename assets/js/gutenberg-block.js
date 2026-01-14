@@ -148,17 +148,31 @@
             // Check if user has pro license (passed from PHP)
             var isProUser = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro === true);
 
-            var styleOptions = grp_gutenberg.styles
-                .filter(function(style) {
-                    // Filter out creative style for free users
-                    return isProUser || style.value !== 'creative';
-                })
-                .map(function(style) {
-                    return {
-                        label: style.label,
-                        value: style.value
-                    };
-                });
+            // Get style options with fallback
+            var styleOptions = [];
+            if (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.styles) {
+                styleOptions = window.grp_gutenberg.styles
+                    .filter(function(style) {
+                        // Filter out creative style for free users
+                        return isProUser || style.value !== 'creative';
+                    })
+                    .map(function(style) {
+                        return {
+                            label: style.label,
+                            value: style.value
+                        };
+                    });
+            } else {
+                // Fallback style options
+                styleOptions = [
+                    { label: i18n.__('Modern', 'google-reviews-plugin'), value: 'modern' },
+                    { label: i18n.__('Classic', 'google-reviews-plugin'), value: 'classic' },
+                    { label: i18n.__('Minimal', 'google-reviews-plugin'), value: 'minimal' }
+                ];
+                if (isProUser) {
+                    styleOptions.push({ label: i18n.__('Creative', 'google-reviews-plugin'), value: 'creative' });
+                }
+            }
 
             var layoutOptions = [
                 { label: i18n.__('Carousel (3 columns)', 'google-reviews-plugin'), value: 'carousel' },
@@ -219,7 +233,7 @@
                                 setAttributes({ layout: value });
                             }
                         }),
-                        isProUser ? [
+                        isProUser ? el('div', {},
                             el(RangeControl, {
                                 label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
                                 value: attributes.cols_desktop || 3,
@@ -256,7 +270,7 @@
                                 min: 0,
                                 max: 60
                             })
-                        ] : el('div', {
+                        ) : el('div', {
                             style: {
                                 background: '#f0f8ff',
                                 border: '1px solid #007cba',
@@ -352,7 +366,7 @@
                         initialOpen: false,
                         className: (attributes.layout !== 'carousel' && attributes.layout !== 'grid_carousel') ? 'grp-hidden' : ''
                     },
-                        isProUser ? [
+                        isProUser ? el('div', {},
                             el(ToggleControl, {
                                 label: i18n.__('Autoplay', 'google-reviews-plugin'),
                                 checked: attributes.autoplay,
@@ -385,7 +399,7 @@
                                     setAttributes({ arrows: value });
                                 }
                             })
-                        ] : el('div', {
+                        ) : el('div', {
                             style: {
                                 background: '#f0f8ff',
                                 border: '1px solid #007cba',
@@ -409,7 +423,7 @@
                         title: i18n.__('Style Customization', 'google-reviews-plugin'),
                         initialOpen: false
                     },
-                        isProUser ? [
+                        isProUser ? el('div', {},
                             el('div', { style: { marginBottom: '16px' } },
                                 el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
                                     i18n.__('Text Color', 'google-reviews-plugin')
@@ -495,7 +509,7 @@
                                 max: 20,
                                 step: 1
                             })
-                        ] : el('div', {
+                        ) : el('div', {
                             style: {
                                 background: '#fff3cd',
                                 border: '1px solid #ffc107',
@@ -691,7 +705,7 @@
     
     // Register Review Button block if addon is enabled
     // Check if the block is registered on PHP side by checking if grp_gutenberg has reviewButtonEnabled
-    if (typeof grp_gutenberg !== 'undefined' && grp_gutenberg.reviewButtonEnabled) {
+    if (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.reviewButtonEnabled) {
     console.log('Registering Google Reviews Button Gutenberg block...');
 
     try {
