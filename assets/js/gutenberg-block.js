@@ -87,6 +87,47 @@
             consistent_height: {
                 type: 'boolean',
                 default: false
+            },
+            // Creative style specific attributes
+            creative_gradient_type: {
+                type: 'string',
+                default: 'linear'
+            },
+            creative_gradient_angle: {
+                type: 'number',
+                default: 135
+            },
+            creative_gradient_start: {
+                type: 'string',
+                default: '#4285F4'
+            },
+            creative_gradient_end: {
+                type: 'string',
+                default: '#EA4335'
+            },
+            creative_text_color: {
+                type: 'string',
+                default: '#ffffff'
+            },
+            creative_date_color: {
+                type: 'string',
+                default: '#ffffff'
+            },
+            creative_star_color: {
+                type: 'string',
+                default: '#FFD700'
+            },
+            creative_glass_effect: {
+                type: 'string',
+                default: 'no'
+            },
+            creative_avatar_size: {
+                type: 'number',
+                default: 80
+            },
+            creative_star_size: {
+                type: 'number',
+                default: 32
             }
         },
         
@@ -353,7 +394,7 @@
                             }, 'Learn More')
                         )
                     ),
-                    
+
                     el(PanelBody, {
                         title: i18n.__('Style Customization', 'google-reviews-plugin'),
                         initialOpen: false
@@ -462,9 +503,134 @@
                                 style: { color: '#856404', textDecoration: 'underline', fontWeight: 'bold' }
                             }, 'Upgrade to Pro')
                         )
+                    ),
+
+                    // Creative Style Options Panel
+                    el(PanelBody, {
+                        title: i18n.__('Creative Style Options', 'google-reviews-plugin'),
+                        initialOpen: false,
+                        className: (attributes.style !== 'creative') ? 'grp-hidden' : ''
+                    },
+                        // Gradient Controls
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                i18n.__('Gradient Type', 'google-reviews-plugin')
+                            ),
+                            el(SelectControl, {
+                                value: attributes.creative_gradient_type || 'linear',
+                                options: [
+                                    { label: i18n.__('Linear', 'google-reviews-plugin'), value: 'linear' },
+                                    { label: i18n.__('Radial', 'google-reviews-plugin'), value: 'radial' }
+                                ],
+                                onChange: function(value) {
+                                    setAttributes({ creative_gradient_type: value });
+                                }
+                            })
+                        ),
+                        (attributes.creative_gradient_type === 'linear') ? el(RangeControl, {
+                            label: i18n.__('Gradient Angle (deg)', 'google-reviews-plugin'),
+                            value: attributes.creative_gradient_angle || 135,
+                            onChange: function(value) {
+                                setAttributes({ creative_gradient_angle: value });
+                            },
+                            min: 0,
+                            max: 360,
+                            step: 1
+                        }) : null,
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                i18n.__('Gradient Start Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.creative_gradient_start || '#4285F4',
+                                onChange: function(value) {
+                                    setAttributes({ creative_gradient_start: value });
+                                }
+                            })
+                        ),
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                i18n.__('Gradient End Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.creative_gradient_end || '#EA4335',
+                                onChange: function(value) {
+                                    setAttributes({ creative_gradient_end: value });
+                                }
+                            })
+                        ),
+                        // Text Colors
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                i18n.__('Text Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.creative_text_color || '#ffffff',
+                                onChange: function(value) {
+                                    setAttributes({ creative_text_color: value });
+                                }
+                            })
+                        ),
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                i18n.__('Date Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.creative_date_color || '#ffffff',
+                                onChange: function(value) {
+                                    setAttributes({ creative_date_color: value });
+                                }
+                            })
+                        ),
+                        el('div', { style: { marginBottom: '16px' } },
+                            el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
+                                i18n.__('Star Color', 'google-reviews-plugin')
+                            ),
+                            el(TextControl, {
+                                type: 'color',
+                                value: attributes.creative_star_color || '#FFD700',
+                                onChange: function(value) {
+                                    setAttributes({ creative_star_color: value });
+                                }
+                            })
+                        ),
+                        // Glass Effect
+                        el(ToggleControl, {
+                            label: i18n.__('Glass Effect', 'google-reviews-plugin'),
+                            checked: (attributes.creative_glass_effect === 'yes'),
+                            onChange: function(value) {
+                                setAttributes({ creative_glass_effect: value ? 'yes' : 'no' });
+                            }
+                        }),
+                        // Avatar Size
+                        el(RangeControl, {
+                            label: i18n.__('Avatar Size (px)', 'google-reviews-plugin'),
+                            value: attributes.creative_avatar_size || 80,
+                            onChange: function(value) {
+                                setAttributes({ creative_avatar_size: value });
+                            },
+                            min: 20,
+                            max: 120,
+                            step: 4
+                        }),
+                        // Star Size
+                        el(RangeControl, {
+                            label: i18n.__('Star Size (px)', 'google-reviews-plugin'),
+                            value: attributes.creative_star_size || 32,
+                            onChange: function(value) {
+                                setAttributes({ creative_star_size: value });
+                            },
+                            min: 12,
+                            max: 48,
+                            step: 2
+                        })
                     )
                 ),
-                
+
                 el('div', { className: 'grp-gutenberg-block-editor' },
                     el('div', { className: 'grp-block-header' },
                         el('h3', {}, i18n.__('Google Reviews', 'google-reviews-plugin')),
@@ -482,7 +648,7 @@
                     }) : el('div', { className: 'grp-block-placeholder' },
                         el('p', {}, i18n.__('Preview will be available after saving.', 'google-reviews-plugin'))
                     )
-                )
+                ),
             ];
         },
         

@@ -168,6 +168,59 @@ class GRP_Gutenberg {
                 'name_font_family' => array(
                     'type' => 'string',
                 ),
+                // Creative style specific attributes
+                'creative_gradient_type' => array(
+                    'type' => 'string',
+                    'default' => 'linear',
+                ),
+                'creative_gradient_angle' => array(
+                    'type' => 'number',
+                    'default' => 135,
+                ),
+                'creative_gradient_start' => array(
+                    'type' => 'string',
+                    'default' => '#4285F4',
+                ),
+                'creative_gradient_end' => array(
+                    'type' => 'string',
+                    'default' => '#EA4335',
+                ),
+                'creative_text_color' => array(
+                    'type' => 'string',
+                    'default' => '#ffffff',
+                ),
+                'creative_date_color' => array(
+                    'type' => 'string',
+                    'default' => '#ffffff',
+                ),
+                'creative_star_color' => array(
+                    'type' => 'string',
+                    'default' => '#FFD700',
+                ),
+                'creative_glass_effect' => array(
+                    'type' => 'string',
+                    'default' => 'no',
+                ),
+                'creative_box_shadow' => array(
+                    'type' => 'object',
+                    'default' => array(),
+                ),
+                'creative_border' => array(
+                    'type' => 'object',
+                    'default' => array(),
+                ),
+                'creative_border_radius' => array(
+                    'type' => 'object',
+                    'default' => array(),
+                ),
+                'creative_avatar_size' => array(
+                    'type' => 'number',
+                    'default' => 80,
+                ),
+                'creative_star_size' => array(
+                    'type' => 'number',
+                    'default' => 32,
+                ),
             ),
         ));
         
@@ -358,6 +411,45 @@ class GRP_Gutenberg {
         }
         // Build custom CSS for style overrides
         $custom_css = '';
+
+        // Creative style gradient background
+        if ($attributes['style'] === 'creative') {
+            $gradient_type = isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear';
+            $gradient_start = isset($attributes['creative_gradient_start']) ? $attributes['creative_gradient_start'] : '#4285F4';
+            $gradient_end = isset($attributes['creative_gradient_end']) ? $attributes['creative_gradient_end'] : '#EA4335';
+
+            if ($gradient_type === 'linear') {
+                $angle = isset($attributes['creative_gradient_angle']) ? intval($attributes['creative_gradient_angle']) : 135;
+                $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($gradient_start) . ', ' . esc_attr($gradient_end) . ') !important; }';
+            } else {
+                $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($gradient_start) . ', ' . esc_attr($gradient_end) . ') !important; }';
+            }
+
+            // Glass effect
+            if (isset($attributes['creative_glass_effect']) && $attributes['creative_glass_effect'] === 'yes') {
+                $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(255, 255, 255, 0.55) !important; backdrop-filter: blur(16px) !important; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2) !important; }';
+            }
+        }
+
+        // Creative styles
+        if (isset($attributes['creative_text_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review-text, .grp-gutenberg-block .grp-style-creative .grp-author-name { color: ' . esc_attr($attributes['creative_text_color']) . ' !important; }';
+        }
+        if (isset($attributes['creative_date_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review-date { color: ' . esc_attr($attributes['creative_date_color']) . ' !important; }';
+        }
+        if (isset($attributes['creative_star_color'])) {
+            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-star { color: ' . esc_attr($attributes['creative_star_color']) . ' !important; }';
+        }
+        if (isset($attributes['creative_avatar_size'])) {
+            $avatar_size = intval($attributes['creative_avatar_size']);
+            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review-avatar img { width: ' . $avatar_size . 'px !important; height: ' . $avatar_size . 'px !important; }';
+        }
+        if (isset($attributes['creative_star_size'])) {
+            $star_size = intval($attributes['creative_star_size']);
+            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-star { font-size: ' . $star_size . 'px !important; }';
+        }
+
         if (!empty($attributes['custom_text_color'])) {
             $custom_css .= '.grp-gutenberg-block .grp-review-text, .grp-gutenberg-block .grp-author-name { color: ' . esc_attr($attributes['custom_text_color']) . ' !important; }';
         }
@@ -408,6 +500,20 @@ class GRP_Gutenberg {
             'dots' => $attributes['dots'] ? 'true' : 'false',
             'arrows' => $attributes['arrows'] ? 'true' : 'false',
             'consistent_height' => $attributes['consistent_height'] ? 'true' : 'false',
+            // Creative style specific options
+            'creative_gradient_type' => isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear',
+            'creative_gradient_angle' => isset($attributes['creative_gradient_angle']) ? $attributes['creative_gradient_angle'] : 135,
+            'creative_gradient_start' => isset($attributes['creative_gradient_start']) ? $attributes['creative_gradient_start'] : '#4285F4',
+            'creative_gradient_end' => isset($attributes['creative_gradient_end']) ? $attributes['creative_gradient_end'] : '#EA4335',
+            'creative_text_color' => isset($attributes['creative_text_color']) ? $attributes['creative_text_color'] : '#ffffff',
+            'creative_date_color' => isset($attributes['creative_date_color']) ? $attributes['creative_date_color'] : '#ffffff',
+            'creative_star_color' => isset($attributes['creative_star_color']) ? $attributes['creative_star_color'] : '#FFD700',
+            'creative_glass_effect' => isset($attributes['creative_glass_effect']) ? $attributes['creative_glass_effect'] : 'no',
+            'creative_box_shadow' => isset($attributes['creative_box_shadow']) ? $attributes['creative_box_shadow'] : array(),
+            'creative_border' => isset($attributes['creative_border']) ? $attributes['creative_border'] : array(),
+            'creative_border_radius' => isset($attributes['creative_border_radius']) ? $attributes['creative_border_radius'] : array(),
+            'creative_avatar_size' => isset($attributes['creative_avatar_size']) ? $attributes['creative_avatar_size'] : 80,
+            'creative_star_size' => isset($attributes['creative_star_size']) ? $attributes['creative_star_size'] : 32,
             'class' => 'grp-gutenberg-block'
         );
         

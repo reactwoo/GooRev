@@ -65,6 +65,20 @@ class GRP_Shortcode {
             'arrows' => 'true',
             'responsive' => 'true',
             'consistent_height' => 'false',
+            // Creative style specific options
+            'creative_gradient_type' => 'linear',
+            'creative_gradient_angle' => 135,
+            'creative_gradient_start' => '#4285F4',
+            'creative_gradient_end' => '#EA4335',
+            'creative_text_color' => '#ffffff',
+            'creative_date_color' => '#ffffff',
+            'creative_star_color' => '#FFD700',
+            'creative_glass_effect' => 'no',
+            'creative_box_shadow' => array(),
+            'creative_border' => array(),
+            'creative_border_radius' => array(),
+            'creative_avatar_size' => 80,
+            'creative_star_size' => 32,
             'class' => '',
             'id' => ''
         ), $atts, 'google_reviews');
@@ -122,7 +136,48 @@ class GRP_Shortcode {
         
         // Generate unique ID for this instance
         $instance_id = 'grp-' . uniqid();
-        
+
+        // Generate custom CSS for creative style gradients
+        $custom_css = '';
+        if ($atts['style'] === 'creative') {
+            $gradient_type = isset($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
+            $gradient_start = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
+            $gradient_end = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
+
+            if ($gradient_type === 'linear') {
+                $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($gradient_start) . ', ' . esc_attr($gradient_end) . ') !important; }';
+            } else {
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($gradient_start) . ', ' . esc_attr($gradient_end) . ') !important; }';
+            }
+
+            // Glass effect
+            if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(255, 255, 255, 0.55) !important; backdrop-filter: blur(16px) !important; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2) !important; }';
+            }
+
+            // Creative text colors
+            if (isset($atts['creative_text_color'])) {
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review-text, #' . esc_attr($instance_id) . ' .grp-style-creative .grp-author-name { color: ' . esc_attr($atts['creative_text_color']) . ' !important; }';
+            }
+            if (isset($atts['creative_date_color'])) {
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review-date { color: ' . esc_attr($atts['creative_date_color']) . ' !important; }';
+            }
+            if (isset($atts['creative_star_color'])) {
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-star { color: ' . esc_attr($atts['creative_star_color']) . ' !important; }';
+            }
+
+            // Creative sizes
+            if (isset($atts['creative_avatar_size'])) {
+                $avatar_size = intval($atts['creative_avatar_size']);
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review-avatar img { width: ' . $avatar_size . 'px !important; height: ' . $avatar_size . 'px !important; }';
+            }
+            if (isset($atts['creative_star_size'])) {
+                $star_size = intval($atts['creative_star_size']);
+                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-star { font-size: ' . $star_size . 'px !important; }';
+            }
+        }
+
         // Render based on layout
         if ($atts['layout'] === 'carousel') {
             return $this->render_carousel($reviews, $atts, $instance_id);
@@ -168,7 +223,10 @@ class GRP_Shortcode {
         
         ob_start();
         ?>
-        <div id="<?php echo esc_attr($instance_id); ?>" 
+        <?php if (!empty($custom_css)): ?>
+        <style type="text/css"><?php echo $custom_css; ?></style>
+        <?php endif; ?>
+        <div id="<?php echo esc_attr($instance_id); ?>"
              class="<?php echo esc_attr($class_string); ?>"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
             
@@ -232,6 +290,9 @@ class GRP_Shortcode {
         
         ob_start();
         ?>
+        <?php if (!empty($custom_css)): ?>
+        <style type="text/css"><?php echo $custom_css; ?></style>
+        <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>">
             <div class="grp-reviews-list">
                 <?php foreach ($reviews as $review): ?>
@@ -279,6 +340,9 @@ class GRP_Shortcode {
 
         ob_start();
         ?>
+        <?php if (!empty($custom_css)): ?>
+        <style type="text/css"><?php echo $custom_css; ?></style>
+        <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>" style="<?php echo esc_attr($style_inline); ?>">
             <div class="grp-reviews-grid">
                 <?php foreach ($reviews as $review): ?>
@@ -329,6 +393,9 @@ class GRP_Shortcode {
 
         ob_start();
         ?>
+        <?php if (!empty($custom_css)): ?>
+        <style type="text/css"><?php echo $custom_css; ?></style>
+        <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>"
              class="<?php echo esc_attr($class_string); ?>"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
