@@ -7,18 +7,85 @@
 
     // Check if required components are available
     if (!blocks || !element || !components || !i18n) {
-        console.error('Google Reviews Gutenberg: Required dependencies not available');
+        console.error('Google Reviews Gutenberg: Required dependencies not available', {
+            blocks: !!blocks,
+            element: !!element,
+            components: !!components,
+            i18n: !!i18n
+        });
         return;
     }
 
     var el = element.createElement;
     var registerBlockType = blocks.registerBlockType;
+    
+    // Check InspectorControls
+    if (!blocks.InspectorControls) {
+        console.error('Google Reviews Gutenberg: InspectorControls not available in blocks');
+        return;
+    }
     var InspectorControls = blocks.InspectorControls;
+    
+    // Check if all required components are available
+    if (!components.PanelBody || !components.SelectControl || !components.ToggleControl) {
+        console.error('Google Reviews Gutenberg: Required WordPress components not available', {
+            PanelBody: !!components.PanelBody,
+            SelectControl: !!components.SelectControl,
+            ToggleControl: !!components.ToggleControl,
+            RangeControl: !!components.RangeControl,
+            TextControl: !!components.TextControl
+        });
+        return;
+    }
+    
     var PanelBody = components.PanelBody;
     var SelectControl = components.SelectControl;
     var ToggleControl = components.ToggleControl;
+    // RangeControl might not be available in older WordPress versions - check and provide fallback
     var RangeControl = components.RangeControl;
+    if (!RangeControl) {
+        console.warn('Google Reviews Gutenberg: RangeControl not available, some features may be limited');
+        RangeControl = function(props) {
+            return el('div', { style: { marginBottom: '10px' } },
+                el('label', { style: { display: 'block', marginBottom: '5px' } }, props.label),
+                el('input', {
+                    type: 'number',
+                    value: props.value !== undefined ? props.value : (props.default || 0),
+                    min: props.min || 0,
+                    max: props.max || 100,
+                    onChange: function(e) {
+                        if (props.onChange) {
+                            props.onChange(parseInt(e.target.value) || 0);
+                        }
+                    },
+                    style: { width: '100%', padding: '8px' }
+                })
+            );
+        };
+    }
+    
     var TextControl = components.TextControl;
+    if (!TextControl && components.TextareaControl) {
+        TextControl = components.TextareaControl;
+    }
+    if (!TextControl) {
+        console.warn('Google Reviews Gutenberg: TextControl not available, some features may be limited');
+        TextControl = function(props) {
+            return el('div', { style: { marginBottom: '10px' } },
+                el('label', { style: { display: 'block', marginBottom: '5px' } }, props.label),
+                el('input', {
+                    type: 'text',
+                    value: props.value || '',
+                    onChange: function(e) {
+                        if (props.onChange) {
+                            props.onChange(e.target.value);
+                        }
+                    },
+                    style: { width: '100%', padding: '8px' }
+                })
+            );
+        };
+    }
     // ServerSideRender is now a separate package in newer WordPress versions
     var ServerSideRender = serverSideRender || (wp && wp.serverSideRender) || (blocks && blocks.ServerSideRender) || null;
     
@@ -211,7 +278,7 @@
                     el(PanelBody, { title: i18n.__('Content Settings', 'google-reviews-plugin'), initialOpen: true },
                         el(SelectControl, {
                             label: i18n.__('Style', 'google-reviews-plugin'),
-                            value: attributes.style,
+                            value: attributes.style || 'modern',
                             options: styleOptions,
                             onChange: function(value) {
                                 setAttributes({ style: value });
@@ -227,7 +294,7 @@
                         }),
                         el(SelectControl, {
                             label: i18n.__('Layout', 'google-reviews-plugin'),
-                            value: attributes.layout,
+                            value: attributes.layout || 'carousel',
                             options: layoutOptions,
                             onChange: function(value) {
                                 setAttributes({ layout: value });
@@ -290,7 +357,7 @@
                         ),
                         el(RangeControl, {
                             label: i18n.__('Number of Reviews', 'google-reviews-plugin'),
-                            value: attributes.count,
+                            value: attributes.count || 10,
                             onChange: function(value) {
                                 setAttributes({ count: value });
                             },
@@ -299,7 +366,7 @@
                         }),
                         el(SelectControl, {
                             label: i18n.__('Minimum Rating', 'google-reviews-plugin'),
-                            value: attributes.min_rating,
+                            value: attributes.min_rating || 1,
                             options: ratingOptions,
                             onChange: function(value) {
                                 setAttributes({ min_rating: parseInt(value) });
@@ -307,7 +374,7 @@
                         }),
                         el(SelectControl, {
                             label: i18n.__('Maximum Rating', 'google-reviews-plugin'),
-                            value: attributes.max_rating,
+                            value: attributes.max_rating || 5,
                             options: ratingOptions,
                             onChange: function(value) {
                                 setAttributes({ max_rating: parseInt(value) });
@@ -315,7 +382,7 @@
                         }),
                         el(SelectControl, {
                             label: i18n.__('Sort By', 'google-reviews-plugin'),
-                            value: attributes.sort_by,
+                            value: attributes.sort_by || 'newest',
                             options: sortOptions,
                             onChange: function(value) {
                                 setAttributes({ sort_by: value });
@@ -462,7 +529,7 @@
                                     },
                                     placeholder: '#D1D5DB'
                                 })
-                            ) : null,
+                            ) : el('div'),
                             (attributes.style === 'modern' || attributes.style === 'corporate' || attributes.style === 'minimal') ? el('div', { style: { marginBottom: '16px' } },
                                 el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
                                     i18n.__('Accent Color', 'google-reviews-plugin')
@@ -475,7 +542,7 @@
                                     },
                                     placeholder: '#4285F4'
                                 })
-                            ) : null,
+                            ) : el('div'),
                             el('div', { style: { marginBottom: '16px' } },
                                 el('label', { style: { display: 'block', marginBottom: '8px', fontWeight: 'bold' } },
                                     i18n.__('Star Color', 'google-reviews-plugin')
@@ -568,7 +635,7 @@
                                 min: 0,
                                 max: 360,
                                 step: 1
-                            }) : null,
+                            }) : el('div'),
                             el('div', { style: { marginBottom: '12px' } },
                                 el('label', { style: { display: 'block', marginBottom: '5px', fontWeight: 'bold' } },
                                     i18n.__('Start Color', 'google-reviews-plugin')
@@ -773,14 +840,14 @@
                         el(PanelBody, { title: i18n.__('Button Settings', 'google-reviews-plugin'), initialOpen: true },
                             el(TextControl, {
                                 label: i18n.__('Button Text', 'google-reviews-plugin'),
-                                value: attributes.button_text,
+                                value: attributes.button_text || __('Leave us a review', 'google-reviews-plugin'),
                                 onChange: function(value) {
                                     setAttributes({ button_text: value });
                                 }
                             }),
                             el(SelectControl, {
                                 label: i18n.__('Button Style', 'google-reviews-plugin'),
-                                value: attributes.button_style,
+                                value: attributes.button_style || 'default',
                                 options: styleOptions,
                                 onChange: function(value) {
                                     setAttributes({ button_style: value });
@@ -788,7 +855,7 @@
                             }),
                             el(SelectControl, {
                                 label: i18n.__('Button Size', 'google-reviews-plugin'),
-                                value: attributes.button_size,
+                                value: attributes.button_size || 'medium',
                                 options: sizeOptions,
                                 onChange: function(value) {
                                     setAttributes({ button_size: value });
@@ -796,7 +863,7 @@
                             }),
                             el(SelectControl, {
                                 label: i18n.__('Alignment', 'google-reviews-plugin'),
-                                value: attributes.align,
+                                value: attributes.align || 'left',
                                 options: alignOptions,
                                 onChange: function(value) {
                                     setAttributes({ align: value });

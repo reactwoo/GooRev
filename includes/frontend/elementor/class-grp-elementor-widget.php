@@ -663,8 +663,11 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 ),
                 'default' => 'left',
                 'selectors' => array(
+                    '{{WRAPPER}} .grp-review' => 'text-align: {{VALUE}};',
                     '{{WRAPPER}} .grp-review-text' => 'text-align: {{VALUE}};',
                     '{{WRAPPER}} .grp-review-meta' => 'text-align: {{VALUE}};',
+                    '{{WRAPPER}} .grp-review-rating' => 'text-align: {{VALUE}};',
+                    '{{WRAPPER}} .grp-review-author' => 'text-align: {{VALUE}};',
                 ),
             )
         );
