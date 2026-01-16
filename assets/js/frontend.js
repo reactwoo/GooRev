@@ -59,18 +59,37 @@
         var currentIndex = 0;
         var totalItems = $items.length;
         var options = $carousel.data('options') || {};
+        
+        // Get column settings from options, with fallbacks
+        var colsDesktop = options.cols_desktop || 3;
+        var colsTablet = options.cols_tablet || 2;
+        var colsMobile = options.cols_mobile || 1;
 
         // Get current columns per view based on screen size
         function getColumnsPerView() {
             var width = window.innerWidth;
-            if (width <= 640) return 1; // Mobile
-            if (width <= 1024) return 2; // Tablet
-            return 3; // Desktop
+            if (width <= 640) return colsMobile;
+            if (width <= 1024) return colsTablet;
+            return colsDesktop;
+        }
+
+        // Update carousel item widths based on columns
+        function updateItemWidths() {
+            var columnsPerView = getColumnsPerView();
+            var itemWidth = 100 / columnsPerView;
+            $items.css({
+                'flex': '0 0 ' + itemWidth + '%',
+                'max-width': itemWidth + '%',
+                'box-sizing': 'border-box'
+            });
+            // Set CSS variable for potential use
+            $carousel.css('--grp-cols', columnsPerView);
         }
 
         // Update carousel position
         function updateCarousel() {
             var columnsPerView = getColumnsPerView();
+            updateItemWidths(); // Update widths first
             var translateX = -currentIndex * (100 / columnsPerView);
             $wrapper.css('transform', 'translateX(' + translateX + '%)');
 
@@ -156,7 +175,8 @@
         $dots.on('click', function(e) {
             e.preventDefault();
             var groupIndex = $(this).data('index');
-            var slideIndex = groupIndex * 3; // Convert group index to slide index
+            var columnsPerView = getColumnsPerView();
+            var slideIndex = groupIndex * columnsPerView; // Convert group index to slide index based on current columns
             goToSlide(slideIndex);
             if (options.autoplay) {
                 stopAutoplay();
@@ -234,6 +254,7 @@
         $(window).on('resize.carousel', function() {
             updateDots();
             updateCarousel();
+            updateItemWidths();
         });
 
         // Initialize
@@ -269,8 +290,12 @@
                 var perView = getItemsPerView();
                 // Set data attribute for CSS calculations
                 $carousel.attr('data-cols', perView);
+                // Set CSS variables for responsive columns (CSS media queries will use these)
                 $carousel.css({
-                    '--grp-cols': perView,
+                    '--grp-cols-desktop': colsDesktop,
+                    '--grp-cols-tablet': colsTablet,
+                    '--grp-cols-mobile': colsMobile,
+                    '--grp-cols': perView, // Current active columns
                     '--grp-gap': gap + 'px'
                 });
 
@@ -330,6 +355,13 @@
                     updateTrack();
                 });
             }
+
+            // Handle window resize for grid carousel
+            $(window).on('resize.grid-carousel-' + $carousel.attr('id'), function() {
+                updateWidths();
+                buildDots();
+                updateTrack();
+            });
 
             // Init
             updateWidths();

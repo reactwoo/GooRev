@@ -2,7 +2,7 @@
  * Google Reviews Gutenberg Block
  */
 
-(function(blocks, element, components, i18n, serverSideRender) {
+(function(blocks, element, components, i18n, serverSideRender, blockEditor) {
     'use strict';
 
     // Check if required components are available
@@ -19,12 +19,25 @@
     var el = element.createElement;
     var registerBlockType = blocks.registerBlockType;
     
+    // InspectorControls is in blockEditor (wp.blockEditor) in newer WordPress, or wp.editor in older versions
+    // Fallback to blocks for very old WordPress versions
+    var InspectorControls = (blockEditor && blockEditor.InspectorControls) || 
+                            (blocks && blocks.InspectorControls) ||
+                            (window.wp && window.wp.blockEditor && window.wp.blockEditor.InspectorControls) ||
+                            (window.wp && window.wp.editor && window.wp.editor.InspectorControls) ||
+                            null;
+    
     // Check InspectorControls
-    if (!blocks.InspectorControls) {
-        console.error('Google Reviews Gutenberg: InspectorControls not available in blocks');
+    if (!InspectorControls) {
+        console.error('Google Reviews Gutenberg: InspectorControls not available', {
+            blockEditor: !!blockEditor,
+            'blockEditor.InspectorControls': !!(blockEditor && blockEditor.InspectorControls),
+            'blocks.InspectorControls': !!(blocks && blocks.InspectorControls),
+            'wp.blockEditor': !!(window.wp && window.wp.blockEditor),
+            'wp.editor': !!(window.wp && window.wp.editor)
+        });
         return;
     }
-    var InspectorControls = blocks.InspectorControls;
     
     // Check if all required components are available
     if (!components.PanelBody || !components.SelectControl || !components.ToggleControl) {
@@ -933,5 +946,6 @@
     window.wp.element,
     window.wp.components,
     window.wp.i18n,
-    window.wp.serverSideRender || null
+    window.wp.serverSideRender || null,
+    (window.wp.blockEditor || window.wp.editor || window.wp.blocks) // blockEditor for InspectorControls
 );

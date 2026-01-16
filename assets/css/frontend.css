@@ -159,7 +159,8 @@
 }
 
 .grp-layout-carousel .grp-review-item {
-    flex: 0 0 100%;
+    flex: 0 0 calc(100% / var(--grp-cols, 3));
+    max-width: calc(100% / var(--grp-cols, 3));
     padding: 0 20px;
     box-sizing: border-box;
 }

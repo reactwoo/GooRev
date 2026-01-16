@@ -237,7 +237,11 @@ class GRP_Shortcode {
             'speed' => intval($atts['speed']),
             'dots' => $atts['dots'],
             'arrows' => $atts['arrows'],
-            'responsive' => $atts['responsive']
+            'responsive' => $atts['responsive'],
+            'cols_desktop' => intval($atts['cols_desktop']),
+            'cols_tablet' => intval($atts['cols_tablet']),
+            'cols_mobile' => intval($atts['cols_mobile']),
+            'gap' => intval($atts['gap'])
         );
         
         ob_start();

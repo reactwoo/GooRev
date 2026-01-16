@@ -327,12 +327,13 @@ class GRP_Gutenberg {
         // Register dependencies - updated for WordPress compatibility
         $dependencies = array('wp-blocks', 'wp-i18n', 'wp-element', 'wp-components');
 
-        // Add wp-editor for older WordPress versions, wp-block-editor for newer ones
+        // Add wp-block-editor for newer WordPress versions (contains InspectorControls)
+        // wp-editor for older WordPress versions
         if (function_exists('wp_enqueue_block_editor_assets')) {
             $dependencies[] = 'wp-block-editor';
-        } else {
-            $dependencies[] = 'wp-editor';
         }
+        // Always include wp-editor as fallback for InspectorControls in older versions
+        $dependencies[] = 'wp-editor';
 
         // Try to add server-side-render if available
         if (wp_script_is('wp-server-side-render', 'registered') || function_exists('wp_enqueue_script') && wp_scripts()->query('wp-server-side-render')) {
