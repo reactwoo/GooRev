@@ -267,6 +267,17 @@
             
             // Check if user has pro license (passed from PHP)
             var isProUser = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro === true);
+            
+            // Debug license check
+            if (typeof window.grp_gutenberg !== 'undefined') {
+                console.log('GRP Gutenberg License Check:', {
+                    isPro: window.grp_gutenberg.isPro,
+                    isProUser: isProUser,
+                    fullObject: window.grp_gutenberg
+                });
+            } else {
+                console.warn('GRP Gutenberg: window.grp_gutenberg is undefined');
+            }
 
             // Get style options with fallback
             var styleOptions = [];
@@ -824,10 +835,11 @@
                                 dots: attributes.dots !== undefined ? attributes.dots : true,
                                 arrows: attributes.arrows !== undefined ? attributes.arrows : true,
                                 consistent_height: attributes.consistent_height !== undefined ? attributes.consistent_height : false,
-                                cols_desktop: attributes.cols_desktop || 3,
-                                cols_tablet: attributes.cols_tablet || 2,
-                                cols_mobile: attributes.cols_mobile || 1,
-                                gap: attributes.gap || 20
+                                // Ensure column defaults are correct - free users should get 3 columns for carousel
+                                cols_desktop: (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
+                                cols_tablet: (attributes.cols_tablet && attributes.cols_tablet > 0) ? attributes.cols_tablet : 2,
+                                cols_mobile: (attributes.cols_mobile && attributes.cols_mobile > 0) ? attributes.cols_mobile : 1,
+                                gap: (attributes.gap && attributes.gap > 0) ? attributes.gap : 20
                             };
                             
                             // Add creative style attributes if they exist and are simple types (skip objects)

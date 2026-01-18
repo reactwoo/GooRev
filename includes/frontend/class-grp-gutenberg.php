@@ -371,14 +371,19 @@ class GRP_Gutenberg {
         $addons = GRP_Addons::get_instance();
         $review_button_enabled = $addons->is_addon_enabled('review-widgets');
         
-        // Check license status
+        // Check license status - use the same method as Elementor widget
         $license = new GRP_License();
         $is_pro = $license->is_pro();
+        
+        // Debug: Log license status for troubleshooting
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('GRP Gutenberg License Check: is_pro = ' . ($is_pro ? 'true' : 'false'));
+        }
 
         wp_localize_script('grp-gutenberg-block', 'grp_gutenberg', array(
             'styles' => $this->get_style_options(),
             'reviewButtonEnabled' => $review_button_enabled,
-            'isPro' => $is_pro,
+            'isPro' => $is_pro ? true : false, // Ensure boolean
             'strings' => array(
                 'block_title' => __('Google Reviews', 'google-reviews-plugin'),
                 'block_description' => __('Display Google Business reviews', 'google-reviews-plugin'),
@@ -592,10 +597,11 @@ class GRP_Gutenberg {
             'style' => isset($attributes['style']) ? $attributes['style'] : 'modern',
             'theme' => isset($attributes['theme']) ? $attributes['theme'] : 'light',
             'layout' => isset($attributes['layout']) ? $attributes['layout'] : 'carousel',
-            'cols_desktop' => isset($attributes['cols_desktop']) ? $attributes['cols_desktop'] : 3,
-            'cols_tablet' => isset($attributes['cols_tablet']) ? $attributes['cols_tablet'] : 2,
-            'cols_mobile' => isset($attributes['cols_mobile']) ? $attributes['cols_mobile'] : 1,
-            'gap' => isset($attributes['gap']) ? $attributes['gap'] : 20,
+            // Ensure column defaults are correct - free users should get 3 columns for carousel
+            'cols_desktop' => isset($attributes['cols_desktop']) && $attributes['cols_desktop'] > 0 ? intval($attributes['cols_desktop']) : 3,
+            'cols_tablet' => isset($attributes['cols_tablet']) && $attributes['cols_tablet'] > 0 ? intval($attributes['cols_tablet']) : 2,
+            'cols_mobile' => isset($attributes['cols_mobile']) && $attributes['cols_mobile'] > 0 ? intval($attributes['cols_mobile']) : 1,
+            'gap' => isset($attributes['gap']) && $attributes['gap'] > 0 ? intval($attributes['gap']) : 20,
             'count' => isset($attributes['count']) ? $attributes['count'] : 10,
             'min_rating' => isset($attributes['min_rating']) ? $attributes['min_rating'] : 1,
             'max_rating' => isset($attributes['max_rating']) ? $attributes['max_rating'] : 5,

@@ -99,6 +99,19 @@
     margin: 20px 0;
 }
 
+/* Prevent link navigation in editor - allow block selection */
+.wp-block-google-reviews-review-button a,
+.wp-block-google-reviews-review-button .grp-review-button-wrapper a,
+.wp-block-google-reviews-review-button .grp-layout-wrapper a {
+    pointer-events: none !important;
+    cursor: default !important;
+}
+
+/* Ensure block is selectable */
+.wp-block-google-reviews-review-button {
+    position: relative;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .grp-gutenberg-block-editor {
