@@ -121,26 +121,6 @@ class GRP_Gutenberg {
                     'type' => 'boolean',
                     'default' => false,
                 ),
-                'theme' => array(
-                    'type' => 'string',
-                    'default' => 'light',
-                ),
-                'cols_desktop' => array(
-                    'type' => 'number',
-                    'default' => 3,
-                ),
-                'cols_tablet' => array(
-                    'type' => 'number',
-                    'default' => 2,
-                ),
-                'cols_mobile' => array(
-                    'type' => 'number',
-                    'default' => 1,
-                ),
-                'gap' => array(
-                    'type' => 'number',
-                    'default' => 20,
-                ),
                 'custom_text_color' => array(
                     'type' => 'string',
                 ),
@@ -301,9 +281,18 @@ class GRP_Gutenberg {
             $widgets = GRP_Review_Widgets::get_instance();
             
             // Build shortcode attributes
+            // Map Gutenberg 'style' to shortcode 'style', ensure it matches shortcode expectations
+            $button_style_mapped = $button_style;
+            // Shortcode expects: 'default', 'rounded', 'outline', 'minimal' or template names like 'basic', 'modern', etc.
+            $valid_styles = array('default', 'rounded', 'outline', 'minimal', 'basic', 'modern', 'elegant', 'bold', 'minimalist', 'card', 'creative', 'layout1', 'layout2', 'layout3', 'creative-pro');
+            if (!in_array($button_style, $valid_styles, true)) {
+                // If style doesn't match, check if it's a template or default to 'default'
+                $button_style_mapped = 'default';
+            }
+            
             $shortcode_atts = array(
                 'text' => $button_text,
-                'style' => $button_style,
+                'style' => $button_style_mapped,
                 'size' => $button_size,
                 'align' => $align,
             );

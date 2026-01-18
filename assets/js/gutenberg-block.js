@@ -801,17 +801,17 @@
                                 gap: attributes.gap || 20
                             };
                             
-                            // Add creative style attributes if they exist and are simple types
-                            if (attributes.creative_gradient_type) sanitized.creative_gradient_type = attributes.creative_gradient_type;
-                            if (attributes.creative_gradient_angle) sanitized.creative_gradient_angle = attributes.creative_gradient_angle;
-                            if (attributes.creative_gradient_start) sanitized.creative_gradient_start = attributes.creative_gradient_start;
-                            if (attributes.creative_gradient_end) sanitized.creative_gradient_end = attributes.creative_gradient_end;
-                            if (attributes.creative_text_color) sanitized.creative_text_color = attributes.creative_text_color;
-                            if (attributes.creative_date_color) sanitized.creative_date_color = attributes.creative_date_color;
-                            if (attributes.creative_star_color) sanitized.creative_star_color = attributes.creative_star_color;
-                            if (attributes.creative_glass_effect) sanitized.creative_glass_effect = attributes.creative_glass_effect;
-                            if (attributes.creative_avatar_size) sanitized.creative_avatar_size = attributes.creative_avatar_size;
-                            if (attributes.creative_star_size) sanitized.creative_star_size = attributes.creative_star_size;
+                            // Add creative style attributes if they exist and are simple types (skip objects)
+                            if (attributes.creative_gradient_type && typeof attributes.creative_gradient_type === 'string') sanitized.creative_gradient_type = attributes.creative_gradient_type;
+                            if (attributes.creative_gradient_angle && typeof attributes.creative_gradient_angle === 'number') sanitized.creative_gradient_angle = attributes.creative_gradient_angle;
+                            if (attributes.creative_gradient_start && typeof attributes.creative_gradient_start === 'string') sanitized.creative_gradient_start = attributes.creative_gradient_start;
+                            if (attributes.creative_gradient_end && typeof attributes.creative_gradient_end === 'string') sanitized.creative_gradient_end = attributes.creative_gradient_end;
+                            if (attributes.creative_text_color && typeof attributes.creative_text_color === 'string') sanitized.creative_text_color = attributes.creative_text_color;
+                            if (attributes.creative_date_color && typeof attributes.creative_date_color === 'string') sanitized.creative_date_color = attributes.creative_date_color;
+                            if (attributes.creative_star_color && typeof attributes.creative_star_color === 'string') sanitized.creative_star_color = attributes.creative_star_color;
+                            if (attributes.creative_glass_effect && typeof attributes.creative_glass_effect === 'string') sanitized.creative_glass_effect = attributes.creative_glass_effect;
+                            if (attributes.creative_avatar_size && typeof attributes.creative_avatar_size === 'number') sanitized.creative_avatar_size = attributes.creative_avatar_size;
+                            if (attributes.creative_star_size && typeof attributes.creative_star_size === 'number') sanitized.creative_star_size = attributes.creative_star_size;
                             
                             return sanitized;
                         })(),
