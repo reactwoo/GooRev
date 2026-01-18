@@ -170,19 +170,6 @@
     margin: 0 auto;
 }
 
-/* Responsive carousel columns */
-@media (max-width: 1024px) {
-    .grp-layout-carousel .grp-review-item {
-        flex: 0 0 50%; /* 2 columns on tablet */
-    }
-}
-
-@media (max-width: 640px) {
-    .grp-layout-carousel .grp-review-item {
-        flex: 0 0 100%; /* 1 column on mobile */
-    }
-}
-
 .grp-layout-carousel .grp-carousel-prev,
 .grp-layout-carousel .grp-carousel-next {
     position: absolute;
@@ -618,5 +605,106 @@
         flex: none;
         padding: 0;
         margin-bottom: 20px;
+    }
+}
+
+/* Theme Styles */
+.grp-theme-dark .grp-review {
+    background: #2d2d2d;
+    color: #f0f0f0;
+    border-color: #444;
+}
+
+.grp-theme-dark .grp-review-text {
+    color: #e0e0e0;
+}
+
+.grp-theme-dark .grp-author-name {
+    color: #ffffff;
+}
+
+.grp-theme-dark .grp-review-date {
+    color: #999;
+}
+
+.grp-theme-dark .grp-star-empty {
+    color: #555;
+}
+
+.grp-theme-light .grp-review {
+    background: #ffffff;
+    color: #333;
+}
+
+/* List Layout Alignment Fixes */
+.grp-layout-list .grp-review-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* List layout - ensure text alignment applies to arrows when text only selected */
+.grp-layout-list .grp-review-rating[style*="text-align: center"],
+.elementor-widget-grp-reviews[class*="text-align-center"] .grp-layout-list .grp-review-rating {
+    justify-content: center;
+}
+
+.grp-layout-list .grp-review-rating[style*="text-align: right"],
+.elementor-widget-grp-reviews[class*="text-align-right"] .grp-layout-list .grp-review-rating {
+    justify-content: flex-end;
+}
+
+.grp-layout-list .grp-review-meta[style*="text-align: center"],
+.elementor-widget-grp-reviews[class*="text-align-center"] .grp-layout-list .grp-review-meta {
+    justify-content: center;
+}
+
+.grp-layout-list .grp-review-meta[style*="text-align: right"],
+.elementor-widget-grp-reviews[class*="text-align-right"] .grp-layout-list .grp-review-meta {
+    justify-content: flex-end;
+}
+
+/* Glass Effect (non-creative styles) */
+.grp-review.grp-glass-effect {
+    background: rgba(255, 255, 255, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.grp-theme-dark .grp-review.grp-glass-effect {
+    background: rgba(45, 45, 45, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Grid Carousel - ensure arrows/dots are visible */
+.grp-layout-grid_carousel {
+    position: relative;
+}
+
+.grp-layout-grid_carousel .grp-grid-carousel-viewport {
+    margin: 0 40px;
+}
+
+/* Fix carousel columns to use CSS variables properly */
+.grp-layout-carousel .grp-carousel-wrapper {
+    --grp-cols-desktop: 3;
+    --grp-cols-tablet: 2;
+    --grp-cols-mobile: 1;
+}
+
+.grp-layout-carousel .grp-review-item {
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
+}
+
+@media (max-width: 1024px) {
+    .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
     }
 }

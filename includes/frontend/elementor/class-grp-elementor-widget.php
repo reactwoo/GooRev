@@ -493,6 +493,243 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             $this->end_controls_section();
         }
         
+        // Carousel Arrow Styling Section (Pro only)
+        if ($this->is_pro()) {
+            $this->start_controls_section(
+                'carousel_arrows_section',
+                array(
+                    'label' => __('Carousel Arrows', 'google-reviews-plugin'),
+                    'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                    'condition' => array(
+                        'layout' => array('carousel', 'grid_carousel'),
+                        'arrows' => 'true',
+                    ),
+                )
+            );
+
+            // Arrow Background Color
+            $this->add_control(
+                'arrow_background_color',
+                array(
+                    'label' => __('Background Color', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::COLOR,
+                    'default' => 'rgba(0, 0, 0, 0.4)',
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'background-color: {{VALUE}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Hover Background Color
+            $this->add_control(
+                'arrow_hover_background_color',
+                array(
+                    'label' => __('Hover Background Color', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::COLOR,
+                    'default' => 'rgba(0, 0, 0, 0.6)',
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev:hover, {{WRAPPER}} .grp-carousel-next:hover' => 'background-color: {{VALUE}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Icon Color
+            $this->add_control(
+                'arrow_icon_color',
+                array(
+                    'label' => __('Icon Color', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::COLOR,
+                    'default' => '#ffffff',
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'color: {{VALUE}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Size
+            $this->add_control(
+                'arrow_size',
+                array(
+                    'label' => __('Arrow Size (px)', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => 24,
+                            'max' => 80,
+                            'step' => 2,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => 'px',
+                        'size' => 40,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Border Radius
+            $this->add_control(
+                'arrow_border_radius',
+                array(
+                    'label' => __('Border Radius', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px', '%'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => 0,
+                            'max' => 50,
+                            'step' => 1,
+                        ),
+                        '%' => array(
+                            'min' => 0,
+                            'max' => 100,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => 'px',
+                        'size' => 50,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'border-radius: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Box Shadow
+            $this->add_group_control(
+                \Elementor\Group_Control_Box_Shadow::get_type(),
+                array(
+                    'name' => 'arrow_box_shadow',
+                    'label' => __('Box Shadow', 'google-reviews-plugin'),
+                    'selector' => '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next',
+                )
+            );
+
+            $this->end_controls_section();
+        }
+
+        // Carousel Dots Styling Section (Pro only)
+        if ($this->is_pro()) {
+            $this->start_controls_section(
+                'carousel_dots_section',
+                array(
+                    'label' => __('Carousel Dots', 'google-reviews-plugin'),
+                    'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                    'condition' => array(
+                        'layout' => array('carousel', 'grid_carousel'),
+                        'dots' => 'true',
+                    ),
+                )
+            );
+
+            // Dot Color
+            $this->add_control(
+                'dot_color',
+                array(
+                    'label' => __('Dot Color', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::COLOR,
+                    'default' => '#ccc',
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-dot' => 'background-color: {{VALUE}} !important;',
+                    ),
+                )
+            );
+
+            // Active Dot Color
+            $this->add_control(
+                'dot_active_color',
+                array(
+                    'label' => __('Active Dot Color', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::COLOR,
+                    'default' => '#007cba',
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-dot.active' => 'background-color: {{VALUE}} !important;',
+                    ),
+                )
+            );
+
+            // Dot Size
+            $this->add_control(
+                'dot_size',
+                array(
+                    'label' => __('Dot Size (px)', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => 6,
+                            'max' => 24,
+                            'step' => 1,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => 'px',
+                        'size' => 12,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-dot' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            // Dot Spacing
+            $this->add_control(
+                'dot_spacing',
+                array(
+                    'label' => __('Dot Spacing (px)', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => 0,
+                            'max' => 30,
+                            'step' => 1,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => 'px',
+                        'size' => 8,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-dots' => 'gap: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            // Dot Border Radius
+            $this->add_control(
+                'dot_border_radius',
+                array(
+                    'label' => __('Border Radius', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px', '%'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => 0,
+                            'max' => 50,
+                            'step' => 1,
+                        ),
+                        '%' => array(
+                            'min' => 0,
+                            'max' => 100,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => '%',
+                        'size' => 50,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-dot' => 'border-radius: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            $this->end_controls_section();
+        }
+        
         // Style Customization Section (style-specific options)
         if ($this->is_pro()) {
             $this->start_controls_section(
@@ -641,6 +878,30 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             )
         );
 
+        // Avatar Size (all styles)
+        $this->add_control(
+            'avatar_size',
+            array(
+                'label' => __('Avatar Size', 'google-reviews-plugin'),
+                'type' => \Elementor\Controls_Manager::SLIDER,
+                'size_units' => array('px'),
+                'range' => array(
+                    'px' => array(
+                        'min' => 20,
+                        'max' => 120,
+                        'step' => 4,
+                    ),
+                ),
+                'default' => array(
+                    'unit' => 'px',
+                    'size' => 40,
+                ),
+                'selectors' => array(
+                    '{{WRAPPER}} .grp-review-avatar img' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important;',
+                ),
+            )
+        );
+
         // Text Alignment
         $this->add_control(
             'text_alignment',
@@ -671,6 +932,38 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 ),
             )
         );
+
+        // Box Shadow (all styles except creative which has its own)
+        $this->add_group_control(
+            \Elementor\Group_Control_Box_Shadow::get_type(),
+            array(
+                'name' => 'review_box_shadow',
+                'label' => __('Box Shadow', 'google-reviews-plugin'),
+                'condition' => array(
+                    'style!' => 'creative',
+                ),
+                'selector' => '{{WRAPPER}} .grp-review',
+            )
+        );
+
+        // Glass Effect (all styles except creative which has its own)
+        if ($this->is_pro()) {
+            $this->add_control(
+                'glass_effect',
+                array(
+                    'label' => __('Glass Effect', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SWITCHER,
+                    'label_on' => __('Yes', 'google-reviews-plugin'),
+                    'label_off' => __('No', 'google-reviews-plugin'),
+                    'return_value' => 'yes',
+                    'default' => 'no',
+                    'condition' => array(
+                        'style!' => 'creative',
+                    ),
+                    'description' => __('Apple-style glass morphism effect with backdrop blur and transparency', 'google-reviews-plugin'),
+                )
+            );
+        }
 
         // Typography Controls
         if ($this->is_pro()) {

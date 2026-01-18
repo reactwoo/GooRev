@@ -775,8 +775,47 @@
                     // Use ServerSideRender for live preview if available
                     ServerSideRender ? el(ServerSideRender, {
                         block: 'google-reviews/reviews',
-                        attributes: attributes,
-                        key: 'grp-reviews-preview-' + JSON.stringify(attributes)
+                        attributes: (function() {
+                            // Filter and sanitize attributes for ServerSideRender
+                            // Only pass simple types (string, number, boolean) - not objects
+                            var sanitized = {
+                                style: attributes.style || 'modern',
+                                theme: attributes.theme || 'light',
+                                layout: attributes.layout || 'carousel',
+                                count: attributes.count || 5,
+                                min_rating: attributes.min_rating || 1,
+                                max_rating: attributes.max_rating || 5,
+                                sort_by: attributes.sort_by || 'newest',
+                                show_avatar: attributes.show_avatar !== undefined ? attributes.show_avatar : true,
+                                show_date: attributes.show_date !== undefined ? attributes.show_date : true,
+                                show_rating: attributes.show_rating !== undefined ? attributes.show_rating : true,
+                                show_reply: attributes.show_reply !== undefined ? attributes.show_reply : true,
+                                autoplay: attributes.autoplay !== undefined ? attributes.autoplay : true,
+                                speed: attributes.speed || 5000,
+                                dots: attributes.dots !== undefined ? attributes.dots : true,
+                                arrows: attributes.arrows !== undefined ? attributes.arrows : true,
+                                consistent_height: attributes.consistent_height !== undefined ? attributes.consistent_height : false,
+                                cols_desktop: attributes.cols_desktop || 3,
+                                cols_tablet: attributes.cols_tablet || 2,
+                                cols_mobile: attributes.cols_mobile || 1,
+                                gap: attributes.gap || 20
+                            };
+                            
+                            // Add creative style attributes if they exist and are simple types
+                            if (attributes.creative_gradient_type) sanitized.creative_gradient_type = attributes.creative_gradient_type;
+                            if (attributes.creative_gradient_angle) sanitized.creative_gradient_angle = attributes.creative_gradient_angle;
+                            if (attributes.creative_gradient_start) sanitized.creative_gradient_start = attributes.creative_gradient_start;
+                            if (attributes.creative_gradient_end) sanitized.creative_gradient_end = attributes.creative_gradient_end;
+                            if (attributes.creative_text_color) sanitized.creative_text_color = attributes.creative_text_color;
+                            if (attributes.creative_date_color) sanitized.creative_date_color = attributes.creative_date_color;
+                            if (attributes.creative_star_color) sanitized.creative_star_color = attributes.creative_star_color;
+                            if (attributes.creative_glass_effect) sanitized.creative_glass_effect = attributes.creative_glass_effect;
+                            if (attributes.creative_avatar_size) sanitized.creative_avatar_size = attributes.creative_avatar_size;
+                            if (attributes.creative_star_size) sanitized.creative_star_size = attributes.creative_star_size;
+                            
+                            return sanitized;
+                        })(),
+                        key: 'grp-reviews-preview-' + (attributes.layout || 'carousel') + '-' + (attributes.count || 5)
                     }) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
                         el('div', { className: 'grp-preview-header' },
                             el('h3', {}, i18n.__('Google Reviews Block', 'google-reviews-plugin'))

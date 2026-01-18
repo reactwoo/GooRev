@@ -76,14 +76,14 @@
         // Update carousel item widths based on columns
         function updateItemWidths() {
             var columnsPerView = getColumnsPerView();
-            var itemWidth = 100 / columnsPerView;
-            $items.css({
-                'flex': '0 0 ' + itemWidth + '%',
-                'max-width': itemWidth + '%',
-                'box-sizing': 'border-box'
+            // Set CSS variables for columns
+            $carousel.css({
+                '--grp-cols-desktop': colsDesktop,
+                '--grp-cols-tablet': colsTablet,
+                '--grp-cols-mobile': colsMobile,
+                '--grp-cols': columnsPerView
             });
-            // Set CSS variable for potential use
-            $carousel.css('--grp-cols', columnsPerView);
+            // Widths will be handled by CSS using calc() with these variables
         }
 
         // Update carousel position
@@ -257,7 +257,8 @@
             updateItemWidths();
         });
 
-        // Initialize
+        // Initialize - set CSS variables first
+        updateItemWidths();
         updateCarousel();
     }
 
