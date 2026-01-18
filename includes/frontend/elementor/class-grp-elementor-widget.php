@@ -714,7 +714,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                         'size' => 12,
                     ),
                     'selectors' => array(
-                        '{{WRAPPER}} .grp-dot' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important;',
+                        '{{WRAPPER}} .grp-dot' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important; min-width: {{SIZE}}{{UNIT}} !important; min-height: {{SIZE}}{{UNIT}} !important; max-width: {{SIZE}}{{UNIT}} !important; max-height: {{SIZE}}{{UNIT}} !important;',
                     ),
                 )
             );

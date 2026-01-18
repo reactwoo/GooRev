@@ -181,18 +181,9 @@ class GRP_Gutenberg {
                     'type' => 'string',
                     'default' => 'no',
                 ),
-                'creative_box_shadow' => array(
-                    'type' => 'object',
-                    'default' => array(),
-                ),
-                'creative_border' => array(
-                    'type' => 'object',
-                    'default' => array(),
-                ),
-                'creative_border_radius' => array(
-                    'type' => 'object',
-                    'default' => array(),
-                ),
+                // Note: creative_box_shadow, creative_border, creative_border_radius are objects
+                // They are handled via CSS in Elementor/Gutenberg editor but not passed via REST API
+                // Removed from REST API validation to prevent 400 errors
                 'creative_avatar_size' => array(
                     'type' => 'number',
                     'default' => 80,
@@ -415,33 +406,56 @@ class GRP_Gutenberg {
      * Render reviews block
      */
     public function render_reviews_block($attributes) {
-        // Ensure attributes are set with defaults
-        // Handle both array and query string formats from REST API
-        if (empty($attributes)) {
-            $attributes = array();
-        }
-        
-        if (!is_array($attributes)) {
-            // If it's not an array, try to parse it
-            if (is_string($attributes)) {
-                parse_str($attributes, $attributes);
-            } else {
-                $attributes = (array) $attributes;
+        // Error handling wrapper for debugging
+        try {
+            // Ensure attributes are set with defaults
+            // Handle both array and query string formats from REST API
+            if (empty($attributes)) {
+                $attributes = array();
             }
-        }
-        
-        // Handle nested attribute arrays from REST API (sometimes attributes come as attributes[style] format)
-        if (isset($attributes['attributes']) && is_array($attributes['attributes'])) {
-            $attributes = array_merge($attributes, $attributes['attributes']);
-            unset($attributes['attributes']);
-        }
-        
-        // Clean up any nested arrays (REST API might pass attributes[key] = value format)
-        foreach ($attributes as $key => $value) {
-            if (is_string($key) && strpos($key, '[') !== false) {
-                // Skip nested array keys, they'll be handled by wp_parse_args
+            
+            if (!is_array($attributes)) {
+                // If it's not an array, try to parse it
+                if (is_string($attributes)) {
+                    parse_str($attributes, $attributes);
+                } else {
+                    $attributes = (array) $attributes;
+                }
             }
-        }
+            
+            // Handle nested attribute arrays from REST API (attributes[key] format in query strings)
+            // WordPress REST API may pass attributes as a nested structure
+            if (isset($attributes['attributes']) && is_array($attributes['attributes'])) {
+                $attributes = array_merge($attributes, $attributes['attributes']);
+                unset($attributes['attributes']);
+            }
+            
+            // Handle query string format attributes[key]=value that parse_str creates
+            // This creates nested arrays that need to be flattened
+            $flattened = array();
+            foreach ($attributes as $key => $value) {
+                // Skip non-string keys
+                if (!is_string($key)) {
+                    $flattened[$key] = $value;
+                    continue;
+                }
+                
+                // Handle keys like 'attributes[style]' - parse_str creates nested array
+                if (strpos($key, '[') !== false && strpos($key, ']') !== false) {
+                    // This is a nested key format - skip it as it's already been handled
+                    continue;
+                }
+                
+                // Skip object-type attributes that shouldn't be passed via REST API
+                if (in_array($key, array('creative_box_shadow', 'creative_border', 'creative_border_radius', 'creative_background'), true)) {
+                    // These are objects and should not be in the attributes passed to REST API
+                    continue;
+                }
+                
+                $flattened[$key] = $value;
+            }
+            
+            $attributes = $flattened;
         
         // Set default values for all required attributes
         $attributes = wp_parse_args($attributes, array(
@@ -614,6 +628,12 @@ class GRP_Gutenberg {
         
         $shortcode = new GRP_Shortcode();
         return $custom_css . $shortcode->render_shortcode($shortcode_atts);
+        } catch (Exception $e) {
+            // Log error but return a user-friendly message
+            error_log('GRP Gutenberg Block Error: ' . $e->getMessage());
+            error_log('GRP Gutenberg Block Attributes: ' . print_r($attributes, true));
+            return '<div class="grp-gutenberg-block grp-error"><p>' . __('Error loading reviews block. Please check your settings.', 'google-reviews-plugin') . '</p></div>';
+        }
     }
     
     /**

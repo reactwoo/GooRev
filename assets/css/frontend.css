@@ -170,6 +170,7 @@
 .grp-layout-carousel .grp-carousel-wrapper {
     display: flex;
     transition: transform 0.5s ease;
+    align-items: stretch;
 }
 
 .grp-layout-carousel .grp-review-item {
@@ -257,6 +258,8 @@
     height: 12px;
     min-width: 12px;
     min-height: 12px;
+    max-width: 12px;
+    max-height: 12px;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     border: none;
@@ -265,6 +268,8 @@
     transition: background 0.3s ease;
     flex-shrink: 0;
     box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
 }
 
 .grp-layout-carousel .grp-dot.active {
@@ -399,8 +404,10 @@
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
-    visibility: visible;
-    opacity: 1;
+    padding: 10px 0;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 32px;
 }
 
 .grp-layout-grid_carousel .grp-dot {
@@ -408,6 +415,8 @@
     height: 12px;
     min-width: 12px;
     min-height: 12px;
+    max-width: 12px;
+    max-height: 12px;
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     border: none;
@@ -416,6 +425,8 @@
     transition: background 0.3s ease;
     flex-shrink: 0;
     box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
 }
 
 .grp-layout-grid_carousel .grp-dot.active {

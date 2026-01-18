@@ -140,9 +140,29 @@
                 type: 'string',
                 default: 'modern'
             },
+            theme: {
+                type: 'string',
+                default: 'light'
+            },
             layout: {
                 type: 'string',
                 default: 'carousel'
+            },
+            cols_desktop: {
+                type: 'number',
+                default: 3
+            },
+            cols_tablet: {
+                type: 'number',
+                default: 2
+            },
+            cols_mobile: {
+                type: 'number',
+                default: 1
+            },
+            gap: {
+                type: 'number',
+                default: 20
             },
             count: {
                 type: 'number',
@@ -197,14 +217,23 @@
                 default: false
             },
             // Creative style specific attributes
-            creative_background: {
-                type: 'object',
-                default: {
-                    type: 'linear',
-                    angle: 135,
-                    start_color: '#4285F4',
-                    end_color: '#EA4335'
-                }
+            // Note: creative_background is removed as it's an object type that causes REST API validation errors
+            // Instead, we use creative_gradient_type, creative_gradient_angle, creative_gradient_start, creative_gradient_end
+            creative_gradient_type: {
+                type: 'string',
+                default: 'linear'
+            },
+            creative_gradient_angle: {
+                type: 'number',
+                default: 135
+            },
+            creative_gradient_start: {
+                type: 'string',
+                default: '#4285F4'
+            },
+            creative_gradient_end: {
+                type: 'string',
+                default: '#EA4335'
             },
             creative_text_color: {
                 type: 'string',
