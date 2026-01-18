@@ -173,10 +173,8 @@
 }
 
 .grp-layout-carousel .grp-review-item {
-    flex: 0 0 calc(100% / var(--grp-cols, 3));
-    max-width: calc(100% / var(--grp-cols, 3));
-    padding: 0 20px;
     box-sizing: border-box;
+    padding: 0 20px;
 }
 
 .grp-layout-carousel .grp-review {
@@ -196,6 +194,9 @@
     height: 40px;
     min-width: 40px;
     min-height: 40px;
+    max-width: 40px;
+    max-height: 40px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
@@ -207,6 +208,7 @@
     box-sizing: border-box;
     flex-shrink: 0;
     padding: 0;
+    overflow: hidden;
 }
 
 .grp-layout-carousel .grp-carousel-prev .grp-arrow-left,
@@ -253,11 +255,16 @@
 .grp-layout-carousel .grp-dot {
     width: 12px;
     height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     border: none;
     background: #ccc;
     cursor: pointer;
     transition: background 0.3s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .grp-layout-carousel .grp-dot.active {
@@ -337,6 +344,9 @@
     height: 32px;
     min-width: 32px;
     min-height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
@@ -347,6 +357,8 @@
     font-size: 14px;
     padding: 0;
     box-sizing: border-box;
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
 .grp-layout-grid_carousel .grp-carousel-prev .grp-arrow-left,
@@ -383,20 +395,27 @@
 }
 
 .grp-layout-grid_carousel .grp-carousel-dots {
-    display: flex;
+    display: flex !important;
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
+    visibility: visible;
+    opacity: 1;
 }
 
 .grp-layout-grid_carousel .grp-dot {
     width: 12px;
     height: 12px;
+    min-width: 12px;
+    min-height: 12px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     border: none;
     background: #ccc;
     cursor: pointer;
     transition: background 0.3s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .grp-layout-grid_carousel .grp-dot.active {
@@ -747,25 +766,22 @@
     margin: 0 40px;
 }
 
-/* Fix carousel columns to use CSS variables properly */
-.grp-layout-carousel .grp-carousel-wrapper {
-    --grp-cols-desktop: 3;
-    --grp-cols-tablet: 2;
-    --grp-cols-mobile: 1;
-}
-
+/* Fix carousel columns to use CSS variables properly - override default at media query level */
 .grp-layout-carousel .grp-review-item {
     flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
+    max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
 }
 
 @media (max-width: 1024px) {
     .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2)) !important;
+        max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2)) !important;
     }
 }
 
 @media (max-width: 640px) {
     .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1)) !important;
+        max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1)) !important;
     }
 }
