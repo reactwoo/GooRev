@@ -81,15 +81,25 @@
     gap: 2px;
 }
 
-.elementor-widget-grp-reviews[class*="text-align-left"] .grp-review-rating {
+/* Support both Elementor class selectors and inline styles for text alignment */
+.elementor-widget-grp-reviews[class*="text-align-left"] .grp-review-rating,
+.grp-review-rating[style*="text-align: left"],
+.grp-review[style*="text-align: left"] .grp-review-rating,
+.elementor-widget-grp-reviews[style*="text-align: left"] .grp-review-rating {
     justify-content: flex-start;
 }
 
-.elementor-widget-grp-reviews[class*="text-align-center"] .grp-review-rating {
+.elementor-widget-grp-reviews[class*="text-align-center"] .grp-review-rating,
+.grp-review-rating[style*="text-align: center"],
+.grp-review[style*="text-align: center"] .grp-review-rating,
+.elementor-widget-grp-reviews[style*="text-align: center"] .grp-review-rating {
     justify-content: center;
 }
 
-.elementor-widget-grp-reviews[class*="text-align-right"] .grp-review-rating {
+.elementor-widget-grp-reviews[class*="text-align-right"] .grp-review-rating,
+.grp-review-rating[style*="text-align: right"],
+.grp-review[style*="text-align: right"] .grp-review-rating,
+.elementor-widget-grp-reviews[style*="text-align: right"] .grp-review-rating {
     justify-content: flex-end;
 }
 
@@ -165,12 +175,17 @@
     border-radius: 8px;
     max-width: 1200px; /* Constrain max width */
     margin: 0 auto; /* Center the carousel */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .grp-layout-carousel .grp-carousel-wrapper {
     display: flex;
     transition: transform 0.5s ease;
     align-items: stretch;
+    justify-content: center;
+    width: 100%;
 }
 
 .grp-layout-carousel .grp-review-item {
@@ -408,6 +423,10 @@
     visibility: visible !important;
     opacity: 1 !important;
     min-height: 32px;
+    width: 100%;
+    clear: both;
+    position: relative;
+    z-index: 10;
 }
 
 .grp-layout-grid_carousel .grp-dot {

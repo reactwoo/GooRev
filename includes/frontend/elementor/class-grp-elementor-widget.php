@@ -652,6 +652,59 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                 )
             );
 
+            // Arrow Horizontal Position (left/right offset)
+            $this->add_control(
+                'arrow_horizontal_position',
+                array(
+                    'label' => __('Horizontal Position (px)', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => -100,
+                            'max' => 100,
+                            'step' => 5,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => 'px',
+                        'size' => 0,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev' => 'left: {{SIZE}}{{UNIT}} !important;',
+                        '{{WRAPPER}} .grp-carousel-next' => 'right: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Vertical Position (top offset)
+            $this->add_control(
+                'arrow_vertical_position',
+                array(
+                    'label' => __('Vertical Position (px)', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px', '%'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => -50,
+                            'max' => 50,
+                            'step' => 1,
+                        ),
+                        '%' => array(
+                            'min' => -100,
+                            'max' => 100,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => '%',
+                        'size' => 0,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'top: calc(50% + {{SIZE}}{{UNIT}}) !important;',
+                    ),
+                )
+            );
+
             $this->end_controls_section();
         }
 
