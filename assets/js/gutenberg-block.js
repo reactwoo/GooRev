@@ -266,12 +266,15 @@
             var setAttributes = props.setAttributes;
             
             // Check if user has pro license (passed from PHP)
-            var isProUser = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro === true);
+            // Handle both boolean and string ('1'/'0') formats from PHP
+            var isProValue = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro);
+            var isProUser = isProValue === true || isProValue === 1 || isProValue === '1';
             
             // Debug license check
             if (typeof window.grp_gutenberg !== 'undefined') {
                 console.log('GRP Gutenberg License Check:', {
                     isPro: window.grp_gutenberg.isPro,
+                    isProType: typeof window.grp_gutenberg.isPro,
                     isProUser: isProUser,
                     fullObject: window.grp_gutenberg
                 });

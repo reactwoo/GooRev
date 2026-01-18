@@ -272,18 +272,31 @@ class GRP_Gutenberg {
             $widgets = GRP_Review_Widgets::get_instance();
             
             // Build shortcode attributes
-            // Map Gutenberg 'style' to shortcode 'style', ensure it matches shortcode expectations
-            $button_style_mapped = $button_style;
-            // Shortcode expects: 'default', 'rounded', 'outline', 'minimal' or template names like 'basic', 'modern', etc.
-            $valid_styles = array('default', 'rounded', 'outline', 'minimal', 'basic', 'modern', 'elegant', 'bold', 'minimalist', 'card', 'creative', 'layout1', 'layout2', 'layout3', 'creative-pro');
-            if (!in_array($button_style, $valid_styles, true)) {
-                // If style doesn't match, check if it's a template or default to 'default'
-                $button_style_mapped = 'default';
+            // The shortcode uses 'template' parameter, not 'style'
+            // Map Gutenberg 'style' to shortcode 'template'
+            $template_mapped = $button_style;
+            // Valid templates: 'basic', 'modern', 'elegant', 'bold', 'minimalist', 'card', 'creative', 'layout1', 'layout2', 'layout3', 'creative-pro'
+            // Valid styles (for button CSS): 'default', 'rounded', 'outline', 'minimal'
+            $valid_templates = array('basic', 'modern', 'elegant', 'bold', 'minimalist', 'card', 'creative', 'layout1', 'layout2', 'layout3', 'creative-pro');
+            $valid_styles = array('default', 'rounded', 'outline', 'minimal');
+            
+            // If it's a template name, use it as template; if it's a style, use 'basic' template with that style
+            if (in_array($button_style, $valid_templates, true)) {
+                $template_mapped = $button_style;
+                $button_style_value = 'default'; // Use default style for template-based buttons
+            } elseif (in_array($button_style, $valid_styles, true)) {
+                $template_mapped = 'basic'; // Use basic template for style-based buttons
+                $button_style_value = $button_style;
+            } else {
+                // Default to basic template
+                $template_mapped = 'basic';
+                $button_style_value = 'default';
             }
             
             $shortcode_atts = array(
                 'text' => $button_text,
-                'style' => $button_style_mapped,
+                'template' => $template_mapped,
+                'style' => $button_style_value,
                 'size' => $button_size,
                 'align' => $align,
             );
@@ -383,7 +396,7 @@ class GRP_Gutenberg {
         wp_localize_script('grp-gutenberg-block', 'grp_gutenberg', array(
             'styles' => $this->get_style_options(),
             'reviewButtonEnabled' => $review_button_enabled,
-            'isPro' => $is_pro ? true : false, // Ensure boolean
+            'isPro' => (bool) $is_pro, // Force boolean conversion - PHP may pass as string '1' or '0'
             'strings' => array(
                 'block_title' => __('Google Reviews', 'google-reviews-plugin'),
                 'block_description' => __('Display Google Business reviews', 'google-reviews-plugin'),
