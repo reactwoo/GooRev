@@ -381,7 +381,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                     'label' => __('Carousel Options', 'google-reviews-plugin'),
                     'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
                     'condition' => array(
-                        'layout' => 'carousel',
+                        'layout' => array('carousel', 'grid_carousel'),
                     ),
                 )
             );
@@ -541,16 +541,30 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                     'type' => \Elementor\Controls_Manager::COLOR,
                     'default' => '#ffffff',
                     'selectors' => array(
-                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'color: {{VALUE}} !important;',
+                        '{{WRAPPER}} .grp-carousel-prev .grp-arrow-left, {{WRAPPER}} .grp-carousel-prev .grp-arrow-right, {{WRAPPER}} .grp-carousel-next .grp-arrow-left, {{WRAPPER}} .grp-carousel-next .grp-arrow-right, {{WRAPPER}} .grp-carousel-prev i, {{WRAPPER}} .grp-carousel-next i' => 'color: {{VALUE}} !important;',
                     ),
                 )
             );
 
-            // Arrow Size
+            // Arrow Icon
+            $this->add_control(
+                'arrow_icon',
+                array(
+                    'label' => __('Arrow Icon', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::ICONS,
+                    'default' => array(
+                        'value' => '',
+                        'library' => 'solid',
+                    ),
+                    'fa4compatibility' => 'icon',
+                )
+            );
+
+            // Arrow Button Size (container - maintains square/circle)
             $this->add_control(
                 'arrow_size',
                 array(
-                    'label' => __('Arrow Size (px)', 'google-reviews-plugin'),
+                    'label' => __('Button Size (px)', 'google-reviews-plugin'),
                     'type' => \Elementor\Controls_Manager::SLIDER,
                     'size_units' => array('px'),
                     'range' => array(
@@ -565,7 +579,37 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                         'size' => 40,
                     ),
                     'selectors' => array(
-                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important;',
+                        '{{WRAPPER}} .grp-carousel-prev, {{WRAPPER}} .grp-carousel-next' => 'width: {{SIZE}}{{UNIT}} !important; height: {{SIZE}}{{UNIT}} !important; min-width: {{SIZE}}{{UNIT}} !important; min-height: {{SIZE}}{{UNIT}} !important;',
+                    ),
+                )
+            );
+
+            // Arrow Icon Size (inside button)
+            $this->add_control(
+                'arrow_icon_size',
+                array(
+                    'label' => __('Icon Size (px)', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SLIDER,
+                    'size_units' => array('px', 'em'),
+                    'range' => array(
+                        'px' => array(
+                            'min' => 10,
+                            'max' => 48,
+                            'step' => 1,
+                        ),
+                        'em' => array(
+                            'min' => 0.5,
+                            'max' => 3,
+                            'step' => 0.1,
+                        ),
+                    ),
+                    'default' => array(
+                        'unit' => 'px',
+                        'size' => 16,
+                    ),
+                    'selectors' => array(
+                        '{{WRAPPER}} .grp-carousel-prev .grp-arrow-left, {{WRAPPER}} .grp-carousel-prev .grp-arrow-right, {{WRAPPER}} .grp-carousel-next .grp-arrow-left, {{WRAPPER}} .grp-carousel-next .grp-arrow-right' => 'font-size: {{SIZE}}{{UNIT}} !important; line-height: 1 !important;',
+                        '{{WRAPPER}} .grp-carousel-prev i, {{WRAPPER}} .grp-carousel-next i' => 'font-size: {{SIZE}}{{UNIT}} !important;',
                     ),
                 )
             );
@@ -929,6 +973,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
                     '{{WRAPPER}} .grp-review-meta' => 'text-align: {{VALUE}};',
                     '{{WRAPPER}} .grp-review-rating' => 'text-align: {{VALUE}};',
                     '{{WRAPPER}} .grp-review-author' => 'text-align: {{VALUE}};',
+                    '{{WRAPPER}} .grp-review-avatar' => 'text-align: {{VALUE}};',
                 ),
             )
         );

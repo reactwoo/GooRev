@@ -251,6 +251,7 @@ class GRP_Shortcode {
         <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>"
              class="<?php echo esc_attr($class_string); ?>"
+             style="--grp-cols-desktop:<?php echo intval($atts['cols_desktop']); ?>;--grp-cols-tablet:<?php echo intval($atts['cols_tablet']); ?>;--grp-cols-mobile:<?php echo intval($atts['cols_mobile']); ?>;--grp-gap:<?php echo intval($atts['gap']); ?>px;"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
             
             <div class="grp-carousel-container">
@@ -421,6 +422,7 @@ class GRP_Shortcode {
         <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>"
              class="<?php echo esc_attr($class_string); ?>"
+             style="--grp-cols-desktop:<?php echo intval($atts['cols_desktop']); ?>;--grp-cols-tablet:<?php echo intval($atts['cols_tablet']); ?>;--grp-cols-mobile:<?php echo intval($atts['cols_mobile']); ?>;--grp-gap:<?php echo intval($atts['gap']); ?>px;"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
 
             <div class="grp-grid-carousel-viewport">

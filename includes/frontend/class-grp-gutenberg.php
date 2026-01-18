@@ -411,9 +411,43 @@ class GRP_Gutenberg {
      */
     public function render_reviews_block($attributes) {
         // Ensure attributes are set with defaults
-        if (empty($attributes)) {
+        if (empty($attributes) || !is_array($attributes)) {
             $attributes = array();
         }
+        
+        // Set default values for all required attributes
+        $attributes = wp_parse_args($attributes, array(
+            'style' => 'modern',
+            'theme' => 'light',
+            'layout' => 'carousel',
+            'count' => 5,
+            'min_rating' => 1,
+            'max_rating' => 5,
+            'sort_by' => 'newest',
+            'show_avatar' => true,
+            'show_date' => true,
+            'show_rating' => true,
+            'show_reply' => true,
+            'autoplay' => true,
+            'speed' => 5000,
+            'dots' => true,
+            'arrows' => true,
+            'consistent_height' => false,
+            'cols_desktop' => 3,
+            'cols_tablet' => 2,
+            'cols_mobile' => 1,
+            'gap' => 20,
+        ));
+        
+        // Ensure boolean values are properly converted
+        $attributes['show_avatar'] = filter_var($attributes['show_avatar'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['show_date'] = filter_var($attributes['show_date'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['show_rating'] = filter_var($attributes['show_rating'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['show_reply'] = filter_var($attributes['show_reply'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['autoplay'] = filter_var($attributes['autoplay'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['dots'] = filter_var($attributes['dots'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['arrows'] = filter_var($attributes['arrows'], FILTER_VALIDATE_BOOLEAN);
+        $attributes['consistent_height'] = filter_var($attributes['consistent_height'], FILTER_VALIDATE_BOOLEAN);
         
         // Check if reviews are available
         $reviews_instance = new GRP_Reviews();
@@ -426,7 +460,7 @@ class GRP_Gutenberg {
         $custom_css = '';
 
         // Creative style gradient background
-        if ($attributes['style'] === 'creative') {
+        if (isset($attributes['style']) && $attributes['style'] === 'creative') {
             $bg_data = isset($attributes['creative_background']) ? $attributes['creative_background'] : array();
             $gradient_type = isset($bg_data['type']) ? $bg_data['type'] : 'linear';
             $start_color = isset($bg_data['start_color']) ? $bg_data['start_color'] : '#4285F4';

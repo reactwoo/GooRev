@@ -93,12 +93,26 @@
     justify-content: flex-end;
 }
 
+.grp-review-avatar {
+    display: inline-block;
+    flex-shrink: 0;
+}
+
 .grp-review-avatar img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #f0f0f0;
+}
+
+/* Avatar alignment based on text-align */
+.elementor-widget-grp-reviews[class*="text-align-center"] .grp-review-avatar {
+    margin: 0 auto;
+}
+
+.elementor-widget-grp-reviews[class*="text-align-right"] .grp-review-avatar {
+    margin-left: auto;
 }
 
 .grp-author-name {
@@ -180,6 +194,8 @@
     border: none;
     width: 40px;
     height: 40px;
+    min-width: 40px;
+    min-height: 40px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
@@ -190,6 +206,27 @@
     font-size: 16px;
     box-sizing: border-box;
     flex-shrink: 0;
+    padding: 0;
+}
+
+.grp-layout-carousel .grp-carousel-prev .grp-arrow-left,
+.grp-layout-carousel .grp-carousel-prev .grp-arrow-right,
+.grp-layout-carousel .grp-carousel-next .grp-arrow-left,
+.grp-layout-carousel .grp-carousel-next .grp-arrow-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.grp-layout-carousel .grp-carousel-prev i,
+.grp-layout-carousel .grp-carousel-next i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .grp-layout-carousel .grp-carousel-prev:hover,
@@ -298,6 +335,8 @@
     border: none;
     width: 32px;
     height: 32px;
+    min-width: 32px;
+    min-height: 32px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 10;
@@ -306,6 +345,28 @@
     justify-content: center;
     transition: background 0.3s ease;
     font-size: 14px;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.grp-layout-grid_carousel .grp-carousel-prev .grp-arrow-left,
+.grp-layout-grid_carousel .grp-carousel-prev .grp-arrow-right,
+.grp-layout-grid_carousel .grp-carousel-next .grp-arrow-left,
+.grp-layout-grid_carousel .grp-carousel-next .grp-arrow-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.grp-layout-grid_carousel .grp-carousel-prev i,
+.grp-layout-grid_carousel .grp-carousel-next i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .grp-layout-grid_carousel .grp-carousel-prev:hover,
