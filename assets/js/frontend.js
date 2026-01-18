@@ -114,24 +114,26 @@
             }
         }
 
-        // Next slide group
+        // Next slide group - move by columnsPerView, not by 1
         function nextSlide() {
             var columnsPerView = getColumnsPerView();
             var maxIndex = Math.max(0, totalItems - columnsPerView);
-            if (currentIndex < maxIndex) {
-                currentIndex++;
+            var nextIndex = currentIndex + columnsPerView;
+            if (nextIndex <= maxIndex) {
+                currentIndex = nextIndex;
             } else {
                 currentIndex = 0; // Loop to first group
             }
             updateCarousel();
         }
 
-        // Previous slide group
+        // Previous slide group - move by columnsPerView, not by 1
         function prevSlide() {
-            if (currentIndex > 0) {
-                currentIndex--;
+            var columnsPerView = getColumnsPerView();
+            var prevIndex = currentIndex - columnsPerView;
+            if (prevIndex >= 0) {
+                currentIndex = prevIndex;
             } else {
-                var columnsPerView = getColumnsPerView();
                 var maxIndex = Math.max(0, totalItems - columnsPerView);
                 currentIndex = maxIndex; // Loop to last group
             }
@@ -172,9 +174,10 @@
             }
         });
         
-        $dots.on('click', function(e) {
+        // Use event delegation for dots since they're dynamically generated
+        $carousel.on('click', '.grp-dot', function(e) {
             e.preventDefault();
-            var groupIndex = $(this).data('index');
+            var groupIndex = parseInt($(this).data('index'), 10) || 0;
             var columnsPerView = getColumnsPerView();
             var slideIndex = groupIndex * columnsPerView; // Convert group index to slide index based on current columns
             goToSlide(slideIndex);

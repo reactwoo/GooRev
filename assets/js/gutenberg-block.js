@@ -845,6 +845,15 @@
                                 gap: (attributes.gap && attributes.gap > 0) ? attributes.gap : 20
                             };
                             
+                            // Add custom colors if set
+                            if (attributes.custom_text_color && typeof attributes.custom_text_color === 'string') sanitized.custom_text_color = attributes.custom_text_color;
+                            if (attributes.custom_background_color && typeof attributes.custom_background_color === 'string') sanitized.custom_background_color = attributes.custom_background_color;
+                            if (attributes.custom_border_color && typeof attributes.custom_border_color === 'string') sanitized.custom_border_color = attributes.custom_border_color;
+                            if (attributes.custom_accent_color && typeof attributes.custom_accent_color === 'string') sanitized.custom_accent_color = attributes.custom_accent_color;
+                            if (attributes.custom_star_color && typeof attributes.custom_star_color === 'string') sanitized.custom_star_color = attributes.custom_star_color;
+                            if (attributes.custom_font_size && typeof attributes.custom_font_size === 'number') sanitized.custom_font_size = attributes.custom_font_size;
+                            if (attributes.custom_name_font_size && typeof attributes.custom_name_font_size === 'number') sanitized.custom_name_font_size = attributes.custom_name_font_size;
+                            
                             // Add creative style attributes if they exist and are simple types (skip objects)
                             if (attributes.creative_gradient_type && typeof attributes.creative_gradient_type === 'string') sanitized.creative_gradient_type = attributes.creative_gradient_type;
                             if (attributes.creative_gradient_angle && typeof attributes.creative_gradient_angle === 'number') sanitized.creative_gradient_angle = attributes.creative_gradient_angle;
@@ -859,7 +868,21 @@
                             
                             return sanitized;
                         })(),
-                        key: 'grp-reviews-preview-' + (attributes.layout || 'carousel') + '-' + (attributes.count || 5)
+                        // Include all relevant attributes in key to force re-render when any change
+                        key: 'grp-reviews-' + 
+                            (attributes.style || 'modern') + '-' + 
+                            (attributes.theme || 'light') + '-' + 
+                            (attributes.layout || 'carousel') + '-' + 
+                            (attributes.count || 5) + '-' + 
+                            (attributes.cols_desktop || 3) + '-' + 
+                            (attributes.cols_tablet || 2) + '-' + 
+                            (attributes.cols_mobile || 1) + '-' + 
+                            (attributes.gap || 20) + '-' + 
+                            (attributes.custom_text_color || '') + '-' + 
+                            (attributes.custom_background_color || '') + '-' + 
+                            (attributes.custom_star_color || '') + '-' + 
+                            (attributes.custom_font_size || '') + '-' + 
+                            (attributes.creative_text_color || '')
                     }) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
                         el('div', { className: 'grp-preview-header' },
                             el('h3', {}, i18n.__('Google Reviews Block', 'google-reviews-plugin'))
@@ -906,7 +929,7 @@
                 },
                 button_style: {
                     type: 'string',
-                    default: 'default'
+                    default: 'basic'
                 },
                 button_size: {
                     type: 'string',
@@ -928,12 +951,30 @@
                 var attributes = props.attributes;
                 var setAttributes = props.setAttributes;
                 
+                // Button style options - include both CSS styles and templates
                 var styleOptions = [
+                    { label: i18n.__('Basic', 'google-reviews-plugin'), value: 'basic' },
+                    { label: i18n.__('Modern', 'google-reviews-plugin'), value: 'modern' },
                     { label: i18n.__('Default', 'google-reviews-plugin'), value: 'default' },
                     { label: i18n.__('Rounded', 'google-reviews-plugin'), value: 'rounded' },
                     { label: i18n.__('Outline', 'google-reviews-plugin'), value: 'outline' },
                     { label: i18n.__('Minimal', 'google-reviews-plugin'), value: 'minimal' }
                 ];
+                
+                // Add pro templates if user has pro
+                if (isProUser) {
+                    styleOptions.push(
+                        { label: i18n.__('Elegant', 'google-reviews-plugin'), value: 'elegant' },
+                        { label: i18n.__('Bold', 'google-reviews-plugin'), value: 'bold' },
+                        { label: i18n.__('Minimalist', 'google-reviews-plugin'), value: 'minimalist' },
+                        { label: i18n.__('Card', 'google-reviews-plugin'), value: 'card' },
+                        { label: i18n.__('Creative', 'google-reviews-plugin'), value: 'creative' },
+                        { label: i18n.__('Layout 1', 'google-reviews-plugin'), value: 'layout1' },
+                        { label: i18n.__('Layout 2', 'google-reviews-plugin'), value: 'layout2' },
+                        { label: i18n.__('Layout 3', 'google-reviews-plugin'), value: 'layout3' },
+                        { label: i18n.__('Creative Pro', 'google-reviews-plugin'), value: 'creative-pro' }
+                    );
+                }
                 
                 var sizeOptions = [
                     { label: i18n.__('Small', 'google-reviews-plugin'), value: 'small' },
@@ -959,7 +1000,7 @@
                             }),
                             el(SelectControl, {
                                 label: i18n.__('Button Style', 'google-reviews-plugin'),
-                                value: attributes.button_style || 'default',
+                                value: attributes.button_style || 'basic',
                                 options: styleOptions,
                                 onChange: function(value) {
                                     setAttributes({ button_style: value });
@@ -1018,13 +1059,20 @@
                         block: 'google-reviews/review-button',
                         attributes: {
                             button_text: attributes.button_text || i18n.__('Leave us a review', 'google-reviews-plugin'),
-                            button_style: attributes.button_style || 'default',
+                            button_style: attributes.button_style || 'basic',
                             button_size: attributes.button_size || 'medium',
                             align: attributes.align || 'left',
                             text_color: attributes.text_color || '',
                             background_color: attributes.background_color || ''
                         },
-                        key: 'grp-review-button-preview-' + (attributes.button_text || 'default') + '-' + (attributes.button_style || 'default')
+                        // Include all attributes in key to force re-render when any change
+                        key: 'grp-review-button-' + 
+                            (attributes.button_text || 'default') + '-' + 
+                            (attributes.button_style || 'basic') + '-' + 
+                            (attributes.button_size || 'medium') + '-' + 
+                            (attributes.align || 'left') + '-' + 
+                            (attributes.text_color || '') + '-' + 
+                            (attributes.background_color || '')
                     }) : el('div', { className: 'grp-review-button-block-editor', style: { textAlign: attributes.align || 'left', padding: '20px' } },
                         el('div', { className: 'grp-block-placeholder grp-button-preview' },
                             el('div', { className: 'grp-preview-header' },

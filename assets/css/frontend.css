@@ -191,6 +191,8 @@
 .grp-layout-carousel .grp-review-item {
     box-sizing: border-box;
     padding: 0 20px;
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
+    max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
 }
 
 .grp-layout-carousel .grp-review {
@@ -262,10 +264,18 @@
 }
 
 .grp-layout-carousel .grp-carousel-dots {
-    display: flex;
+    display: flex !important;
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
+    padding: 10px 0;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 32px;
+    width: 100%;
+    clear: both;
+    position: relative;
+    z-index: 10;
 }
 
 .grp-layout-carousel .grp-dot {
@@ -796,22 +806,5 @@
     margin: 0 40px;
 }
 
-/* Fix carousel columns to use CSS variables properly - override default at media query level */
-.grp-layout-carousel .grp-review-item {
-    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
-    max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
-}
-
-@media (max-width: 1024px) {
-    .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2)) !important;
-        max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2)) !important;
-    }
-}
-
-@media (max-width: 640px) {
-    .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1)) !important;
-        max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1)) !important;
-    }
-}
+/* Carousel item widths are now handled by the CSS rule above using --grp-cols variable */
+/* Media queries not needed as JavaScript updates --grp-cols dynamically */
