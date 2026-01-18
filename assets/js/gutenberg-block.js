@@ -100,9 +100,20 @@
         };
     }
     // ServerSideRender is now a separate package in newer WordPress versions
-    var ServerSideRender = serverSideRender || (wp && wp.serverSideRender) || (blocks && blocks.ServerSideRender) || null;
+    // Try multiple locations: wp.serverSideRender, wp.editor.ServerSideRender, blocks.ServerSideRender
+    var ServerSideRender = (serverSideRender && serverSideRender.default) || serverSideRender || 
+                            (window.wp && window.wp.serverSideRender) || 
+                            (window.wp && window.wp.editor && window.wp.editor.ServerSideRender) ||
+                            (blocks && blocks.ServerSideRender) || 
+                            null;
     
     console.log('Google Reviews Gutenberg: Starting block registration...');
+    console.log('ServerSideRender available:', !!ServerSideRender, {
+        'serverSideRender param': !!serverSideRender,
+        'wp.serverSideRender': !!(window.wp && window.wp.serverSideRender),
+        'wp.editor.ServerSideRender': !!(window.wp && window.wp.editor && window.wp.editor.ServerSideRender),
+        'blocks.ServerSideRender': !!(blocks && blocks.ServerSideRender)
+    });
 
     // Check if registerBlockType is available
     if (typeof registerBlockType === 'undefined') {
@@ -761,7 +772,12 @@
                             i18n.__('layout', 'google-reviews-plugin')
                         )
                     ),
-                    el('div', { className: 'grp-block-placeholder grp-block-preview' },
+                    // Use ServerSideRender for live preview if available
+                    ServerSideRender ? el(ServerSideRender, {
+                        block: 'google-reviews/reviews',
+                        attributes: attributes,
+                        key: 'grp-reviews-preview-' + JSON.stringify(attributes)
+                    }) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
                         el('div', { className: 'grp-preview-header' },
                             el('h3', {}, i18n.__('Google Reviews Block', 'google-reviews-plugin'))
                         ),
@@ -946,6 +962,6 @@
     window.wp.element,
     window.wp.components,
     window.wp.i18n,
-    window.wp.serverSideRender || null,
+    (window.wp.serverSideRender || (window.wp.editor && window.wp.editor.ServerSideRender ? window.wp.editor : null) || null), // ServerSideRender
     (window.wp.blockEditor || window.wp.editor || window.wp.blocks) // blockEditor for InspectorControls
 );

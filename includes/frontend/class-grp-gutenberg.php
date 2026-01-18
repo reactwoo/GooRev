@@ -335,8 +335,20 @@ class GRP_Gutenberg {
         // Always include wp-editor as fallback for InspectorControls in older versions
         $dependencies[] = 'wp-editor';
 
-        // Try to add server-side-render if available
-        if (wp_script_is('wp-server-side-render', 'registered') || function_exists('wp_enqueue_script') && wp_scripts()->query('wp-server-side-render')) {
+        // Always try to add server-side-render for previews
+        // In WordPress 5.3+, it's wp-server-side-render
+        // In older versions, it may be in wp-editor
+        $server_side_render_available = wp_script_is('wp-server-side-render', 'registered');
+        if (!$server_side_render_available) {
+            // Check if it exists in wp-editor for older versions
+            $scripts = wp_scripts();
+            if ($scripts && isset($scripts->registered['wp-editor'])) {
+                // wp-editor contains ServerSideRender in older WordPress versions
+                $server_side_render_available = true;
+            }
+        }
+        
+        if ($server_side_render_available) {
             $dependencies[] = 'wp-server-side-render';
         }
         
