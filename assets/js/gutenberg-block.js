@@ -969,7 +969,19 @@
                         )
                     ),
                     
-                    el('div', { className: 'grp-review-button-block-editor', style: { textAlign: attributes.align || 'left', padding: '20px' } },
+                    // Use ServerSideRender for live preview if available
+                    ServerSideRender ? el(ServerSideRender, {
+                        block: 'google-reviews/review-button',
+                        attributes: {
+                            button_text: attributes.button_text || i18n.__('Leave us a review', 'google-reviews-plugin'),
+                            button_style: attributes.button_style || 'default',
+                            button_size: attributes.button_size || 'medium',
+                            align: attributes.align || 'left',
+                            text_color: attributes.text_color || '',
+                            background_color: attributes.background_color || ''
+                        },
+                        key: 'grp-review-button-preview-' + (attributes.button_text || 'default') + '-' + (attributes.button_style || 'default')
+                    }) : el('div', { className: 'grp-review-button-block-editor', style: { textAlign: attributes.align || 'left', padding: '20px' } },
                         el('div', { className: 'grp-block-placeholder grp-button-preview' },
                             el('div', { className: 'grp-preview-header' },
                                 el('h3', {}, i18n.__('Review Button Block', 'google-reviews-plugin'))
@@ -977,7 +989,7 @@
                             el('div', { className: 'grp-preview-content' },
                                 el('p', {}, i18n.__('Configure your button options in the sidebar.', 'google-reviews-plugin')),
                                 el('div', { className: 'grp-button-preview-sample', style: { padding: '10px', background: '#f0f0f0', borderRadius: '4px', textAlign: 'center', margin: '10px 0' } },
-                                    i18n.__('Leave a Review', 'google-reviews-plugin')
+                                    attributes.button_text || i18n.__('Leave a Review', 'google-reviews-plugin')
                                 ),
                                 el('p', {}, i18n.__('Preview will be available after saving the post.', 'google-reviews-plugin'))
                             )

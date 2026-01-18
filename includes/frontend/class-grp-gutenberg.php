@@ -265,8 +265,24 @@ class GRP_Gutenberg {
      */
     public function render_review_button_block($attributes) {
         // Ensure attributes are set with defaults
+        // Handle both array and query string formats from REST API
         if (empty($attributes)) {
             $attributes = array();
+        }
+        
+        if (!is_array($attributes)) {
+            // If it's not an array, try to parse it
+            if (is_string($attributes)) {
+                parse_str($attributes, $attributes);
+            } else {
+                $attributes = (array) $attributes;
+            }
+        }
+        
+        // Handle nested attribute arrays from REST API
+        if (isset($attributes['attributes']) && is_array($attributes['attributes'])) {
+            $attributes = array_merge($attributes, $attributes['attributes']);
+            unset($attributes['attributes']);
         }
         
         // Check if Review Widgets addon is enabled
@@ -411,8 +427,31 @@ class GRP_Gutenberg {
      */
     public function render_reviews_block($attributes) {
         // Ensure attributes are set with defaults
-        if (empty($attributes) || !is_array($attributes)) {
+        // Handle both array and query string formats from REST API
+        if (empty($attributes)) {
             $attributes = array();
+        }
+        
+        if (!is_array($attributes)) {
+            // If it's not an array, try to parse it
+            if (is_string($attributes)) {
+                parse_str($attributes, $attributes);
+            } else {
+                $attributes = (array) $attributes;
+            }
+        }
+        
+        // Handle nested attribute arrays from REST API (sometimes attributes come as attributes[style] format)
+        if (isset($attributes['attributes']) && is_array($attributes['attributes'])) {
+            $attributes = array_merge($attributes, $attributes['attributes']);
+            unset($attributes['attributes']);
+        }
+        
+        // Clean up any nested arrays (REST API might pass attributes[key] = value format)
+        foreach ($attributes as $key => $value) {
+            if (is_string($key) && strpos($key, '[') !== false) {
+                // Skip nested array keys, they'll be handled by wp_parse_args
+            }
         }
         
         // Set default values for all required attributes
