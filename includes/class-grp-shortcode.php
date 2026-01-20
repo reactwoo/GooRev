@@ -451,9 +451,14 @@ class GRP_Shortcode {
      * Render single review
      */
     private function render_single_review($review, $atts) {
+        // Special layout handling for modern style (avatar badge at top-left)
+        $is_modern_style = isset($atts['style']) && $atts['style'] === 'modern';
+        $card_inline_style = $is_modern_style ? 'position: relative;' : '';
+        $avatar_inline_style = $is_modern_style ? 'position:absolute; top:-20px; left:24px; z-index:2;' : '';
+
         ob_start();
         ?>
-        <div class="grp-review">
+        <div class="grp-review"<?php echo $card_inline_style ? ' style="' . esc_attr($card_inline_style) . '"' : ''; ?>>
             <?php if ($atts['show_rating']): ?>
                 <div class="grp-review-rating">
                     <?php echo $review['stars_html']; ?>
@@ -468,7 +473,7 @@ class GRP_Shortcode {
             
             <div class="grp-review-meta">
                 <?php if ($atts['show_avatar'] && !empty($review['author_photo'])): ?>
-                    <div class="grp-review-avatar">
+                    <div class="grp-review-avatar"<?php echo $avatar_inline_style ? ' style="' . esc_attr($avatar_inline_style) . '"' : ''; ?>>
                         <img src="<?php echo esc_url($review['author_photo']); ?>" 
                              alt="<?php echo esc_attr($review['author_name']); ?>"
                              loading="lazy">
