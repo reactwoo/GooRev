@@ -687,6 +687,25 @@
     margin-bottom: 20px;
 }
 
+/* Modern style avatar placement (ensure consistent top-left overlap) */
+.grp-style-modern .grp-review {
+    position: relative;
+}
+
+.grp-style-modern .grp-review-avatar {
+    position: absolute;
+    top: -20px;
+    left: 24px;
+    z-index: 2;
+}
+
+.grp-style-modern .grp-review-avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
 /* Loading State */
 .grp-loading {
     text-align: center;
