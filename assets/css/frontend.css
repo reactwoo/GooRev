@@ -116,12 +116,25 @@
     border: 2px solid #f0f0f0;
 }
 
-/* Avatar alignment based on text-align */
+/* Avatar alignment based on text-align (Elementor widgets) */
 .elementor-widget-grp-reviews[class*="text-align-center"] .grp-review-avatar {
     margin: 0 auto;
 }
 
 .elementor-widget-grp-reviews[class*="text-align-right"] .grp-review-avatar {
+    margin-left: auto;
+}
+
+/* Avatar alignment for Gutenberg output – rely on text-align applied to review/meta */
+.grp-gutenberg-block .grp-review[style*="text-align: center"] .grp-review-avatar,
+.grp-gutenberg-block .grp-review-meta[style*="text-align: center"] .grp-review-avatar {
+    display: block;
+    margin: 0 auto;
+}
+
+.grp-gutenberg-block .grp-review[style*="text-align: right"] .grp-review-avatar,
+.grp-gutenberg-block .grp-review-meta[style*="text-align: right"] .grp-review-avatar {
+    display: block;
     margin-left: auto;
 }
 
