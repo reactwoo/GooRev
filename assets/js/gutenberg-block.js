@@ -276,17 +276,7 @@
             var isProValue = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro);
             var isProUser = isProValue === true || isProValue === 1 || isProValue === '1';
             
-            // Debug license check
-            if (typeof window.grp_gutenberg !== 'undefined') {
-                console.log('GRP Gutenberg License Check:', {
-                    isPro: window.grp_gutenberg.isPro,
-                    isProType: typeof window.grp_gutenberg.isPro,
-                    isProUser: isProUser,
-                    fullObject: window.grp_gutenberg
-                });
-            } else {
-                console.warn('GRP Gutenberg: window.grp_gutenberg is undefined');
-            }
+            // License is now checked once per block render; avoid noisy console logs in production
 
             // Get style options with fallback
             var styleOptions = [];
