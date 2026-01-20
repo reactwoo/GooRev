@@ -128,10 +128,12 @@
     transition: transform 0.5s ease;
 }
 
+/* Carousel layout in editor - respect responsive column CSS variables */
 .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
-    flex: 0 0 calc(100% / 3);
-    padding: 0 10px;
     box-sizing: border-box;
+    padding: 0 10px;
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
+    max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
 }
 
 .grp-gutenberg-block .grp-layout-carousel .grp-review {
@@ -170,6 +172,36 @@
 
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
     right: -16px;
+}
+
+/* Grid carousel layout in editor - mirror frontend responsive behavior */
+.grp-gutenberg-block .grp-layout-grid_carousel .grp-grid-carousel-viewport {
+    overflow: hidden;
+    position: relative;
+}
+
+.grp-gutenberg-block .grp-layout-grid_carousel .grp-grid-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease;
+    gap: var(--grp-gap, 20px);
+}
+
+.grp-gutenberg-block .grp-layout-grid_carousel .grp-review-item {
+    box-sizing: border-box;
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
+    min-width: 0;
+}
+
+@media (max-width: 1024px) {
+    .grp-gutenberg-block .grp-layout-grid_carousel .grp-review-item {
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-gutenberg-block .grp-layout-grid_carousel .grp-review-item {
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
+    }
 }
 
 /* Editor Styles */
