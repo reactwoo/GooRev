@@ -804,11 +804,8 @@
                     el('div', { className: 'grp-block-header' },
                         el('h3', {}, i18n.__('Google Reviews', 'google-reviews-plugin')),
                         el('p', { className: 'grp-block-description' }, 
-                            i18n.__('Displaying', 'google-reviews-plugin') + ' ' + 
-                            attributes.count + ' ' + 
-                            i18n.__('reviews in', 'google-reviews-plugin') + ' ' + 
-                            attributes.layout + ' ' + 
-                            i18n.__('layout', 'google-reviews-plugin')
+                            // Clarify that editor is an approximate preview
+                            i18n.__('Editor preview – front‑end may show different number of visible cards and styles. Use Preview to confirm changes.', 'google-reviews-plugin')
                         )
                     ),
                     // Use ServerSideRender for live preview if available
