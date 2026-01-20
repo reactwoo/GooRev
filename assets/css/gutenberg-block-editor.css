@@ -27,13 +27,21 @@
 }
 
 /* Preview Styles */
-.grp-gutenberg-block-editor .grp-review {
+/* Default/light theme preview styles */
+.grp-gutenberg-block-editor .grp-theme-light .grp-review,
+.grp-gutenberg-block-editor .grp-review:not(.grp-theme-dark .grp-review) {
     background: #fff;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Respect dark theme from frontend styles inside editor */
+.grp-gutenberg-block-editor .grp-theme-dark .grp-review {
+    background: #1e1e1e;
+    color: #f5f5f5;
 }
 
 .grp-gutenberg-block-editor .grp-review-rating {

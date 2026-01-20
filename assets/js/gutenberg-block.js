@@ -5,6 +5,12 @@
 (function(blocks, element, components, i18n, serverSideRender, blockEditor) {
     'use strict';
 
+    // Global fallback for isProUser to prevent ReferenceError in case of scope issues
+    // Local variables with the same name inside block edit functions will override this.
+    if (typeof window !== 'undefined' && typeof window.grpIsProUser === 'undefined') {
+        window.grpIsProUser = false;
+    }
+
     // Check if required components are available
     if (!blocks || !element || !components || !i18n) {
         console.error('Google Reviews Gutenberg: Required dependencies not available', {
@@ -950,6 +956,10 @@
             edit: function(props) {
                 var attributes = props.attributes;
                 var setAttributes = props.setAttributes;
+                
+                // Check if user has pro license (passed from PHP)
+                var isProValue = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro);
+                var isProUser = isProValue === true || isProValue === 1 || isProValue === '1';
                 
                 // Button style options - include both CSS styles and templates
                 var styleOptions = [

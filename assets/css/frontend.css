@@ -184,7 +184,6 @@
     display: flex;
     transition: transform 0.5s ease;
     align-items: stretch;
-    justify-content: center;
     width: 100%;
 }
 
