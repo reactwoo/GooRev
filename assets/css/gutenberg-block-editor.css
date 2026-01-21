@@ -65,6 +65,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    justify-content: flex-start;
+    text-align: left;
 }
 
 .grp-gutenberg-block-editor .grp-review-avatar img {
@@ -83,6 +85,25 @@
     color: #666;
     font-size: 12px;
     margin-left: 10px;
+}
+
+/* Default meta alignment in editor: left for all styles */
+.grp-gutenberg-block-editor .grp-review-author {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Creative template: center meta/author by default in editor */
+.grp-gutenberg-block-editor .grp-style-creative .grp-review-meta {
+    justify-content: center;
+    text-align: center;
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review-author {
+    align-items: center;
+    text-align: center;
 }
 
 /* Inspector Controls */
