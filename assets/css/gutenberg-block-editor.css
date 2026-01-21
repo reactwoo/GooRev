@@ -225,7 +225,7 @@
 
 /* Viewport card stacking */
 .grp-grid-carousel-track {
-    display-inline-flex !important;
+    display: inline-flex !important;
 }
 
 /* Responsive */
