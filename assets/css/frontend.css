@@ -259,7 +259,10 @@
 /* Carousel Styles */
 .grp-layout-carousel .grp-carousel-container {
     position: relative;
-    overflow: hidden;
+    /* Hide horizontal overflow so extra slides don't show,
+       but allow vertical overflow for shadows / floating avatars */
+    overflow-x: hidden;
+    overflow-y: visible;
     border-radius: 8px;
     max-width: 1200px; /* Constrain max width */
     margin: 0 auto; /* Center the carousel */
@@ -420,7 +423,9 @@
 
 /* Grid Carousel */
 .grp-layout-grid_carousel .grp-grid-carousel-viewport {
-    overflow: hidden;
+    /* Same behaviour as standard carousel: clip horizontally only */
+    overflow-x: hidden;
+    overflow-y: visible;
     position: relative;
 }
 
