@@ -208,12 +208,14 @@
 .grp-gutenberg-block .grp-layout-grid_carousel .grp-grid-carousel-viewport {
     overflow: hidden;
     position: relative;
+    margin: 10px 40px;
 }
 
 .grp-gutenberg-block .grp-layout-grid_carousel .grp-grid-carousel-track {
     display: flex;
     transition: transform 0.5s ease;
     gap: var(--grp-gap, 20px);
+    padding: 10px 0;
 }
 
 .grp-gutenberg-block .grp-layout-grid_carousel .grp-review-item {

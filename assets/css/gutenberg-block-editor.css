@@ -69,6 +69,13 @@
     text-align: left;
 }
 
+/* Prevent avatar centering overrides in editor for non-creative styles */
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-avatar,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-avatar {
+    margin: 0 !important;
+    align-self: center;
+}
+
 .grp-gutenberg-block-editor .grp-review-avatar img {
     width: 40px;
     height: 40px;

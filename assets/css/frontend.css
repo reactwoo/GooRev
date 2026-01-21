@@ -56,8 +56,10 @@
     margin-bottom: 12px;
 }
 
+/* Meta row: unified inline layout across styles */
 .grp-review-meta {
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: flex-start;
     text-align: left;
@@ -431,12 +433,14 @@
     overflow-x: hidden;
     overflow-y: visible;
     position: relative;
+    margin: 10px 40px;
 }
 
 .grp-layout-grid_carousel .grp-grid-carousel-track {
     display: flex;
     transition: transform 0.5s ease;
     gap: var(--grp-gap, 20px);
+    padding: 10px 0;
 }
 
 .grp-layout-grid_carousel .grp-review-item {
