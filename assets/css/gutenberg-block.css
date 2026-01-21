@@ -212,7 +212,7 @@
 }
 
 .grp-gutenberg-block .grp-layout-grid_carousel .grp-grid-carousel-track {
-    display: flex;
+    display: inline-flex !important;
     transition: transform 0.5s ease;
     gap: var(--grp-gap, 20px);
     padding: 10px 0;
