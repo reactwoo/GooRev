@@ -418,6 +418,17 @@ class GRP_Gutenberg {
         // Ensure dynamic CSS is available on frontend where block styles are loaded
         $styles = new GRP_Styles();
         wp_add_inline_style('grp-gutenberg-block', $styles->get_all_css());
+
+        // Ensure editor stylesheet is loaded inside the block editor iframe.
+        if (is_admin()) {
+            wp_enqueue_style(
+                'grp-gutenberg-block-editor',
+                GRP_PLUGIN_URL . 'assets/css/gutenberg-block-editor.css',
+                array('wp-edit-blocks'),
+                GRP_PLUGIN_VERSION
+            );
+            wp_add_inline_style('grp-gutenberg-block-editor', $styles->get_all_css());
+        }
     }
     
     /**
