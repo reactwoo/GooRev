@@ -34,6 +34,20 @@ class GRP_Gutenberg {
         if (!function_exists('register_block_type')) {
             return;
         }
+
+        // Register block styles so editor_style can load inside the iframe.
+        wp_register_style(
+            'grp-gutenberg-block-editor',
+            GRP_PLUGIN_URL . 'assets/css/gutenberg-block-editor.css',
+            array('wp-edit-blocks'),
+            GRP_PLUGIN_VERSION
+        );
+        wp_register_style(
+            'grp-gutenberg-block',
+            GRP_PLUGIN_URL . 'assets/css/gutenberg-block.css',
+            array(),
+            GRP_PLUGIN_VERSION
+        );
         
         register_block_type('google-reviews/reviews', array(
             'editor_script' => 'grp-gutenberg-block',
