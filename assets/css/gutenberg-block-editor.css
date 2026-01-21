@@ -94,6 +94,20 @@
     margin-left: 0px;
 }
 
+/* Preview spacing/margins to better match frontend */
+.grp-gutenberg-block-editor .grp-layout-grid_carousel .grp-grid-carousel-viewport {
+    margin: 10px 40px;
+}
+
+.grp-gutenberg-block-editor .grp-layout-grid_carousel .grp-grid-carousel-track {
+    padding: 10px 0;
+    gap: var(--grp-gap, 20px);
+}
+
+.grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-container {
+    margin: 10px 0;
+}
+
 /* Default meta alignment in editor: left for all styles */
 .grp-gutenberg-block-editor .grp-review-author {
     display: flex;
