@@ -707,8 +707,9 @@
 }
 
 .grp-responsive .grp-review-meta {
-    flex-direction: column;
-    align-items: flex-start;
+    /* Keep avatar + author inline on all layouts; spacing handled by gap */
+    flex-direction: row;
+    align-items: center;
     gap: 8px;
 }
 
