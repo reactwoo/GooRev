@@ -451,14 +451,28 @@ class GRP_Shortcode {
      * Render single review
      */
     private function render_single_review($review, $atts) {
-        // Special layout handling for modern style (avatar badge at top-left)
+        // Special layout handling for modern style (avatar badge on top border)
         $is_modern_style = isset($atts['style']) && $atts['style'] === 'modern';
-        $card_inline_style = $is_modern_style ? 'position: relative;' : '';
-        $avatar_inline_style = $is_modern_style ? 'position:absolute; top:-20px; left:24px; z-index:2;' : '';
 
         ob_start();
         ?>
-        <div class="grp-review"<?php echo $card_inline_style ? ' style="' . esc_attr($card_inline_style) . '"' : ''; ?>>
+        <div class="grp-review">
+            <?php
+            // For modern style, render avatar as a direct child of .grp-review so CSS
+            // can pin it to the top border independent of meta/content height.
+            if (
+                $is_modern_style
+                && !empty($atts['show_avatar'])
+                && filter_var($atts['show_avatar'], FILTER_VALIDATE_BOOLEAN)
+                && !empty($review['author_photo'])
+            ): ?>
+                <div class="grp-review-avatar">
+                    <img src="<?php echo esc_url($review['author_photo']); ?>"
+                         alt="<?php echo esc_attr($review['author_name']); ?>"
+                         loading="lazy">
+                </div>
+            <?php endif; ?>
+
             <?php if ($atts['show_rating']): ?>
                 <div class="grp-review-rating">
                     <?php echo $review['stars_html']; ?>
@@ -472,9 +486,16 @@ class GRP_Shortcode {
             <?php endif; ?>
             
             <div class="grp-review-meta">
-                <?php if ($atts['show_avatar'] && !empty($review['author_photo'])): ?>
-                    <div class="grp-review-avatar"<?php echo $avatar_inline_style ? ' style="' . esc_attr($avatar_inline_style) . '"' : ''; ?>>
-                        <img src="<?php echo esc_url($review['author_photo']); ?>" 
+                <?php
+                // For non-modern styles, keep the avatar inside the meta row as before.
+                if (
+                    !$is_modern_style
+                    && !empty($atts['show_avatar'])
+                    && filter_var($atts['show_avatar'], FILTER_VALIDATE_BOOLEAN)
+                    && !empty($review['author_photo'])
+                ): ?>
+                    <div class="grp-review-avatar">
+                        <img src="<?php echo esc_url($review['author_photo']); ?>"
                              alt="<?php echo esc_attr($review['author_name']); ?>"
                              loading="lazy">
                     </div>

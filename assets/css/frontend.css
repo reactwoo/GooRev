@@ -7,6 +7,7 @@
 
 .grp-review {
     position: relative;
+    overflow: visible;
     margin-bottom: 15px;
     background: #fff;
     border: 1px solid #e0e0e0;
@@ -687,23 +688,27 @@
     margin-bottom: 20px;
 }
 
-/* Modern style avatar placement (ensure consistent top-left overlap) */
+/* Modern style avatar placement (badge sitting on top border of card) */
 .grp-style-modern .grp-review {
-    position: relative;
+    /* Create extra space so rating/text don't collide with the avatar badge */
+    padding-top: 28px;
 }
 
-.grp-style-modern .grp-review-avatar {
+.grp-style-modern .grp-review > .grp-review-avatar {
     position: absolute;
-    top: -20px;
+    top: 0;
     left: 24px;
-    z-index: 2;
+    transform: translateY(-50%);
+    z-index: 3;
+    pointer-events: none;
 }
 
-.grp-style-modern .grp-review-avatar img {
+.grp-style-modern .grp-review > .grp-review-avatar img {
     width: 48px;
     height: 48px;
     border-radius: 50%;
     object-fit: cover;
+    display: block;
 }
 
 /* Loading State */
