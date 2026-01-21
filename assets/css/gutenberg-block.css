@@ -109,6 +109,25 @@
     width: 100%;
 }
 
+/* Prevent stacking/centering for classic & minimal meta in Gutenberg frontend */
+.grp-gutenberg-block .grp-style-classic .grp-review-meta > .grp-review-avatar,
+.grp-gutenberg-block .grp-style-classic .grp-review-meta > .grp-review-author,
+.grp-gutenberg-block .grp-style-minimal .grp-review-meta > .grp-review-avatar,
+.grp-gutenberg-block .grp-style-minimal .grp-review-meta > .grp-review-author {
+    width: auto !important;
+    min-width: 0;
+    flex: 0 0 auto;
+}
+
+.grp-gutenberg-block .grp-style-classic .grp-review-meta > .grp-review-author,
+.grp-gutenberg-block .grp-style-minimal .grp-review-meta > .grp-review-author {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    flex: 1 1 auto;
+}
+
 .grp-gutenberg-block .grp-review-avatar img {
     width: 40px;
     height: 40px;
@@ -270,17 +289,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-    .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
-        flex: 0 0 50%; /* 2 columns on tablet */
-    }
-}
-
-@media (max-width: 640px) {
-    .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
-        flex: 0 0 100%; /* 1 column on mobile */
-    }
-}
+/* Let carousel columns be driven by CSS variables for all breakpoints */
 
 @media (max-width: 768px) {
     .grp-gutenberg-block .grp-review {

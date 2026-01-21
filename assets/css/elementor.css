@@ -88,17 +88,23 @@
 /* Carousel Styles */
 .elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-container {
     position: relative;
-    overflow: hidden;
+    /* Clip horizontally to hide extra slides, allow vertical overflow for shadows/avatars */
+    overflow-x: hidden;
+    overflow-y: visible;
     border-radius: 8px;
 }
 
 .elementor-widget-grp-reviews .grp-layout-carousel .grp-carousel-wrapper {
     display: flex;
     transition: transform 0.5s ease;
+    align-items: stretch;
+    width: 100%;
 }
 
 .elementor-widget-grp-reviews .grp-layout-carousel .grp-review-item {
-    flex: 0 0 100%;
+    box-sizing: border-box;
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
+    max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
     padding: 0 10px;
 }
 
@@ -212,8 +218,8 @@
     }
     
     .elementor-widget-grp-reviews .grp-review-meta {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
         gap: 8px;
     }
 }

@@ -123,7 +123,37 @@
 .grp-gutenberg-block-editor .grp-style-corporate .grp-review-author {
     text-align: left !important;
     align-items: flex-start;
+    width: auto;
+    flex: 1 1 auto;
+}
+
+/* Classic & Minimal: force inline meta row in editor */
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-meta,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-meta {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px;
     width: 100%;
+}
+
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-meta > .grp-review-avatar,
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-meta > .grp-review-author,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-meta > .grp-review-avatar,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-meta > .grp-review-author {
+    width: auto !important;
+    min-width: 0;
+    flex: 0 0 auto;
+}
+
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-meta > .grp-review-author,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-meta > .grp-review-author {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    flex: 1 1 auto;
 }
 
 /* Creative template: center meta/author by default in editor */
