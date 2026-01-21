@@ -3,6 +3,8 @@
 .grp-reviews {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
+    /* Ensure review wrapper itself never clips avatar/shadows */
+    overflow: visible !important;
 }
 
 .grp-review {
@@ -955,6 +957,8 @@
 /* Grid Carousel - ensure arrows/dots are visible */
 .grp-layout-grid_carousel {
     position: relative;
+    /* Never clip vertical overflow from cards/avatars */
+    overflow-y: visible !important;
 }
 
 .grp-layout-grid_carousel .grp-grid-carousel-viewport {
