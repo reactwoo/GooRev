@@ -157,6 +157,54 @@
     min-width: 0;
 }
 
+/* Style-level alignment reset: ensure default left alignment for non-creative styles */
+.grp-style-modern .grp-review,
+.grp-style-classic .grp-review,
+.grp-style-minimal .grp-review,
+.grp-style-corporate .grp-review {
+    text-align: left !important;
+}
+
+/* Meta row: force full-width, left-aligned for non-creative styles */
+.grp-style-modern .grp-review-meta,
+.grp-style-classic .grp-review-meta,
+.grp-style-minimal .grp-review-meta,
+.grp-style-corporate .grp-review-meta {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    align-self: stretch;
+}
+
+/* Author block: left-aligned for non-creative styles */
+.grp-style-modern .grp-review-author,
+.grp-style-classic .grp-review-author,
+.grp-style-minimal .grp-review-author,
+.grp-style-corporate .grp-review-author {
+    text-align: left;
+    align-items: flex-start;
+}
+
+/* Modern style: ensure meta row groups avatar + author on the left */
+.grp-style-modern .grp-review-meta {
+    justify-content: flex-start;
+}
+
+/* Optional editor alignment override – only center when wrapper explicitly opts in */
+.grp-align-center .grp-review {
+    text-align: center !important;
+}
+
+.grp-align-center .grp-review-meta {
+    justify-content: center !important;
+}
+
+.grp-align-center .grp-review-author {
+    align-items: center !important;
+    text-align: center !important;
+}
+
 .grp-review-date {
     color: #666;
     font-size: 12px;

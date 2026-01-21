@@ -95,6 +95,35 @@
     text-align: left;
 }
 
+/* Style-level alignment reset in editor: default left for non-creative styles */
+.grp-gutenberg-block-editor .grp-style-modern .grp-review,
+.grp-gutenberg-block-editor .grp-style-classic .grp-review,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review,
+.grp-gutenberg-block-editor .grp-style-corporate .grp-review {
+    text-align: left !important;
+}
+
+/* Meta row: force full-width, left-aligned in editor for non-creative styles */
+.grp-gutenberg-block-editor .grp-style-modern .grp-review-meta,
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-meta,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-meta,
+.grp-gutenberg-block-editor .grp-style-corporate .grp-review-meta {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    align-self: stretch;
+}
+
+/* Author block: left-aligned per style in editor */
+.grp-gutenberg-block-editor .grp-style-modern .grp-review-author,
+.grp-gutenberg-block-editor .grp-style-classic .grp-review-author,
+.grp-gutenberg-block-editor .grp-style-minimal .grp-review-author,
+.grp-gutenberg-block-editor .grp-style-corporate .grp-review-author {
+    text-align: left;
+    align-items: flex-start;
+}
+
 /* Creative template: center meta/author by default in editor */
 .grp-gutenberg-block-editor .grp-style-creative .grp-review-meta {
     justify-content: center;
@@ -104,6 +133,20 @@
 .grp-gutenberg-block-editor .grp-style-creative .grp-review-author {
     align-items: center;
     text-align: center;
+}
+
+/* Optional editor alignment override – only center when wrapper explicitly opts in */
+.grp-gutenberg-block-editor .grp-align-center .grp-review {
+    text-align: center !important;
+}
+
+.grp-gutenberg-block-editor .grp-align-center .grp-review-meta {
+    justify-content: center !important;
+}
+
+.grp-gutenberg-block-editor .grp-align-center .grp-review-author {
+    align-items: center !important;
+    text-align: center !important;
 }
 
 /* Inspector Controls */
