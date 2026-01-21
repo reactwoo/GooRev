@@ -223,6 +223,11 @@
     position: relative;
 }
 
+/* Viewport card stacking */
+.grp-grid-carousel-track {
+    display-inline-flex !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .grp-gutenberg-block-editor {
