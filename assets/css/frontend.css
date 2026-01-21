@@ -222,7 +222,7 @@
 .grp-review-date {
     color: #666;
     font-size: 12px;
-    margin-left: 10px;
+    margin-left: 0px;
 }
 
 .grp-review-reply {
@@ -635,10 +635,8 @@
     padding: 0 10px;
 }
 
-/* Ensure containers don't clip shadows */
-.grp-layout-carousel .grp-carousel-container,
+/* Ensure containers don't clip shadows (avoid changing carousel viewports) */
 .grp-layout-grid .grp-reviews-grid,
-.grp-layout-grid_carousel .grp-grid-carousel-viewport,
 .grp-layout-list .grp-reviews-list {
     overflow: visible !important;
 }
