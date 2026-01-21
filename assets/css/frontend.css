@@ -157,6 +157,20 @@
     min-width: 0;
 }
 
+/* Ensure author/meta block fills card width in Elementor to avoid centering by parent */
+.grp-elementor-widget .grp-review-author {
+    width: 100%;
+}
+
+.grp-elementor-widget .grp-style-modern .grp-review-author,
+.grp-elementor-widget .grp-style-classic .grp-review-author,
+.grp-elementor-widget .grp-style-minimal .grp-review-author,
+.grp-elementor-widget .grp-style-corporate .grp-review-author {
+    text-align: left !important;
+    align-items: flex-start;
+    width: 100%;
+}
+
 /* Style-level alignment reset: ensure default left alignment for non-creative styles */
 .grp-style-modern .grp-review,
 .grp-style-classic .grp-review,
