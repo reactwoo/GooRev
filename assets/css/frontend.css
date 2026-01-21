@@ -697,7 +697,7 @@
 .grp-style-modern .grp-review > .grp-review-avatar {
     position: absolute;
     top: 0;
-    left: 24px;
+    left: auto;
     transform: translateY(-50%);
     z-index: 3;
     pointer-events: none;
