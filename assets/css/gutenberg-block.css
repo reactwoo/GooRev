@@ -98,6 +98,17 @@
     margin-top: 8px;
 }
 
+/* Classic & Minimal: force inline meta row (avatar + name/date side-by-side) */
+.grp-gutenberg-block .grp-style-classic .grp-review-meta,
+.grp-gutenberg-block .grp-style-minimal .grp-review-meta {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px;
+    width: 100%;
+}
+
 .grp-gutenberg-block .grp-review-avatar img {
     width: 40px;
     height: 40px;
@@ -279,8 +290,9 @@
     .grp-gutenberg-block .grp-review-text {
         font-size: 14px;
     }
-
-    .grp-gutenberg-block .grp-review-meta {
+    
+    /* Only stack meta vertically for creative style; keep classic/minimal inline */
+    .grp-gutenberg-block .grp-style-creative .grp-review-meta {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
