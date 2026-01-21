@@ -57,7 +57,9 @@
 .grp-review-meta {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 12px;
     margin-top: 8px;
     flex-wrap: nowrap;
 }
@@ -150,6 +152,8 @@
 .grp-review-author {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
     min-width: 0;
 }
 
@@ -798,6 +802,12 @@
 .grp-theme-light .grp-review {
     background: #ffffff;
     color: #333;
+}
+
+/* Classic template: slightly larger avatar by default */
+.grp-style-classic .grp-review-avatar img {
+    width: 48px;
+    height: 48px;
 }
 
 /* List Layout Alignment Fixes */
