@@ -877,8 +877,9 @@
     height: 48px;
 }
 
-/* CLASSIC: force meta row layout to stay inline across themes/builders */
-.grp-style-classic .grp-review-meta {
+/* CLASSIC & MINIMAL: force meta row layout to stay inline across themes/builders */
+.grp-style-classic .grp-review-meta,
+.grp-style-minimal .grp-review-meta {
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
@@ -889,14 +890,17 @@
 
 /* Prevent children stacking (builders often apply width:100% to inner blocks) */
 .grp-style-classic .grp-review-meta > .grp-review-avatar,
-.grp-style-classic .grp-review-meta > .grp-review-author {
+.grp-style-classic .grp-review-meta > .grp-review-author,
+.grp-style-minimal .grp-review-meta > .grp-review-avatar,
+.grp-style-minimal .grp-review-meta > .grp-review-author {
     width: auto !important;
     min-width: 0;
     flex: 0 0 auto;
 }
 
 /* Author should be a vertical stack, left aligned */
-.grp-style-classic .grp-review-meta > .grp-review-author {
+.grp-style-classic .grp-review-meta > .grp-review-author,
+.grp-style-minimal .grp-review-meta > .grp-review-author {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
