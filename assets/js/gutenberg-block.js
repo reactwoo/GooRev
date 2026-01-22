@@ -288,6 +288,14 @@
             arrow_border_radius: {
                 type: 'number',
                 default: 50
+            },
+            arrow_horizontal_position: {
+                type: 'number',
+                default: 0
+            },
+            arrow_vertical_position: {
+                type: 'number',
+                default: 0
             }
         },
         
@@ -641,6 +649,30 @@
                                             max: 50,
                                             step: 1
                                         })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Horizontal Position (px)', 'google-reviews-plugin')),
+                                        el(RangeControl, {
+                                            value: attributes.arrow_horizontal_position || 0,
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_horizontal_position: value });
+                                            },
+                                            min: -100,
+                                            max: 100,
+                                            step: 5
+                                        })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Vertical Position (px)', 'google-reviews-plugin')),
+                                        el(RangeControl, {
+                                            value: attributes.arrow_vertical_position || 0,
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_vertical_position: value });
+                                            },
+                                            min: -50,
+                                            max: 50,
+                                            step: 1
+                                        })
                                     )
                                 )
                             ) : el('div', {
@@ -986,6 +1018,12 @@
                             if (attributes.arrow_border_radius !== undefined) {
                                 styleVars['--grp-arrow-radius'] = attributes.arrow_border_radius + '%';
                                 styleVars['--grp-arrow-border-radius'] = attributes.arrow_border_radius + '%';
+                            }
+                            if (attributes.arrow_horizontal_position !== undefined) {
+                                styleVars['--grp-arrow-horizontal'] = attributes.arrow_horizontal_position + 'px';
+                            }
+                            if (attributes.arrow_vertical_position !== undefined) {
+                                styleVars['--grp-arrow-vertical'] = attributes.arrow_vertical_position + 'px';
                             }
                             
                             return styleVars;

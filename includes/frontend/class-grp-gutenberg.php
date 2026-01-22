@@ -230,6 +230,14 @@ class GRP_Gutenberg {
                     'type' => 'number',
                     'default' => 50,
                 ),
+                'arrow_horizontal_position' => array(
+                    'type' => 'number',
+                    'default' => 0,
+                ),
+                'arrow_vertical_position' => array(
+                    'type' => 'number',
+                    'default' => 0,
+                ),
             ),
         ));
         
@@ -698,6 +706,12 @@ class GRP_Gutenberg {
             $css_vars[] = '--grp-arrow-radius: ' . intval($attributes['arrow_border_radius']) . '%';
             $css_vars[] = '--grp-arrow-border-radius: ' . intval($attributes['arrow_border_radius']) . '%';
         }
+        if (isset($attributes['arrow_horizontal_position'])) {
+            $css_vars[] = '--grp-arrow-horizontal: ' . intval($attributes['arrow_horizontal_position']) . 'px';
+        }
+        if (isset($attributes['arrow_vertical_position'])) {
+            $css_vars[] = '--grp-arrow-vertical: ' . intval($attributes['arrow_vertical_position']) . 'px';
+        }
         
         $css_vars_string = !empty($css_vars) ? ' style="' . esc_attr(implode('; ', $css_vars)) . '"' : '';
         
@@ -747,17 +761,24 @@ class GRP_Gutenberg {
             'arrow_hover_background_color' => isset($attributes['arrow_hover_background_color']) ? $attributes['arrow_hover_background_color'] : 'rgba(0, 0, 0, 0.7)',
             'arrow_icon_color' => isset($attributes['arrow_icon_color']) ? $attributes['arrow_icon_color'] : '#ffffff',
             'arrow_border_radius' => isset($attributes['arrow_border_radius']) ? $attributes['arrow_border_radius'] : 50,
+            'arrow_horizontal_position' => isset($attributes['arrow_horizontal_position']) ? $attributes['arrow_horizontal_position'] : 0,
+            'arrow_vertical_position' => isset($attributes['arrow_vertical_position']) ? $attributes['arrow_vertical_position'] : 0,
+            // Pass style customizations to shortcode renderer
+            'custom_text_color' => isset($attributes['custom_text_color']) ? $attributes['custom_text_color'] : '',
+            'custom_background_color' => isset($attributes['custom_background_color']) ? $attributes['custom_background_color'] : '',
+            'custom_border_color' => isset($attributes['custom_border_color']) ? $attributes['custom_border_color'] : '',
+            'custom_accent_color' => isset($attributes['custom_accent_color']) ? $attributes['custom_accent_color'] : '',
+            'custom_star_color' => isset($attributes['custom_star_color']) ? $attributes['custom_star_color'] : '',
+            'custom_font_size' => isset($attributes['custom_font_size']) ? $attributes['custom_font_size'] : '',
+            'custom_name_font_size' => isset($attributes['custom_name_font_size']) ? $attributes['custom_name_font_size'] : '',
             'class' => 'grp-gutenberg-block'
         );
         
         $shortcode = new GRP_Shortcode();
         $shortcode_output = $shortcode->render_shortcode($shortcode_atts);
         
-        // Wrap output with CSS variables wrapper for live preview
-        if (!empty($css_vars_string)) {
-            return $custom_css . '<div class="grp-gutenberg-block-wrapper"' . $css_vars_string . '>' . $shortcode_output . '</div>';
-        }
-        
+        // CSS variables are now applied directly in the shortcode renderer
+        // No need to inject them here - they're already in the output
         return $custom_css . $shortcode_output;
         } catch (Exception $e) {
             // Log error but return a user-friendly message

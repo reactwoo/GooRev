@@ -201,12 +201,15 @@
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-viewport,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-viewport {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     margin: -16px;
     padding: 16px;
     position: relative;
     width: 100%;
     box-sizing: border-box;
+    /* Ensure viewport clips horizontally for any column count */
+    max-width: 100%;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-track,
@@ -286,7 +289,7 @@
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
     position: absolute;
-    top: 50%;
+    top: calc(50% + var(--grp-arrow-vertical, 0px));
     transform: translateY(-50%);
     background: var(--grp-arrow-background-color, var(--grp-arrow-bg, rgba(0, 0, 0, 0.5)));
     color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
@@ -338,12 +341,12 @@
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev {
-    left: 10px;
+    left: calc(10px + var(--grp-arrow-horizontal, 0px));
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
-    right: 10px;
+    right: calc(10px + var(--grp-arrow-horizontal, 0px));
 }
 
 /* Grid carousel layout in editor - mirror frontend responsive behavior */

@@ -118,12 +118,15 @@
 }
 
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-viewport {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     margin: -16px;
     padding: 16px;
     position: relative;
     width: 100%;
     box-sizing: border-box;
+    /* Ensure viewport clips horizontally for any column count */
+    max-width: 100%;
 }
 
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-track {

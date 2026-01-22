@@ -289,12 +289,15 @@
 
 /* Carousel Viewport: Clips overflow while preserving shadows */
 .grp-layout-carousel .grp-carousel-viewport {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     margin: -16px;
     padding: 16px;
     position: relative;
     width: 100%;
     box-sizing: border-box;
+    /* Ensure viewport clips horizontally for any column count */
+    max-width: 100%;
 }
 
 /* Carousel Track: Horizontal flex container */
@@ -320,6 +323,8 @@
     min-width: 0;
     max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
     flex-shrink: 0;
+    /* Prevent cards from expanding beyond calculated width */
+    overflow: hidden;
 }
 
 @media (max-width: 1024px) {
@@ -415,7 +420,7 @@
 .grp-layout-carousel .grp-carousel-prev,
 .grp-layout-carousel .grp-carousel-next {
     position: absolute;
-    top: 50%;
+    top: calc(50% + var(--grp-arrow-vertical, 0px));
     transform: translateY(-50%);
     background: var(--grp-arrow-background-color, var(--grp-arrow-bg, rgba(0, 0, 0, 0.5)));
     color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
@@ -462,11 +467,11 @@
 }
 
 .grp-layout-carousel .grp-carousel-prev {
-    left: 10px;
+    left: calc(10px + var(--grp-arrow-horizontal, 0px));
 }
 
 .grp-layout-carousel .grp-carousel-next {
-    right: 10px;
+    right: calc(10px + var(--grp-arrow-horizontal, 0px));
 }
 
 .grp-layout-carousel .grp-carousel-dots {
