@@ -296,6 +296,56 @@
             arrow_vertical_position: {
                 type: 'number',
                 default: 0
+            },
+            // Style customization attributes
+            custom_text_color: {
+                type: 'string',
+                default: ''
+            },
+            custom_background_color: {
+                type: 'string',
+                default: ''
+            },
+            custom_border_color: {
+                type: 'string',
+                default: ''
+            },
+            custom_accent_color: {
+                type: 'string',
+                default: ''
+            },
+            custom_star_color: {
+                type: 'string',
+                default: ''
+            },
+            custom_font_size: {
+                type: 'number',
+                default: 0
+            },
+            custom_name_font_size: {
+                type: 'number',
+                default: 0
+            },
+            // Dot styling attributes
+            dot_color: {
+                type: 'string',
+                default: '#ccc'
+            },
+            dot_active_color: {
+                type: 'string',
+                default: '#007cba'
+            },
+            dot_size: {
+                type: 'number',
+                default: 12
+            },
+            dot_spacing: {
+                type: 'number',
+                default: 8
+            },
+            dot_border_radius: {
+                type: 'number',
+                default: 50
             }
         },
         
@@ -673,6 +723,66 @@
                                             max: 50,
                                             step: 1
                                         })
+                                    ),
+                                    // Dot Styling Controls
+                                    el('div', { style: { marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #ddd' } },
+                                        el('h4', { style: { margin: '0 0 12px 0', fontSize: '13px', fontWeight: 'bold' } }, i18n.__('Dot Styling', 'google-reviews-plugin')),
+                                        el('div', { style: { marginBottom: '12px' } },
+                                            el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Dot Color', 'google-reviews-plugin')),
+                                            el(TextControl, {
+                                                type: 'color',
+                                                value: attributes.dot_color || '#ccc',
+                                                onChange: function(value) {
+                                                    setAttributes({ dot_color: value });
+                                                }
+                                            })
+                                        ),
+                                        el('div', { style: { marginBottom: '12px' } },
+                                            el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Active Dot Color', 'google-reviews-plugin')),
+                                            el(TextControl, {
+                                                type: 'color',
+                                                value: attributes.dot_active_color || '#007cba',
+                                                onChange: function(value) {
+                                                    setAttributes({ dot_active_color: value });
+                                                }
+                                            })
+                                        ),
+                                        el('div', { style: { marginBottom: '12px' } },
+                                            el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Dot Size (px)', 'google-reviews-plugin')),
+                                            el(RangeControl, {
+                                                value: attributes.dot_size || 12,
+                                                onChange: function(value) {
+                                                    setAttributes({ dot_size: value });
+                                                },
+                                                min: 6,
+                                                max: 24,
+                                                step: 1
+                                            })
+                                        ),
+                                        el('div', { style: { marginBottom: '12px' } },
+                                            el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Dot Spacing (px)', 'google-reviews-plugin')),
+                                            el(RangeControl, {
+                                                value: attributes.dot_spacing || 8,
+                                                onChange: function(value) {
+                                                    setAttributes({ dot_spacing: value });
+                                                },
+                                                min: 0,
+                                                max: 30,
+                                                step: 1
+                                            })
+                                        ),
+                                        el('div', { style: { marginBottom: '12px' } },
+                                            el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Dot Border Radius (%)', 'google-reviews-plugin')),
+                                            el(RangeControl, {
+                                                value: attributes.dot_border_radius || 50,
+                                                onChange: function(value) {
+                                                    setAttributes({ dot_border_radius: value });
+                                                },
+                                                min: 0,
+                                                max: 50,
+                                                step: 1
+                                            })
+                                        )
                                     )
                                 )
                             ) : el('div', {
@@ -1026,6 +1136,23 @@
                                 styleVars['--grp-arrow-vertical'] = attributes.arrow_vertical_position + 'px';
                             }
                             
+                            // Dot styling variables
+                            if (attributes.dot_color) {
+                                styleVars['--grp-dot-color'] = attributes.dot_color;
+                            }
+                            if (attributes.dot_active_color) {
+                                styleVars['--grp-dot-active-color'] = attributes.dot_active_color;
+                            }
+                            if (attributes.dot_size) {
+                                styleVars['--grp-dot-size'] = attributes.dot_size + 'px';
+                            }
+                            if (attributes.dot_spacing !== undefined) {
+                                styleVars['--grp-dot-spacing'] = attributes.dot_spacing + 'px';
+                            }
+                            if (attributes.dot_border_radius !== undefined) {
+                                styleVars['--grp-dot-radius'] = attributes.dot_border_radius + '%';
+                            }
+                            
                             return styleVars;
                         })()
                     },
@@ -1074,6 +1201,15 @@
                             if (attributes.arrow_hover_background_color && typeof attributes.arrow_hover_background_color === 'string') sanitized.arrow_hover_background_color = attributes.arrow_hover_background_color;
                             if (attributes.arrow_icon_color && typeof attributes.arrow_icon_color === 'string') sanitized.arrow_icon_color = attributes.arrow_icon_color;
                             if (attributes.arrow_border_radius !== undefined && typeof attributes.arrow_border_radius === 'number') sanitized.arrow_border_radius = attributes.arrow_border_radius;
+                            if (attributes.arrow_horizontal_position !== undefined && typeof attributes.arrow_horizontal_position === 'number') sanitized.arrow_horizontal_position = attributes.arrow_horizontal_position;
+                            if (attributes.arrow_vertical_position !== undefined && typeof attributes.arrow_vertical_position === 'number') sanitized.arrow_vertical_position = attributes.arrow_vertical_position;
+                            
+                            // Add dot styling attributes
+                            if (attributes.dot_color && typeof attributes.dot_color === 'string') sanitized.dot_color = attributes.dot_color;
+                            if (attributes.dot_active_color && typeof attributes.dot_active_color === 'string') sanitized.dot_active_color = attributes.dot_active_color;
+                            if (attributes.dot_size && typeof attributes.dot_size === 'number') sanitized.dot_size = attributes.dot_size;
+                            if (attributes.dot_spacing !== undefined && typeof attributes.dot_spacing === 'number') sanitized.dot_spacing = attributes.dot_spacing;
+                            if (attributes.dot_border_radius !== undefined && typeof attributes.dot_border_radius === 'number') sanitized.dot_border_radius = attributes.dot_border_radius;
                             
                             // Add creative style attributes if they exist and are simple types (skip objects)
                             if (attributes.creative_gradient_type && typeof attributes.creative_gradient_type === 'string') sanitized.creative_gradient_type = attributes.creative_gradient_type;

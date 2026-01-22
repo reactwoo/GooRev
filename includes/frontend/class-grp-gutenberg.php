@@ -763,6 +763,12 @@ class GRP_Gutenberg {
             'arrow_border_radius' => isset($attributes['arrow_border_radius']) ? $attributes['arrow_border_radius'] : 50,
             'arrow_horizontal_position' => isset($attributes['arrow_horizontal_position']) ? $attributes['arrow_horizontal_position'] : 0,
             'arrow_vertical_position' => isset($attributes['arrow_vertical_position']) ? $attributes['arrow_vertical_position'] : 0,
+            // Pass dot styling to shortcode renderer
+            'dot_color' => isset($attributes['dot_color']) ? $attributes['dot_color'] : '',
+            'dot_active_color' => isset($attributes['dot_active_color']) ? $attributes['dot_active_color'] : '',
+            'dot_size' => isset($attributes['dot_size']) ? $attributes['dot_size'] : '',
+            'dot_spacing' => isset($attributes['dot_spacing']) ? $attributes['dot_spacing'] : '',
+            'dot_border_radius' => isset($attributes['dot_border_radius']) ? $attributes['dot_border_radius'] : '',
             // Pass style customizations to shortcode renderer
             'custom_text_color' => isset($attributes['custom_text_color']) ? $attributes['custom_text_color'] : '',
             'custom_background_color' => isset($attributes['custom_background_color']) ? $attributes['custom_background_color'] : '',

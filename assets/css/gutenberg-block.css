@@ -349,6 +349,42 @@
     right: calc(10px + var(--grp-arrow-horizontal, 0px));
 }
 
+/* Dot styling - use CSS variables */
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-dot,
+.grp-gutenberg-block .grp-layout-carousel .grp-dot {
+    width: var(--grp-dot-size, 12px);
+    height: var(--grp-dot-size, 12px);
+    min-width: var(--grp-dot-size, 12px);
+    min-height: var(--grp-dot-size, 12px);
+    max-width: var(--grp-dot-size, 12px);
+    max-height: var(--grp-dot-size, 12px);
+    aspect-ratio: 1 / 1;
+    border-radius: var(--grp-dot-radius, 50%);
+    border: none;
+    background: var(--grp-dot-color, #ccc);
+    cursor: pointer;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
+}
+
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-dot.active,
+.grp-gutenberg-block .grp-layout-carousel .grp-dot.active {
+    background: var(--grp-dot-active-color, #007cba);
+}
+
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-dot:hover,
+.grp-gutenberg-block .grp-layout-carousel .grp-dot:hover {
+    background: var(--grp-dot-active-color, #999);
+}
+
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-dots,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-dots {
+    gap: var(--grp-dot-spacing, 8px);
+}
+
 /* Grid carousel layout in editor - mirror frontend responsive behavior */
 .grp-gutenberg-block .grp-layout-grid_carousel .grp-grid-carousel-viewport {
     overflow: hidden;

@@ -98,6 +98,12 @@ class GRP_Shortcode {
             'arrow_border_radius' => '',
             'arrow_horizontal_position' => '',
             'arrow_vertical_position' => '',
+            // Dot styling
+            'dot_color' => '',
+            'dot_active_color' => '',
+            'dot_size' => '',
+            'dot_spacing' => '',
+            'dot_border_radius' => '',
             'class' => '',
             'id' => ''
         ), $atts, 'google_reviews');

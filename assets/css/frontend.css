@@ -490,16 +490,16 @@
 }
 
 .grp-layout-carousel .grp-dot {
-    width: 12px;
-    height: 12px;
-    min-width: 12px;
-    min-height: 12px;
-    max-width: 12px;
-    max-height: 12px;
+    width: var(--grp-dot-size, 12px);
+    height: var(--grp-dot-size, 12px);
+    min-width: var(--grp-dot-size, 12px);
+    min-height: var(--grp-dot-size, 12px);
+    max-width: var(--grp-dot-size, 12px);
+    max-height: var(--grp-dot-size, 12px);
     aspect-ratio: 1 / 1;
-    border-radius: 50%;
+    border-radius: var(--grp-dot-radius, 50%);
     border: none;
-    background: #ccc;
+    background: var(--grp-dot-color, #ccc);
     cursor: pointer;
     transition: background 0.3s ease;
     flex-shrink: 0;
@@ -509,11 +509,15 @@
 }
 
 .grp-layout-carousel .grp-dot.active {
-    background: #007cba;
+    background: var(--grp-dot-active-color, #007cba);
 }
 
 .grp-layout-carousel .grp-dot:hover {
-    background: #999;
+    background: var(--grp-dot-active-color, #999);
+}
+
+.grp-layout-carousel .grp-carousel-dots {
+    gap: var(--grp-dot-spacing, 8px);
 }
 
 /* List Layout */
