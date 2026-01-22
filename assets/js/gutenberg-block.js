@@ -810,20 +810,26 @@
                     // Use ServerSideRender for live preview if available
                     ServerSideRender ? el('div', {
                         className: 'grp-gutenberg-block-wrapper',
-                        style: {
-                            '--grp-cols-desktop': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
-                            '--grp-cols-tablet': (attributes.cols_tablet && attributes.cols_tablet > 0) ? attributes.cols_tablet : 2,
-                            '--grp-cols-mobile': (attributes.cols_mobile && attributes.cols_mobile > 0) ? attributes.cols_mobile : 1,
-                            '--grp-cols': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
-                            '--grp-gap': (attributes.gap && attributes.gap > 0 ? attributes.gap : 20) + 'px',
-                            '--grp-text-color': attributes.custom_text_color || '',
-                            '--grp-card-bg': attributes.custom_background_color || '',
-                            '--grp-border-color': attributes.custom_border_color || '',
-                            '--grp-accent-color': attributes.custom_accent_color || '',
-                            '--grp-star-color': attributes.custom_star_color || '',
-                            '--grp-font-size': attributes.custom_font_size ? attributes.custom_font_size + 'px' : '',
-                            '--grp-name-font-size': attributes.custom_name_font_size ? attributes.custom_name_font_size + 'px' : ''
-                        }
+                        style: (function() {
+                            var styleVars = {
+                                '--grp-cols-desktop': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
+                                '--grp-cols-tablet': (attributes.cols_tablet && attributes.cols_tablet > 0) ? attributes.cols_tablet : 2,
+                                '--grp-cols-mobile': (attributes.cols_mobile && attributes.cols_mobile > 0) ? attributes.cols_mobile : 1,
+                                '--grp-cols': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
+                                '--grp-gap': (attributes.gap && attributes.gap > 0 ? attributes.gap : 20) + 'px'
+                            };
+                            
+                            // Style customization variables
+                            if (attributes.custom_text_color) styleVars['--grp-text-color'] = attributes.custom_text_color;
+                            if (attributes.custom_background_color) styleVars['--grp-card-bg'] = attributes.custom_background_color;
+                            if (attributes.custom_border_color) styleVars['--grp-border-color'] = attributes.custom_border_color;
+                            if (attributes.custom_accent_color) styleVars['--grp-accent-color'] = attributes.custom_accent_color;
+                            if (attributes.custom_star_color) styleVars['--grp-star-color'] = attributes.custom_star_color;
+                            if (attributes.custom_font_size) styleVars['--grp-font-size'] = attributes.custom_font_size + 'px';
+                            if (attributes.custom_name_font_size) styleVars['--grp-name-font-size'] = attributes.custom_name_font_size + 'px';
+                            
+                            return styleVars;
+                        })()
                     },
                         el(ServerSideRender, {
                         block: 'google-reviews/reviews',

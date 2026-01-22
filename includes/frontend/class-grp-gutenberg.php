@@ -628,21 +628,26 @@ class GRP_Gutenberg {
         // Build CSS variables for style customization (for live preview)
         $css_vars = array();
         
-        // Custom colors
+        // Custom colors - use both naming conventions for compatibility
         if (!empty($attributes['custom_text_color'])) {
             $css_vars[] = '--grp-text-color: ' . esc_attr($attributes['custom_text_color']);
+            $css_vars[] = '--grp-text: ' . esc_attr($attributes['custom_text_color']);
         }
         if (!empty($attributes['custom_background_color'])) {
             $css_vars[] = '--grp-card-bg: ' . esc_attr($attributes['custom_background_color']);
+            $css_vars[] = '--grp-card_background: ' . esc_attr($attributes['custom_background_color']);
         }
         if (!empty($attributes['custom_border_color'])) {
             $css_vars[] = '--grp-border-color: ' . esc_attr($attributes['custom_border_color']);
+            $css_vars[] = '--grp-border: ' . esc_attr($attributes['custom_border_color']);
         }
         if (!empty($attributes['custom_accent_color'])) {
             $css_vars[] = '--grp-accent-color: ' . esc_attr($attributes['custom_accent_color']);
+            $css_vars[] = '--grp-accent: ' . esc_attr($attributes['custom_accent_color']);
         }
         if (!empty($attributes['custom_star_color'])) {
             $css_vars[] = '--grp-star-color: ' . esc_attr($attributes['custom_star_color']);
+            $css_vars[] = '--grp-star: ' . esc_attr($attributes['custom_star_color']);
         }
         
         // Font sizes

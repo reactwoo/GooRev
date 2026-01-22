@@ -170,53 +170,89 @@
     margin-left: 0px;
 }
 
-/* Gutenberg Carousel Styles */
-.grp-gutenberg-block .grp-layout-carousel .grp-carousel-container {
+/* Gutenberg Carousel Styles - Frame/Viewport/Track Structure */
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-frame,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-frame {
     position: relative;
-    overflow: hidden;
-    border-radius: 8px;
+    padding: 16px;
 }
 
-.grp-gutenberg-block .grp-layout-carousel .grp-carousel-wrapper {
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-viewport,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-viewport {
+    overflow: hidden;
+    margin: -16px;
+    padding: 16px;
+    position: relative;
+}
+
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-track,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-track {
     display: flex;
+    gap: var(--grp-gap, 20px);
+    will-change: transform;
     transition: transform 0.5s ease;
+    max-width: 100%;
+    align-items: flex-start;
+}
+
+/* Consistent height: stretch cards when enabled */
+.grp-gutenberg-block-wrapper .grp-consistent-height .grp-layout-carousel .grp-carousel-track,
+.grp-gutenberg-block .grp-consistent-height .grp-layout-carousel .grp-carousel-track {
+    align-items: stretch;
 }
 
 /* Carousel layout in editor - respect responsive column CSS variables */
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review-item,
 .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
     box-sizing: border-box;
-    padding: 0 10px;
-    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
-    width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
-    /* Remove fixed max-width */
+    flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    min-width: 0;
     max-width: none;
 }
 
 @media (max-width: 1024px) {
     .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review-item,
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
-        width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+        flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
     }
 }
 
 @media (max-width: 640px) {
     .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review-item,
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
-        width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
+        flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
     }
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review,
 .grp-gutenberg-block .grp-layout-carousel .grp-review {
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     max-width: none;
+    box-sizing: border-box;
 }
 
+/* Consistent height: make cards fill height */
+.grp-gutenberg-block-wrapper .grp-consistent-height .grp-layout-carousel .grp-review,
+.grp-gutenberg-block .grp-consistent-height .grp-layout-carousel .grp-review {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.grp-gutenberg-block-wrapper .grp-consistent-height .grp-layout-carousel .grp-review-content,
+.grp-gutenberg-block .grp-consistent-height .grp-layout-carousel .grp-review-content,
+.grp-gutenberg-block-wrapper .grp-consistent-height .grp-layout-carousel .grp-review-text,
+.grp-gutenberg-block .grp-consistent-height .grp-layout-carousel .grp-review-text {
+    flex: 1;
+}
+
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev,
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
     position: absolute;
     top: 50%;
@@ -236,17 +272,21 @@
     font-size: 14px;
 }
 
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev:hover,
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next:hover,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next:hover {
     background: rgba(0, 0, 0, 0.6);
 }
 
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev {
-    left: -16px;
+    left: 16px;
 }
 
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
-    right: -16px;
+    right: 16px;
 }
 
 /* Grid carousel layout in editor - mirror frontend responsive behavior */

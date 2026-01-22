@@ -11,8 +11,8 @@
     position: relative;
     overflow: visible;
     margin-bottom: 15px;
-    background: #fff;
-    border: 1px solid #e0e0e0;
+    background: var(--grp-card-bg, #fff);
+    border: 1px solid var(--grp-border-color, #e0e0e0);
     border-radius: 8px;
     padding: 16px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -30,7 +30,7 @@
 
 .grp-star {
     display: inline-block;
-    color: #ffc107;
+    color: var(--grp-star-color, #ffc107);
     font-size: 18px;
     margin-right: 2px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -50,8 +50,8 @@
 }
 
 .grp-review-text {
-    color: #333;
-    font-size: 14px;
+    color: var(--grp-text-color, #333);
+    font-size: var(--grp-font-size, 14px);
     line-height: 1.5;
     margin-bottom: 12px;
 }
@@ -149,8 +149,8 @@
 
 .grp-author-name {
     font-weight: 600;
-    color: #333;
-    font-size: 13px;
+    color: var(--grp-text-color, #333);
+    font-size: var(--grp-name-font-size, 13px);
 }
 
 .grp-review-author {
@@ -261,39 +261,74 @@
 }
 
 /* Carousel Styles */
-.grp-layout-carousel .grp-carousel-container {
+/* Carousel Frame: Outer container with padding for shadow breathing room */
+.grp-layout-carousel .grp-carousel-frame {
     position: relative;
-    /* Hide horizontal overflow so extra slides don't show,
-       but allow vertical overflow for shadows / floating avatars */
-    overflow-x: hidden;
-    overflow-y: visible;
-    border-radius: 8px;
-    max-width: 1200px; /* Constrain max width */
-    margin: 0 auto; /* Center the carousel */
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    padding: 16px;
 }
 
-.grp-layout-carousel .grp-carousel-wrapper {
+/* Carousel Viewport: Clips overflow while preserving shadows */
+.grp-layout-carousel .grp-carousel-viewport {
+    overflow: hidden;
+    margin: -16px;
+    padding: 16px;
+    position: relative;
+}
+
+/* Carousel Track: Horizontal flex container */
+.grp-layout-carousel .grp-carousel-track {
     display: flex;
+    gap: var(--grp-gap, 20px);
+    will-change: transform;
     transition: transform 0.5s ease;
+    max-width: 100%;
+    align-items: flex-start;
+}
+
+/* Consistent height: stretch cards when enabled */
+.grp-consistent-height .grp-layout-carousel .grp-carousel-track {
     align-items: stretch;
-    width: 100%;
 }
 
 .grp-layout-carousel .grp-review-item {
     box-sizing: border-box;
-    padding: 0 20px;
-    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
-    max-width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1)) / var(--grp-cols, 3));
+    flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    min-width: 0;
+    max-width: none;
+}
+
+@media (max-width: 1024px) {
+    .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+    }
 }
 
 .grp-layout-carousel .grp-review {
-    /* Allow each card to use full width of its flex item so columns
-       (1, 2, 3, etc.) correctly fill the available track space */
-    max-width: 100%;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+/* Consistent height: make cards fill height */
+.grp-consistent-height .grp-layout-carousel .grp-review {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.grp-consistent-height .grp-layout-carousel .grp-review-content,
+.grp-consistent-height .grp-layout-carousel .grp-review-text {
+    flex: 1;
 }
 
 .grp-layout-carousel .grp-carousel-prev,
@@ -352,11 +387,11 @@
 }
 
 .grp-layout-carousel .grp-carousel-prev {
-    left: 10px;
+    left: 16px;
 }
 
 .grp-layout-carousel .grp-carousel-next {
-    right: 10px;
+    right: 16px;
 }
 
 .grp-layout-carousel .grp-carousel-dots {

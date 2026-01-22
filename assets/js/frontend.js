@@ -18,7 +18,7 @@
     function initCarousels() {
         $('.grp-layout-carousel').each(function() {
             var $carousel = $(this);
-            var $wrapper = $carousel.find('.grp-carousel-wrapper');
+            var $track = $carousel.find('.grp-carousel-track');
             var $items = $carousel.find('.grp-review-item');
             var $prev = $carousel.find('.grp-carousel-prev');
             var $next = $carousel.find('.grp-carousel-next');
@@ -50,7 +50,7 @@
      */
     function setupCarousel() {
         var $carousel = $(this);
-        var $wrapper = $carousel.find('.grp-carousel-wrapper');
+        var $track = $carousel.find('.grp-carousel-track');
         var $items = $carousel.find('.grp-review-item');
         var $prev = $carousel.find('.grp-carousel-prev');
         var $next = $carousel.find('.grp-carousel-next');
@@ -91,7 +91,7 @@
             var columnsPerView = getColumnsPerView();
             updateItemWidths(); // Update widths first
             var translateX = -currentIndex * (100 / columnsPerView);
-            $wrapper.css('transform', 'translateX(' + translateX + '%)');
+            $track.css('transform', 'translateX(' + translateX + '%)');
 
             // Update dots - calculate which group is active
             var activeGroup = Math.floor(currentIndex / columnsPerView);

@@ -254,13 +254,15 @@ class GRP_Shortcode {
              style="--grp-cols-desktop:<?php echo intval($atts['cols_desktop']); ?>;--grp-cols-tablet:<?php echo intval($atts['cols_tablet']); ?>;--grp-cols-mobile:<?php echo intval($atts['cols_mobile']); ?>;--grp-cols:<?php echo intval($atts['cols_desktop']); ?>;--grp-gap:<?php echo intval($atts['gap']); ?>px;"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
             
-            <div class="grp-carousel-container">
-                <div class="grp-carousel-wrapper">
-                    <?php foreach ($reviews as $index => $review): ?>
-                        <div class="grp-review-item" data-index="<?php echo $index; ?>">
-                            <?php echo $this->render_single_review($review, $atts); ?>
-                        </div>
-                    <?php endforeach; ?>
+            <div class="grp-carousel-frame">
+                <div class="grp-carousel-viewport">
+                    <div class="grp-carousel-track">
+                        <?php foreach ($reviews as $index => $review): ?>
+                            <div class="grp-review-item" data-index="<?php echo $index; ?>">
+                                <?php echo $this->render_single_review($review, $atts); ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
                 
                 <?php if ($atts['arrows']): ?>

@@ -1000,9 +1000,9 @@ class GRP_Styles {
         }
         
         .grp-style-corporate .grp-review {
-            background: var(--grp-card_background, var(--grp-background_alt));
+            background: var(--grp-card-bg, var(--grp-card_background, var(--grp-background_alt)));
             border-style: solid;
-            border-color: var(--grp-border, #E5E7EB);
+            border-color: var(--grp-border-color, var(--grp-border, #E5E7EB));
             border-width: var(--grp-border_width_top, 1px) var(--grp-border_width_right, 1px) var(--grp-border_width_bottom, 1px) var(--grp-border_width_left, 1px);
             border-radius: var(--grp-card_radius, 6px);
             padding: 0;
@@ -1024,7 +1024,7 @@ class GRP_Styles {
         .grp-style-corporate .grp-review-header-text {
             font-size: 13px;
             font-weight: var(--grp-heading_font_weight, 600);
-            color: var(--grp-text);
+            color: var(--grp-text-color, var(--grp-text));
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -1046,13 +1046,13 @@ class GRP_Styles {
         }
         
         .grp-style-corporate .grp-star {
-            color: var(--grp-star, #FBBC05);
+            color: var(--grp-star-color, var(--grp-star, #FBBC05));
             font-size: 16px;
             margin-left: 2px;
         }
         
         .grp-style-corporate .grp-review-text {
-            color: var(--grp-text);
+            color: var(--grp-text-color, var(--grp-text));
             font-size: 14px;
             line-height: var(--grp-body_line_height, 1.6);
             letter-spacing: var(--grp-body_letter_spacing, 0px);
@@ -1076,8 +1076,8 @@ class GRP_Styles {
         
         .grp-style-corporate .grp-author-name {
             font-weight: var(--grp-heading_font_weight, 500);
-            color: var(--grp-text);
-            font-size: 13px;
+            color: var(--grp-text-color, var(--grp-text));
+            font-size: var(--grp-name-font-size, 13px);
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -1108,7 +1108,7 @@ class GRP_Styles {
         
         .grp-style-corporate .grp-verified-badge::before {
             content: '✓';
-            color: var(--grp-accent, #4285F4);
+            color: var(--grp-accent-color, var(--grp-accent, #4285F4));
             font-weight: bold;
         }
         ";
