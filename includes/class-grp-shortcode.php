@@ -453,43 +453,72 @@ class GRP_Shortcode {
     private function render_single_review($review, $atts) {
         // Special layout handling for modern style (avatar badge on top border)
         $is_modern_style = isset($atts['style']) && $atts['style'] === 'modern';
+        $is_corporate_style = isset($atts['style']) && $atts['style'] === 'corporate';
 
         ob_start();
         ?>
         <div class="grp-review">
-            <?php
-            // For modern style, render avatar as a direct child of .grp-review so CSS
-            // can pin it to the top border independent of meta/content height.
-            if (
-                $is_modern_style
-                && !empty($atts['show_avatar'])
-                && filter_var($atts['show_avatar'], FILTER_VALIDATE_BOOLEAN)
-                && !empty($review['author_photo'])
-            ): ?>
-                <div class="grp-review-avatar">
-                    <img src="<?php echo esc_url($review['author_photo']); ?>"
-                         alt="<?php echo esc_attr($review['author_name']); ?>"
-                         loading="lazy">
+            <?php if ($is_corporate_style): ?>
+                <div class="grp-review-header">
+                    <span class="grp-review-header-text"><?php esc_html_e('Google Reviews', 'google-reviews-plugin'); ?></span>
+                    <svg class="grp-google-logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
                 </div>
-            <?php endif; ?>
 
-            <?php if ($atts['show_rating']): ?>
-                <div class="grp-review-rating">
-                    <?php echo $review['stars_html']; ?>
+                <div class="grp-review-content">
+                    <?php if ($atts['show_rating']): ?>
+                        <div class="grp-review-rating" style="text-align: right;">
+                            <?php echo $review['stars_html']; ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($review['text'])): ?>
+                        <div class="grp-review-text">
+                            <?php echo wp_kses_post($review['text']); ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <div class="grp-review-meta">
+                        <?php if (!empty($atts['show_avatar']) && filter_var($atts['show_avatar'], FILTER_VALIDATE_BOOLEAN) && !empty($review['author_photo'])): ?>
+                            <div class="grp-review-avatar">
+                                <img src="<?php echo esc_url($review['author_photo']); ?>"
+                                     alt="<?php echo esc_attr($review['author_name']); ?>"
+                                     loading="lazy">
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="grp-author-name"><?php echo esc_html($review['author_name']); ?></div>
+                    </div>
+
+                    <?php if ($atts['show_reply'] && !empty($review['reply']['text'])): ?>
+                        <div class="grp-review-reply">
+                            <div class="grp-reply-header">
+                                <strong><?php esc_html_e('Business Response', 'google-reviews-plugin'); ?></strong>
+                                <span class="grp-reply-date"><?php echo esc_html($review['reply']['time']); ?></span>
+                            </div>
+                            <div class="grp-reply-text">
+                                <?php echo wp_kses_post($review['reply']['text']); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
-            <?php endif; ?>
-            
-            <?php if (!empty($review['text'])): ?>
-                <div class="grp-review-text">
-                    <?php echo wp_kses_post($review['text']); ?>
+
+                <div class="grp-review-footer">
+                    <?php if ($atts['show_date']): ?>
+                        <span class="grp-review-date"><?php echo esc_html($review['time_formatted']); ?></span>
+                    <?php endif; ?>
+                    <span class="grp-verified-badge"><?php esc_html_e('Verified', 'google-reviews-plugin'); ?></span>
                 </div>
-            <?php endif; ?>
-            
-            <div class="grp-review-meta">
+            <?php else: ?>
                 <?php
-                // For non-modern styles, keep the avatar inside the meta row as before.
+                // For modern style, render avatar as a direct child of .grp-review so CSS
+                // can pin it to the top border independent of meta/content height.
                 if (
-                    !$is_modern_style
+                    $is_modern_style
                     && !empty($atts['show_avatar'])
                     && filter_var($atts['show_avatar'], FILTER_VALIDATE_BOOLEAN)
                     && !empty($review['author_photo'])
@@ -500,26 +529,55 @@ class GRP_Shortcode {
                              loading="lazy">
                     </div>
                 <?php endif; ?>
+
+                <?php if ($atts['show_rating']): ?>
+                    <div class="grp-review-rating">
+                        <?php echo $review['stars_html']; ?>
+                    </div>
+                <?php endif; ?>
                 
-                <div class="grp-review-author">
-                    <span class="grp-author-name"><?php echo esc_html($review['author_name']); ?></span>
-                    
-                    <?php if ($atts['show_date']): ?>
-                        <span class="grp-review-date"><?php echo esc_html($review['time_formatted']); ?></span>
+                <?php if (!empty($review['text'])): ?>
+                    <div class="grp-review-text">
+                        <?php echo wp_kses_post($review['text']); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="grp-review-meta">
+                    <?php
+                    // For non-modern styles, keep the avatar inside the meta row as before.
+                    if (
+                        !$is_modern_style
+                        && !empty($atts['show_avatar'])
+                        && filter_var($atts['show_avatar'], FILTER_VALIDATE_BOOLEAN)
+                        && !empty($review['author_photo'])
+                    ): ?>
+                        <div class="grp-review-avatar">
+                            <img src="<?php echo esc_url($review['author_photo']); ?>"
+                                 alt="<?php echo esc_attr($review['author_name']); ?>"
+                                 loading="lazy">
+                        </div>
                     <?php endif; ?>
-                </div>
-            </div>
-            
-            <?php if ($atts['show_reply'] && !empty($review['reply']['text'])): ?>
-                <div class="grp-review-reply">
-                    <div class="grp-reply-header">
-                        <strong><?php esc_html_e('Business Response', 'google-reviews-plugin'); ?></strong>
-                        <span class="grp-reply-date"><?php echo esc_html($review['reply']['time']); ?></span>
-                    </div>
-                    <div class="grp-reply-text">
-                        <?php echo wp_kses_post($review['reply']['text']); ?>
+                    
+                    <div class="grp-review-author">
+                        <span class="grp-author-name"><?php echo esc_html($review['author_name']); ?></span>
+                        
+                        <?php if ($atts['show_date']): ?>
+                            <span class="grp-review-date"><?php echo esc_html($review['time_formatted']); ?></span>
+                        <?php endif; ?>
                     </div>
                 </div>
+                
+                <?php if ($atts['show_reply'] && !empty($review['reply']['text'])): ?>
+                    <div class="grp-review-reply">
+                        <div class="grp-reply-header">
+                            <strong><?php esc_html_e('Business Response', 'google-reviews-plugin'); ?></strong>
+                            <span class="grp-reply-date"><?php echo esc_html($review['reply']['time']); ?></span>
+                        </div>
+                        <div class="grp-reply-text">
+                            <?php echo wp_kses_post($review['reply']['text']); ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
         <?php
