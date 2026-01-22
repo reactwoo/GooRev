@@ -629,6 +629,7 @@
                                 style: { color: '#007cba', textDecoration: 'underline' }
                             }, 'Learn More')
                         )
+                        )  // Close outer div wrapper from line 533
                     ),
 
                     el(PanelBody, {
