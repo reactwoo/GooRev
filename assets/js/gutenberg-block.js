@@ -305,9 +305,9 @@
             }
 
             var layoutOptions = [
-                { label: i18n.__('Carousel (3 columns)', 'google-reviews-plugin'), value: 'carousel' },
-                { label: i18n.__('List', 'google-reviews-plugin'), value: 'list' },
-                { label: i18n.__('Grid', 'google-reviews-plugin'), value: 'grid' }
+                { label: i18n.__('Carousel', 'google-reviews-plugin'), value: 'carousel' },
+                { label: i18n.__('Grid', 'google-reviews-plugin'), value: 'grid' },
+                { label: i18n.__('List', 'google-reviews-plugin'), value: 'list' }
             ];
 
             // Add grid_carousel only for pro users
@@ -356,23 +356,32 @@
                             }
                         }),
                         el(SelectControl, {
-                            label: i18n.__('Layout', 'google-reviews-plugin'),
+                            label: i18n.__('Layout Type', 'google-reviews-plugin'),
                             value: attributes.layout || 'carousel',
                             options: layoutOptions,
                             onChange: function(value) {
                                 setAttributes({ layout: value });
                             }
                         }),
+                        el(RangeControl, {
+                            label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
+                            value: attributes.cols_desktop || 3,
+                            onChange: function(value) {
+                                setAttributes({ cols_desktop: value });
+                            },
+                            min: 1,
+                            max: 6
+                        }),
+                        el(RangeControl, {
+                            label: i18n.__('Gap (px)', 'google-reviews-plugin'),
+                            value: attributes.gap || 20,
+                            onChange: function(value) {
+                                setAttributes({ gap: value });
+                            },
+                            min: 0,
+                            max: 60
+                        }),
                         isProUser ? el('div', {},
-                            el(RangeControl, {
-                                label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
-                                value: attributes.cols_desktop || 3,
-                                onChange: function(value) {
-                                    setAttributes({ cols_desktop: value });
-                                },
-                                min: 1,
-                                max: 6
-                            }),
                             el(RangeControl, {
                                 label: i18n.__('Columns (Tablet)', 'google-reviews-plugin'),
                                 value: attributes.cols_tablet || 2,
@@ -390,15 +399,6 @@
                                 },
                                 min: 1,
                                 max: 3
-                            }),
-                            el(RangeControl, {
-                                label: i18n.__('Gap (px)', 'google-reviews-plugin'),
-                                value: attributes.gap || 20,
-                                onChange: function(value) {
-                                    setAttributes({ gap: value });
-                                },
-                                min: 0,
-                                max: 60
                             })
                         ) : el('div', {
                             style: {
@@ -409,9 +409,9 @@
                                 borderRadius: '4px'
                             }
                         },
-                            el('strong', {}, '📐 Column Controls'),
+                            el('strong', {}, '📐 Responsive Column Controls'),
                             el('br'),
-                            el('span', {}, 'Upgrade to Pro to customize column counts and gap spacing for each device. '),
+                            el('span', {}, 'Upgrade to Pro to customize tablet and mobile column counts. '),
                             el('a', {
                                 href: 'https://reactwoo.com/google-reviews-plugin-pro/',
                                 target: '_blank',
@@ -800,16 +800,32 @@
                     )
                 ),
 
-                el('div', { className: 'grp-gutenberg-block-editor' },
+                    el('div', { className: 'grp-gutenberg-block-editor' },
                     el('div', { className: 'grp-block-header' },
                         el('h3', {}, i18n.__('Google Reviews', 'google-reviews-plugin')),
                         el('p', { className: 'grp-block-description' }, 
-                            // Clarify that editor is an approximate preview
-                            i18n.__('Editor preview – front‑end may show different number of visible cards and styles. Use Preview to confirm changes.', 'google-reviews-plugin')
+                            i18n.__('Editor preview matches frontend layout and styles.', 'google-reviews-plugin')
                         )
                     ),
                     // Use ServerSideRender for live preview if available
-                    ServerSideRender ? el(ServerSideRender, {
+                    ServerSideRender ? el('div', {
+                        className: 'grp-gutenberg-block-wrapper',
+                        style: {
+                            '--grp-cols-desktop': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
+                            '--grp-cols-tablet': (attributes.cols_tablet && attributes.cols_tablet > 0) ? attributes.cols_tablet : 2,
+                            '--grp-cols-mobile': (attributes.cols_mobile && attributes.cols_mobile > 0) ? attributes.cols_mobile : 1,
+                            '--grp-cols': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
+                            '--grp-gap': (attributes.gap && attributes.gap > 0 ? attributes.gap : 20) + 'px',
+                            '--grp-text-color': attributes.custom_text_color || '',
+                            '--grp-card-bg': attributes.custom_background_color || '',
+                            '--grp-border-color': attributes.custom_border_color || '',
+                            '--grp-accent-color': attributes.custom_accent_color || '',
+                            '--grp-star-color': attributes.custom_star_color || '',
+                            '--grp-font-size': attributes.custom_font_size ? attributes.custom_font_size + 'px' : '',
+                            '--grp-name-font-size': attributes.custom_name_font_size ? attributes.custom_name_font_size + 'px' : ''
+                        }
+                    },
+                        el(ServerSideRender, {
                         block: 'google-reviews/reviews',
                         attributes: (function() {
                             // Filter and sanitize attributes for ServerSideRender
@@ -876,7 +892,8 @@
                             (attributes.custom_star_color || '') + '-' + 
                             (attributes.custom_font_size || '') + '-' + 
                             (attributes.creative_text_color || '')
-                    }) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
+                        })
+                    ) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
                         el('div', { className: 'grp-preview-header' },
                             el('h3', {}, i18n.__('Google Reviews Block', 'google-reviews-plugin'))
                         ),

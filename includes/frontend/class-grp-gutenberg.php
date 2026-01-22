@@ -625,6 +625,43 @@ class GRP_Gutenberg {
             $custom_css .= '.grp-gutenberg-block .grp-author-name { font-family: ' . esc_attr($attributes['name_font_family']) . ' !important; }';
         }
         
+        // Build CSS variables for style customization (for live preview)
+        $css_vars = array();
+        
+        // Custom colors
+        if (!empty($attributes['custom_text_color'])) {
+            $css_vars[] = '--grp-text-color: ' . esc_attr($attributes['custom_text_color']);
+        }
+        if (!empty($attributes['custom_background_color'])) {
+            $css_vars[] = '--grp-card-bg: ' . esc_attr($attributes['custom_background_color']);
+        }
+        if (!empty($attributes['custom_border_color'])) {
+            $css_vars[] = '--grp-border-color: ' . esc_attr($attributes['custom_border_color']);
+        }
+        if (!empty($attributes['custom_accent_color'])) {
+            $css_vars[] = '--grp-accent-color: ' . esc_attr($attributes['custom_accent_color']);
+        }
+        if (!empty($attributes['custom_star_color'])) {
+            $css_vars[] = '--grp-star-color: ' . esc_attr($attributes['custom_star_color']);
+        }
+        
+        // Font sizes
+        if (!empty($attributes['custom_font_size'])) {
+            $css_vars[] = '--grp-font-size: ' . intval($attributes['custom_font_size']) . 'px';
+        }
+        if (!empty($attributes['custom_name_font_size'])) {
+            $css_vars[] = '--grp-name-font-size: ' . intval($attributes['custom_name_font_size']) . 'px';
+        }
+        
+        // Column and gap variables
+        $css_vars[] = '--grp-cols-desktop: ' . (isset($attributes['cols_desktop']) && $attributes['cols_desktop'] > 0 ? intval($attributes['cols_desktop']) : 3);
+        $css_vars[] = '--grp-cols-tablet: ' . (isset($attributes['cols_tablet']) && $attributes['cols_tablet'] > 0 ? intval($attributes['cols_tablet']) : 2);
+        $css_vars[] = '--grp-cols-mobile: ' . (isset($attributes['cols_mobile']) && $attributes['cols_mobile'] > 0 ? intval($attributes['cols_mobile']) : 1);
+        $css_vars[] = '--grp-cols: ' . (isset($attributes['cols_desktop']) && $attributes['cols_desktop'] > 0 ? intval($attributes['cols_desktop']) : 3);
+        $css_vars[] = '--grp-gap: ' . (isset($attributes['gap']) && $attributes['gap'] > 0 ? intval($attributes['gap']) : 20) . 'px';
+        
+        $css_vars_string = !empty($css_vars) ? ' style="' . esc_attr(implode('; ', $css_vars)) . '"' : '';
+        
         if (!empty($custom_css)) {
             $custom_css = '<style type="text/css">' . $custom_css . '</style>';
         }
@@ -669,7 +706,14 @@ class GRP_Gutenberg {
         );
         
         $shortcode = new GRP_Shortcode();
-        return $custom_css . $shortcode->render_shortcode($shortcode_atts);
+        $shortcode_output = $shortcode->render_shortcode($shortcode_atts);
+        
+        // Wrap output with CSS variables wrapper for live preview
+        if (!empty($css_vars_string)) {
+            return $custom_css . '<div class="grp-gutenberg-block-wrapper"' . $css_vars_string . '>' . $shortcode_output . '</div>';
+        }
+        
+        return $custom_css . $shortcode_output;
         } catch (Exception $e) {
             // Log error but return a user-friendly message
             error_log('GRP Gutenberg Block Error: ' . $e->getMessage());

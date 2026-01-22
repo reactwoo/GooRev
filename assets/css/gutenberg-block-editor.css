@@ -108,6 +108,78 @@
     margin: 10px 0;
 }
 
+/* Grid layout in editor */
+.grp-gutenberg-block-editor .grp-layout-grid .grp-reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grp-cols-desktop, 3), 1fr);
+    gap: var(--grp-gap, 20px);
+}
+
+@media (max-width: 1024px) {
+    .grp-gutenberg-block-editor .grp-layout-grid .grp-reviews-grid {
+        grid-template-columns: repeat(var(--grp-cols-tablet, 2), 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-gutenberg-block-editor .grp-layout-grid .grp-reviews-grid {
+        grid-template-columns: repeat(var(--grp-cols-mobile, 1), 1fr);
+    }
+}
+
+/* Carousel layout in editor */
+.grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
+    box-sizing: border-box;
+    padding: 0 10px;
+    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
+    width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
+    max-width: none;
+}
+
+@media (max-width: 1024px) {
+    .grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+        width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
+        width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
+    }
+}
+
+/* Remove fixed widths from cards in editor */
+.grp-gutenberg-block-editor .grp-review {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box;
+}
+
+/* Style customization via CSS variables */
+.grp-gutenberg-block-editor .grp-review-text,
+.grp-gutenberg-block-editor .grp-author-name {
+    color: var(--grp-text-color, inherit);
+}
+
+.grp-gutenberg-block-editor .grp-review-text {
+    font-size: var(--grp-font-size, inherit);
+}
+
+.grp-gutenberg-block-editor .grp-author-name {
+    font-size: var(--grp-name-font-size, inherit);
+}
+
+.grp-gutenberg-block-editor .grp-review {
+    background-color: var(--grp-card-bg, inherit);
+    border-color: var(--grp-border-color, inherit);
+}
+
+.grp-gutenberg-block-editor .grp-star {
+    color: var(--grp-star-color, inherit);
+}
+
 /* Default meta alignment in editor: left for all styles */
 .grp-gutenberg-block-editor .grp-review-author {
     display: flex;
