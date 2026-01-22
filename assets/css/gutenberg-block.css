@@ -164,6 +164,26 @@
     font-size: var(--grp-name-font-size, 14px);
 }
 
+/* Corporate Card: Ensure avatar and name are inline, not stacked */
+.grp-gutenberg-block-wrapper .grp-style-corporate .grp-review-meta,
+.grp-gutenberg-block .grp-style-corporate .grp-review-meta {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+.grp-gutenberg-block-wrapper .grp-style-corporate .grp-review-meta .grp-review-avatar,
+.grp-gutenberg-block .grp-style-corporate .grp-review-meta .grp-review-avatar {
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.grp-gutenberg-block-wrapper .grp-style-corporate .grp-review-meta .grp-author-name,
+.grp-gutenberg-block .grp-style-corporate .grp-review-meta .grp-author-name {
+    flex: 0 1 auto;
+}
+
 .grp-gutenberg-block .grp-review-date {
     color: #666;
     font-size: 12px;
@@ -175,6 +195,8 @@
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-frame {
     position: relative;
     padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-viewport,
@@ -183,6 +205,8 @@
     margin: -16px;
     padding: 16px;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-track,
@@ -191,8 +215,9 @@
     gap: var(--grp-gap, 20px);
     will-change: transform;
     transition: transform 0.5s ease;
-    max-width: 100%;
     align-items: flex-start;
+    flex-wrap: nowrap;
+    /* Do not set max-width - let it be wider than viewport for scrolling */
 }
 
 /* Consistent height: stretch cards when enabled */
@@ -209,7 +234,8 @@
     flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1))) / var(--grp-cols, 3));
     width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1))) / var(--grp-cols, 3));
     min-width: 0;
-    max-width: none;
+    max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1))) / var(--grp-cols, 3));
+    flex-shrink: 0;
 }
 
 /* Responsive breakpoints - override with device-specific columns */
@@ -218,6 +244,7 @@
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
         flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
         width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+        max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
     }
 }
 
@@ -226,6 +253,7 @@
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
         flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
         width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+        max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
     }
 }
 
@@ -252,7 +280,7 @@
     flex: 1;
 }
 
-/* Arrow styling - positioned relative to frame, centered vertically */
+/* Arrow styling - positioned relative to frame, centered vertically (match Elementor) */
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
@@ -260,45 +288,62 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: var(--grp-arrow-bg, rgba(0, 0, 0, 0.4));
-    color: var(--grp-arrow-color, white);
+    background: var(--grp-arrow-background-color, var(--grp-arrow-bg, rgba(0, 0, 0, 0.5)));
+    color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
     border: none;
-    width: var(--grp-arrow-size, 32px);
-    height: var(--grp-arrow-size, 32px);
-    min-width: var(--grp-arrow-size, 32px);
-    min-height: var(--grp-arrow-size, 32px);
-    max-width: var(--grp-arrow-size, 32px);
-    max-height: var(--grp-arrow-size, 32px);
-    border-radius: var(--grp-arrow-radius, 50%);
+    width: var(--grp-arrow-size, 40px);
+    height: var(--grp-arrow-size, 40px);
+    min-width: var(--grp-arrow-size, 40px);
+    min-height: var(--grp-arrow-size, 40px);
+    max-width: var(--grp-arrow-size, 40px);
+    max-height: var(--grp-arrow-size, 40px);
+    border-radius: var(--grp-arrow-border-radius, var(--grp-arrow-radius, 50%));
     cursor: pointer;
-    z-index: 5;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    box-shadow: var(--grp-arrow-shadow, none);
+    transition: background 0.3s ease;
+    font-size: var(--grp-arrow-icon-size, 18px);
+    box-shadow: none;
     box-sizing: border-box;
     padding: 0;
     overflow: hidden;
+}
+
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev .grp-arrow-left,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev .grp-arrow-left,
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev .grp-arrow-right,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev .grp-arrow-right,
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next .grp-arrow-left,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-next .grp-arrow-left,
+.grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next .grp-arrow-right,
+.grp-gutenberg-block .grp-layout-carousel .grp-carousel-next .grp-arrow-right {
+    color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
+    font-size: var(--grp-arrow-icon-size, 18px);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next:hover,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next:hover {
-    background: var(--grp-arrow-hover-bg, rgba(0, 0, 0, 0.6));
-    color: var(--grp-arrow-hover-color, white);
+    background: var(--grp-arrow-hover-background-color, var(--grp-arrow-hover-bg, rgba(0, 0, 0, 0.7)));
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev {
-    left: 8px;
+    left: 10px;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
-    right: 8px;
+    right: 10px;
 }
 
 /* Grid carousel layout in editor - mirror frontend responsive behavior */

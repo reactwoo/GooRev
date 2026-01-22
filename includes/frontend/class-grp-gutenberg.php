@@ -208,15 +208,25 @@ class GRP_Gutenberg {
                 ),
                 'arrow_size' => array(
                     'type' => 'number',
-                    'default' => 32,
+                    'default' => 40,
                 ),
-                'arrow_color' => array(
+                'arrow_icon_size' => array(
+                    'type' => 'number',
+                    'default' => 18,
+                ),
+                'arrow_background_color' => array(
                     'type' => 'string',
+                    'default' => 'rgba(0, 0, 0, 0.5)',
                 ),
-                'arrow_bg' => array(
+                'arrow_hover_background_color' => array(
                     'type' => 'string',
+                    'default' => 'rgba(0, 0, 0, 0.7)',
                 ),
-                'arrow_radius' => array(
+                'arrow_icon_color' => array(
+                    'type' => 'string',
+                    'default' => '#ffffff',
+                ),
+                'arrow_border_radius' => array(
                     'type' => 'number',
                     'default' => 50,
                 ),
@@ -614,24 +624,10 @@ class GRP_Gutenberg {
             $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-star { font-size: ' . $star_size . 'px !important; }';
         }
 
-        if (!empty($attributes['custom_text_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-review-text, .grp-gutenberg-block .grp-author-name { color: ' . esc_attr($attributes['custom_text_color']) . ' !important; }';
-        }
-        if (!empty($attributes['custom_background_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-review { background-color: ' . esc_attr($attributes['custom_background_color']) . ' !important; }';
-        }
-        if (!empty($attributes['custom_border_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-review { border-color: ' . esc_attr($attributes['custom_border_color']) . ' !important; }';
-        }
-        if (!empty($attributes['custom_star_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-star { color: ' . esc_attr($attributes['custom_star_color']) . ' !important; }';
-        }
-        if (!empty($attributes['custom_font_size'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-review-text { font-size: ' . intval($attributes['custom_font_size']) . 'px !important; }';
-        }
-        if (!empty($attributes['custom_name_font_size'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-author-name { font-size: ' . intval($attributes['custom_name_font_size']) . 'px !important; }';
-        }
+        // Style customizations - use CSS variables (set on wrapper) instead of !important rules
+        // The CSS variables are already set in $css_vars and applied to the wrapper
+        // This ensures styles apply both in editor preview and frontend
+        // Note: Keep !important for creative styles as they need to override gradients
         if (!empty($attributes['body_font_family'])) {
             $custom_css .= '.grp-gutenberg-block .grp-review-text { font-family: ' . esc_attr($attributes['body_font_family']) . ' !important; }';
         }
@@ -679,18 +675,28 @@ class GRP_Gutenberg {
         $css_vars[] = '--grp-cols: ' . (isset($attributes['cols_desktop']) && $attributes['cols_desktop'] > 0 ? intval($attributes['cols_desktop']) : 3);
         $css_vars[] = '--grp-gap: ' . (isset($attributes['gap']) && $attributes['gap'] > 0 ? intval($attributes['gap']) : 20) . 'px';
         
-        // Arrow styling variables
+        // Arrow styling variables (match Elementor naming)
         if (!empty($attributes['arrow_size'])) {
             $css_vars[] = '--grp-arrow-size: ' . intval($attributes['arrow_size']) . 'px';
         }
-        if (!empty($attributes['arrow_color'])) {
-            $css_vars[] = '--grp-arrow-color: ' . esc_attr($attributes['arrow_color']);
+        if (!empty($attributes['arrow_icon_size'])) {
+            $css_vars[] = '--grp-arrow-icon-size: ' . intval($attributes['arrow_icon_size']) . 'px';
         }
-        if (!empty($attributes['arrow_bg'])) {
-            $css_vars[] = '--grp-arrow-bg: ' . esc_attr($attributes['arrow_bg']);
+        if (!empty($attributes['arrow_icon_color'])) {
+            $css_vars[] = '--grp-arrow-icon-color: ' . esc_attr($attributes['arrow_icon_color']);
+            $css_vars[] = '--grp-arrow-color: ' . esc_attr($attributes['arrow_icon_color']);
         }
-        if (isset($attributes['arrow_radius'])) {
-            $css_vars[] = '--grp-arrow-radius: ' . intval($attributes['arrow_radius']) . '%';
+        if (!empty($attributes['arrow_background_color'])) {
+            $css_vars[] = '--grp-arrow-bg: ' . esc_attr($attributes['arrow_background_color']);
+            $css_vars[] = '--grp-arrow-background-color: ' . esc_attr($attributes['arrow_background_color']);
+        }
+        if (!empty($attributes['arrow_hover_background_color'])) {
+            $css_vars[] = '--grp-arrow-hover-bg: ' . esc_attr($attributes['arrow_hover_background_color']);
+            $css_vars[] = '--grp-arrow-hover-background-color: ' . esc_attr($attributes['arrow_hover_background_color']);
+        }
+        if (isset($attributes['arrow_border_radius'])) {
+            $css_vars[] = '--grp-arrow-radius: ' . intval($attributes['arrow_border_radius']) . '%';
+            $css_vars[] = '--grp-arrow-border-radius: ' . intval($attributes['arrow_border_radius']) . '%';
         }
         
         $css_vars_string = !empty($css_vars) ? ' style="' . esc_attr(implode('; ', $css_vars)) . '"' : '';
@@ -735,6 +741,12 @@ class GRP_Gutenberg {
             'creative_border_radius' => isset($attributes['creative_border_radius']) ? $attributes['creative_border_radius'] : array(),
             'creative_avatar_size' => isset($attributes['creative_avatar_size']) ? $attributes['creative_avatar_size'] : 80,
             'creative_star_size' => isset($attributes['creative_star_size']) ? $attributes['creative_star_size'] : 32,
+            'arrow_size' => isset($attributes['arrow_size']) ? $attributes['arrow_size'] : 40,
+            'arrow_icon_size' => isset($attributes['arrow_icon_size']) ? $attributes['arrow_icon_size'] : 18,
+            'arrow_background_color' => isset($attributes['arrow_background_color']) ? $attributes['arrow_background_color'] : 'rgba(0, 0, 0, 0.5)',
+            'arrow_hover_background_color' => isset($attributes['arrow_hover_background_color']) ? $attributes['arrow_hover_background_color'] : 'rgba(0, 0, 0, 0.7)',
+            'arrow_icon_color' => isset($attributes['arrow_icon_color']) ? $attributes['arrow_icon_color'] : '#ffffff',
+            'arrow_border_radius' => isset($attributes['arrow_border_radius']) ? $attributes['arrow_border_radius'] : 50,
             'class' => 'grp-gutenberg-block'
         );
         

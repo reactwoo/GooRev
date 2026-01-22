@@ -113,6 +113,8 @@
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-frame {
     position: relative;
     padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-viewport {
@@ -120,6 +122,8 @@
     margin: -16px;
     padding: 16px;
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-track {
@@ -127,13 +131,40 @@
     gap: var(--grp-gap, 20px);
     will-change: transform;
     transition: transform 0.5s ease;
-    max-width: 100%;
     align-items: flex-start;
+    flex-wrap: nowrap;
+    /* Do not set max-width - let it be wider than viewport for scrolling */
 }
 
 /* Consistent height: stretch cards when enabled */
 .grp-gutenberg-block-editor .grp-consistent-height .grp-layout-carousel .grp-carousel-track {
     align-items: stretch;
+}
+
+/* Carousel items in editor - ensure proper sizing and clipping */
+.grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
+    box-sizing: border-box;
+    flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    min-width: 0;
+    max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+    .grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+        max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
+    }
+}
+
+@media (max-width: 640px) {
+    .grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
+        flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+        max-width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
+    }
 }
 
 /* Grid layout in editor */
@@ -155,28 +186,7 @@
     }
 }
 
-/* Carousel layout in editor */
-.grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
-    box-sizing: border-box;
-    padding: 0 10px;
-    flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
-    width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1)) / var(--grp-cols-desktop, 3));
-    max-width: none;
-}
-
-@media (max-width: 1024px) {
-    .grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
-        width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
-    }
-}
-
-@media (max-width: 640px) {
-    .grp-gutenberg-block-editor .grp-layout-carousel .grp-review-item {
-        flex: 0 0 calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
-        width: calc((100% - var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
-    }
-}
+/* Carousel layout in editor - already defined above in Frame/Viewport/Track section */
 
 /* Remove fixed widths from cards in editor */
 .grp-gutenberg-block-editor .grp-review {
@@ -185,27 +195,38 @@
     box-sizing: border-box;
 }
 
-/* Style customization via CSS variables */
+/* Style customization via CSS variables - must apply in editor preview */
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-review-text,
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-author-name,
 .grp-gutenberg-block-editor .grp-review-text,
 .grp-gutenberg-block-editor .grp-author-name {
-    color: var(--grp-text-color, inherit);
+    color: var(--grp-text-color, var(--grp-text, inherit));
 }
 
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-review-text,
 .grp-gutenberg-block-editor .grp-review-text {
-    font-size: var(--grp-font-size, inherit);
+    font-size: var(--grp-font-size, var(--grp-body-size, inherit));
 }
 
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-author-name,
 .grp-gutenberg-block-editor .grp-author-name {
-    font-size: var(--grp-name-font-size, inherit);
+    font-size: var(--grp-name-font-size, var(--grp-name-size, inherit));
 }
 
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-review,
 .grp-gutenberg-block-editor .grp-review {
-    background-color: var(--grp-card-bg, inherit);
-    border-color: var(--grp-border-color, inherit);
+    background-color: var(--grp-card-bg, var(--grp-card_background, inherit));
+    border-color: var(--grp-border-color, var(--grp-border, inherit));
 }
 
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-star,
 .grp-gutenberg-block-editor .grp-star {
-    color: var(--grp-star-color, inherit);
+    color: var(--grp-star-color, var(--grp-star, inherit));
+}
+
+.grp-gutenberg-block-wrapper .grp-gutenberg-block-editor .grp-verified-badge::before,
+.grp-gutenberg-block-editor .grp-verified-badge::before {
+    color: var(--grp-accent-color, var(--grp-accent, inherit));
 }
 
 /* Consistent Height - Only apply when toggle is ON */
@@ -254,8 +275,11 @@
 .grp-gutenberg-block-editor .grp-style-classic .grp-review-meta,
 .grp-gutenberg-block-editor .grp-style-minimal .grp-review-meta,
 .grp-gutenberg-block-editor .grp-style-corporate .grp-review-meta {
+    display: flex !important;
+    flex-direction: row !important;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: flex-start !important;
+    align-items: center !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
     align-self: stretch;
@@ -270,6 +294,21 @@
     align-items: flex-start;
     width: auto;
     flex: 1 1 auto;
+}
+
+/* Corporate Card: Ensure avatar and name are inline, not stacked */
+.grp-gutenberg-block-editor .grp-style-corporate .grp-review-meta {
+    flex-direction: row !important;
+    align-items: center !important;
+}
+
+.grp-gutenberg-block-editor .grp-style-corporate .grp-review-meta .grp-review-avatar {
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.grp-gutenberg-block-editor .grp-style-corporate .grp-review-meta .grp-author-name {
+    flex: 0 1 auto;
 }
 
 /* Classic & Minimal: force inline meta row in editor */

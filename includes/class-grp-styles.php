@@ -1062,9 +1062,12 @@ class GRP_Styles {
         
         .grp-style-corporate .grp-review-meta {
             display: flex;
+            flex-direction: row;
             align-items: center;
+            justify-content: flex-start;
             gap: 12px;
             margin-bottom: 16px;
+            width: 100%;
         }
         
         .grp-style-corporate .grp-review-avatar img {

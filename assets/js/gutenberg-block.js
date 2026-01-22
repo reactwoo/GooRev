@@ -267,15 +267,25 @@
             },
             arrow_size: {
                 type: 'number',
-                default: 32
+                default: 40
             },
-            arrow_color: {
-                type: 'string'
+            arrow_icon_size: {
+                type: 'number',
+                default: 18
             },
-            arrow_bg: {
-                type: 'string'
+            arrow_background_color: {
+                type: 'string',
+                default: 'rgba(0, 0, 0, 0.5)'
             },
-            arrow_radius: {
+            arrow_hover_background_color: {
+                type: 'string',
+                default: 'rgba(0, 0, 0, 0.7)'
+            },
+            arrow_icon_color: {
+                type: 'string',
+                default: '#ffffff'
+            },
+            arrow_border_radius: {
                 type: 'number',
                 default: 50
             }
@@ -579,31 +589,53 @@
                                         })
                                     ),
                                     el('div', { style: { marginBottom: '12px' } },
-                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Color', 'google-reviews-plugin')),
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Icon Color', 'google-reviews-plugin')),
                                         el(TextControl, {
                                             type: 'color',
-                                            value: attributes.arrow_color || '#ffffff',
+                                            value: attributes.arrow_icon_color || '#ffffff',
                                             onChange: function(value) {
-                                                setAttributes({ arrow_color: value });
+                                                setAttributes({ arrow_icon_color: value });
                                             }
                                         })
                                     ),
                                     el('div', { style: { marginBottom: '12px' } },
-                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Background', 'google-reviews-plugin')),
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Background Color', 'google-reviews-plugin')),
                                         el(TextControl, {
                                             type: 'color',
-                                            value: attributes.arrow_bg || 'rgba(0, 0, 0, 0.4)',
+                                            value: attributes.arrow_background_color || 'rgba(0, 0, 0, 0.5)',
                                             onChange: function(value) {
-                                                setAttributes({ arrow_bg: value });
+                                                setAttributes({ arrow_background_color: value });
                                             }
                                         })
                                     ),
                                     el('div', { style: { marginBottom: '12px' } },
-                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Border Radius', 'google-reviews-plugin')),
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Hover Background', 'google-reviews-plugin')),
+                                        el(TextControl, {
+                                            type: 'color',
+                                            value: attributes.arrow_hover_background_color || 'rgba(0, 0, 0, 0.7)',
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_hover_background_color: value });
+                                            }
+                                        })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Icon Size (px)', 'google-reviews-plugin')),
                                         el(RangeControl, {
-                                            value: attributes.arrow_radius || 50,
+                                            value: attributes.arrow_icon_size || 18,
                                             onChange: function(value) {
-                                                setAttributes({ arrow_radius: value });
+                                                setAttributes({ arrow_icon_size: value });
+                                            },
+                                            min: 12,
+                                            max: 32,
+                                            step: 1
+                                        })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Border Radius (%)', 'google-reviews-plugin')),
+                                        el(RangeControl, {
+                                            value: attributes.arrow_border_radius || 50,
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_border_radius: value });
                                             },
                                             min: 0,
                                             max: 50,
@@ -932,18 +964,28 @@
                                 styleVars['--grp-name-size'] = attributes.custom_name_font_size + 'px';
                             }
                             
-                            // Arrow styling variables
+                            // Arrow styling variables (match Elementor naming)
                             if (attributes.arrow_size) {
                                 styleVars['--grp-arrow-size'] = attributes.arrow_size + 'px';
                             }
-                            if (attributes.arrow_color) {
-                                styleVars['--grp-arrow-color'] = attributes.arrow_color;
+                            if (attributes.arrow_icon_size) {
+                                styleVars['--grp-arrow-icon-size'] = attributes.arrow_icon_size + 'px';
                             }
-                            if (attributes.arrow_bg) {
-                                styleVars['--grp-arrow-bg'] = attributes.arrow_bg;
+                            if (attributes.arrow_icon_color) {
+                                styleVars['--grp-arrow-icon-color'] = attributes.arrow_icon_color;
+                                styleVars['--grp-arrow-color'] = attributes.arrow_icon_color;
                             }
-                            if (attributes.arrow_radius !== undefined) {
-                                styleVars['--grp-arrow-radius'] = attributes.arrow_radius + '%';
+                            if (attributes.arrow_background_color) {
+                                styleVars['--grp-arrow-bg'] = attributes.arrow_background_color;
+                                styleVars['--grp-arrow-background-color'] = attributes.arrow_background_color;
+                            }
+                            if (attributes.arrow_hover_background_color) {
+                                styleVars['--grp-arrow-hover-bg'] = attributes.arrow_hover_background_color;
+                                styleVars['--grp-arrow-hover-background-color'] = attributes.arrow_hover_background_color;
+                            }
+                            if (attributes.arrow_border_radius !== undefined) {
+                                styleVars['--grp-arrow-radius'] = attributes.arrow_border_radius + '%';
+                                styleVars['--grp-arrow-border-radius'] = attributes.arrow_border_radius + '%';
                             }
                             
                             return styleVars;
@@ -978,7 +1020,7 @@
                                 gap: (attributes.gap && attributes.gap > 0) ? attributes.gap : 20
                             };
                             
-                            // Add custom colors if set
+                            // Add custom colors if set (for ServerSideRender)
                             if (attributes.custom_text_color && typeof attributes.custom_text_color === 'string') sanitized.custom_text_color = attributes.custom_text_color;
                             if (attributes.custom_background_color && typeof attributes.custom_background_color === 'string') sanitized.custom_background_color = attributes.custom_background_color;
                             if (attributes.custom_border_color && typeof attributes.custom_border_color === 'string') sanitized.custom_border_color = attributes.custom_border_color;
@@ -986,6 +1028,14 @@
                             if (attributes.custom_star_color && typeof attributes.custom_star_color === 'string') sanitized.custom_star_color = attributes.custom_star_color;
                             if (attributes.custom_font_size && typeof attributes.custom_font_size === 'number') sanitized.custom_font_size = attributes.custom_font_size;
                             if (attributes.custom_name_font_size && typeof attributes.custom_name_font_size === 'number') sanitized.custom_name_font_size = attributes.custom_name_font_size;
+                            
+                            // Add arrow styling attributes
+                            if (attributes.arrow_size && typeof attributes.arrow_size === 'number') sanitized.arrow_size = attributes.arrow_size;
+                            if (attributes.arrow_icon_size && typeof attributes.arrow_icon_size === 'number') sanitized.arrow_icon_size = attributes.arrow_icon_size;
+                            if (attributes.arrow_background_color && typeof attributes.arrow_background_color === 'string') sanitized.arrow_background_color = attributes.arrow_background_color;
+                            if (attributes.arrow_hover_background_color && typeof attributes.arrow_hover_background_color === 'string') sanitized.arrow_hover_background_color = attributes.arrow_hover_background_color;
+                            if (attributes.arrow_icon_color && typeof attributes.arrow_icon_color === 'string') sanitized.arrow_icon_color = attributes.arrow_icon_color;
+                            if (attributes.arrow_border_radius !== undefined && typeof attributes.arrow_border_radius === 'number') sanitized.arrow_border_radius = attributes.arrow_border_radius;
                             
                             // Add creative style attributes if they exist and are simple types (skip objects)
                             if (attributes.creative_gradient_type && typeof attributes.creative_gradient_type === 'string') sanitized.creative_gradient_type = attributes.creative_gradient_type;
@@ -1013,8 +1063,14 @@
                             (attributes.gap || 20) + '-' + 
                             (attributes.custom_text_color || '') + '-' + 
                             (attributes.custom_background_color || '') + '-' + 
+                            (attributes.custom_border_color || '') + '-' + 
+                            (attributes.custom_accent_color || '') + '-' + 
                             (attributes.custom_star_color || '') + '-' + 
                             (attributes.custom_font_size || '') + '-' + 
+                            (attributes.custom_name_font_size || '') + '-' + 
+                            (attributes.arrow_size || '') + '-' + 
+                            (attributes.arrow_icon_color || '') + '-' + 
+                            (attributes.arrow_background_color || '') + '-' + 
                             (attributes.creative_text_color || '')
                         })
                     ) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
