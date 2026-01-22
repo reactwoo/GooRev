@@ -264,6 +264,20 @@
             creative_star_size: {
                 type: 'number',
                 default: 32
+            },
+            arrow_size: {
+                type: 'number',
+                default: 32
+            },
+            arrow_color: {
+                type: 'string'
+            },
+            arrow_bg: {
+                type: 'string'
+            },
+            arrow_radius: {
+                type: 'number',
+                default: 50
             }
         },
         
@@ -275,6 +289,26 @@
             // Handle both boolean and string ('1'/'0') formats from PHP
             var isProValue = (typeof window.grp_gutenberg !== 'undefined' && window.grp_gutenberg.isPro);
             var isProUser = isProValue === true || isProValue === 1 || isProValue === '1';
+            
+            // Get responsive columns based on viewport (for editor preview)
+            // Use matchMedia to detect viewport size in editor
+            function getColumnsForViewport() {
+                if (typeof window === 'undefined' || !window.matchMedia) {
+                    return attributes.cols_desktop || 3;
+                }
+                var isMobile = window.matchMedia('(max-width: 640px)').matches;
+                var isTablet = window.matchMedia('(max-width: 1024px)').matches && !isMobile;
+                
+                if (isMobile) {
+                    return attributes.cols_mobile || 1;
+                } else if (isTablet) {
+                    return attributes.cols_tablet || 2;
+                } else {
+                    return attributes.cols_desktop || 3;
+                }
+            }
+            
+            var effectiveColumns = getColumnsForViewport();
             
             // License is now checked once per block render; avoid noisy console logs in production
 
@@ -496,40 +530,88 @@
                         initialOpen: false,
                         className: (attributes.layout !== 'carousel' && attributes.layout !== 'grid_carousel') ? 'grp-hidden' : ''
                     },
-                        isProUser ? el('div', {},
+                        el('div', {},
                             el(ToggleControl, {
-                                label: i18n.__('Autoplay', 'google-reviews-plugin'),
-                                checked: attributes.autoplay,
+                                label: i18n.__('Show Arrows', 'google-reviews-plugin'),
+                                checked: attributes.arrows !== undefined ? attributes.arrows : true,
                                 onChange: function(value) {
-                                    setAttributes({ autoplay: value });
+                                    setAttributes({ arrows: value });
                                 }
-                            }),
-                            el(RangeControl, {
-                                label: i18n.__('Speed (ms)', 'google-reviews-plugin'),
-                                value: attributes.speed,
-                                onChange: function(value) {
-                                    setAttributes({ speed: value });
-                                },
-                                min: 1000,
-                                max: 10000,
-                                step: 500,
-                                disabled: !attributes.autoplay
                             }),
                             el(ToggleControl, {
                                 label: i18n.__('Show Dots', 'google-reviews-plugin'),
-                                checked: attributes.dots,
+                                checked: attributes.dots !== undefined ? attributes.dots : true,
                                 onChange: function(value) {
                                     setAttributes({ dots: value });
                                 }
                             }),
-                            el(ToggleControl, {
-                                label: i18n.__('Show Arrows', 'google-reviews-plugin'),
-                                checked: attributes.arrows,
-                                onChange: function(value) {
-                                    setAttributes({ arrows: value });
-                                }
-                            })
-                        ) : el('div', {
+                            isProUser ? el('div', {},
+                                el(ToggleControl, {
+                                    label: i18n.__('Autoplay', 'google-reviews-plugin'),
+                                    checked: attributes.autoplay,
+                                    onChange: function(value) {
+                                        setAttributes({ autoplay: value });
+                                    }
+                                }),
+                                el(RangeControl, {
+                                    label: i18n.__('Speed (ms)', 'google-reviews-plugin'),
+                                    value: attributes.speed,
+                                    onChange: function(value) {
+                                        setAttributes({ speed: value });
+                                    },
+                                    min: 1000,
+                                    max: 10000,
+                                    step: 500,
+                                    disabled: !attributes.autoplay
+                                }),
+                                el('div', { style: { marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #ddd' } },
+                                    el('strong', { style: { display: 'block', marginBottom: '8px' } }, i18n.__('Arrow Styling', 'google-reviews-plugin')),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Size (px)', 'google-reviews-plugin')),
+                                        el(RangeControl, {
+                                            value: attributes.arrow_size || 32,
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_size: value });
+                                            },
+                                            min: 20,
+                                            max: 60,
+                                            step: 2
+                                        })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Color', 'google-reviews-plugin')),
+                                        el(TextControl, {
+                                            type: 'color',
+                                            value: attributes.arrow_color || '#ffffff',
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_color: value });
+                                            }
+                                        })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Background', 'google-reviews-plugin')),
+                                        el(TextControl, {
+                                            type: 'color',
+                                            value: attributes.arrow_bg || 'rgba(0, 0, 0, 0.4)',
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_bg: value });
+                                            }
+                                        })
+                                    ),
+                                    el('div', { style: { marginBottom: '12px' } },
+                                        el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Border Radius', 'google-reviews-plugin')),
+                                        el(RangeControl, {
+                                            value: attributes.arrow_radius || 50,
+                                            onChange: function(value) {
+                                                setAttributes({ arrow_radius: value });
+                                            },
+                                            min: 0,
+                                            max: 50,
+                                            step: 1
+                                        })
+                                    )
+                                )
+                            ) : el('div', {
                             style: {
                                 background: '#f0f8ff',
                                 border: '1px solid #007cba',
@@ -815,18 +897,53 @@
                                 '--grp-cols-desktop': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
                                 '--grp-cols-tablet': (attributes.cols_tablet && attributes.cols_tablet > 0) ? attributes.cols_tablet : 2,
                                 '--grp-cols-mobile': (attributes.cols_mobile && attributes.cols_mobile > 0) ? attributes.cols_mobile : 1,
-                                '--grp-cols': (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
+                                '--grp-cols': effectiveColumns, // Use responsive column count
                                 '--grp-gap': (attributes.gap && attributes.gap > 0 ? attributes.gap : 20) + 'px'
                             };
                             
-                            // Style customization variables
-                            if (attributes.custom_text_color) styleVars['--grp-text-color'] = attributes.custom_text_color;
-                            if (attributes.custom_background_color) styleVars['--grp-card-bg'] = attributes.custom_background_color;
-                            if (attributes.custom_border_color) styleVars['--grp-border-color'] = attributes.custom_border_color;
-                            if (attributes.custom_accent_color) styleVars['--grp-accent-color'] = attributes.custom_accent_color;
-                            if (attributes.custom_star_color) styleVars['--grp-star-color'] = attributes.custom_star_color;
-                            if (attributes.custom_font_size) styleVars['--grp-font-size'] = attributes.custom_font_size + 'px';
-                            if (attributes.custom_name_font_size) styleVars['--grp-name-font-size'] = attributes.custom_name_font_size + 'px';
+                            // Style customization variables - use both naming conventions for compatibility
+                            if (attributes.custom_text_color) {
+                                styleVars['--grp-text-color'] = attributes.custom_text_color;
+                                styleVars['--grp-text'] = attributes.custom_text_color;
+                            }
+                            if (attributes.custom_background_color) {
+                                styleVars['--grp-card-bg'] = attributes.custom_background_color;
+                                styleVars['--grp-card_background'] = attributes.custom_background_color;
+                            }
+                            if (attributes.custom_border_color) {
+                                styleVars['--grp-border-color'] = attributes.custom_border_color;
+                                styleVars['--grp-border'] = attributes.custom_border_color;
+                            }
+                            if (attributes.custom_accent_color) {
+                                styleVars['--grp-accent-color'] = attributes.custom_accent_color;
+                                styleVars['--grp-accent'] = attributes.custom_accent_color;
+                            }
+                            if (attributes.custom_star_color) {
+                                styleVars['--grp-star-color'] = attributes.custom_star_color;
+                                styleVars['--grp-star'] = attributes.custom_star_color;
+                            }
+                            if (attributes.custom_font_size) {
+                                styleVars['--grp-font-size'] = attributes.custom_font_size + 'px';
+                                styleVars['--grp-body-size'] = attributes.custom_font_size + 'px';
+                            }
+                            if (attributes.custom_name_font_size) {
+                                styleVars['--grp-name-font-size'] = attributes.custom_name_font_size + 'px';
+                                styleVars['--grp-name-size'] = attributes.custom_name_font_size + 'px';
+                            }
+                            
+                            // Arrow styling variables
+                            if (attributes.arrow_size) {
+                                styleVars['--grp-arrow-size'] = attributes.arrow_size + 'px';
+                            }
+                            if (attributes.arrow_color) {
+                                styleVars['--grp-arrow-color'] = attributes.arrow_color;
+                            }
+                            if (attributes.arrow_bg) {
+                                styleVars['--grp-arrow-bg'] = attributes.arrow_bg;
+                            }
+                            if (attributes.arrow_radius !== undefined) {
+                                styleVars['--grp-arrow-radius'] = attributes.arrow_radius + '%';
+                            }
                             
                             return styleVars;
                         })()

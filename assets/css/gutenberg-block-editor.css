@@ -1,5 +1,10 @@
 /* Google Reviews Plugin - Gutenberg Block Editor Styles */
 
+/* Debug: Verify editor CSS is loaded (remove after verification) */
+.wp-block-google-reviews-reviews {
+    /* outline: 1px solid rgba(255, 0, 0, 0.2); */ /* Uncomment to verify CSS loading */
+}
+
 .grp-gutenberg-block-editor {
     border: 1px solid #e0e0e0;
     border-radius: 8px;

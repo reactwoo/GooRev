@@ -206,6 +206,20 @@ class GRP_Gutenberg {
                     'type' => 'number',
                     'default' => 32,
                 ),
+                'arrow_size' => array(
+                    'type' => 'number',
+                    'default' => 32,
+                ),
+                'arrow_color' => array(
+                    'type' => 'string',
+                ),
+                'arrow_bg' => array(
+                    'type' => 'string',
+                ),
+                'arrow_radius' => array(
+                    'type' => 'number',
+                    'default' => 50,
+                ),
             ),
         ));
         
@@ -664,6 +678,20 @@ class GRP_Gutenberg {
         $css_vars[] = '--grp-cols-mobile: ' . (isset($attributes['cols_mobile']) && $attributes['cols_mobile'] > 0 ? intval($attributes['cols_mobile']) : 1);
         $css_vars[] = '--grp-cols: ' . (isset($attributes['cols_desktop']) && $attributes['cols_desktop'] > 0 ? intval($attributes['cols_desktop']) : 3);
         $css_vars[] = '--grp-gap: ' . (isset($attributes['gap']) && $attributes['gap'] > 0 ? intval($attributes['gap']) : 20) . 'px';
+        
+        // Arrow styling variables
+        if (!empty($attributes['arrow_size'])) {
+            $css_vars[] = '--grp-arrow-size: ' . intval($attributes['arrow_size']) . 'px';
+        }
+        if (!empty($attributes['arrow_color'])) {
+            $css_vars[] = '--grp-arrow-color: ' . esc_attr($attributes['arrow_color']);
+        }
+        if (!empty($attributes['arrow_bg'])) {
+            $css_vars[] = '--grp-arrow-bg: ' . esc_attr($attributes['arrow_bg']);
+        }
+        if (isset($attributes['arrow_radius'])) {
+            $css_vars[] = '--grp-arrow-radius: ' . intval($attributes['arrow_radius']) . '%';
+        }
         
         $css_vars_string = !empty($css_vars) ? ' style="' . esc_attr(implode('; ', $css_vars)) . '"' : '';
         

@@ -386,12 +386,32 @@
     transform: translateY(-50%) scale(1.1);
 }
 
+.grp-layout-carousel .grp-carousel-prev,
+.grp-layout-carousel .grp-carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--grp-arrow-bg, rgba(0, 0, 0, 0.4));
+    color: var(--grp-arrow-color, white);
+    width: var(--grp-arrow-size, 40px);
+    height: var(--grp-arrow-size, 40px);
+    border-radius: var(--grp-arrow-radius, 50%);
+    box-shadow: var(--grp-arrow-shadow, none);
+    z-index: 5;
+}
+
+.grp-layout-carousel .grp-carousel-prev:hover,
+.grp-layout-carousel .grp-carousel-next:hover {
+    background: var(--grp-arrow-hover-bg, rgba(0, 0, 0, 0.6));
+    color: var(--grp-arrow-hover-color, white);
+}
+
 .grp-layout-carousel .grp-carousel-prev {
-    left: 16px;
+    left: 8px;
 }
 
 .grp-layout-carousel .grp-carousel-next {
-    right: 16px;
+    right: 8px;
 }
 
 .grp-layout-carousel .grp-carousel-dots {

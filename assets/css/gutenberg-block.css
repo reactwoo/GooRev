@@ -202,20 +202,22 @@
 }
 
 /* Carousel layout in editor - respect responsive column CSS variables */
+/* Use --grp-cols which is set dynamically based on viewport */
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review-item,
 .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
     box-sizing: border-box;
-    flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
-    width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-desktop, 3) - 1))) / var(--grp-cols-desktop, 3));
+    flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1))) / var(--grp-cols, 3));
+    width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols, 3) - 1))) / var(--grp-cols, 3));
     min-width: 0;
     max-width: none;
 }
 
+/* Responsive breakpoints - override with device-specific columns */
 @media (max-width: 1024px) {
     .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review-item,
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
         flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
-        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1)) / var(--grp-cols-tablet, 2));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-tablet, 2) - 1))) / var(--grp-cols-tablet, 2));
     }
 }
 
@@ -223,7 +225,7 @@
     .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-review-item,
     .grp-gutenberg-block .grp-layout-carousel .grp-review-item {
         flex: 0 0 calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
-        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1)) / var(--grp-cols-mobile, 1));
+        width: calc((100% - (var(--grp-gap, 20px) * (var(--grp-cols-mobile, 1) - 1))) / var(--grp-cols-mobile, 1));
     }
 }
 
@@ -250,6 +252,7 @@
     flex: 1;
 }
 
+/* Arrow styling - positioned relative to frame, centered vertically */
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
@@ -257,36 +260,45 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
+    background: var(--grp-arrow-bg, rgba(0, 0, 0, 0.4));
+    color: var(--grp-arrow-color, white);
     border: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    width: var(--grp-arrow-size, 32px);
+    height: var(--grp-arrow-size, 32px);
+    min-width: var(--grp-arrow-size, 32px);
+    min-height: var(--grp-arrow-size, 32px);
+    max-width: var(--grp-arrow-size, 32px);
+    max-height: var(--grp-arrow-size, 32px);
+    border-radius: var(--grp-arrow-radius, 50%);
     cursor: pointer;
-    z-index: 10;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
     font-size: 14px;
+    box-shadow: var(--grp-arrow-shadow, none);
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev:hover,
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next:hover,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next:hover {
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--grp-arrow-hover-bg, rgba(0, 0, 0, 0.6));
+    color: var(--grp-arrow-hover-color, white);
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-prev,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-prev {
-    left: 16px;
+    left: 8px;
 }
 
 .grp-gutenberg-block-wrapper .grp-layout-carousel .grp-carousel-next,
 .grp-gutenberg-block .grp-layout-carousel .grp-carousel-next {
-    right: 16px;
+    right: 8px;
 }
 
 /* Grid carousel layout in editor - mirror frontend responsive behavior */
