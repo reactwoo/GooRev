@@ -25,6 +25,77 @@ class GRP_Gutenberg {
         add_action('init', array($this, 'register_blocks'));
         add_action('enqueue_block_editor_assets', array($this, 'enqueue_block_editor_assets'));
         add_action('enqueue_block_assets', array($this, 'enqueue_block_assets'));
+        
+        // Filter block attributes before REST API validation to prevent 400 errors
+        add_filter('rest_pre_dispatch', array($this, 'sanitize_block_attributes'), 10, 3);
+    }
+    
+    /**
+     * Sanitize block attributes before REST API validation
+     * This prevents 400 errors from type mismatches
+     * Note: This filter runs before WordPress validates attributes against the schema
+     */
+    public function sanitize_block_attributes($result, $server, $request) {
+        // Only process block-renderer requests for our block
+        $route = $request->get_route();
+        if (!$route || strpos($route, '/wp/v2/block-renderer/google-reviews/reviews') === false) {
+            return $result;
+        }
+        
+        try {
+            // Get attributes from request
+            $params = $request->get_params();
+            if (isset($params['attributes']) && is_array($params['attributes'])) {
+                $attributes = $params['attributes'];
+                $modified = false;
+                
+                // Sanitize numeric attributes - convert empty strings/null to defaults
+                $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap',
+                                       'custom_font_size', 'custom_name_font_size', 'arrow_size', 'arrow_icon_size', 'arrow_border_radius',
+                                       'arrow_horizontal_position', 'arrow_vertical_position', 'dot_size', 'dot_spacing', 'dot_border_radius',
+                                       'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
+                foreach ($numeric_attrs as $attr) {
+                    if (isset($attributes[$attr])) {
+                        // Convert empty string, null, or non-numeric - remove to use default
+                        if ($attributes[$attr] === '' || $attributes[$attr] === null || (!is_numeric($attributes[$attr]) && $attributes[$attr] !== 0)) {
+                            unset($attributes[$attr]); // Remove invalid value, let default be used
+                            $modified = true;
+                        } elseif (is_numeric($attributes[$attr])) {
+                            $attributes[$attr] = intval($attributes[$attr]);
+                            $modified = true;
+                        }
+                    }
+                }
+                
+                // Sanitize boolean attributes
+                $boolean_attrs = array('show_avatar', 'show_date', 'show_rating', 'show_reply', 'autoplay', 'dots', 'arrows', 'consistent_height');
+                foreach ($boolean_attrs as $attr) {
+                    if (isset($attributes[$attr])) {
+                        if ($attributes[$attr] === '' || $attributes[$attr] === null) {
+                            unset($attributes[$attr]);
+                            $modified = true;
+                        } elseif (!is_bool($attributes[$attr])) {
+                            $attributes[$attr] = filter_var($attributes[$attr], FILTER_VALIDATE_BOOLEAN);
+                            $modified = true;
+                        }
+                    }
+                }
+                
+                // Update request with sanitized attributes if modified
+                if ($modified) {
+                    $params['attributes'] = $attributes;
+                    // Use reflection to update request params (WordPress doesn't provide a direct setter)
+                    $request->set_param('attributes', $attributes);
+                }
+            }
+        } catch (Exception $e) {
+            // Log but don't break the request
+            if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log('GRP Gutenberg: Error sanitizing attributes: ' . $e->getMessage());
+            }
+        }
+        
+        return $result;
     }
     
     /**
@@ -137,30 +208,39 @@ class GRP_Gutenberg {
                 ),
                 'custom_text_color' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 'custom_background_color' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 'custom_border_color' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 'custom_accent_color' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 'custom_star_color' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 'custom_font_size' => array(
                     'type' => 'number',
+                    'default' => 0,
                 ),
                 'custom_name_font_size' => array(
                     'type' => 'number',
+                    'default' => 0,
                 ),
                 'body_font_family' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 'name_font_family' => array(
                     'type' => 'string',
+                    'default' => '',
                 ),
                 // Creative style specific attributes
                 'creative_gradient_type' => array(
@@ -237,6 +317,44 @@ class GRP_Gutenberg {
                 'arrow_vertical_position' => array(
                     'type' => 'number',
                     'default' => 0,
+                ),
+                // Dot styling attributes
+                'dot_color' => array(
+                    'type' => 'string',
+                    'default' => '#ccc',
+                ),
+                'dot_active_color' => array(
+                    'type' => 'string',
+                    'default' => '#007cba',
+                ),
+                'dot_size' => array(
+                    'type' => 'number',
+                    'default' => 12,
+                ),
+                'dot_spacing' => array(
+                    'type' => 'number',
+                    'default' => 8,
+                ),
+                'dot_border_radius' => array(
+                    'type' => 'number',
+                    'default' => 50,
+                ),
+                // Additional attributes that might be sent but aren't critical
+                'creative_background' => array(
+                    'type' => 'object',
+                    'default' => array(),
+                ),
+                'creative_box_shadow' => array(
+                    'type' => 'object',
+                    'default' => array(),
+                ),
+                'creative_border' => array(
+                    'type' => 'object',
+                    'default' => array(),
+                ),
+                'creative_border_radius' => array(
+                    'type' => 'object',
+                    'default' => array(),
                 ),
             ),
         ));
@@ -481,6 +599,11 @@ class GRP_Gutenberg {
     public function render_reviews_block($attributes) {
         // Error handling wrapper for debugging
         try {
+            // Log raw attributes for debugging (only in debug mode)
+            if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log('GRP Gutenberg SSR: Raw attributes received: ' . print_r($attributes, true));
+            }
+            
             // Ensure attributes are set with defaults
             // Handle both array and query string formats from REST API
             if (empty($attributes)) {
@@ -519,9 +642,14 @@ class GRP_Gutenberg {
                     continue;
                 }
                 
-                // Skip object-type attributes that shouldn't be passed via REST API
+                // Handle object-type attributes - convert to empty array if invalid
                 if (in_array($key, array('creative_box_shadow', 'creative_border', 'creative_border_radius', 'creative_background'), true)) {
-                    // These are objects and should not be in the attributes passed to REST API
+                    // These are objects - ensure they're arrays
+                    if (!is_array($value)) {
+                        $flattened[$key] = array();
+                    } else {
+                        $flattened[$key] = $value;
+                    }
                     continue;
                 }
                 
@@ -529,6 +657,11 @@ class GRP_Gutenberg {
             }
             
             $attributes = $flattened;
+            
+            // Log sanitized attributes for debugging
+            if (defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
+                error_log('GRP Gutenberg SSR: Sanitized attributes: ' . print_r($attributes, true));
+            }
         
         // Set default values for all required attributes
         $attributes = wp_parse_args($attributes, array(
@@ -552,17 +685,73 @@ class GRP_Gutenberg {
             'cols_tablet' => 2,
             'cols_mobile' => 1,
             'gap' => 20,
+            // Style customization defaults
+            'custom_text_color' => '',
+            'custom_background_color' => '',
+            'custom_border_color' => '',
+            'custom_accent_color' => '',
+            'custom_star_color' => '',
+            'custom_font_size' => 0,
+            'custom_name_font_size' => 0,
+            // Arrow styling defaults
+            'arrow_size' => 40,
+            'arrow_icon_size' => 18,
+            'arrow_background_color' => 'rgba(0, 0, 0, 0.5)',
+            'arrow_hover_background_color' => 'rgba(0, 0, 0, 0.7)',
+            'arrow_icon_color' => '#ffffff',
+            'arrow_border_radius' => 50,
+            'arrow_horizontal_position' => 0,
+            'arrow_vertical_position' => 0,
+            // Dot styling defaults
+            'dot_color' => '#ccc',
+            'dot_active_color' => '#007cba',
+            'dot_size' => 12,
+            'dot_spacing' => 8,
+            'dot_border_radius' => 50,
         ));
         
-        // Ensure boolean values are properly converted
-        $attributes['show_avatar'] = filter_var($attributes['show_avatar'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['show_date'] = filter_var($attributes['show_date'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['show_rating'] = filter_var($attributes['show_rating'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['show_reply'] = filter_var($attributes['show_reply'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['autoplay'] = filter_var($attributes['autoplay'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['dots'] = filter_var($attributes['dots'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['arrows'] = filter_var($attributes['arrows'], FILTER_VALIDATE_BOOLEAN);
-        $attributes['consistent_height'] = filter_var($attributes['consistent_height'], FILTER_VALIDATE_BOOLEAN);
+        // Sanitize and validate all attributes
+        // Numbers: cast to int, allow 0 or empty for optional fields
+        $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap', 
+                               'custom_font_size', 'custom_name_font_size', 'arrow_size', 'arrow_icon_size', 'arrow_border_radius',
+                               'arrow_horizontal_position', 'arrow_vertical_position', 'dot_size', 'dot_spacing', 'dot_border_radius',
+                               'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
+        foreach ($numeric_attrs as $attr) {
+            if (isset($attributes[$attr])) {
+                // Allow empty string, null, or 0 - convert to appropriate default
+                if ($attributes[$attr] === '' || $attributes[$attr] === null) {
+                    // Use default from wp_parse_args above
+                    continue;
+                }
+                $attributes[$attr] = is_numeric($attributes[$attr]) ? intval($attributes[$attr]) : 0;
+            }
+        }
+        
+        // Booleans: convert to proper boolean
+        $boolean_attrs = array('show_avatar', 'show_date', 'show_rating', 'show_reply', 'autoplay', 'dots', 'arrows', 'consistent_height');
+        foreach ($boolean_attrs as $attr) {
+            if (isset($attributes[$attr])) {
+                $attributes[$attr] = filter_var($attributes[$attr], FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+        
+        // Strings: sanitize text fields and allow empty for colors
+        $string_attrs = array('style', 'theme', 'layout', 'sort_by', 'custom_text_color', 'custom_background_color', 
+                              'custom_border_color', 'custom_accent_color', 'custom_star_color', 'body_font_family', 'name_font_family',
+                              'arrow_background_color', 'arrow_hover_background_color', 'arrow_icon_color',
+                              'dot_color', 'dot_active_color', 'creative_gradient_type', 'creative_gradient_start', 
+                              'creative_gradient_end', 'creative_text_color', 'creative_date_color', 'creative_star_color', 'creative_glass_effect');
+        foreach ($string_attrs as $attr) {
+            if (isset($attributes[$attr])) {
+                // Allow empty strings for all string fields (especially colors)
+                if ($attributes[$attr] === null) {
+                    // Use default from wp_parse_args
+                    continue;
+                }
+                // Sanitize but preserve empty strings
+                $attributes[$attr] = is_string($attributes[$attr]) ? sanitize_text_field($attributes[$attr]) : '';
+            }
+        }
         
         // Check if reviews are available
         $reviews_instance = new GRP_Reviews();
@@ -764,11 +953,11 @@ class GRP_Gutenberg {
             'arrow_horizontal_position' => isset($attributes['arrow_horizontal_position']) ? $attributes['arrow_horizontal_position'] : 0,
             'arrow_vertical_position' => isset($attributes['arrow_vertical_position']) ? $attributes['arrow_vertical_position'] : 0,
             // Pass dot styling to shortcode renderer
-            'dot_color' => isset($attributes['dot_color']) ? $attributes['dot_color'] : '',
-            'dot_active_color' => isset($attributes['dot_active_color']) ? $attributes['dot_active_color'] : '',
-            'dot_size' => isset($attributes['dot_size']) ? $attributes['dot_size'] : '',
-            'dot_spacing' => isset($attributes['dot_spacing']) ? $attributes['dot_spacing'] : '',
-            'dot_border_radius' => isset($attributes['dot_border_radius']) ? $attributes['dot_border_radius'] : '',
+            'dot_color' => isset($attributes['dot_color']) && $attributes['dot_color'] !== '' ? $attributes['dot_color'] : '#ccc',
+            'dot_active_color' => isset($attributes['dot_active_color']) && $attributes['dot_active_color'] !== '' ? $attributes['dot_active_color'] : '#007cba',
+            'dot_size' => isset($attributes['dot_size']) && $attributes['dot_size'] > 0 ? intval($attributes['dot_size']) : 12,
+            'dot_spacing' => isset($attributes['dot_spacing']) && $attributes['dot_spacing'] >= 0 ? intval($attributes['dot_spacing']) : 8,
+            'dot_border_radius' => isset($attributes['dot_border_radius']) && $attributes['dot_border_radius'] >= 0 ? intval($attributes['dot_border_radius']) : 50,
             // Pass style customizations to shortcode renderer
             'custom_text_color' => isset($attributes['custom_text_color']) ? $attributes['custom_text_color'] : '',
             'custom_background_color' => isset($attributes['custom_background_color']) ? $attributes['custom_background_color'] : '',
@@ -787,10 +976,44 @@ class GRP_Gutenberg {
         // No need to inject them here - they're already in the output
         return $custom_css . $shortcode_output;
         } catch (Exception $e) {
-            // Log error but return a user-friendly message
-            error_log('GRP Gutenberg Block Error: ' . $e->getMessage());
-            error_log('GRP Gutenberg Block Attributes: ' . print_r($attributes, true));
-            return '<div class="grp-gutenberg-block grp-error"><p>' . __('Error loading reviews block. Please check your settings.', 'google-reviews-plugin') . '</p></div>';
+            // Log detailed error for debugging
+            $error_message = 'GRP Gutenberg Block Error: ' . $e->getMessage();
+            $error_message .= "\nStack trace: " . $e->getTraceAsString();
+            $error_message .= "\nAttributes received: " . print_r($attributes, true);
+            error_log($error_message);
+            
+            // Return WP_Error for REST API calls (SSR) or HTML for direct calls
+            if (defined('REST_REQUEST') && REST_REQUEST) {
+                return new WP_Error(
+                    'grp_render_error',
+                    __('Error rendering Google Reviews block: ', 'google-reviews-plugin') . $e->getMessage(),
+                    array(
+                        'status' => 500,
+                        'error_details' => $error_message
+                    )
+                );
+            }
+            
+            return '<div class="grp-gutenberg-block grp-error"><p>' . __('Error loading reviews block. Please check your settings.', 'google-reviews-plugin') . '</p><p><small>' . esc_html($e->getMessage()) . '</small></p></div>';
+        } catch (Error $e) {
+            // Catch PHP 7+ errors (TypeError, etc.)
+            $error_message = 'GRP Gutenberg Block Fatal Error: ' . $e->getMessage();
+            $error_message .= "\nStack trace: " . $e->getTraceAsString();
+            $error_message .= "\nAttributes received: " . print_r($attributes, true);
+            error_log($error_message);
+            
+            if (defined('REST_REQUEST') && REST_REQUEST) {
+                return new WP_Error(
+                    'grp_render_fatal_error',
+                    __('Fatal error rendering Google Reviews block: ', 'google-reviews-plugin') . $e->getMessage(),
+                    array(
+                        'status' => 500,
+                        'error_details' => $error_message
+                    )
+                );
+            }
+            
+            return '<div class="grp-gutenberg-block grp-error"><p>' . __('Fatal error loading reviews block.', 'google-reviews-plugin') . '</p><p><small>' . esc_html($e->getMessage()) . '</small></p></div>';
         }
     }
     
