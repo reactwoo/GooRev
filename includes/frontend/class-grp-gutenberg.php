@@ -51,9 +51,9 @@ class GRP_Gutenberg {
                 
                 // Sanitize numeric attributes - convert empty strings/null to defaults
                 $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap',
-                                       'custom_font_size', 'custom_name_font_size', 'arrow_size', 'arrow_icon_size', 'arrow_border_radius',
-                                       'arrow_horizontal_position', 'arrow_vertical_position', 'dot_size', 'dot_spacing', 'dot_border_radius',
-                                       'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
+                                       'custom_font_size', 'custom_name_font_size', 'custom_padding', 'custom_border_radius', 'custom_avatar_size',
+                                       'arrow_size', 'arrow_icon_size', 'arrow_border_radius', 'arrow_horizontal_position', 'arrow_vertical_position',
+                                       'dot_size', 'dot_spacing', 'dot_border_radius', 'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
                 foreach ($numeric_attrs as $attr) {
                     if (isset($attributes[$attr])) {
                         // Convert empty string, null, or non-numeric - remove to use default
@@ -318,6 +318,14 @@ class GRP_Gutenberg {
                     'type' => 'number',
                     'default' => 0,
                 ),
+                'arrow_icon' => array(
+                    'type' => 'string',
+                    'default' => 'chevron',
+                ),
+                'arrow_box_shadow' => array(
+                    'type' => 'string',
+                    'default' => '',
+                ),
                 // Dot styling attributes
                 'dot_color' => array(
                     'type' => 'string',
@@ -338,6 +346,26 @@ class GRP_Gutenberg {
                 'dot_border_radius' => array(
                     'type' => 'number',
                     'default' => 50,
+                ),
+                'custom_padding' => array(
+                    'type' => 'number',
+                    'default' => 16,
+                ),
+                'custom_border_radius' => array(
+                    'type' => 'number',
+                    'default' => 8,
+                ),
+                'custom_box_shadow' => array(
+                    'type' => 'string',
+                    'default' => '',
+                ),
+                'custom_text_align' => array(
+                    'type' => 'string',
+                    'default' => 'left',
+                ),
+                'custom_avatar_size' => array(
+                    'type' => 'number',
+                    'default' => 40,
                 ),
                 // Additional attributes that might be sent but aren't critical
                 'creative_background' => array(
@@ -713,9 +741,9 @@ class GRP_Gutenberg {
         // Sanitize and validate all attributes
         // Numbers: cast to int, allow 0 or empty for optional fields
         $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap', 
-                               'custom_font_size', 'custom_name_font_size', 'arrow_size', 'arrow_icon_size', 'arrow_border_radius',
-                               'arrow_horizontal_position', 'arrow_vertical_position', 'dot_size', 'dot_spacing', 'dot_border_radius',
-                               'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
+                               'custom_font_size', 'custom_name_font_size', 'custom_padding', 'custom_border_radius', 'custom_avatar_size',
+                               'arrow_size', 'arrow_icon_size', 'arrow_border_radius', 'arrow_horizontal_position', 'arrow_vertical_position',
+                               'dot_size', 'dot_spacing', 'dot_border_radius', 'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
         foreach ($numeric_attrs as $attr) {
             if (isset($attributes[$attr])) {
                 // Allow empty string, null, or 0 - convert to appropriate default
@@ -737,10 +765,11 @@ class GRP_Gutenberg {
         
         // Strings: sanitize text fields and allow empty for colors
         $string_attrs = array('style', 'theme', 'layout', 'sort_by', 'custom_text_color', 'custom_background_color', 
-                              'custom_border_color', 'custom_accent_color', 'custom_star_color', 'body_font_family', 'name_font_family',
-                              'arrow_background_color', 'arrow_hover_background_color', 'arrow_icon_color',
-                              'dot_color', 'dot_active_color', 'creative_gradient_type', 'creative_gradient_start', 
-                              'creative_gradient_end', 'creative_text_color', 'creative_date_color', 'creative_star_color', 'creative_glass_effect');
+                              'custom_border_color', 'custom_accent_color', 'custom_star_color', 'custom_box_shadow', 'custom_text_align',
+                              'body_font_family', 'name_font_family', 'arrow_background_color', 'arrow_hover_background_color',
+                              'arrow_icon_color', 'arrow_icon', 'arrow_box_shadow', 'dot_color', 'dot_active_color',
+                              'creative_gradient_type', 'creative_gradient_start', 'creative_gradient_end', 'creative_text_color',
+                              'creative_date_color', 'creative_star_color', 'creative_glass_effect');
         foreach ($string_attrs as $attr) {
             if (isset($attributes[$attr])) {
                 // Allow empty strings for all string fields (especially colors)
@@ -765,22 +794,34 @@ class GRP_Gutenberg {
 
         // Creative style gradient background
         if (isset($attributes['style']) && $attributes['style'] === 'creative') {
-            $bg_data = isset($attributes['creative_background']) ? $attributes['creative_background'] : array();
-            $gradient_type = isset($bg_data['type']) ? $bg_data['type'] : 'linear';
-            $start_color = isset($bg_data['start_color']) ? $bg_data['start_color'] : '#4285F4';
-            $end_color = isset($bg_data['end_color']) ? $bg_data['end_color'] : '#EA4335';
+            $bg_data = (isset($attributes['creative_background']) && is_array($attributes['creative_background'])) ? $attributes['creative_background'] : array();
+            $gradient_type = isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear';
+            $start_color = isset($attributes['creative_gradient_start']) ? $attributes['creative_gradient_start'] : '#4285F4';
+            $end_color = isset($attributes['creative_gradient_end']) ? $attributes['creative_gradient_end'] : '#EA4335';
+            $angle = isset($attributes['creative_gradient_angle']) ? intval($attributes['creative_gradient_angle']) : 135;
 
-            // Also check for Elementor-style data structure
-            if (empty($start_color) && isset($bg_data['color'])) {
-                $start_color = $bg_data['color'];
-            }
-            if (empty($end_color) && isset($bg_data['color_b'])) {
-                $end_color = $bg_data['color_b'];
-            }
-            if ($gradient_type === 'linear' && isset($bg_data['gradient_angle'])) {
-                $angle = isset($bg_data['gradient_angle']['size']) ? intval($bg_data['gradient_angle']['size']) : 135;
-            } elseif ($gradient_type === 'linear') {
-                $angle = isset($bg_data['angle']) ? intval($bg_data['angle']) : 135;
+            // Elementor-style object fallback
+            if (!empty($bg_data)) {
+                if (!empty($bg_data['type'])) {
+                    $gradient_type = $bg_data['type'];
+                }
+                if (!empty($bg_data['start_color'])) {
+                    $start_color = $bg_data['start_color'];
+                }
+                if (!empty($bg_data['end_color'])) {
+                    $end_color = $bg_data['end_color'];
+                }
+                if (!empty($bg_data['color'])) {
+                    $start_color = $bg_data['color'];
+                }
+                if (!empty($bg_data['color_b'])) {
+                    $end_color = $bg_data['color_b'];
+                }
+                if (!empty($bg_data['gradient_angle']['size'])) {
+                    $angle = intval($bg_data['gradient_angle']['size']);
+                } elseif (!empty($bg_data['angle'])) {
+                    $angle = intval($bg_data['angle']);
+                }
             }
 
             // Only apply gradient if custom values are set
@@ -952,6 +993,8 @@ class GRP_Gutenberg {
             'arrow_border_radius' => isset($attributes['arrow_border_radius']) ? $attributes['arrow_border_radius'] : 50,
             'arrow_horizontal_position' => isset($attributes['arrow_horizontal_position']) ? $attributes['arrow_horizontal_position'] : 0,
             'arrow_vertical_position' => isset($attributes['arrow_vertical_position']) ? $attributes['arrow_vertical_position'] : 0,
+            'arrow_icon' => isset($attributes['arrow_icon']) ? $attributes['arrow_icon'] : 'chevron',
+            'arrow_box_shadow' => isset($attributes['arrow_box_shadow']) ? $attributes['arrow_box_shadow'] : '',
             // Pass dot styling to shortcode renderer
             'dot_color' => isset($attributes['dot_color']) && $attributes['dot_color'] !== '' ? $attributes['dot_color'] : '#ccc',
             'dot_active_color' => isset($attributes['dot_active_color']) && $attributes['dot_active_color'] !== '' ? $attributes['dot_active_color'] : '#007cba',
@@ -966,6 +1009,11 @@ class GRP_Gutenberg {
             'custom_star_color' => isset($attributes['custom_star_color']) ? $attributes['custom_star_color'] : '',
             'custom_font_size' => isset($attributes['custom_font_size']) ? $attributes['custom_font_size'] : '',
             'custom_name_font_size' => isset($attributes['custom_name_font_size']) ? $attributes['custom_name_font_size'] : '',
+            'custom_padding' => isset($attributes['custom_padding']) ? $attributes['custom_padding'] : '',
+            'custom_border_radius' => isset($attributes['custom_border_radius']) ? $attributes['custom_border_radius'] : '',
+            'custom_box_shadow' => isset($attributes['custom_box_shadow']) ? $attributes['custom_box_shadow'] : '',
+            'custom_text_align' => isset($attributes['custom_text_align']) ? $attributes['custom_text_align'] : 'left',
+            'custom_avatar_size' => isset($attributes['custom_avatar_size']) ? $attributes['custom_avatar_size'] : '',
             'class' => 'grp-gutenberg-block'
         );
         

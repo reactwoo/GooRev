@@ -62,14 +62,15 @@
 .grp-gutenberg-block .grp-review {
     background: var(--grp-card-bg, #fff);
     border: 1px solid var(--grp-border-color, #e0e0e0);
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: var(--grp-card-radius, 8px);
+    padding: var(--grp-card-padding, 16px);
     margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--grp-card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
     width: 100%;
     box-sizing: border-box;
     /* Remove any fixed widths */
     max-width: none;
+    text-align: var(--grp-text-align, left);
 }
 
 /* Editor preview helpers for grid */
@@ -96,6 +97,7 @@
 
 .grp-gutenberg-block .grp-review-rating {
     margin-bottom: 12px;
+    justify-content: var(--grp-meta-justify, flex-start);
 }
 
 .grp-gutenberg-block-wrapper .grp-star,
@@ -118,6 +120,8 @@
     align-items: center;
     gap: 10px;
     margin-top: 8px;
+    justify-content: var(--grp-meta-justify, flex-start);
+    text-align: var(--grp-text-align, left);
 }
 
 /* Classic & Minimal: force inline meta row (avatar + name/date side-by-side) */
@@ -151,8 +155,8 @@
 }
 
 .grp-gutenberg-block .grp-review-avatar img {
-    width: 40px;
-    height: 40px;
+    width: var(--grp-avatar-size, 40px);
+    height: var(--grp-avatar-size, 40px);
     border-radius: 50%;
     object-fit: cover;
 }
@@ -301,6 +305,7 @@
     max-width: var(--grp-arrow-size, 40px);
     max-height: var(--grp-arrow-size, 40px);
     border-radius: var(--grp-arrow-border-radius, var(--grp-arrow-radius, 50%));
+    box-shadow: var(--grp-arrow-box-shadow, none);
     cursor: pointer;
     z-index: 10;
     display: flex;

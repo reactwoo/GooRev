@@ -13,10 +13,11 @@
     margin-bottom: 15px;
     background: var(--grp-card-bg, #fff);
     border: 1px solid var(--grp-border-color, #e0e0e0);
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--grp-card-radius, 8px);
+    padding: var(--grp-card-padding, 16px);
+    box-shadow: var(--grp-card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: var(--grp-text-align, left);
 }
 
 .grp-review:hover {
@@ -61,8 +62,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
-    text-align: left;
+    justify-content: var(--grp-meta-justify, flex-start);
+    text-align: var(--grp-text-align, left);
     gap: 12px;
     margin-top: 8px;
     flex-wrap: nowrap;
@@ -87,6 +88,7 @@
 .grp-review-rating {
     display: flex;
     gap: 2px;
+    justify-content: var(--grp-meta-justify, flex-start);
 }
 
 /* Support both Elementor class selectors and inline styles for text alignment */
@@ -118,8 +120,8 @@
 }
 
 .grp-review-avatar img {
-    width: 40px;
-    height: 40px;
+    width: var(--grp-avatar-size, 40px);
+    height: var(--grp-avatar-size, 40px);
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #f0f0f0;
@@ -431,7 +433,7 @@
     max-width: var(--grp-arrow-size, 40px);
     max-height: var(--grp-arrow-size, 40px);
     border-radius: var(--grp-arrow-border-radius, var(--grp-arrow-radius, 50%));
-    box-shadow: none;
+    box-shadow: var(--grp-arrow-box-shadow, none);
     z-index: 10;
     display: flex;
     align-items: center;
@@ -586,28 +588,29 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
+    background: var(--grp-arrow-background-color, var(--grp-arrow-bg, rgba(0, 0, 0, 0.5)));
+    color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
     border: none;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 32px;
-    max-height: 32px;
+    width: var(--grp-arrow-size, 32px);
+    height: var(--grp-arrow-size, 32px);
+    min-width: var(--grp-arrow-size, 32px);
+    min-height: var(--grp-arrow-size, 32px);
+    max-width: var(--grp-arrow-size, 32px);
+    max-height: var(--grp-arrow-size, 32px);
     aspect-ratio: 1 / 1;
-    border-radius: 50%;
+    border-radius: var(--grp-arrow-border-radius, var(--grp-arrow-radius, 50%));
     cursor: pointer;
     z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background 0.3s ease;
-    font-size: 14px;
+    font-size: var(--grp-arrow-icon-size, 14px);
     padding: 0;
     box-sizing: border-box;
     flex-shrink: 0;
     overflow: hidden;
+    box-shadow: var(--grp-arrow-box-shadow, none);
 }
 
 .grp-layout-grid_carousel .grp-carousel-prev .grp-arrow-left,
@@ -620,6 +623,8 @@
     line-height: 1;
     width: 100%;
     height: 100%;
+    color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
+    font-size: var(--grp-arrow-icon-size, 14px);
 }
 
 .grp-layout-grid_carousel .grp-carousel-prev i,
@@ -632,15 +637,15 @@
 
 .grp-layout-grid_carousel .grp-carousel-prev:hover,
 .grp-layout-grid_carousel .grp-carousel-next:hover {
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--grp-arrow-hover-background-color, var(--grp-arrow-hover-bg, rgba(0, 0, 0, 0.7)));
 }
 
 .grp-layout-grid_carousel .grp-carousel-prev {
-    left: -16px;
+    left: calc(-16px + var(--grp-arrow-horizontal, 0px));
 }
 
 .grp-layout-grid_carousel .grp-carousel-next {
-    right: -16px;
+    right: calc(-16px + var(--grp-arrow-horizontal, 0px));
 }
 
 .grp-layout-grid_carousel .grp-carousel-dots {
@@ -771,11 +776,6 @@
 .grp-layout-grid .grp-reviews-grid,
 .grp-layout-list .grp-reviews-list {
     overflow: visible !important;
-}
-
-.grp-layout-grid .grp-review-item,
-.grp-layout-grid_carousel .grp-review-item {
-    /* Grid items already have gaps, reduce additional margin */
 }
 
 .grp-layout-grid .grp-review-item:has(.grp-review[style*="box-shadow"]),

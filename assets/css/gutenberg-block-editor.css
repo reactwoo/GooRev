@@ -1,10 +1,5 @@
 /* Google Reviews Plugin - Gutenberg Block Editor Styles */
 
-/* Debug: Verify editor CSS is loaded (remove after verification) */
-.wp-block-google-reviews-reviews {
-    /* outline: 1px solid rgba(255, 0, 0, 0.2); */ /* Uncomment to verify CSS loading */
-}
-
 .grp-gutenberg-block-editor {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
@@ -37,10 +32,11 @@
 .grp-gutenberg-block-editor .grp-review:not(.grp-theme-dark .grp-review) {
     background: #fff;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
+    border-radius: var(--grp-card-radius, 8px);
+    padding: var(--grp-card-padding, 20px);
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--grp-card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
+    text-align: var(--grp-text-align, left);
 }
 
 /* Respect dark theme from frontend styles inside editor */
@@ -51,6 +47,7 @@
 
 .grp-gutenberg-block-editor .grp-review-rating {
     margin-bottom: 15px;
+    justify-content: var(--grp-meta-justify, flex-start);
 }
 
 .grp-gutenberg-block-editor .grp-star {
@@ -70,8 +67,8 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    justify-content: flex-start;
-    text-align: left;
+    justify-content: var(--grp-meta-justify, flex-start);
+    text-align: var(--grp-text-align, left);
 }
 
 /* Prevent avatar centering overrides in editor for non-creative styles */
@@ -82,8 +79,8 @@
 }
 
 .grp-gutenberg-block-editor .grp-review-avatar img {
-    width: 40px;
-    height: 40px;
+    width: var(--grp-avatar-size, 40px);
+    height: var(--grp-avatar-size, 40px);
     border-radius: 50%;
     object-fit: cover;
 }

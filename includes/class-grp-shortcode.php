@@ -89,6 +89,11 @@ class GRP_Shortcode {
             'custom_star_color' => '',
             'custom_font_size' => '',
             'custom_name_font_size' => '',
+            'custom_padding' => '',
+            'custom_border_radius' => '',
+            'custom_box_shadow' => '',
+            'custom_text_align' => 'left',
+            'custom_avatar_size' => '',
             // Arrow styling
             'arrow_size' => '',
             'arrow_icon_size' => '',
@@ -98,6 +103,8 @@ class GRP_Shortcode {
             'arrow_border_radius' => '',
             'arrow_horizontal_position' => '',
             'arrow_vertical_position' => '',
+            'arrow_icon' => '',
+            'arrow_box_shadow' => '',
             // Dot styling
             'dot_color' => '',
             'dot_active_color' => '',
@@ -165,16 +172,41 @@ class GRP_Shortcode {
         // Generate custom CSS for creative style
         $custom_css = '';
         if ($atts['style'] === 'creative') {
-            // Handle gradient background (from Elementor or Gutenberg controls)
-            $bg_data = isset($atts['creative_background']) ? $atts['creative_background'] : array();
+            // Handle gradient background (from Elementor object or Gutenberg scalar controls)
+            $bg_data = (isset($atts['creative_background']) && is_array($atts['creative_background'])) ? $atts['creative_background'] : array();
             $gradient_type = isset($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
             $start_color = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
             $end_color = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
+            $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
+
+            // Elementor object fallback
+            if (!empty($bg_data)) {
+                if (!empty($bg_data['type'])) {
+                    $gradient_type = $bg_data['type'];
+                }
+                if (!empty($bg_data['start_color'])) {
+                    $start_color = $bg_data['start_color'];
+                }
+                if (!empty($bg_data['end_color'])) {
+                    $end_color = $bg_data['end_color'];
+                }
+                if (!empty($bg_data['color'])) {
+                    $start_color = $bg_data['color'];
+                }
+                if (!empty($bg_data['color_b'])) {
+                    $end_color = $bg_data['color_b'];
+                }
+                if (!empty($bg_data['angle'])) {
+                    $angle = intval($bg_data['angle']);
+                }
+                if (!empty($bg_data['gradient_angle']['size'])) {
+                    $angle = intval($bg_data['gradient_angle']['size']);
+                }
+            }
 
             // Generate gradient CSS - only apply when controls are used
             $custom_css .= '/* Creative gradient applied */ ';
             if ($gradient_type === 'linear') {
-                $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
                 // Only apply gradient if custom colors are provided (not defaults)
                 if ($start_color !== '#4285F4' || $end_color !== '#EA4335' || $angle !== 135) {
                     $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
@@ -225,6 +257,138 @@ class GRP_Shortcode {
             return $this->render_list($reviews, $atts, $instance_id);
         }
     }
+
+    /**
+     * Build inline CSS variables for styles and layout.
+     */
+    private function build_style_vars($atts) {
+        $style_vars = array();
+
+        // Layout variables
+        $style_vars[] = '--grp-cols-desktop:' . intval($atts['cols_desktop']);
+        $style_vars[] = '--grp-cols-tablet:' . intval($atts['cols_tablet']);
+        $style_vars[] = '--grp-cols-mobile:' . intval($atts['cols_mobile']);
+        $style_vars[] = '--grp-cols:' . intval($atts['cols_desktop']);
+        $style_vars[] = '--grp-gap:' . intval($atts['gap']) . 'px';
+
+        // Style customizations
+        if (!empty($atts['custom_text_color'])) {
+            $style_vars[] = '--grp-text-color:' . esc_attr($atts['custom_text_color']);
+            $style_vars[] = '--grp-text:' . esc_attr($atts['custom_text_color']);
+        }
+        if (!empty($atts['custom_background_color'])) {
+            $style_vars[] = '--grp-card-bg:' . esc_attr($atts['custom_background_color']);
+            $style_vars[] = '--grp-card_background:' . esc_attr($atts['custom_background_color']);
+        }
+        if (!empty($atts['custom_border_color'])) {
+            $style_vars[] = '--grp-border-color:' . esc_attr($atts['custom_border_color']);
+            $style_vars[] = '--grp-border:' . esc_attr($atts['custom_border_color']);
+        }
+        if (!empty($atts['custom_accent_color'])) {
+            $style_vars[] = '--grp-accent-color:' . esc_attr($atts['custom_accent_color']);
+            $style_vars[] = '--grp-accent:' . esc_attr($atts['custom_accent_color']);
+        }
+        if (!empty($atts['custom_star_color'])) {
+            $style_vars[] = '--grp-star-color:' . esc_attr($atts['custom_star_color']);
+            $style_vars[] = '--grp-star:' . esc_attr($atts['custom_star_color']);
+        }
+        if (!empty($atts['custom_font_size'])) {
+            $style_vars[] = '--grp-font-size:' . intval($atts['custom_font_size']) . 'px';
+            $style_vars[] = '--grp-body-size:' . intval($atts['custom_font_size']) . 'px';
+        }
+        if (!empty($atts['custom_name_font_size'])) {
+            $style_vars[] = '--grp-name-font-size:' . intval($atts['custom_name_font_size']) . 'px';
+            $style_vars[] = '--grp-name-size:' . intval($atts['custom_name_font_size']) . 'px';
+        }
+        if (isset($atts['custom_padding']) && $atts['custom_padding'] !== '') {
+            $style_vars[] = '--grp-card-padding:' . intval($atts['custom_padding']) . 'px';
+        }
+        if (isset($atts['custom_border_radius']) && $atts['custom_border_radius'] !== '') {
+            $style_vars[] = '--grp-card-radius:' . intval($atts['custom_border_radius']) . 'px';
+        }
+        if (!empty($atts['custom_box_shadow'])) {
+            $style_vars[] = '--grp-card-shadow:' . esc_attr($atts['custom_box_shadow']);
+        }
+        if (!empty($atts['custom_avatar_size'])) {
+            $style_vars[] = '--grp-avatar-size:' . intval($atts['custom_avatar_size']) . 'px';
+        }
+        if (!empty($atts['custom_text_align'])) {
+            $align = strtolower($atts['custom_text_align']);
+            if (in_array($align, array('left', 'center', 'right'), true)) {
+                $style_vars[] = '--grp-text-align:' . $align;
+                $style_vars[] = '--grp-meta-justify:' . ($align === 'center' ? 'center' : ($align === 'right' ? 'flex-end' : 'flex-start'));
+            }
+        }
+
+        // Arrow styling
+        if (!empty($atts['arrow_size'])) {
+            $style_vars[] = '--grp-arrow-size:' . intval($atts['arrow_size']) . 'px';
+        }
+        if (!empty($atts['arrow_icon_size'])) {
+            $style_vars[] = '--grp-arrow-icon-size:' . intval($atts['arrow_icon_size']) . 'px';
+        }
+        if (!empty($atts['arrow_icon_color'])) {
+            $style_vars[] = '--grp-arrow-icon-color:' . esc_attr($atts['arrow_icon_color']);
+            $style_vars[] = '--grp-arrow-color:' . esc_attr($atts['arrow_icon_color']);
+        }
+        if (!empty($atts['arrow_background_color'])) {
+            $style_vars[] = '--grp-arrow-bg:' . esc_attr($atts['arrow_background_color']);
+            $style_vars[] = '--grp-arrow-background-color:' . esc_attr($atts['arrow_background_color']);
+        }
+        if (!empty($atts['arrow_hover_background_color'])) {
+            $style_vars[] = '--grp-arrow-hover-bg:' . esc_attr($atts['arrow_hover_background_color']);
+            $style_vars[] = '--grp-arrow-hover-background-color:' . esc_attr($atts['arrow_hover_background_color']);
+        }
+        if (isset($atts['arrow_border_radius'])) {
+            $style_vars[] = '--grp-arrow-radius:' . intval($atts['arrow_border_radius']) . '%';
+            $style_vars[] = '--grp-arrow-border-radius:' . intval($atts['arrow_border_radius']) . '%';
+        }
+        if (isset($atts['arrow_horizontal_position'])) {
+            $style_vars[] = '--grp-arrow-horizontal:' . intval($atts['arrow_horizontal_position']) . 'px';
+        }
+        if (isset($atts['arrow_vertical_position'])) {
+            $style_vars[] = '--grp-arrow-vertical:' . intval($atts['arrow_vertical_position']) . 'px';
+        }
+        if (!empty($atts['arrow_box_shadow'])) {
+            $style_vars[] = '--grp-arrow-box-shadow:' . esc_attr($atts['arrow_box_shadow']);
+        }
+
+        // Dot styling
+        if (!empty($atts['dot_color'])) {
+            $style_vars[] = '--grp-dot-color:' . esc_attr($atts['dot_color']);
+        }
+        if (!empty($atts['dot_active_color'])) {
+            $style_vars[] = '--grp-dot-active-color:' . esc_attr($atts['dot_active_color']);
+        }
+        if (!empty($atts['dot_size'])) {
+            $style_vars[] = '--grp-dot-size:' . intval($atts['dot_size']) . 'px';
+        }
+        if (isset($atts['dot_spacing'])) {
+            $style_vars[] = '--grp-dot-spacing:' . intval($atts['dot_spacing']) . 'px';
+        }
+        if (isset($atts['dot_border_radius'])) {
+            $style_vars[] = '--grp-dot-radius:' . intval($atts['dot_border_radius']) . '%';
+        }
+
+        return implode(';', $style_vars);
+    }
+
+    private function get_arrow_icons($atts) {
+        $icon = isset($atts['arrow_icon']) ? strtolower(trim($atts['arrow_icon'])) : '';
+        switch ($icon) {
+            case 'double':
+                return array('prev' => '«', 'next' => '»');
+            case 'arrow':
+                return array('prev' => '←', 'next' => '→');
+            case 'angle':
+                return array('prev' => '❮', 'next' => '❯');
+            case 'caret':
+                return array('prev' => '‹', 'next' => '›');
+            case 'chevron':
+            default:
+                return array('prev' => '‹', 'next' => '›');
+        }
+    }
     
     /**
      * Render carousel layout
@@ -262,13 +426,14 @@ class GRP_Shortcode {
         );
         
         ob_start();
+        $arrow_icons = $this->get_arrow_icons($atts);
         ?>
         <?php if (!empty($custom_css)): ?>
         <style type="text/css"><?php echo $custom_css; ?></style>
         <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>"
              class="<?php echo esc_attr($class_string); ?>"
-             style="--grp-cols-desktop:<?php echo intval($atts['cols_desktop']); ?>;--grp-cols-tablet:<?php echo intval($atts['cols_tablet']); ?>;--grp-cols-mobile:<?php echo intval($atts['cols_mobile']); ?>;--grp-cols:<?php echo intval($atts['cols_desktop']); ?>;--grp-gap:<?php echo intval($atts['gap']); ?>px;"
+             style="<?php echo esc_attr($this->build_style_vars($atts)); ?>"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
             
             <div class="grp-carousel-frame">
@@ -284,10 +449,10 @@ class GRP_Shortcode {
                 
                 <?php if ($atts['arrows']): ?>
                     <button class="grp-carousel-prev" aria-label="<?php esc_attr_e('Previous reviews', 'google-reviews-plugin'); ?>">
-                        <span class="grp-arrow-left">‹</span>
+                        <span class="grp-arrow-left"><?php echo esc_html($arrow_icons['prev']); ?></span>
                     </button>
                     <button class="grp-carousel-next" aria-label="<?php esc_attr_e('Next reviews', 'google-reviews-plugin'); ?>">
-                        <span class="grp-arrow-right">›</span>
+                        <span class="grp-arrow-right"><?php echo esc_html($arrow_icons['next']); ?></span>
                     </button>
                 <?php endif; ?>
             </div>
@@ -331,7 +496,7 @@ class GRP_Shortcode {
         <?php if (!empty($custom_css)): ?>
         <style type="text/css"><?php echo $custom_css; ?></style>
         <?php endif; ?>
-        <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>">
+        <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>" style="<?php echo esc_attr($this->build_style_vars($atts)); ?>">
             <div class="grp-reviews-list">
                 <?php foreach ($reviews as $review): ?>
                     <div class="grp-review-item">
@@ -368,20 +533,12 @@ class GRP_Shortcode {
 
         $class_string = implode(' ', $classes);
 
-        $style_inline = sprintf(
-            '--grp-cols-desktop:%d;--grp-cols-tablet:%d;--grp-cols-mobile:%d;--grp-gap:%dpx;',
-            intval($atts['cols_desktop']),
-            intval($atts['cols_tablet']),
-            intval($atts['cols_mobile']),
-            intval($atts['gap'])
-        );
-
         ob_start();
         ?>
         <?php if (!empty($custom_css)): ?>
         <style type="text/css"><?php echo $custom_css; ?></style>
         <?php endif; ?>
-        <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>" style="<?php echo esc_attr($style_inline); ?>">
+        <div id="<?php echo esc_attr($instance_id); ?>" class="<?php echo esc_attr($class_string); ?>" style="<?php echo esc_attr($this->build_style_vars($atts)); ?>">
             <div class="grp-reviews-grid">
                 <?php foreach ($reviews as $review): ?>
                     <div class="grp-review-item">
@@ -430,13 +587,14 @@ class GRP_Shortcode {
         );
 
         ob_start();
+        $arrow_icons = $this->get_arrow_icons($atts);
         ?>
         <?php if (!empty($custom_css)): ?>
         <style type="text/css"><?php echo $custom_css; ?></style>
         <?php endif; ?>
         <div id="<?php echo esc_attr($instance_id); ?>"
              class="<?php echo esc_attr($class_string); ?>"
-             style="--grp-cols-desktop:<?php echo intval($atts['cols_desktop']); ?>;--grp-cols-tablet:<?php echo intval($atts['cols_tablet']); ?>;--grp-cols-mobile:<?php echo intval($atts['cols_mobile']); ?>;--grp-cols:<?php echo intval($atts['cols_desktop']); ?>;--grp-gap:<?php echo intval($atts['gap']); ?>px;"
+             style="<?php echo esc_attr($this->build_style_vars($atts)); ?>"
              data-options="<?php echo esc_attr(json_encode($carousel_options)); ?>">
 
             <div class="grp-grid-carousel-viewport">
@@ -451,10 +609,10 @@ class GRP_Shortcode {
 
             <?php if ($atts['arrows']): ?>
                 <button class="grp-carousel-prev" aria-label="<?php esc_attr_e('Previous reviews', 'google-reviews-plugin'); ?>">
-                    <span class="grp-arrow-left">‹</span>
+                    <span class="grp-arrow-left"><?php echo esc_html($arrow_icons['prev']); ?></span>
                 </button>
                 <button class="grp-carousel-next" aria-label="<?php esc_attr_e('Next reviews', 'google-reviews-plugin'); ?>">
-                    <span class="grp-arrow-right">›</span>
+                    <span class="grp-arrow-right"><?php echo esc_html($arrow_icons['next']); ?></span>
                 </button>
             <?php endif; ?>
 

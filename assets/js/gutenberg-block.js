@@ -297,6 +297,14 @@
                 type: 'number',
                 default: 0
             },
+            arrow_icon: {
+                type: 'string',
+                default: 'chevron'
+            },
+            arrow_box_shadow: {
+                type: 'string',
+                default: ''
+            },
             // Style customization attributes
             custom_text_color: {
                 type: 'string',
@@ -325,6 +333,26 @@
             custom_name_font_size: {
                 type: 'number',
                 default: 0
+            },
+            custom_padding: {
+                type: 'number',
+                default: 16
+            },
+            custom_border_radius: {
+                type: 'number',
+                default: 8
+            },
+            custom_box_shadow: {
+                type: 'string',
+                default: ''
+            },
+            custom_text_align: {
+                type: 'string',
+                default: 'left'
+            },
+            custom_avatar_size: {
+                type: 'number',
+                default: 40
             },
             // Dot styling attributes
             dot_color: {
@@ -688,6 +716,19 @@
                                             step: 1
                                         })
                                     ),
+                                    el(SelectControl, {
+                                        label: i18n.__('Arrow Icon', 'google-reviews-plugin'),
+                                        value: attributes.arrow_icon || 'chevron',
+                                        options: [
+                                            { label: i18n.__('Chevron', 'google-reviews-plugin'), value: 'chevron' },
+                                            { label: i18n.__('Angle', 'google-reviews-plugin'), value: 'angle' },
+                                            { label: i18n.__('Double', 'google-reviews-plugin'), value: 'double' },
+                                            { label: i18n.__('Arrow', 'google-reviews-plugin'), value: 'arrow' }
+                                        ],
+                                        onChange: function(value) {
+                                            setAttributes({ arrow_icon: value });
+                                        }
+                                    }),
                                     el('div', { style: { marginBottom: '12px' } },
                                         el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Border Radius (%)', 'google-reviews-plugin')),
                                         el(RangeControl, {
@@ -700,6 +741,14 @@
                                             step: 1
                                         })
                                     ),
+                                    el(TextControl, {
+                                        label: i18n.__('Arrow Box Shadow', 'google-reviews-plugin'),
+                                        value: attributes.arrow_box_shadow || '',
+                                        onChange: function(value) {
+                                            setAttributes({ arrow_box_shadow: value });
+                                        },
+                                        placeholder: '0 2px 6px rgba(0,0,0,0.2)'
+                                    }),
                                     el('div', { style: { marginBottom: '12px' } },
                                         el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Horizontal Position (px)', 'google-reviews-plugin')),
                                         el(RangeControl, {
@@ -895,6 +944,56 @@
                                 min: 10,
                                 max: 20,
                                 step: 1
+                            }),
+                            el(SelectControl, {
+                                label: i18n.__('Text Alignment', 'google-reviews-plugin'),
+                                value: attributes.custom_text_align || 'left',
+                                options: [
+                                    { label: i18n.__('Left', 'google-reviews-plugin'), value: 'left' },
+                                    { label: i18n.__('Center', 'google-reviews-plugin'), value: 'center' },
+                                    { label: i18n.__('Right', 'google-reviews-plugin'), value: 'right' }
+                                ],
+                                onChange: function(value) {
+                                    setAttributes({ custom_text_align: value });
+                                }
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Card Padding (px)', 'google-reviews-plugin'),
+                                value: attributes.custom_padding !== undefined ? attributes.custom_padding : 16,
+                                onChange: function(value) {
+                                    setAttributes({ custom_padding: value });
+                                },
+                                min: 0,
+                                max: 40,
+                                step: 1
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Card Border Radius (px)', 'google-reviews-plugin'),
+                                value: attributes.custom_border_radius !== undefined ? attributes.custom_border_radius : 8,
+                                onChange: function(value) {
+                                    setAttributes({ custom_border_radius: value });
+                                },
+                                min: 0,
+                                max: 40,
+                                step: 1
+                            }),
+                            el(RangeControl, {
+                                label: i18n.__('Avatar Size (px)', 'google-reviews-plugin'),
+                                value: attributes.custom_avatar_size !== undefined ? attributes.custom_avatar_size : 40,
+                                onChange: function(value) {
+                                    setAttributes({ custom_avatar_size: value });
+                                },
+                                min: 20,
+                                max: 80,
+                                step: 1
+                            }),
+                            el(TextControl, {
+                                label: i18n.__('Card Box Shadow', 'google-reviews-plugin'),
+                                value: attributes.custom_box_shadow || '',
+                                onChange: function(value) {
+                                    setAttributes({ custom_box_shadow: value });
+                                },
+                                placeholder: '0 2px 6px rgba(0,0,0,0.15)'
                             })
                         ) : el('div', {
                             style: {
@@ -930,27 +1029,21 @@
                                     i18n.__('Gradient Type', 'google-reviews-plugin')
                                 ),
                                 el(SelectControl, {
-                                    value: attributes.creative_background?.type || 'linear',
+                                    value: attributes.creative_gradient_type || 'linear',
                                     options: [
                                         { label: i18n.__('Linear', 'google-reviews-plugin'), value: 'linear' },
                                         { label: i18n.__('Radial', 'google-reviews-plugin'), value: 'radial' }
                                     ],
                                     onChange: function(value) {
-                                        var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
-                                        setAttributes({
-                                            creative_background: Object.assign({}, currentBg, { type: value })
-                                        });
+                                        setAttributes({ creative_gradient_type: value });
                                     }
                                 })
                             ),
-                            (attributes.creative_background?.type === 'linear' || attributes.creative_background?.type === undefined) ? el(RangeControl, {
+                            (attributes.creative_gradient_type === 'linear') ? el(RangeControl, {
                                 label: i18n.__('Angle (degrees)', 'google-reviews-plugin'),
-                                value: attributes.creative_background?.angle || 135,
+                                value: attributes.creative_gradient_angle || 135,
                                 onChange: function(value) {
-                                    var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
-                                    setAttributes({
-                                        creative_background: Object.assign({}, currentBg, { angle: value })
-                                    });
+                                    setAttributes({ creative_gradient_angle: value });
                                 },
                                 min: 0,
                                 max: 360,
@@ -962,12 +1055,9 @@
                                 ),
                                 el(TextControl, {
                                     type: 'color',
-                                    value: attributes.creative_background?.start_color || '#4285F4',
+                                    value: attributes.creative_gradient_start || '#4285F4',
                                     onChange: function(value) {
-                                        var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
-                                        setAttributes({
-                                            creative_background: Object.assign({}, currentBg, { start_color: value })
-                                        });
+                                        setAttributes({ creative_gradient_start: value });
                                     }
                                 })
                             ),
@@ -977,12 +1067,9 @@
                                 ),
                                 el(TextControl, {
                                     type: 'color',
-                                    value: attributes.creative_background?.end_color || '#EA4335',
+                                    value: attributes.creative_gradient_end || '#EA4335',
                                     onChange: function(value) {
-                                        var currentBg = attributes.creative_background || { type: 'linear', angle: 135, start_color: '#4285F4', end_color: '#EA4335' };
-                                        setAttributes({
-                                            creative_background: Object.assign({}, currentBg, { end_color: value })
-                                        });
+                                        setAttributes({ creative_gradient_end: value });
                                     }
                                 })
                             )
@@ -1105,6 +1192,22 @@
                                 styleVars['--grp-name-font-size'] = attributes.custom_name_font_size + 'px';
                                 styleVars['--grp-name-size'] = attributes.custom_name_font_size + 'px';
                             }
+                            if (attributes.custom_padding !== undefined && attributes.custom_padding !== null) {
+                                styleVars['--grp-card-padding'] = attributes.custom_padding + 'px';
+                            }
+                            if (attributes.custom_border_radius !== undefined && attributes.custom_border_radius !== null) {
+                                styleVars['--grp-card-radius'] = attributes.custom_border_radius + 'px';
+                            }
+                            if (attributes.custom_box_shadow) {
+                                styleVars['--grp-card-shadow'] = attributes.custom_box_shadow;
+                            }
+                            if (attributes.custom_avatar_size) {
+                                styleVars['--grp-avatar-size'] = attributes.custom_avatar_size + 'px';
+                            }
+                            if (attributes.custom_text_align) {
+                                styleVars['--grp-text-align'] = attributes.custom_text_align;
+                                styleVars['--grp-meta-justify'] = attributes.custom_text_align === 'center' ? 'center' : (attributes.custom_text_align === 'right' ? 'flex-end' : 'flex-start');
+                            }
                             
                             // Arrow styling variables (match Elementor naming)
                             if (attributes.arrow_size) {
@@ -1128,6 +1231,9 @@
                             if (attributes.arrow_border_radius !== undefined) {
                                 styleVars['--grp-arrow-radius'] = attributes.arrow_border_radius + '%';
                                 styleVars['--grp-arrow-border-radius'] = attributes.arrow_border_radius + '%';
+                            }
+                            if (attributes.arrow_box_shadow) {
+                                styleVars['--grp-arrow-box-shadow'] = attributes.arrow_box_shadow;
                             }
                             if (attributes.arrow_horizontal_position !== undefined) {
                                 styleVars['--grp-arrow-horizontal'] = attributes.arrow_horizontal_position + 'px';
@@ -1193,6 +1299,11 @@
                             if (attributes.custom_star_color && typeof attributes.custom_star_color === 'string') sanitized.custom_star_color = attributes.custom_star_color;
                             if (attributes.custom_font_size && typeof attributes.custom_font_size === 'number') sanitized.custom_font_size = attributes.custom_font_size;
                             if (attributes.custom_name_font_size && typeof attributes.custom_name_font_size === 'number') sanitized.custom_name_font_size = attributes.custom_name_font_size;
+                            if (attributes.custom_padding !== undefined && typeof attributes.custom_padding === 'number') sanitized.custom_padding = attributes.custom_padding;
+                            if (attributes.custom_border_radius !== undefined && typeof attributes.custom_border_radius === 'number') sanitized.custom_border_radius = attributes.custom_border_radius;
+                            if (attributes.custom_avatar_size !== undefined && typeof attributes.custom_avatar_size === 'number') sanitized.custom_avatar_size = attributes.custom_avatar_size;
+                            if (attributes.custom_text_align && typeof attributes.custom_text_align === 'string') sanitized.custom_text_align = attributes.custom_text_align;
+                            if (attributes.custom_box_shadow && typeof attributes.custom_box_shadow === 'string') sanitized.custom_box_shadow = attributes.custom_box_shadow;
                             
                             // Add arrow styling attributes
                             if (attributes.arrow_size && typeof attributes.arrow_size === 'number') sanitized.arrow_size = attributes.arrow_size;
@@ -1203,6 +1314,8 @@
                             if (attributes.arrow_border_radius !== undefined && typeof attributes.arrow_border_radius === 'number') sanitized.arrow_border_radius = attributes.arrow_border_radius;
                             if (attributes.arrow_horizontal_position !== undefined && typeof attributes.arrow_horizontal_position === 'number') sanitized.arrow_horizontal_position = attributes.arrow_horizontal_position;
                             if (attributes.arrow_vertical_position !== undefined && typeof attributes.arrow_vertical_position === 'number') sanitized.arrow_vertical_position = attributes.arrow_vertical_position;
+                            if (attributes.arrow_icon && typeof attributes.arrow_icon === 'string') sanitized.arrow_icon = attributes.arrow_icon;
+                            if (attributes.arrow_box_shadow && typeof attributes.arrow_box_shadow === 'string') sanitized.arrow_box_shadow = attributes.arrow_box_shadow;
                             
                             // Add dot styling attributes
                             if (attributes.dot_color && typeof attributes.dot_color === 'string') sanitized.dot_color = attributes.dot_color;
@@ -1242,9 +1355,23 @@
                             (attributes.custom_star_color || '') + '-' + 
                             (attributes.custom_font_size || '') + '-' + 
                             (attributes.custom_name_font_size || '') + '-' + 
+                            (attributes.custom_padding || '') + '-' + 
+                            (attributes.custom_border_radius || '') + '-' + 
+                            (attributes.custom_avatar_size || '') + '-' + 
+                            (attributes.custom_text_align || '') + '-' + 
+                            (attributes.custom_box_shadow || '') + '-' + 
                             (attributes.arrow_size || '') + '-' + 
                             (attributes.arrow_icon_color || '') + '-' + 
                             (attributes.arrow_background_color || '') + '-' + 
+                            (attributes.arrow_horizontal_position || '') + '-' + 
+                            (attributes.arrow_vertical_position || '') + '-' + 
+                            (attributes.arrow_icon || '') + '-' + 
+                            (attributes.arrow_box_shadow || '') + '-' + 
+                            (attributes.dot_color || '') + '-' + 
+                            (attributes.dot_active_color || '') + '-' + 
+                            (attributes.dot_size || '') + '-' + 
+                            (attributes.dot_spacing || '') + '-' + 
+                            (attributes.dot_border_radius || '') + '-' + 
                             (attributes.creative_text_color || '')
                         })
                     ) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
