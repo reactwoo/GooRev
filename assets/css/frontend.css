@@ -820,6 +820,7 @@
 .grp-style-creative .grp-review {
     position: relative;
     background: transparent;
+    text-align: center;
     /* Ensure proper background rendering for gradients */
     background-attachment: initial;
     background-clip: initial;
@@ -829,6 +830,10 @@
     min-height: 150px; /* Ensure cards have height for gradient visibility */
     backdrop-filter: blur(var(--grp-creative-blur, 0px));
     -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
+}
+
+.grp-style-creative .grp-review-text {
+    text-align: var(--grp-text-align, center);
 }
 
 .grp-style-creative .grp-review::before {
@@ -855,6 +860,7 @@
 
 .grp-style-creative .grp-review-avatar {
     margin-bottom: 6px;
+    margin-right: 0;
 }
 
 .grp-style-creative .grp-review-author {

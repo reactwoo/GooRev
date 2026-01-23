@@ -348,6 +348,45 @@ Both sides rely on `--grp-*` variables. Gutenberg sets variables in JS and PHP, 
   - **Fix:** Single authoritative control or link both to same attribute.
   - **Acceptance test:** One value updates preview + frontend.
 
+### Creative Card — Audit (Background / Padding / Avatar / Gradient)
+**Background / gradient selectors**
+- `assets/css/frontend.css`
+  - `.grp-review` → `background: var(--grp-card-bg, #fff)` (must not override creative gradient).
+  - `.grp-style-creative .grp-review` → must be `background: transparent`.
+  - `.grp-style-creative .grp-review::before` → **only** background owner using `--grp-gradient_css`.
+  - `.grp-theme-dark .grp-review`, `.grp-theme-light .grp-review` → must not override creative (ensure creative override keeps transparent).
+- `assets/css/gutenberg-block.css`
+  - `.grp-gutenberg-block .grp-style-creative .grp-review` → must be `background: transparent`.
+  - `.grp-gutenberg-block .grp-style-creative .grp-review::before` → **only** background owner.
+- `assets/css/gutenberg-block-editor.css`
+  - `.grp-gutenberg-block-editor .grp-style-creative .grp-review` → must be `background: transparent`.
+  - `.grp-gutenberg-block-editor .grp-style-creative .grp-review::before` → **only** background owner.
+- `assets/css/elementor.css`
+  - `.elementor-widget-grp-reviews .grp-style-creative .grp-review` → must be `background: transparent`.
+  - `.elementor-widget-grp-reviews .grp-style-creative .grp-review::before` → **only** background owner.
+- `assets/css/review-widgets.css`
+  - `.grp-review-button-template-creative-pro` → hard-coded gradient (audit only; change only if it conflicts).
+
+**Padding selectors**
+- `assets/css/frontend.css` → `.grp-review { padding: var(--grp-card-padding, 16px); }`
+- `assets/css/gutenberg-block-editor.css` → `.grp-review { padding: var(--grp-card-padding, 20px); }`
+- `assets/css/gutenberg-block.css` → `.grp-review { padding: var(--grp-card-padding, 16px); }`
+- `assets/css/elementor.css` → `.elementor-widget-grp-reviews .grp-review { padding: 20px; }` (must allow CSS var for parity).
+
+**Avatar layout selectors**
+- `assets/css/frontend.css`
+  - `.grp-style-creative .grp-review-meta` → stacked / centered.
+  - `.grp-style-creative .grp-review-author` → centered.
+  - `.grp-style-creative .grp-review-avatar` → margin spacing.
+- `assets/css/gutenberg-block.css` / `assets/css/gutenberg-block-editor.css`
+  - `.grp-style-creative .grp-review-meta` and `.grp-review-author` → stacked / centered.
+- `assets/css/elementor.css`
+  - `.elementor-widget-grp-reviews .grp-style-creative .grp-review-meta` / `.grp-review-author` → stacked / centered.
+
+**Inline override sources to remove**
+- `includes/frontend/class-grp-gutenberg.php`
+  - Creative background and glass effect rules using `!important`.
+  - Creative color, date, star, avatar size, and star size rules using `!important`.
 ### 2.1 Consistent height broken (Elementor regression)
 - **Editor:** Elementor
 - **Preview status:** Broken

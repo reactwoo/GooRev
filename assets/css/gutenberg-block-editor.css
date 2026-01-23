@@ -552,23 +552,33 @@
 
 /* Creative template: center meta/author by default in editor */
 .grp-gutenberg-block-editor .grp-style-creative .grp-review-meta {
-    justify-content: var(--grp-meta-justify, center);
-    text-align: var(--grp-text-align, center);
+    justify-content: center;
+    text-align: center;
     flex-direction: column;
     align-items: center;
     gap: 6px;
 }
 
 .grp-gutenberg-block-editor .grp-style-creative .grp-review-author {
-    align-items: var(--grp-meta-align, center);
-    text-align: var(--grp-text-align, center);
+    align-items: center;
+    text-align: center;
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review-avatar {
+    margin-right: 0;
+    margin-bottom: 6px;
 }
 
 .grp-gutenberg-block-editor .grp-style-creative .grp-review {
     position: relative;
     background: transparent;
+    text-align: center;
     backdrop-filter: blur(var(--grp-creative-blur, 0px));
     -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review-text {
+    text-align: var(--grp-text-align, center);
 }
 
 .grp-gutenberg-block-editor .grp-style-creative .grp-review::before {

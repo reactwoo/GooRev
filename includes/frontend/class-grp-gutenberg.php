@@ -802,80 +802,9 @@ class GRP_Gutenberg {
         // Build custom CSS for style overrides
         $custom_css = '';
 
-        // Creative style gradient background
-        if (isset($attributes['style']) && $attributes['style'] === 'creative') {
-            $bg_data = (isset($attributes['creative_background']) && is_array($attributes['creative_background'])) ? $attributes['creative_background'] : array();
-            $gradient_type = isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear';
-            $start_color = isset($attributes['creative_gradient_start']) ? $attributes['creative_gradient_start'] : '#4285F4';
-            $end_color = isset($attributes['creative_gradient_end']) ? $attributes['creative_gradient_end'] : '#EA4335';
-            $angle = isset($attributes['creative_gradient_angle']) ? intval($attributes['creative_gradient_angle']) : 135;
-
-            // Elementor-style object fallback
-            if (!empty($bg_data)) {
-                if (!empty($bg_data['type'])) {
-                    $gradient_type = $bg_data['type'];
-                }
-                if (!empty($bg_data['start_color'])) {
-                    $start_color = $bg_data['start_color'];
-                }
-                if (!empty($bg_data['end_color'])) {
-                    $end_color = $bg_data['end_color'];
-                }
-                if (!empty($bg_data['color'])) {
-                    $start_color = $bg_data['color'];
-                }
-                if (!empty($bg_data['color_b'])) {
-                    $end_color = $bg_data['color_b'];
-                }
-                if (!empty($bg_data['gradient_angle']['size'])) {
-                    $angle = intval($bg_data['gradient_angle']['size']);
-                } elseif (!empty($bg_data['angle'])) {
-                    $angle = intval($bg_data['angle']);
-                }
-            }
-
-            // Only apply gradient if custom values are set
-            if ($gradient_type === 'linear') {
-                if ($angle !== 135 || $start_color !== '#4285F4' || $end_color !== '#EA4335') {
-                    $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
-                }
-            } else {
-                if ($start_color !== '#4285F4' || $end_color !== '#EA4335') {
-                    $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
-                }
-            }
-            // Always apply background properties
-            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background-size: cover; background-repeat: no-repeat; background-attachment: initial; }';
-
-            // Glass effect
-            if (isset($attributes['creative_glass_effect']) && $attributes['creative_glass_effect'] === 'yes') {
-                $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }';
-            }
-        }
-
-        // Creative styles
-        if (isset($attributes['creative_text_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review-text, .grp-gutenberg-block .grp-style-creative .grp-author-name { color: ' . esc_attr($attributes['creative_text_color']) . ' !important; }';
-        }
-        if (isset($attributes['creative_date_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review-date { color: ' . esc_attr($attributes['creative_date_color']) . ' !important; }';
-        }
-        if (isset($attributes['creative_star_color'])) {
-            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-star { color: ' . esc_attr($attributes['creative_star_color']) . ' !important; }';
-        }
-        if (isset($attributes['creative_avatar_size'])) {
-            $avatar_size = intval($attributes['creative_avatar_size']);
-            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-review-avatar img { width: ' . $avatar_size . 'px !important; height: ' . $avatar_size . 'px !important; }';
-        }
-        if (isset($attributes['creative_star_size'])) {
-            $star_size = intval($attributes['creative_star_size']);
-            $custom_css .= '.grp-gutenberg-block .grp-style-creative .grp-star { font-size: ' . $star_size . 'px !important; }';
-        }
-
         // Style customizations - use CSS variables (set on wrapper) instead of !important rules
         // The CSS variables are already set in $css_vars and applied to the wrapper
         // This ensures styles apply both in editor preview and frontend
-        // Note: Keep !important for creative styles as they need to override gradients
         if (!empty($attributes['body_font_family'])) {
             $custom_css .= '.grp-gutenberg-block .grp-review-text { font-family: ' . esc_attr($attributes['body_font_family']) . ' !important; }';
         }
