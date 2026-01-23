@@ -268,6 +268,113 @@ Both sides rely on `--grp-*` variables. Gutenberg sets variables in JS and PHP, 
 
 ---
 
+## Creative Card — Detailed Review (Elementor + Gutenberg)
+
+### Steps already taken
+- Added CSS variable pipeline for core Gutenberg styling (arrows/dots/card bg/avatars).
+- Added server-side dots for Gutenberg preview to mirror frontend.
+- Split creative gradient handling to scalar attributes and object fallback for Elementor.
+
+### 2.1 Consistent height broken (Elementor regression)
+- **Editor:** Elementor
+- **Preview status:** Broken
+- **Frontend status:** Broken
+- **Expected behaviour:** Consistent height toggle makes all cards equal height.
+- **Actual behaviour:** Cards remain uneven based on content.
+- **Likely cause:** Elementor switcher returns `yes`, but shortcode expects `true`, so `grp-consistent-height` class is missing.
+- **Fix approach:** Normalize `consistent_height` to `true/false` in Elementor render.
+- **Acceptance test:** With toggle ON, carousel cards equal height.
+
+### 2.2 Background / gradient colors not applying (Elementor)
+- **Editor:** Elementor
+- **Preview status:** Broken
+- **Frontend status:** Broken
+- **Expected behaviour:** Gradient/angle/positions override defaults.
+- **Actual behaviour:** Defaults remain; angle/positions do not apply.
+- **Likely cause:** Gradient values not applied through CSS vars; start/end positions ignored.
+- **Fix approach:** Map creative gradient values to CSS vars on wrapper and consume via CSS; include stop positions.
+- **Acceptance test:** Changing angle/positions updates creative card background immediately.
+
+### 2.3 Avatar + meta layout incorrect (Elementor)
+- **Editor:** Elementor
+- **Preview status:** Broken
+- **Frontend status:** Broken
+- **Expected behaviour:** Avatar stacked above name; name above date (vertical stack).
+- **Actual behaviour:** Avatar and meta are inline (side-by-side).
+- **Likely cause:** No creative-specific layout CSS; defaults enforce row layout.
+- **Fix approach:** Add creative meta layout overrides (`flex-direction: column`, center alignment).
+- **Acceptance test:** Avatar is above name/date in creative style.
+
+### 2.4 Stars alignment + quote icon
+- **Editor:** Elementor
+- **Preview status:** Partial
+- **Frontend status:** Partial
+- **Expected behaviour:** Stars alignment matches Creative spec; no unintended quote icon.
+- **Actual behaviour:** Stars appear centered; quote icon appears top-left in preview.
+- **Likely cause:** Creative layout forces centering; quote icon not found in plugin CSS/markup.
+- **Fix approach:** Verify markup for quote icon; align stars to Creative spec (center if intended).
+- **Acceptance test:** Stars alignment matches spec; no stray quote icon.
+
+### 2.5 Style previews not updating (Elementor)
+- **Editor:** Elementor
+- **Preview status:** Broken
+- **Frontend status:** Working
+- **Expected behaviour:** Auto/Dark theme previews update in editor.
+- **Actual behaviour:** Preview stays on light theme.
+- **Likely cause:** Elementor editor CSS lacks theme variable overrides.
+- **Fix approach:** Add theme variable styles to `elementor.css` for preview.
+- **Acceptance test:** Theme dropdown updates preview immediately.
+
+### 3.1 Horizontal clipping still broken (Gutenberg)
+- **Editor:** Gutenberg
+- **Preview status:** Broken
+- **Frontend status:** Working
+- **Expected behaviour:** Extra cards clipped by viewport for 1–2 columns.
+- **Actual behaviour:** Extra cards visible outside frame.
+- **Likely cause:** Editor viewport overflow rules not applied for creative layout.
+- **Fix approach:** Enforce overflow hidden on creative carousel viewport in editor CSS.
+- **Acceptance test:** 1–2 column preview clips extra cards.
+
+### 3.2 Missing or non-functional controls (Gutenberg)
+- **Editor:** Gutenberg
+- **Preview status:** Broken
+- **Frontend status:** Partial
+- **Expected behaviour:** Gradient, date/star colors, glass, avatar/star sizes apply live.
+- **Actual behaviour:** Text color works; others do not.
+- **Likely cause:** Preview does not re-render on creative attribute changes; CSS vars not injected.
+- **Fix approach:** Add creative attributes to SSR key + style vars; map creative values to CSS vars.
+- **Acceptance test:** All creative controls update preview live.
+
+### 3.3 Missing controls vs Elementor (Gutenberg)
+- **Editor:** Gutenberg
+- **Preview status:** Broken
+- **Frontend status:** Broken
+- **Expected behaviour:** Creative border radius control exists and applies.
+- **Actual behaviour:** No control; border radius stays default.
+- **Likely cause:** Missing attribute + UI control.
+- **Fix approach:** Add `creative_border_radius_value` control and map to `--grp-card-radius`.
+- **Acceptance test:** Creative border radius updates preview/frontend.
+
+### 3.4 Text color works, others don’t (important clue)
+- **Editor:** Gutenberg
+- **Preview status:** Partial
+- **Frontend status:** Partial
+- **Expected behaviour:** All creative controls follow same pipeline as text color.
+- **Actual behaviour:** Only text color applies live.
+- **Likely cause:** Only text color is wired into preview variables and SSR key.
+- **Fix approach:** Mirror text color pattern for all creative attributes.
+- **Acceptance test:** All creative controls apply live and persist.
+
+### Fix order (Creative Card)
+1. Fix Elementor consistent height + background/gradient overrides.
+2. Fix Gutenberg horizontal clipping (creative preview).
+3. Wire creative controls in Gutenberg (gradient/date/star/glass/avatar/star size).
+4. Add missing Gutenberg control(s) for creative border radius.
+5. Verify Elementor preview theme switching (Auto/Dark).
+6. Final parity check (Elementor vs Gutenberg).
+
+---
+
 ## Fix Plan (Prioritized)
 
 ### Priority 0 — Blockers (SSR + attribute validation)

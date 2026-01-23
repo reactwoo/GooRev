@@ -5,12 +5,12 @@
 }
 
 .elementor-widget-grp-reviews .grp-review {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    background: var(--grp-card-bg, #fff);
+    border: 1px solid var(--grp-border-color, #e0e0e0);
+    border-radius: var(--grp-card-radius, 8px);
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--grp-card-shadow, 0 2px 4px rgba(0, 0, 0, 0.1));
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -24,14 +24,14 @@
 }
 
 .elementor-widget-grp-reviews .grp-star {
-    color: #ffc107;
-    font-size: 18px;
+    color: var(--grp-star-color, #ffc107);
+    font-size: var(--grp-star-size, 18px);
     margin-right: 2px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .elementor-widget-grp-reviews .grp-review-text {
-    color: #333;
+    color: var(--grp-text-color, #333);
     font-size: 16px;
     line-height: 1.6;
     margin-bottom: 15px;
@@ -44,8 +44,8 @@
 }
 
 .elementor-widget-grp-reviews .grp-review-avatar img {
-    width: 40px;
-    height: 40px;
+    width: var(--grp-avatar-size, 40px);
+    height: var(--grp-avatar-size, 40px);
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #f0f0f0;
@@ -53,12 +53,12 @@
 
 .elementor-widget-grp-reviews .grp-author-name {
     font-weight: 600;
-    color: #333;
+    color: var(--grp-text-color, #333);
     font-size: 14px;
 }
 
 .elementor-widget-grp-reviews .grp-review-date {
-    color: #666;
+    color: var(--grp-date-color, #666);
     font-size: 12px;
     margin-left: 0px;
 }
@@ -236,4 +236,66 @@
 
 .elementor-editor .grp-dot {
     pointer-events: none;
+}
+
+/* Creative style layout in Elementor */
+.elementor-widget-grp-reviews .grp-style-creative .grp-review {
+    backdrop-filter: blur(var(--grp-creative-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
+    text-align: center;
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-review-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-review-author {
+    align-items: center;
+    text-align: center;
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-review-rating {
+    justify-content: center;
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-star {
+    font-size: var(--grp-star-size, 18px);
+}
+
+/* Theme previews in Elementor editor */
+.elementor-widget-grp-reviews .grp-theme-dark {
+    --grp-card-bg: #2d2d2d;
+    --grp-border-color: #444;
+    --grp-text-color: #e0e0e0;
+    --grp-date-color: #999;
+    --grp-star-empty-color: #555;
+}
+
+.elementor-widget-grp-reviews .grp-theme-light {
+    --grp-card-bg: #ffffff;
+    --grp-border-color: #e0e0e0;
+    --grp-text-color: #333;
+    --grp-date-color: #666;
+    --grp-star-empty-color: #ddd;
+}
+
+.elementor-widget-grp-reviews .grp-theme-dark .grp-review,
+.elementor-widget-grp-reviews .grp-theme-light .grp-review {
+    background: var(--grp-card-bg, #fff);
+    color: var(--grp-text-color, #333);
+    border-color: var(--grp-border-color, #e0e0e0);
+}
+
+.elementor-widget-grp-reviews .grp-theme-dark .grp-review-text,
+.elementor-widget-grp-reviews .grp-theme-light .grp-review-text {
+    color: var(--grp-text-color, #333);
+}
+
+.elementor-widget-grp-reviews .grp-theme-dark .grp-review-date,
+.elementor-widget-grp-reviews .grp-theme-light .grp-review-date {
+    color: var(--grp-date-color, #666);
 }

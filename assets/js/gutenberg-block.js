@@ -257,6 +257,10 @@
                 type: 'string',
                 default: 'no'
             },
+            creative_border_radius_value: {
+                type: 'number',
+                default: 16
+            },
             creative_avatar_size: {
                 type: 'number',
                 default: 80
@@ -1119,6 +1123,16 @@
                                 setAttributes({ creative_glass_effect: value ? 'yes' : 'no' });
                             }
                         }),
+                        el(RangeControl, {
+                            label: i18n.__('Border Radius (px)', 'google-reviews-plugin'),
+                            value: attributes.creative_border_radius_value || 16,
+                            onChange: function(value) {
+                                setAttributes({ creative_border_radius_value: value });
+                            },
+                            min: 0,
+                            max: 40,
+                            step: 1
+                        }),
                         // Avatar Size
                         el(RangeControl, {
                             label: i18n.__('Avatar Size (px)', 'google-reviews-plugin'),
@@ -1208,6 +1222,32 @@
                                 styleVars['--grp-text-align'] = attributes.custom_text_align;
                                 styleVars['--grp-meta-justify'] = attributes.custom_text_align === 'center' ? 'center' : (attributes.custom_text_align === 'right' ? 'flex-end' : 'flex-start');
                                 styleVars['--grp-meta-align'] = attributes.custom_text_align === 'center' ? 'center' : (attributes.custom_text_align === 'right' ? 'flex-end' : 'flex-start');
+                            }
+
+                            if (attributes.style === 'creative') {
+                                var gradientType = attributes.creative_gradient_type || 'linear';
+                                var startColor = attributes.creative_gradient_start || '#4285F4';
+                                var endColor = attributes.creative_gradient_end || '#EA4335';
+                                var angle = attributes.creative_gradient_angle || 135;
+                                var gradient = gradientType === 'radial'
+                                    ? 'radial-gradient(circle, ' + startColor + ' 0%, ' + endColor + ' 100%)'
+                                    : 'linear-gradient(' + angle + 'deg, ' + startColor + ' 0%, ' + endColor + ' 100%)';
+
+                                styleVars['--grp-card-bg'] = gradient;
+                                styleVars['--grp-text-color'] = attributes.creative_text_color || '#ffffff';
+                                styleVars['--grp-date-color'] = attributes.creative_date_color || '#ffffff';
+                                styleVars['--grp-star-color'] = attributes.creative_star_color || '#FFD700';
+                                styleVars['--grp-avatar-size'] = (attributes.creative_avatar_size || 80) + 'px';
+                                styleVars['--grp-star-size'] = (attributes.creative_star_size || 32) + 'px';
+                                styleVars['--grp-card-radius'] = (attributes.creative_border_radius_value || 16) + 'px';
+
+                                if (attributes.creative_glass_effect === 'yes') {
+                                    styleVars['--grp-card-bg'] = 'rgba(255, 255, 255, 0.25)';
+                                    styleVars['--grp-border-color'] = 'rgba(255, 255, 255, 0.3)';
+                                    styleVars['--grp-creative-blur'] = '20px';
+                                } else {
+                                    styleVars['--grp-creative-blur'] = '0px';
+                                }
                             }
                             
                             // Arrow styling variables (match Elementor naming)
@@ -1334,6 +1374,7 @@
                             if (attributes.creative_date_color && typeof attributes.creative_date_color === 'string') sanitized.creative_date_color = attributes.creative_date_color;
                             if (attributes.creative_star_color && typeof attributes.creative_star_color === 'string') sanitized.creative_star_color = attributes.creative_star_color;
                             if (attributes.creative_glass_effect && typeof attributes.creative_glass_effect === 'string') sanitized.creative_glass_effect = attributes.creative_glass_effect;
+                            if (attributes.creative_border_radius_value !== undefined && typeof attributes.creative_border_radius_value === 'number') sanitized.creative_border_radius_value = attributes.creative_border_radius_value;
                             if (attributes.creative_avatar_size && typeof attributes.creative_avatar_size === 'number') sanitized.creative_avatar_size = attributes.creative_avatar_size;
                             if (attributes.creative_star_size && typeof attributes.creative_star_size === 'number') sanitized.creative_star_size = attributes.creative_star_size;
                             
@@ -1373,7 +1414,17 @@
                             (attributes.dot_size || '') + '-' + 
                             (attributes.dot_spacing || '') + '-' + 
                             (attributes.dot_border_radius || '') + '-' + 
-                            (attributes.creative_text_color || '')
+                            (attributes.creative_gradient_type || '') + '-' +
+                            (attributes.creative_gradient_angle || '') + '-' +
+                            (attributes.creative_gradient_start || '') + '-' +
+                            (attributes.creative_gradient_end || '') + '-' +
+                            (attributes.creative_text_color || '') + '-' +
+                            (attributes.creative_date_color || '') + '-' +
+                            (attributes.creative_star_color || '') + '-' +
+                            (attributes.creative_glass_effect || '') + '-' +
+                            (attributes.creative_border_radius_value || '') + '-' +
+                            (attributes.creative_avatar_size || '') + '-' +
+                            (attributes.creative_star_size || '')
                         })
                     ) : el('div', { className: 'grp-block-placeholder grp-block-preview' },
                         el('div', { className: 'grp-preview-header' },

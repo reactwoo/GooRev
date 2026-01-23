@@ -1461,7 +1461,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'speed' => $settings['speed'],
             'dots' => $settings['dots'],
             'arrows' => $settings['arrows'],
-            'consistent_height' => isset($settings['consistent_height']) ? $settings['consistent_height'] : 'false',
+            'consistent_height' => (!empty($settings['consistent_height']) && $settings['consistent_height'] === 'yes') ? 'true' : 'false',
             // Creative style specific options
             // Creative background - extract gradient data from Elementor control
             'creative_background' => isset($settings['creative_background']) ? $settings['creative_background'] : array(),

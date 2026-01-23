@@ -76,6 +76,7 @@ class GRP_Shortcode {
             'creative_box_shadow' => array(),
             'creative_border' => array(),
             'creative_border_radius' => array(),
+            'creative_border_radius_value' => 16,
             'creative_avatar_size' => 80,
             'creative_star_size' => 32,
             'creative_text_color' => '#ffffff',
@@ -169,82 +170,8 @@ class GRP_Shortcode {
         // Generate unique ID for this instance
         $instance_id = 'grp-' . uniqid();
 
-        // Generate custom CSS for creative style
+        // Generate custom CSS for creative style (legacy hook, now empty)
         $custom_css = '';
-        if ($atts['style'] === 'creative') {
-            // Handle gradient background (from Elementor object or Gutenberg scalar controls)
-            $bg_data = (isset($atts['creative_background']) && is_array($atts['creative_background'])) ? $atts['creative_background'] : array();
-            $gradient_type = isset($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
-            $start_color = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
-            $end_color = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
-            $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
-
-            // Elementor object fallback
-            if (!empty($bg_data)) {
-                if (!empty($bg_data['type'])) {
-                    $gradient_type = $bg_data['type'];
-                }
-                if (!empty($bg_data['start_color'])) {
-                    $start_color = $bg_data['start_color'];
-                }
-                if (!empty($bg_data['end_color'])) {
-                    $end_color = $bg_data['end_color'];
-                }
-                if (!empty($bg_data['color'])) {
-                    $start_color = $bg_data['color'];
-                }
-                if (!empty($bg_data['color_b'])) {
-                    $end_color = $bg_data['color_b'];
-                }
-                if (!empty($bg_data['angle'])) {
-                    $angle = intval($bg_data['angle']);
-                }
-                if (!empty($bg_data['gradient_angle']['size'])) {
-                    $angle = intval($bg_data['gradient_angle']['size']);
-                }
-            }
-
-            // Generate gradient CSS - only apply when controls are used
-            $custom_css .= '/* Creative gradient applied */ ';
-            if ($gradient_type === 'linear') {
-                // Only apply gradient if custom colors are provided (not defaults)
-                if ($start_color !== '#4285F4' || $end_color !== '#EA4335' || $angle !== 135) {
-                    $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: linear-gradient(' . $angle . 'deg, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
-                }
-            } else {
-                // Only apply gradient if custom colors are provided
-                if ($start_color !== '#4285F4' || $end_color !== '#EA4335') {
-                    $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: radial-gradient(circle, ' . esc_attr($start_color) . ' 0%, ' . esc_attr($end_color) . ' 100%) !important; }';
-                }
-            }
-            // Always apply background properties for creative style
-            $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background-size: cover; background-repeat: no-repeat; background-attachment: initial; }';
-            // Glass effect (Apple-style)
-            if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review { background: rgba(255, 255, 255, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important; }';
-            }
-
-            // Creative text colors
-            if (isset($atts['creative_text_color'])) {
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review-text, #' . esc_attr($instance_id) . ' .grp-style-creative .grp-author-name { color: ' . esc_attr($atts['creative_text_color']) . ' !important; }';
-            }
-            if (isset($atts['creative_date_color'])) {
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review-date { color: ' . esc_attr($atts['creative_date_color']) . ' !important; }';
-            }
-            if (isset($atts['creative_star_color'])) {
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-star { color: ' . esc_attr($atts['creative_star_color']) . ' !important; }';
-            }
-
-            // Creative sizes
-            if (isset($atts['creative_avatar_size'])) {
-                $avatar_size = intval($atts['creative_avatar_size']);
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-review-avatar img { width: ' . $avatar_size . 'px !important; height: ' . $avatar_size . 'px !important; }';
-            }
-            if (isset($atts['creative_star_size'])) {
-                $star_size = intval($atts['creative_star_size']);
-                $custom_css .= '#' . esc_attr($instance_id) . ' .grp-style-creative .grp-star { font-size: ' . $star_size . 'px !important; }';
-            }
-        }
 
         // Render based on layout
         if ($atts['layout'] === 'carousel') {
@@ -369,6 +296,87 @@ class GRP_Shortcode {
         }
         if (isset($atts['dot_border_radius'])) {
             $style_vars[] = '--grp-dot-radius:' . intval($atts['dot_border_radius']) . '%';
+        }
+
+        // Creative style variables (use CSS vars on wrapper for preview/frontend parity)
+        if (isset($atts['style']) && $atts['style'] === 'creative') {
+            $bg_data = (isset($atts['creative_background']) && is_array($atts['creative_background'])) ? $atts['creative_background'] : array();
+            $gradient_type = isset($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
+            $start_color = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
+            $end_color = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
+            $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
+            $start_pos = 0;
+            $end_pos = 100;
+
+            if (!empty($bg_data)) {
+                if (!empty($bg_data['type'])) {
+                    $gradient_type = $bg_data['type'];
+                }
+                if (!empty($bg_data['start_color'])) {
+                    $start_color = $bg_data['start_color'];
+                }
+                if (!empty($bg_data['end_color'])) {
+                    $end_color = $bg_data['end_color'];
+                }
+                if (!empty($bg_data['color'])) {
+                    $start_color = $bg_data['color'];
+                }
+                if (!empty($bg_data['color_b'])) {
+                    $end_color = $bg_data['color_b'];
+                }
+                if (!empty($bg_data['angle'])) {
+                    $angle = intval($bg_data['angle']);
+                }
+                if (!empty($bg_data['gradient_angle']['size'])) {
+                    $angle = intval($bg_data['gradient_angle']['size']);
+                }
+                if (!empty($bg_data['color_stop']['size'])) {
+                    $start_pos = intval($bg_data['color_stop']['size']);
+                }
+                if (!empty($bg_data['color_b_stop']['size'])) {
+                    $end_pos = intval($bg_data['color_b_stop']['size']);
+                }
+            }
+
+            $gradient = $gradient_type === 'radial'
+                ? 'radial-gradient(circle, ' . $start_color . ' ' . $start_pos . '%, ' . $end_color . ' ' . $end_pos . '%)'
+                : 'linear-gradient(' . $angle . 'deg, ' . $start_color . ' ' . $start_pos . '%, ' . $end_color . ' ' . $end_pos . '%)';
+
+            $style_vars[] = '--grp-card-bg:' . esc_attr($gradient);
+            if (!empty($atts['creative_text_color'])) {
+                $style_vars[] = '--grp-text-color:' . esc_attr($atts['creative_text_color']);
+                $style_vars[] = '--grp-text:' . esc_attr($atts['creative_text_color']);
+            }
+            if (!empty($atts['creative_date_color'])) {
+                $style_vars[] = '--grp-date-color:' . esc_attr($atts['creative_date_color']);
+            }
+            if (!empty($atts['creative_star_color'])) {
+                $style_vars[] = '--grp-star-color:' . esc_attr($atts['creative_star_color']);
+                $style_vars[] = '--grp-star:' . esc_attr($atts['creative_star_color']);
+            }
+            if (!empty($atts['creative_avatar_size'])) {
+                $style_vars[] = '--grp-avatar-size:' . intval($atts['creative_avatar_size']) . 'px';
+            }
+            if (!empty($atts['creative_star_size'])) {
+                $style_vars[] = '--grp-star-size:' . intval($atts['creative_star_size']) . 'px';
+            }
+            if (!empty($atts['creative_border_radius_value'])) {
+                $style_vars[] = '--grp-card-radius:' . intval($atts['creative_border_radius_value']) . 'px';
+            } elseif (!empty($atts['creative_border_radius']) && is_array($atts['creative_border_radius'])) {
+                $unit = isset($atts['creative_border_radius']['unit']) ? $atts['creative_border_radius']['unit'] : 'px';
+                $top = isset($atts['creative_border_radius']['top']) ? $atts['creative_border_radius']['top'] : '16';
+                $right = isset($atts['creative_border_radius']['right']) ? $atts['creative_border_radius']['right'] : $top;
+                $bottom = isset($atts['creative_border_radius']['bottom']) ? $atts['creative_border_radius']['bottom'] : $top;
+                $left = isset($atts['creative_border_radius']['left']) ? $atts['creative_border_radius']['left'] : $top;
+                $style_vars[] = '--grp-card-radius:' . $top . $unit . ' ' . $right . $unit . ' ' . $bottom . $unit . ' ' . $left . $unit;
+            }
+            if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
+                $style_vars[] = '--grp-card-bg:rgba(255, 255, 255, 0.25)';
+                $style_vars[] = '--grp-border-color:rgba(255, 255, 255, 0.3)';
+                $style_vars[] = '--grp-creative-blur:20px';
+            } else {
+                $style_vars[] = '--grp-creative-blur:0px';
+            }
         }
 
         return implode(';', $style_vars);

@@ -50,10 +50,11 @@ class GRP_Gutenberg {
                 $modified = false;
                 
                 // Sanitize numeric attributes - convert empty strings/null to defaults
-                $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap',
-                                       'custom_font_size', 'custom_name_font_size', 'custom_padding', 'custom_border_radius', 'custom_avatar_size',
-                                       'arrow_size', 'arrow_icon_size', 'arrow_border_radius', 'arrow_horizontal_position', 'arrow_vertical_position',
-                                       'dot_size', 'dot_spacing', 'dot_border_radius', 'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
+        $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap', 
+                               'custom_font_size', 'custom_name_font_size', 'custom_padding', 'custom_border_radius', 'custom_avatar_size',
+                               'arrow_size', 'arrow_icon_size', 'arrow_border_radius', 'arrow_horizontal_position', 'arrow_vertical_position',
+                               'dot_size', 'dot_spacing', 'dot_border_radius', 'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle',
+                               'creative_border_radius_value');
                 foreach ($numeric_attrs as $attr) {
                     if (isset($attributes[$attr])) {
                         // Convert empty string, null, or non-numeric - remove to use default
@@ -274,6 +275,10 @@ class GRP_Gutenberg {
                 'creative_glass_effect' => array(
                     'type' => 'string',
                     'default' => 'no',
+                ),
+                'creative_border_radius_value' => array(
+                    'type' => 'number',
+                    'default' => 16,
                 ),
                 // Note: creative_box_shadow, creative_border, creative_border_radius are objects
                 // They are handled via CSS in Elementor/Gutenberg editor but not passed via REST API
@@ -740,10 +745,11 @@ class GRP_Gutenberg {
         
         // Sanitize and validate all attributes
         // Numbers: cast to int, allow 0 or empty for optional fields
-        $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap', 
-                               'custom_font_size', 'custom_name_font_size', 'custom_padding', 'custom_border_radius', 'custom_avatar_size',
-                               'arrow_size', 'arrow_icon_size', 'arrow_border_radius', 'arrow_horizontal_position', 'arrow_vertical_position',
-                               'dot_size', 'dot_spacing', 'dot_border_radius', 'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle');
+                $numeric_attrs = array('count', 'min_rating', 'max_rating', 'speed', 'cols_desktop', 'cols_tablet', 'cols_mobile', 'gap',
+                                       'custom_font_size', 'custom_name_font_size', 'custom_padding', 'custom_border_radius', 'custom_avatar_size',
+                                       'arrow_size', 'arrow_icon_size', 'arrow_border_radius', 'arrow_horizontal_position', 'arrow_vertical_position',
+                                       'dot_size', 'dot_spacing', 'dot_border_radius', 'creative_avatar_size', 'creative_star_size', 'creative_gradient_angle',
+                                       'creative_border_radius_value');
         foreach ($numeric_attrs as $attr) {
             if (isset($attributes[$attr])) {
                 // Allow empty string, null, or 0 - convert to appropriate default
@@ -980,6 +986,7 @@ class GRP_Gutenberg {
             'creative_date_color' => isset($attributes['creative_date_color']) ? $attributes['creative_date_color'] : '#ffffff',
             'creative_star_color' => isset($attributes['creative_star_color']) ? $attributes['creative_star_color'] : '#FFD700',
             'creative_glass_effect' => isset($attributes['creative_glass_effect']) ? $attributes['creative_glass_effect'] : 'no',
+            'creative_border_radius_value' => isset($attributes['creative_border_radius_value']) ? $attributes['creative_border_radius_value'] : 16,
             'creative_box_shadow' => isset($attributes['creative_box_shadow']) ? $attributes['creative_box_shadow'] : array(),
             'creative_border' => isset($attributes['creative_border']) ? $attributes['creative_border'] : array(),
             'creative_border_radius' => isset($attributes['creative_border_radius']) ? $attributes['creative_border_radius'] : array(),

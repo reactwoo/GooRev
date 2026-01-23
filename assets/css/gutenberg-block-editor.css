@@ -148,6 +148,10 @@
     max-width: 100%;
 }
 
+.grp-gutenberg-block-editor .grp-style-creative .grp-carousel-viewport {
+    overflow: hidden;
+}
+
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-track {
     display: flex;
     gap: var(--grp-gap, 20px);
@@ -536,11 +540,27 @@
 .grp-gutenberg-block-editor .grp-style-creative .grp-review-meta {
     justify-content: var(--grp-meta-justify, center);
     text-align: var(--grp-text-align, center);
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
 }
 
 .grp-gutenberg-block-editor .grp-style-creative .grp-review-author {
     align-items: var(--grp-meta-align, center);
     text-align: var(--grp-text-align, center);
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review {
+    backdrop-filter: blur(var(--grp-creative-blur, 0px));
+    -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review-rating {
+    justify-content: center;
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-star {
+    font-size: var(--grp-star-size, 18px);
 }
 
 /* Optional editor alignment override – only center when wrapper explicitly opts in */
