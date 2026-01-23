@@ -708,6 +708,15 @@
     margin: 0;
 }
 
+.grp-consistent-height .grp-layout-grid .grp-reviews-grid {
+    align-items: stretch;
+}
+
+.grp-consistent-height .grp-layout-grid .grp-review-item,
+.grp-consistent-height .grp-layout-grid_carousel .grp-review-item {
+    height: 100%;
+}
+
 /* Ensure minimum height for consistency */
 .grp-consistent-height .grp-review {
     min-height: 200px;

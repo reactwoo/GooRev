@@ -299,3 +299,28 @@
 .elementor-widget-grp-reviews .grp-theme-light .grp-review-date {
     color: var(--grp-date-color, #666);
 }
+
+/* Consistent height (Elementor editor/preview) */
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-carousel .grp-carousel-track {
+    align-items: stretch;
+}
+
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-carousel .grp-review {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-carousel .grp-review-content,
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-carousel .grp-review-text {
+    flex: 1;
+}
+
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-grid .grp-reviews-grid {
+    align-items: stretch;
+}
+
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-grid .grp-review-item,
+.elementor-widget-grp-reviews .grp-consistent-height .grp-layout-grid_carousel .grp-review-item {
+    height: 100%;
+}

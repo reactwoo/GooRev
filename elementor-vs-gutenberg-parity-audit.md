@@ -275,6 +275,57 @@ Both sides rely on `--grp-*` variables. Gutenberg sets variables in JS and PHP, 
 - Added server-side dots for Gutenberg preview to mirror frontend.
 - Split creative gradient handling to scalar attributes and object fallback for Elementor.
 
+### Latest feedback – Creative Card (Elementor + Gutenberg)
+- **Duplicate avatar size control**
+  - **Editor:** Elementor
+  - **Preview status:** Partial
+  - **Frontend status:** Partial
+  - **Expected vs actual:** Single authoritative avatar size control; current Style Customization avatar size does not apply, Creative control does.
+  - **Root cause hypothesis:** Controls write to different settings; generic avatar size not mapped to creative.
+  - **Fix approach + acceptance test:** Hide generic avatar size when style is Creative or link both to the same value. Avatar size updates preview immediately.
+- **Consistent height still broken**
+  - **Editor:** Elementor
+  - **Preview status:** Broken
+  - **Frontend status:** Broken
+  - **Expected vs actual:** Consistent height should equalize cards in grid + carousel; cards remain uneven.
+  - **Root cause hypothesis:** Elementor switcher returns `yes`, but shortcode expects `true`, so `grp-consistent-height` never applies.
+  - **Fix approach + acceptance test:** Normalize to `true/false` in Elementor render. Cards equal height when enabled.
+- **Gradient background controls not overriding**
+  - **Editor:** Elementor
+  - **Preview status:** Broken
+  - **Frontend status:** Broken
+  - **Expected vs actual:** Gradient controls override defaults and apply angle/stop positions; defaults remain.
+  - **Root cause hypothesis:** Default background overrides control output; gradient values not wired to CSS vars.
+  - **Fix approach + acceptance test:** Map creative gradient to wrapper CSS vars and ensure theme defaults do not override. Gradient changes update preview + frontend.
+- **Horizontal cropping still broken**
+  - **Editor:** Gutenberg
+  - **Preview status:** Broken
+  - **Frontend status:** Unknown
+  - **Expected vs actual:** 1–2 columns clip extra cards; all cards remain visible.
+  - **Root cause hypothesis:** Creative viewport overflow rules not enforced in editor.
+  - **Fix approach + acceptance test:** Enforce frame → viewport clipping in editor CSS. Extra cards clipped in preview.
+- **Consistent height not working**
+  - **Editor:** Gutenberg
+  - **Preview status:** Broken
+  - **Frontend status:** Broken
+  - **Expected vs actual:** Consistent height should stretch cards in grid + carousel; remains uneven.
+  - **Root cause hypothesis:** Grid containers do not stretch; missing consistent-height rules for grid.
+  - **Fix approach + acceptance test:** Add grid stretch rules and ensure review card flex grows. Uniform height when enabled.
+- **Creative controls not applying in preview**
+  - **Editor:** Gutenberg
+  - **Preview status:** Broken
+  - **Frontend status:** Partial
+  - **Expected vs actual:** Gradient/avatar/star/text size apply live; only text color works.
+  - **Root cause hypothesis:** Creative attributes not injected into preview CSS vars and SSR key.
+  - **Fix approach + acceptance test:** Bind creative attrs to wrapper vars and SSR key. Preview updates without saving.
+- **Loop option missing**
+  - **Editor:** Both
+  - **Preview status:** Broken
+  - **Frontend status:** Broken
+  - **Expected vs actual:** Loop toggle enables infinite carousel; no control exists.
+  - **Root cause hypothesis:** No attribute/control; frontend JS always loops.
+  - **Fix approach + acceptance test:** Add loop control in Elementor + Gutenberg, pass to data-options, honor in JS. Carousel loops when enabled.
+
 ### 2.1 Consistent height broken (Elementor regression)
 - **Editor:** Elementor
 - **Preview status:** Broken

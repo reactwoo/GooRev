@@ -218,6 +218,10 @@
                 type: 'boolean',
                 default: true
             },
+            loop: {
+                type: 'boolean',
+                default: true
+            },
             consistent_height: {
                 type: 'boolean',
                 default: false
@@ -651,6 +655,13 @@
                                     checked: attributes.autoplay,
                                     onChange: function(value) {
                                         setAttributes({ autoplay: value });
+                                    }
+                                }),
+                                el(ToggleControl, {
+                                    label: i18n.__('Loop', 'google-reviews-plugin'),
+                                    checked: attributes.loop !== undefined ? attributes.loop : true,
+                                    onChange: function(value) {
+                                        setAttributes({ loop: value });
                                     }
                                 }),
                                 el(RangeControl, {
@@ -1324,6 +1335,7 @@
                                 speed: attributes.speed || 5000,
                                 dots: attributes.dots !== undefined ? attributes.dots : true,
                                 arrows: attributes.arrows !== undefined ? attributes.arrows : true,
+                                loop: attributes.loop !== undefined ? attributes.loop : true,
                                 consistent_height: attributes.consistent_height !== undefined ? attributes.consistent_height : false,
                                 // Ensure column defaults are correct - free users should get 3 columns for carousel
                                 cols_desktop: (attributes.cols_desktop && attributes.cols_desktop > 0) ? attributes.cols_desktop : 3,
@@ -1414,6 +1426,7 @@
                             (attributes.dot_size || '') + '-' + 
                             (attributes.dot_spacing || '') + '-' + 
                             (attributes.dot_border_radius || '') + '-' + 
+                            (attributes.loop !== undefined ? attributes.loop : true) + '-' +
                             (attributes.creative_gradient_type || '') + '-' +
                             (attributes.creative_gradient_angle || '') + '-' +
                             (attributes.creative_gradient_start || '') + '-' +

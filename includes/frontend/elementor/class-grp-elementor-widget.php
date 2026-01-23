@@ -399,6 +399,18 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             );
 
             $this->add_control(
+                'loop',
+                array(
+                    'label' => __('Loop', 'google-reviews-plugin'),
+                    'type' => \Elementor\Controls_Manager::SWITCHER,
+                    'label_on' => __('Yes', 'google-reviews-plugin'),
+                    'label_off' => __('No', 'google-reviews-plugin'),
+                    'return_value' => 'true',
+                    'default' => 'true',
+                )
+            );
+
+            $this->add_control(
                 'speed',
                 array(
                     'label' => __('Speed (ms)', 'google-reviews-plugin'),
@@ -981,6 +993,9 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             array(
                 'label' => __('Avatar Size', 'google-reviews-plugin'),
                 'type' => \Elementor\Controls_Manager::SLIDER,
+                'condition' => array(
+                    'style!' => 'creative',
+                ),
                 'size_units' => array('px'),
                 'range' => array(
                     'px' => array(
@@ -1461,6 +1476,7 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'speed' => $settings['speed'],
             'dots' => $settings['dots'],
             'arrows' => $settings['arrows'],
+            'loop' => isset($settings['loop']) ? $settings['loop'] : 'true',
             'consistent_height' => (!empty($settings['consistent_height']) && $settings['consistent_height'] === 'yes') ? 'true' : 'false',
             // Creative style specific options
             // Creative background - extract gradient data from Elementor control

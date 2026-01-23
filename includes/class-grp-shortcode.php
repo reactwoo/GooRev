@@ -63,6 +63,7 @@ class GRP_Shortcode {
             'speed' => 5000,
             'dots' => 'true',
             'arrows' => 'true',
+            'loop' => 'true',
             'responsive' => 'true',
             'consistent_height' => 'false',
             // Creative style specific options
@@ -124,6 +125,7 @@ class GRP_Shortcode {
         $atts['autoplay'] = filter_var($atts['autoplay'], FILTER_VALIDATE_BOOLEAN);
         $atts['dots'] = filter_var($atts['dots'], FILTER_VALIDATE_BOOLEAN);
         $atts['arrows'] = filter_var($atts['arrows'], FILTER_VALIDATE_BOOLEAN);
+        $atts['loop'] = filter_var($atts['loop'], FILTER_VALIDATE_BOOLEAN);
         $atts['responsive'] = filter_var($atts['responsive'], FILTER_VALIDATE_BOOLEAN);
         
         // Get reviews from database first
@@ -441,6 +443,7 @@ class GRP_Shortcode {
             'speed' => intval($atts['speed']),
             'dots' => $atts['dots'],
             'arrows' => $atts['arrows'],
+            'loop' => $atts['loop'],
             'responsive' => $atts['responsive'],
             'cols_desktop' => intval($atts['cols_desktop']),
             'cols_tablet' => intval($atts['cols_tablet']),
@@ -600,6 +603,7 @@ class GRP_Shortcode {
             'speed' => intval($atts['speed']),
             'dots' => $atts['dots'],
             'arrows' => $atts['arrows'],
+            'loop' => $atts['loop'],
             'responsive' => $atts['responsive'],
             'cols_desktop' => intval($atts['cols_desktop']),
             'cols_tablet' => intval($atts['cols_tablet']),

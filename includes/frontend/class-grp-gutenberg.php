@@ -69,7 +69,7 @@ class GRP_Gutenberg {
                 }
                 
                 // Sanitize boolean attributes
-                $boolean_attrs = array('show_avatar', 'show_date', 'show_rating', 'show_reply', 'autoplay', 'dots', 'arrows', 'consistent_height');
+                $boolean_attrs = array('show_avatar', 'show_date', 'show_rating', 'show_reply', 'autoplay', 'dots', 'arrows', 'loop', 'consistent_height');
                 foreach ($boolean_attrs as $attr) {
                     if (isset($attributes[$attr])) {
                         if ($attributes[$attr] === '' || $attributes[$attr] === null) {
@@ -200,6 +200,10 @@ class GRP_Gutenberg {
                     'default' => true,
                 ),
                 'arrows' => array(
+                    'type' => 'boolean',
+                    'default' => true,
+                ),
+                'loop' => array(
                     'type' => 'boolean',
                     'default' => true,
                 ),
@@ -762,7 +766,7 @@ class GRP_Gutenberg {
         }
         
         // Booleans: convert to proper boolean
-        $boolean_attrs = array('show_avatar', 'show_date', 'show_rating', 'show_reply', 'autoplay', 'dots', 'arrows', 'consistent_height');
+        $boolean_attrs = array('show_avatar', 'show_date', 'show_rating', 'show_reply', 'autoplay', 'dots', 'arrows', 'loop', 'consistent_height');
         foreach ($boolean_attrs as $attr) {
             if (isset($attributes[$attr])) {
                 $attributes[$attr] = filter_var($attributes[$attr], FILTER_VALIDATE_BOOLEAN);
@@ -976,6 +980,7 @@ class GRP_Gutenberg {
             'speed' => isset($attributes['speed']) ? $attributes['speed'] : 5000,
             'dots' => isset($attributes['dots']) && $attributes['dots'] ? 'true' : 'false',
             'arrows' => isset($attributes['arrows']) && $attributes['arrows'] ? 'true' : 'false',
+            'loop' => isset($attributes['loop']) && $attributes['loop'] ? 'true' : 'false',
             'consistent_height' => isset($attributes['consistent_height']) && $attributes['consistent_height'] ? 'true' : 'false',
             // Creative style specific options
             'creative_gradient_type' => isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear',

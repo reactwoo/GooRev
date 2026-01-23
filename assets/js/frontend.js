@@ -59,6 +59,7 @@
         var currentIndex = 0;
         var totalItems = $items.length;
         var options = $carousel.data('options') || {};
+        var loopEnabled = options.loop !== undefined ? (options.loop === true || options.loop === 'true') : true;
         
         // Get column settings from options, with fallbacks
         var colsDesktop = options.cols_desktop || 3;
@@ -100,8 +101,13 @@
 
             // Update arrows - disable when at start/end groups
             var maxIndex = Math.max(0, totalItems - columnsPerView);
-            $prev.prop('disabled', currentIndex === 0);
-            $next.prop('disabled', currentIndex >= maxIndex);
+            if (loopEnabled) {
+                $prev.prop('disabled', false);
+                $next.prop('disabled', false);
+            } else {
+                $prev.prop('disabled', currentIndex === 0);
+                $next.prop('disabled', currentIndex >= maxIndex);
+            }
         }
 
         // Go to specific slide group
@@ -121,7 +127,7 @@
             var nextIndex = currentIndex + columnsPerView;
             if (nextIndex <= maxIndex) {
                 currentIndex = nextIndex;
-            } else {
+            } else if (loopEnabled) {
                 currentIndex = 0; // Loop to first group
             }
             updateCarousel();
@@ -133,7 +139,7 @@
             var prevIndex = currentIndex - columnsPerView;
             if (prevIndex >= 0) {
                 currentIndex = prevIndex;
-            } else {
+            } else if (loopEnabled) {
                 var maxIndex = Math.max(0, totalItems - columnsPerView);
                 currentIndex = maxIndex; // Loop to last group
             }
@@ -278,6 +284,7 @@
             var $dots = $carousel.find('.grp-dot');
 
             var options = $carousel.data('options') || {};
+            var loopEnabled = options.loop !== undefined ? (options.loop === true || options.loop === 'true') : true;
             var colsDesktop = options.cols_desktop || 3;
             var colsTablet = options.cols_tablet || 2;
             var colsMobile = options.cols_mobile || 1;
@@ -325,19 +332,32 @@
                 $dots.eq(currentPage).addClass('active');
                 // Arrows
                 var totalPages = getTotalPages();
-                $prev.prop('disabled', currentPage === 0);
-                $next.prop('disabled', currentPage === totalPages - 1);
+                if (loopEnabled) {
+                    $prev.prop('disabled', false);
+                    $next.prop('disabled', false);
+                } else {
+                    $prev.prop('disabled', currentPage === 0);
+                    $next.prop('disabled', currentPage === totalPages - 1);
+                }
             }
 
             function nextPage() {
                 var totalPages = getTotalPages();
-                currentPage = (currentPage + 1) % totalPages;
+                if (currentPage + 1 < totalPages) {
+                    currentPage = currentPage + 1;
+                } else if (loopEnabled) {
+                    currentPage = 0;
+                }
                 updateTrack();
             }
 
             function prevPage() {
                 var totalPages = getTotalPages();
-                currentPage = (currentPage - 1 + totalPages) % totalPages;
+                if (currentPage - 1 >= 0) {
+                    currentPage = currentPage - 1;
+                } else if (loopEnabled) {
+                    currentPage = totalPages - 1;
+                }
                 updateTrack();
             }
 
