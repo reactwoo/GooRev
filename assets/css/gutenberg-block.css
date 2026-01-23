@@ -149,8 +149,8 @@
 .grp-gutenberg-block .grp-style-minimal .grp-review-meta > .grp-review-author {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: var(--grp-meta-align, flex-start);
+    text-align: var(--grp-text-align, left);
     flex: 1 1 auto;
 }
 
@@ -159,6 +159,15 @@
     height: var(--grp-avatar-size, 40px);
     border-radius: 50%;
     object-fit: cover;
+}
+
+.grp-gutenberg-block-wrapper .grp-review-author,
+.grp-gutenberg-block .grp-review-author {
+    display: flex;
+    flex-direction: column;
+    align-items: var(--grp-meta-align, flex-start);
+    text-align: var(--grp-text-align, left);
+    min-width: 0;
 }
 
 .grp-gutenberg-block-wrapper .grp-author-name,
@@ -174,7 +183,7 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: var(--grp-meta-justify, flex-start) !important;
 }
 
 .grp-gutenberg-block-wrapper .grp-style-corporate .grp-review-meta .grp-review-avatar,
@@ -189,7 +198,7 @@
 }
 
 .grp-gutenberg-block .grp-review-date {
-    color: #666;
+    color: var(--grp-date-color, #666);
     font-size: 12px;
     margin-left: 0px;
 }

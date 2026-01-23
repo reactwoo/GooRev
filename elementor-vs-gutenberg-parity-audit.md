@@ -192,6 +192,82 @@ Both sides rely on `--grp-*` variables. Gutenberg sets variables in JS and PHP, 
 
 ---
 
+## Post-latest update status
+
+### Carousel horizontal cropping (preview)
+- **Status:** Preview
+- **Expected (Elementor):** 1–2 columns only show configured number of cards; overflow clipped within frame.
+- **Actual (Gutenberg):** 1–2 columns still show extra cards outside the frame.
+- **Root cause hypothesis:** Editor CSS not fully enforcing viewport clipping; preview wrapper styles may not mirror frontend frame/viewport contract.
+- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `.grp-carousel-frame`, `.grp-carousel-viewport`, `.grp-carousel-track`
+- **Fix approach:** Ensure editor uses frame → viewport (overflow hidden) → track; enforce overflow hidden with padding for shadows.
+- **Acceptance test:** In editor preview, 1–2 columns show only visible cards inside frame; no overflow.
+
+### Card background color not applying
+- **Status:** Both
+- **Expected (Elementor):** Card background updates in preview and frontend when control changes.
+- **Actual (Gutenberg):** Preview stays white; frontend unverified but treat as broken until confirmed.
+- **Root cause hypothesis:** Editor theme styles hardcode background and override CSS vars; theme styles on frontend override custom vars.
+- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `assets/css/frontend.css`, `.grp-review`
+- **Fix approach:** Use CSS variables for background in editor + frontend and ensure theme styles set defaults via vars.
+- **Acceptance test:** Card background changes are visible in preview and on frontend without saving.
+
+### Dots preview + dot sizing not working
+- **Status:** Both
+- **Expected (Elementor):** Dots visible in preview; size/spacing/radius apply in preview + frontend.
+- **Actual (Gutenberg):** Dots missing in preview; dot sizing controls do not apply reliably.
+- **Root cause hypothesis:** Dots are JS-generated on frontend only; editor lacks dot markup and CSS variable consumption.
+- **Files/classes involved:** `includes/class-grp-shortcode.php`, `assets/css/gutenberg-block-editor.css`, `.grp-carousel-dots`, `.grp-dot`
+- **Fix approach:** Render dots server-side for preview; add editor CSS for dots using vars.
+- **Acceptance test:** Dots visible in preview; size/spacing/radius update in preview + frontend.
+
+### Arrows preview not applying
+- **Status:** Preview
+- **Expected (Elementor):** Arrow icon/color/radius/position update live in editor.
+- **Actual (Gutenberg):** Arrow styles only reflect on frontend; preview stays static.
+- **Root cause hypothesis:** Editor CSS lacks arrow styling and variable consumption.
+- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `.grp-carousel-prev`, `.grp-carousel-next`
+- **Fix approach:** Mirror frontend arrow CSS in editor and consume CSS vars from wrapper.
+- **Acceptance test:** Arrow styling changes apply immediately in preview.
+
+### Text alignment controls not working / incomplete
+- **Status:** Both
+- **Expected (Elementor):** Text alignment applies consistently to review text + meta + name.
+- **Actual (Gutenberg):** Alignment control does not affect layout; meta/name remain left-aligned.
+- **Root cause hypothesis:** Editor CSS forces left alignment; frontend alignment uses class-based overrides not vars.
+- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `assets/css/frontend.css`, `.grp-review`, `.grp-review-meta`, `.grp-review-author`
+- **Fix approach:** Apply alignment via CSS variables at wrapper; remove hardcoded left alignment.
+- **Acceptance test:** Center alignment centers review text + meta + name in preview + frontend.
+
+### Box shadow control UX + correctness
+- **Status:** Both
+- **Expected (Elementor):** Shadow control updates card shadow in preview + frontend.
+- **Actual (Gutenberg):** Shadow input unclear; results inconsistent in preview.
+- **Root cause hypothesis:** Shadow value not mapped to CSS vars in editor; theme/default shadow overrides.
+- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `assets/css/frontend.css`, `.grp-review`
+- **Fix approach:** Map shadow input to `--grp-card-shadow` and consume in editor + frontend.
+- **Acceptance test:** Card shadow changes are visible in preview + frontend.
+
+### Light/Dark theme toggle not working
+- **Status:** Preview
+- **Expected (Elementor):** Theme toggle changes preview and frontend output.
+- **Actual (Gutenberg):** Theme toggle does not change review preview.
+- **Root cause hypothesis:** Editor theme styles not applied or overridden; theme values not represented via vars.
+- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `.grp-theme-dark`, `.grp-theme-light`
+- **Fix approach:** Add theme variables in editor CSS and ensure review styles use vars.
+- **Acceptance test:** Theme toggle changes preview and frontend styles.
+
+### Avatar size controls not applying
+- **Status:** Both
+- **Expected (Elementor):** Avatar size updates in preview + frontend.
+- **Actual (Gutenberg):** Avatar size does not reflect reliably in preview/frontend.
+- **Root cause hypothesis:** Style-specific avatar rules override size; editor lacks var-based sizing.
+- **Files/classes involved:** `assets/css/frontend.css`, `assets/css/gutenberg-block-editor.css`, `.grp-review-avatar img`
+- **Fix approach:** Replace hardcoded avatar sizes with CSS vars and update style-specific defaults.
+- **Acceptance test:** Avatar size changes apply in preview + frontend for all styles.
+
+---
+
 ## Fix Plan (Prioritized)
 
 ### Priority 0 — Blockers (SSR + attribute validation)

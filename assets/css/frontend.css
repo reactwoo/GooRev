@@ -47,7 +47,7 @@
 }
 
 .grp-star-empty {
-    color: #ddd;
+    color: var(--grp-star-empty-color, #ddd);
 }
 
 .grp-review-text {
@@ -158,8 +158,8 @@
 .grp-review-author {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: var(--grp-meta-align, flex-start);
+    text-align: var(--grp-text-align, left);
     min-width: 0;
 }
 
@@ -244,7 +244,7 @@
 }
 
 .grp-review-date {
-    color: #666;
+    color: var(--grp-date-color, #666);
     font-size: 12px;
     margin-left: 0px;
 }
@@ -586,7 +586,7 @@
 .grp-layout-grid_carousel .grp-carousel-prev,
 .grp-layout-grid_carousel .grp-carousel-next {
     position: absolute;
-    top: 50%;
+    top: calc(50% + var(--grp-arrow-vertical, 0px));
     transform: translateY(-50%);
     background: var(--grp-arrow-background-color, var(--grp-arrow-bg, rgba(0, 0, 0, 0.5)));
     color: var(--grp-arrow-icon-color, var(--grp-arrow-color, #ffffff));
@@ -837,8 +837,8 @@
 }
 
 .grp-responsive .grp-review-avatar img {
-    width: 35px;
-    height: 35px;
+    width: var(--grp-avatar-size, 35px);
+    height: var(--grp-avatar-size, 35px);
 }
 
 @media (max-width: 768px) {
@@ -888,7 +888,7 @@
 /* Modern style avatar placement (badge sitting on top border of card) */
 .grp-style-modern .grp-review {
     /* Create extra space so rating/text don't collide with the avatar badge */
-    padding-top: 28px;
+    padding-top: calc((var(--grp-avatar-size, 48px) / 2) + 4px);
 }
 
 .grp-style-modern .grp-review > .grp-review-avatar {
@@ -901,8 +901,8 @@
 }
 
 .grp-style-modern .grp-review > .grp-review-avatar img {
-    width: 48px;
-    height: 48px;
+    width: var(--grp-avatar-size, 48px);
+    height: var(--grp-avatar-size, 48px);
     border-radius: 50%;
     object-fit: cover;
     display: block;
@@ -970,37 +970,53 @@
 }
 
 /* Theme Styles */
-.grp-theme-dark .grp-review {
-    background: #2d2d2d;
-    color: #f0f0f0;
-    border-color: #444;
+.grp-theme-dark {
+    --grp-card-bg: #2d2d2d;
+    --grp-border-color: #444;
+    --grp-text-color: #e0e0e0;
+    --grp-date-color: #999;
+    --grp-star-empty-color: #555;
 }
 
-.grp-theme-dark .grp-review-text {
-    color: #e0e0e0;
+.grp-theme-light {
+    --grp-card-bg: #ffffff;
+    --grp-border-color: #e0e0e0;
+    --grp-text-color: #333;
+    --grp-date-color: #666;
+    --grp-star-empty-color: #ddd;
 }
 
-.grp-theme-dark .grp-author-name {
-    color: #ffffff;
-}
-
-.grp-theme-dark .grp-review-date {
-    color: #999;
-}
-
-.grp-theme-dark .grp-star-empty {
-    color: #555;
-}
-
+.grp-theme-dark .grp-review,
 .grp-theme-light .grp-review {
-    background: #ffffff;
-    color: #333;
+    background: var(--grp-card-bg, #fff);
+    color: var(--grp-text-color, #333);
+    border-color: var(--grp-border-color, #e0e0e0);
+}
+
+.grp-theme-dark .grp-review-text,
+.grp-theme-light .grp-review-text {
+    color: var(--grp-text-color, #333);
+}
+
+.grp-theme-dark .grp-author-name,
+.grp-theme-light .grp-author-name {
+    color: var(--grp-text-color, #333);
+}
+
+.grp-theme-dark .grp-review-date,
+.grp-theme-light .grp-review-date {
+    color: var(--grp-date-color, #666);
+}
+
+.grp-theme-dark .grp-star-empty,
+.grp-theme-light .grp-star-empty {
+    color: var(--grp-star-empty-color, #ddd);
 }
 
 /* Classic template: slightly larger avatar by default */
 .grp-style-classic .grp-review-avatar img {
-    width: 48px;
-    height: 48px;
+    width: var(--grp-avatar-size, 48px);
+    height: var(--grp-avatar-size, 48px);
 }
 
 /* CLASSIC & MINIMAL: force meta row layout to stay inline across themes/builders */
@@ -1009,7 +1025,7 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: flex-start !important;
+    justify-content: var(--grp-meta-justify, flex-start) !important;
     gap: 12px;
     width: 100%;
 }
@@ -1029,18 +1045,9 @@
 .grp-style-minimal .grp-review-meta > .grp-review-author {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+    align-items: var(--grp-meta-align, flex-start);
+    text-align: var(--grp-text-align, left);
     flex: 1 1 auto;
-}
-
-/* Classic avatar sizing (no inline styles required) */
-.grp-style-classic .grp-review-avatar img {
-    display: block;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
 }
 
 /* List Layout Alignment Fixes */

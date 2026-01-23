@@ -1207,6 +1207,7 @@
                             if (attributes.custom_text_align) {
                                 styleVars['--grp-text-align'] = attributes.custom_text_align;
                                 styleVars['--grp-meta-justify'] = attributes.custom_text_align === 'center' ? 'center' : (attributes.custom_text_align === 'right' ? 'flex-end' : 'flex-start');
+                                styleVars['--grp-meta-align'] = attributes.custom_text_align === 'center' ? 'center' : (attributes.custom_text_align === 'right' ? 'flex-end' : 'flex-start');
                             }
                             
                             // Arrow styling variables (match Elementor naming)
