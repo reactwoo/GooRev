@@ -344,7 +344,11 @@ class GRP_Shortcode {
                 ? 'radial-gradient(circle, ' . $start_color . ' ' . $start_pos . '%, ' . $end_color . ' ' . $end_pos . '%)'
                 : 'linear-gradient(' . $angle . 'deg, ' . $start_color . ' ' . $start_pos . '%, ' . $end_color . ' ' . $end_pos . '%)';
 
-            $style_vars[] = '--grp-card-bg:' . esc_attr($gradient);
+            $style_vars[] = '--grp-card-bg:transparent';
+            $style_vars[] = '--grp-gradient_css:' . esc_attr($gradient);
+            $style_vars[] = '--grp-gradient_blue:' . esc_attr($start_color);
+            $style_vars[] = '--grp-gradient_red:' . esc_attr($end_color);
+            $style_vars[] = '--grp-gradient_opacity:1';
             if (!empty($atts['creative_text_color'])) {
                 $style_vars[] = '--grp-text-color:' . esc_attr($atts['creative_text_color']);
                 $style_vars[] = '--grp-text:' . esc_attr($atts['creative_text_color']);
@@ -373,7 +377,7 @@ class GRP_Shortcode {
                 $style_vars[] = '--grp-card-radius:' . $top . $unit . ' ' . $right . $unit . ' ' . $bottom . $unit . ' ' . $left . $unit;
             }
             if (isset($atts['creative_glass_effect']) && $atts['creative_glass_effect'] === 'yes') {
-                $style_vars[] = '--grp-card-bg:rgba(255, 255, 255, 0.25)';
+                $style_vars[] = '--grp-gradient_css:rgba(255, 255, 255, 0.25)';
                 $style_vars[] = '--grp-border-color:rgba(255, 255, 255, 0.3)';
                 $style_vars[] = '--grp-creative-blur:20px';
             } else {

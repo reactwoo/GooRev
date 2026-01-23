@@ -240,9 +240,25 @@
 
 /* Creative style layout in Elementor */
 .elementor-widget-grp-reviews .grp-style-creative .grp-review {
+    position: relative;
+    background: transparent;
     backdrop-filter: blur(var(--grp-creative-blur, 0px));
     -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
     text-align: center;
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-review::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+    opacity: var(--grp-gradient_opacity, 1);
+    z-index: 0;
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-review > * {
+    position: relative;
+    z-index: 1;
 }
 
 .elementor-widget-grp-reviews .grp-style-creative .grp-review-meta {
@@ -288,6 +304,10 @@
     background: var(--grp-card-bg, #fff);
     color: var(--grp-text-color, #333);
     border-color: var(--grp-border-color, #e0e0e0);
+}
+
+.elementor-widget-grp-reviews .grp-style-creative .grp-review {
+    background: transparent;
 }
 
 .elementor-widget-grp-reviews .grp-theme-dark .grp-review-text,

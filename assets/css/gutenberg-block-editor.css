@@ -64,6 +64,11 @@
     border-color: var(--grp-border-color, #444);
 }
 
+/* Creative style should not inherit theme background blocks */
+.grp-gutenberg-block-editor .grp-style-creative .grp-review {
+    background: transparent;
+}
+
 .grp-gutenberg-block-editor .grp-review-rating {
     margin-bottom: 15px;
     justify-content: var(--grp-meta-justify, flex-start);
@@ -560,8 +565,24 @@
 }
 
 .grp-gutenberg-block-editor .grp-style-creative .grp-review {
+    position: relative;
+    background: transparent;
     backdrop-filter: blur(var(--grp-creative-blur, 0px));
     -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+    opacity: var(--grp-gradient_opacity, 1);
+    z-index: 0;
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-review > * {
+    position: relative;
+    z-index: 1;
 }
 
 .grp-gutenberg-block-editor .grp-style-creative .grp-carousel-frame {

@@ -326,6 +326,28 @@ Both sides rely on `--grp-*` variables. Gutenberg sets variables in JS and PHP, 
   - **Root cause hypothesis:** No attribute/control; frontend JS always loops.
   - **Fix approach + acceptance test:** Add loop control in Elementor + Gutenberg, pass to data-options, honor in JS. Carousel loops when enabled.
 
+### Creative Card — Latest Findings (Blockers + Next Steps)
+- **BLOCKER: Gradient/background override**
+  - **Where:** Both
+  - **Cause:** Hard-coded backgrounds and `!important` rules override variables; multiple layers compete (`.grp-review`, `.grp-style-creative .grp-review::before`).
+  - **Fix:** Single background owner uses `--grp-gradient_css` in `::before`; remove/neutralize competing backgrounds.
+  - **Acceptance test:** Creative gradient changes apply immediately in Elementor + Gutenberg without defaults overriding.
+- **BLOCKER: Gutenberg carousel cropping**
+  - **Where:** Gutenberg
+  - **Cause:** Viewport/track clipping not enforced; overflow visible for 1–2 columns.
+  - **Fix:** Enforce frame → viewport (overflow hidden) → track (flex + max-width:100%) contract in editor + frontend CSS.
+  - **Acceptance test:** 1–2 columns clip extra cards in preview + frontend.
+- **Creative sizing controls not applying**
+  - **Where:** Gutenberg
+  - **Cause:** Attributes not injected as CSS vars or CSS not consuming vars (avatar/star size).
+  - **Fix:** Bind sizes to wrapper vars (`--grp-avatar-size`, `--grp-star-size`) and consume in creative CSS.
+  - **Acceptance test:** Avatar/star size updates live in preview and matches frontend after save.
+- **Deduplicate avatar size controls**
+  - **Where:** Elementor + Gutenberg
+  - **Cause:** Multiple controls writing to different attributes.
+  - **Fix:** Single authoritative control or link both to same attribute.
+  - **Acceptance test:** One value updates preview + frontend.
+
 ### 2.1 Consistent height broken (Elementor regression)
 - **Editor:** Elementor
 - **Preview status:** Broken

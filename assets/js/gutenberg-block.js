@@ -992,7 +992,7 @@
                                 max: 40,
                                 step: 1
                             }),
-                            el(RangeControl, {
+                            (attributes.style !== 'creative') ? el(RangeControl, {
                                 label: i18n.__('Avatar Size (px)', 'google-reviews-plugin'),
                                 value: attributes.custom_avatar_size !== undefined ? attributes.custom_avatar_size : 40,
                                 onChange: function(value) {
@@ -1001,7 +1001,7 @@
                                 min: 20,
                                 max: 80,
                                 step: 1
-                            }),
+                            }) : null,
                             el(TextControl, {
                                 label: i18n.__('Card Box Shadow', 'google-reviews-plugin'),
                                 value: attributes.custom_box_shadow || '',
@@ -1244,7 +1244,11 @@
                                     ? 'radial-gradient(circle, ' + startColor + ' 0%, ' + endColor + ' 100%)'
                                     : 'linear-gradient(' + angle + 'deg, ' + startColor + ' 0%, ' + endColor + ' 100%)';
 
-                                styleVars['--grp-card-bg'] = gradient;
+                                styleVars['--grp-card-bg'] = 'transparent';
+                                styleVars['--grp-gradient_css'] = gradient;
+                                styleVars['--grp-gradient_blue'] = startColor;
+                                styleVars['--grp-gradient_red'] = endColor;
+                                styleVars['--grp-gradient_opacity'] = '1';
                                 styleVars['--grp-text-color'] = attributes.creative_text_color || '#ffffff';
                                 styleVars['--grp-date-color'] = attributes.creative_date_color || '#ffffff';
                                 styleVars['--grp-star-color'] = attributes.creative_star_color || '#FFD700';
@@ -1253,7 +1257,7 @@
                                 styleVars['--grp-card-radius'] = (attributes.creative_border_radius_value || 16) + 'px';
 
                                 if (attributes.creative_glass_effect === 'yes') {
-                                    styleVars['--grp-card-bg'] = 'rgba(255, 255, 255, 0.25)';
+                                    styleVars['--grp-gradient_css'] = 'rgba(255, 255, 255, 0.25)';
                                     styleVars['--grp-border-color'] = 'rgba(255, 255, 255, 0.3)';
                                     styleVars['--grp-creative-blur'] = '20px';
                                 } else {

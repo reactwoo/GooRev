@@ -291,8 +291,7 @@
 
 /* Carousel Viewport: Clips overflow while preserving shadows */
 .grp-layout-carousel .grp-carousel-viewport {
-    overflow-x: hidden;
-    overflow-y: visible;
+    overflow: hidden;
     margin: -16px;
     padding: 16px;
     position: relative;
@@ -819,6 +818,8 @@
 
 /* Creative style background properties - supports Elementor gradients */
 .grp-style-creative .grp-review {
+    position: relative;
+    background: transparent;
     /* Ensure proper background rendering for gradients */
     background-attachment: initial;
     background-clip: initial;
@@ -828,6 +829,20 @@
     min-height: 150px; /* Ensure cards have height for gradient visibility */
     backdrop-filter: blur(var(--grp-creative-blur, 0px));
     -webkit-backdrop-filter: blur(var(--grp-creative-blur, 0px));
+}
+
+.grp-style-creative .grp-review::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+    opacity: var(--grp-gradient_opacity, 1);
+    z-index: 0;
+}
+
+.grp-style-creative .grp-review > * {
+    position: relative;
+    z-index: 1;
 }
 
 .grp-style-creative .grp-review-meta {
@@ -1049,6 +1064,11 @@
     color: var(--grp-star-empty-color, #ddd);
 }
 
+/* Creative style should not inherit theme background blocks */
+.grp-style-creative .grp-review {
+    background: transparent;
+}
+
 /* Classic template: slightly larger avatar by default */
 .grp-style-classic .grp-review-avatar img {
     width: var(--grp-avatar-size, 48px);
@@ -1116,15 +1136,15 @@
 
 /* Glass Effect (non-creative styles) */
 .grp-review.grp-glass-effect {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
+    background: var(--grp-glass-bg, rgba(255, 255, 255, 0.25));
+    border: 1px solid var(--grp-glass-border, rgba(255, 255, 255, 0.3));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 .grp-theme-dark .grp-review.grp-glass-effect {
-    background: rgba(45, 45, 45, 0.5) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    --grp-glass-bg: rgba(45, 45, 45, 0.5);
+    --grp-glass-border: rgba(255, 255, 255, 0.1);
 }
 
 /* Grid Carousel - ensure arrows/dots are visible */
