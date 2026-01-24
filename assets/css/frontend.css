@@ -840,7 +840,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+    background: var(--grp-gradient_css, linear-gradient(135deg, #4285F4 0%, #EA4335 100%));
     opacity: var(--grp-gradient_opacity, 1);
     z-index: 0;
 }

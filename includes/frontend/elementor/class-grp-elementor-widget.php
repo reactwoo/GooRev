@@ -1478,13 +1478,13 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
             'arrows' => $settings['arrows'],
             'loop' => isset($settings['loop']) ? $settings['loop'] : 'true',
             'consistent_height' => (!empty($settings['consistent_height']) && $settings['consistent_height'] === 'yes') ? 'true' : 'false',
-            // Creative style specific options
+            // Creative style specific options (defaults only when empty/unset; never overwrite user gradient)
             // Creative background - extract gradient data from Elementor control
             'creative_background' => isset($settings['creative_background']) ? $settings['creative_background'] : array(),
-            'creative_gradient_type' => isset($settings['creative_background']['gradient_type']) ? $settings['creative_background']['gradient_type'] : 'linear',
-            'creative_gradient_angle' => isset($settings['creative_background']['gradient_angle']['size']) ? $settings['creative_background']['gradient_angle']['size'] : 135,
-            'creative_gradient_start' => isset($settings['creative_background']['color']) ? $settings['creative_background']['color'] : '#4285F4',
-            'creative_gradient_end' => isset($settings['creative_background']['color_b']) ? $settings['creative_background']['color_b'] : '#EA4335',
+            'creative_gradient_type' => (isset($settings['creative_background']['gradient_type']) && $settings['creative_background']['gradient_type'] !== '') ? $settings['creative_background']['gradient_type'] : 'linear',
+            'creative_gradient_angle' => (isset($settings['creative_background']['gradient_angle']['size']) && $settings['creative_background']['gradient_angle']['size'] !== '' && $settings['creative_background']['gradient_angle']['size'] !== null) ? intval($settings['creative_background']['gradient_angle']['size']) : 135,
+            'creative_gradient_start' => (isset($settings['creative_background']['color']) && $settings['creative_background']['color'] !== '') ? $settings['creative_background']['color'] : '#4285F4',
+            'creative_gradient_end' => (isset($settings['creative_background']['color_b']) && $settings['creative_background']['color_b'] !== '') ? $settings['creative_background']['color_b'] : '#EA4335',
             'creative_text_color' => isset($settings['creative_text_color']) ? $settings['creative_text_color'] : '#ffffff',
             'creative_date_color' => isset($settings['creative_date_color']) ? $settings['creative_date_color'] : '#ffffff',
             'creative_star_color' => isset($settings['creative_star_color']) ? $settings['creative_star_color'] : '#FFD700',

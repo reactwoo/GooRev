@@ -911,11 +911,11 @@ class GRP_Gutenberg {
             'arrows' => isset($attributes['arrows']) && $attributes['arrows'] ? 'true' : 'false',
             'loop' => isset($attributes['loop']) && $attributes['loop'] ? 'true' : 'false',
             'consistent_height' => isset($attributes['consistent_height']) && $attributes['consistent_height'] ? 'true' : 'false',
-            // Creative style specific options
-            'creative_gradient_type' => isset($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear',
-            'creative_gradient_angle' => isset($attributes['creative_gradient_angle']) ? $attributes['creative_gradient_angle'] : 135,
-            'creative_gradient_start' => isset($attributes['creative_gradient_start']) ? $attributes['creative_gradient_start'] : '#4285F4',
-            'creative_gradient_end' => isset($attributes['creative_gradient_end']) ? $attributes['creative_gradient_end'] : '#EA4335',
+            // Creative style specific options (defaults only when empty/unset; never overwrite user gradient)
+            'creative_gradient_type' => !empty($attributes['creative_gradient_type']) ? $attributes['creative_gradient_type'] : 'linear',
+            'creative_gradient_angle' => (isset($attributes['creative_gradient_angle']) && $attributes['creative_gradient_angle'] !== '' && $attributes['creative_gradient_angle'] !== null) ? $attributes['creative_gradient_angle'] : 135,
+            'creative_gradient_start' => (isset($attributes['creative_gradient_start']) && $attributes['creative_gradient_start'] !== '') ? $attributes['creative_gradient_start'] : '#4285F4',
+            'creative_gradient_end' => (isset($attributes['creative_gradient_end']) && $attributes['creative_gradient_end'] !== '') ? $attributes['creative_gradient_end'] : '#EA4335',
             'creative_text_color' => isset($attributes['creative_text_color']) ? $attributes['creative_text_color'] : '#ffffff',
             'creative_date_color' => isset($attributes['creative_date_color']) ? $attributes['creative_date_color'] : '#ffffff',
             'creative_star_color' => isset($attributes['creative_star_color']) ? $attributes['creative_star_color'] : '#FFD700',

@@ -301,12 +301,13 @@ class GRP_Shortcode {
         }
 
         // Creative style variables (use CSS vars on wrapper for preview/frontend parity)
+        // Defaults apply only when values are empty/unset; never overwrite user-selected gradient.
         if (isset($atts['style']) && $atts['style'] === 'creative') {
             $bg_data = (isset($atts['creative_background']) && is_array($atts['creative_background'])) ? $atts['creative_background'] : array();
-            $gradient_type = isset($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
-            $start_color = isset($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
-            $end_color = isset($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
-            $angle = isset($atts['creative_gradient_angle']) ? intval($atts['creative_gradient_angle']) : 135;
+            $gradient_type = !empty($atts['creative_gradient_type']) ? $atts['creative_gradient_type'] : 'linear';
+            $start_color = !empty($atts['creative_gradient_start']) ? $atts['creative_gradient_start'] : '#4285F4';
+            $end_color = !empty($atts['creative_gradient_end']) ? $atts['creative_gradient_end'] : '#EA4335';
+            $angle = (isset($atts['creative_gradient_angle']) && $atts['creative_gradient_angle'] !== '' && $atts['creative_gradient_angle'] !== null) ? intval($atts['creative_gradient_angle']) : 135;
             $start_pos = 0;
             $end_pos = 100;
 

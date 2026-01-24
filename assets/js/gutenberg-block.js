@@ -1236,10 +1236,11 @@
                             }
 
                             if (attributes.style === 'creative') {
-                                var gradientType = attributes.creative_gradient_type || 'linear';
-                                var startColor = attributes.creative_gradient_start || '#4285F4';
-                                var endColor = attributes.creative_gradient_end || '#EA4335';
-                                var angle = attributes.creative_gradient_angle || 135;
+                                // Use default only when null/undefined/''; never overwrite user-selected gradient.
+                                var gradientType = (attributes.creative_gradient_type != null && attributes.creative_gradient_type !== '') ? attributes.creative_gradient_type : 'linear';
+                                var startColor = (attributes.creative_gradient_start != null && attributes.creative_gradient_start !== '') ? attributes.creative_gradient_start : '#4285F4';
+                                var endColor = (attributes.creative_gradient_end != null && attributes.creative_gradient_end !== '') ? attributes.creative_gradient_end : '#EA4335';
+                                var angle = (attributes.creative_gradient_angle != null && attributes.creative_gradient_angle !== '') ? attributes.creative_gradient_angle : 135;
                                 var gradient = gradientType === 'radial'
                                     ? 'radial-gradient(circle, ' + startColor + ' 0%, ' + endColor + ' 100%)'
                                     : 'linear-gradient(' + angle + 'deg, ' + startColor + ' 0%, ' + endColor + ' 100%)';

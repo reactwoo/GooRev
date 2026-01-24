@@ -1149,7 +1149,7 @@ class GRP_Styles {
             content: '';
             position: absolute;
             inset: 0;
-            background: var(--grp-gradient_css, linear-gradient(135deg, var(--grp-gradient_blue, #4285F4), var(--grp-gradient_red, #EA4335)));
+            background: var(--grp-gradient_css, linear-gradient(135deg, #4285F4 0%, #EA4335 100%));
             opacity: var(--grp-gradient_opacity, 1);
             z-index: 0;
         }
@@ -1164,26 +1164,7 @@ class GRP_Styles {
             box-shadow: var(--grp-card_shadow, 0 12px 32px rgba(0, 0, 0, 0.2));
         }
         
-        /* Random gradient variations - use data attributes for different colors */
-        .grp-style-creative .grp-review[data-gradient='blue'] {
-            --grp-gradient_css: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
-        }
-        
-        .grp-style-creative .grp-review[data-gradient='red'] {
-            --grp-gradient_css: linear-gradient(135deg, #EA4335 0%, #FBBC05 100%);
-        }
-        
-        .grp-style-creative .grp-review[data-gradient='yellow'] {
-            --grp-gradient_css: linear-gradient(135deg, #FBBC05 0%, #EA4335 100%);
-        }
-        
-        .grp-style-creative .grp-review[data-gradient='green'] {
-            --grp-gradient_css: linear-gradient(135deg, #34A853 0%, #4285F4 100%);
-        }
-        
-        .grp-style-creative .grp-review[data-gradient='purple'] {
-            --grp-gradient_css: linear-gradient(135deg, #9C27B0 0%, #E91E63 100%);
-        }
+        /* data-gradient overrides removed: user --grp-gradient_css from controls must always win */
         
         .grp-style-creative .grp-review-quote {
             font-size: 48px;
