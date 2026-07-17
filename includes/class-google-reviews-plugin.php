@@ -66,6 +66,7 @@ class Google_Reviews_Plugin {
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-styles.php';
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-cache.php';
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-license.php';
+        require_once GRP_PLUGIN_DIR . 'includes/class-grp-updater.php';
         require_once GRP_PLUGIN_DIR . 'includes/class-grp-addons.php';
         
         // WooCommerce integration (load class so it can hook into addon actions)
@@ -98,8 +99,8 @@ class Google_Reviews_Plugin {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_action('widgets_init', array($this, 'register_widgets'));
-        add_action('elementor/widgets/widgets_registered', array($this, 'register_elementor_widgets'));
         add_action('init', array($this, 'register_gutenberg_blocks'));
+        add_action('plugins_loaded', array($this, 'init_elementor_integration'), 20);
         
         // Initialize Review Widgets addon early - it will register its menu on admin_menu hook with priority 20
         // This ensures the parent menu 'google-reviews' exists (registered by GRP_Admin at priority 10)
@@ -245,13 +246,21 @@ class Google_Reviews_Plugin {
     }
     
     /**
-     * Register Elementor widgets
+     * Bootstrap Elementor integration once (avoids duplicate widget registration).
      */
-    public function register_elementor_widgets() {
-        if (class_exists('GRP_Elementor')) {
-            $elementor = new GRP_Elementor();
-            $elementor->register_widgets();
+    public function init_elementor_integration() {
+        if (!did_action('elementor/loaded') && !class_exists('\\Elementor\\Plugin')) {
+            return;
         }
+        if (!class_exists('GRP_Elementor')) {
+            return;
+        }
+        static $bootstrapped = false;
+        if ($bootstrapped) {
+            return;
+        }
+        $bootstrapped = true;
+        new GRP_Elementor();
     }
     
     /**

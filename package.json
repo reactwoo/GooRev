@@ -1,22 +1,28 @@
 {
-  "name": "google-reviews-plugin",
-  "version": "1.0.0",
+  "name": "reactwoo-reviews",
+  "version": "1.1.0",
   "description": "Display Google Business reviews on your WordPress site with beautiful widgets and shortcodes.",
   "main": "index.js",
   "scripts": {
+    "package:zip": "python scripts/package_zip.py",
     "build": "webpack --mode=production",
     "dev": "webpack --mode=development --watch",
     "lint": "eslint assets/js/",
     "lint:fix": "eslint assets/js/ --fix",
-    "sass": "sass assets/scss:assets/css --watch",
-    "sass:build": "sass assets/scss:assets/css --style=compressed",
     "test": "jest",
     "test:watch": "jest --watch"
+  },
+  "reactwooBuild": {
+    "pluginFolder": "reactwoo-reviews",
+    "zipFile": "reactwoo-reviews.zip",
+    "mainPhp": "reactwoo-reviews.php",
+    "versionInZipFile": true
   },
   "keywords": [
     "wordpress",
     "plugin",
     "google-reviews",
+    "reactwoo-reviews",
     "testimonials",
     "ratings",
     "google-my-business",
@@ -27,10 +33,10 @@
   ],
   "author": "ReactWoo Ltd <support@reactwoo.com>",
   "license": "GPL-2.0-or-later",
-  "homepage": "https://reactwoo.com/google-reviews-plugin",
+  "homepage": "https://reactwoo.com/reactwoo-reviews",
   "repository": {
     "type": "git",
-    "url": "https://github.com/reactwoo/google-reviews-plugin.git"
+    "url": "https://github.com/reactwoo/GooRev.git"
   },
   "bugs": {
     "url": "https://reactwoo.com/support"

@@ -143,7 +143,7 @@
 }
 
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-viewport {
-    overflow: hidden;
+    overflow: hidden !important;
     margin: -16px;
     padding: 16px;
     position: relative;
@@ -153,8 +153,13 @@
     max-width: 100%;
 }
 
-.grp-gutenberg-block-editor .grp-style-creative .grp-carousel-viewport {
+.grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-frame {
     overflow: hidden;
+    max-width: 100%;
+}
+
+.grp-gutenberg-block-editor .grp-style-creative .grp-carousel-viewport {
+    overflow: hidden !important;
 }
 
 .grp-gutenberg-block-editor .grp-layout-carousel .grp-carousel-track {

@@ -120,8 +120,8 @@ class GRP_Gutenberg {
             array(),
             GRP_PLUGIN_VERSION
         );
-        
-        register_block_type('google-reviews/reviews', array(
+
+        $reviews_args = array(
             'editor_script' => 'grp-gutenberg-block',
             'editor_style' => 'grp-gutenberg-block-editor',
             'style' => 'grp-gutenberg-block',
@@ -394,12 +394,19 @@ class GRP_Gutenberg {
                     'default' => array(),
                 ),
             ),
-        ));
+        );
+
+        $reviews_meta = GRP_PLUGIN_DIR . 'blocks/reviews';
+        if (function_exists('register_block_type_from_metadata') && file_exists($reviews_meta . '/block.json')) {
+            register_block_type_from_metadata($reviews_meta, $reviews_args);
+        } else {
+            register_block_type('google-reviews/reviews', $reviews_args);
+        }
         
         // Register Review Button block if addon is enabled
         $addons = GRP_Addons::get_instance();
         if ($addons->is_addon_enabled('review-widgets')) {
-            register_block_type('google-reviews/review-button', array(
+            $button_args = array(
                 'editor_script' => 'grp-gutenberg-block',
                 'editor_style' => 'grp-gutenberg-block-editor',
                 'style' => 'grp-review-widgets',
@@ -428,7 +435,13 @@ class GRP_Gutenberg {
                         'type' => 'string',
                     ),
                 ),
-            ));
+            );
+            $button_meta = GRP_PLUGIN_DIR . 'blocks/review-button';
+            if (function_exists('register_block_type_from_metadata') && file_exists($button_meta . '/block.json')) {
+                register_block_type_from_metadata($button_meta, $button_args);
+            } else {
+                register_block_type('google-reviews/review-button', $button_args);
+            }
         }
     }
     

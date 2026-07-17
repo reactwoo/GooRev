@@ -192,51 +192,33 @@ Both sides rely on `--grp-*` variables. Gutenberg sets variables in JS and PHP, 
 
 ---
 
-## Post-latest update status
+## Post-latest update status (1.1.0 productization)
+
+Parity CSS vars (card bg, text align, dots, arrows, creative meta, theme) are wired in `frontend.css`, `gutenberg-block*.css`, and `elementor.css`. Remaining visual QA should be done in the editor after installing `reactwoo-reviews` 1.1.0.
 
 ### Carousel horizontal cropping (preview)
-- **Status:** Preview
-- **Expected (Elementor):** 1–2 columns only show configured number of cards; overflow clipped within frame.
-- **Actual (Gutenberg):** 1–2 columns still show extra cards outside the frame.
-- **Root cause hypothesis:** Editor CSS not fully enforcing viewport clipping; preview wrapper styles may not mirror frontend frame/viewport contract.
-- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `.grp-carousel-frame`, `.grp-carousel-viewport`, `.grp-carousel-track`
-- **Fix approach:** Ensure editor uses frame → viewport (overflow hidden) → track; enforce overflow hidden with padding for shadows.
-- **Acceptance test:** In editor preview, 1–2 columns show only visible cards inside frame; no overflow.
+- **Status:** Mitigated — editor viewport uses `overflow: hidden !important` + frame clip.
+- **Acceptance test:** In editor preview, 1–2 columns show only visible cards inside frame.
 
-### Card background color not applying
-- **Status:** Both
-- **Expected (Elementor):** Card background updates in preview and frontend when control changes.
-- **Actual (Gutenberg):** Preview stays white; frontend unverified but treat as broken until confirmed.
-- **Root cause hypothesis:** Editor theme styles hardcode background and override CSS vars; theme styles on frontend override custom vars.
-- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `assets/css/frontend.css`, `.grp-review`
-- **Fix approach:** Use CSS variables for background in editor + frontend and ensure theme styles set defaults via vars.
-- **Acceptance test:** Card background changes are visible in preview and on frontend without saving.
+### Card background color
+- **Status:** Mitigated — `--grp-card-bg` consumed in editor + frontend.
 
-### Dots preview + dot sizing not working
-- **Status:** Both
-- **Expected (Elementor):** Dots visible in preview; size/spacing/radius apply in preview + frontend.
-- **Actual (Gutenberg):** Dots missing in preview; dot sizing controls do not apply reliably.
-- **Root cause hypothesis:** Dots are JS-generated on frontend only; editor lacks dot markup and CSS variable consumption.
-- **Files/classes involved:** `includes/class-grp-shortcode.php`, `assets/css/gutenberg-block-editor.css`, `.grp-carousel-dots`, `.grp-dot`
-- **Fix approach:** Render dots server-side for preview; add editor CSS for dots using vars.
-- **Acceptance test:** Dots visible in preview; size/spacing/radius update in preview + frontend.
+### Dots preview + sizing
+- **Status:** Mitigated — shortcode `render_dots()` server-side; CSS vars for size/spacing/radius.
 
-### Arrows preview not applying
-- **Status:** Preview
-- **Expected (Elementor):** Arrow icon/color/radius/position update live in editor.
-- **Actual (Gutenberg):** Arrow styles only reflect on frontend; preview stays static.
-- **Root cause hypothesis:** Editor CSS lacks arrow styling and variable consumption.
-- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `.grp-carousel-prev`, `.grp-carousel-next`
-- **Fix approach:** Mirror frontend arrow CSS in editor and consume CSS vars from wrapper.
-- **Acceptance test:** Arrow styling changes apply immediately in preview.
+### Arrows preview
+- **Status:** Mitigated — editor CSS consumes arrow CSS vars.
 
-### Text alignment controls not working / incomplete
-- **Status:** Both
-- **Expected (Elementor):** Text alignment applies consistently to review text + meta + name.
-- **Actual (Gutenberg):** Alignment control does not affect layout; meta/name remain left-aligned.
-- **Root cause hypothesis:** Editor CSS forces left alignment; frontend alignment uses class-based overrides not vars.
-- **Files/classes involved:** `assets/css/gutenberg-block-editor.css`, `assets/css/frontend.css`, `.grp-review`, `.grp-review-meta`, `.grp-review-author`
-- **Fix approach:** Apply alignment via CSS variables at wrapper; remove hardcoded left alignment.
+### Text alignment
+- **Status:** Mitigated — `--grp-text-align` / meta justify vars.
+
+### Creative style / consistent height / themes
+- **Status:** Mitigated in CSS + Elementor `consistent_height` maps `yes` → `true`.
+
+---
+
+## Historical audit notes (pre-1.1.0)
+
 - **Acceptance test:** Center alignment centers review text + meta + name in preview + frontend.
 
 ### Box shadow control UX + correctness

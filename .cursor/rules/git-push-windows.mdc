@@ -1,0 +1,26 @@
+---
+description: Plain git push for releases; diagnostic script only on failure
+alwaysApply: true
+---
+
+# Git push (agents)
+
+**Default:** use normal git — normal `git push` — no `GIT_SSH_COMMAND`. R2 publish only runs after the **tag is on GitHub**.
+
+```bash
+git push origin main "vVERSION"
+```
+
+Run **commit**, **tag**, and **push** as **separate** commands (do not chain with `&&` on Windows). A release is **not done** until `git ls-remote --tags origin "vVERSION"` shows the tag.
+
+## If plain push fails or hangs
+
+1. Stop the hung command; open a fresh shell.
+2. Retry `git push origin main "vVERSION"` in a fresh shell.
+
+## Never
+
+- Stop after commit/tag without pushing (CI will not publish).
+- Set `GIT_SSH_COMMAND` unless diagnosing SSH auth (origin is already SSH).
+- Background a push and declare the release complete.
+- Push multiple repos in parallel shell loops.

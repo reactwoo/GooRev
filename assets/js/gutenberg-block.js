@@ -501,15 +501,15 @@
                                 setAttributes({ layout: value });
                             }
                         }),
-                        el(RangeControl, {
-                            label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
-                            value: attributes.cols_desktop || 3,
-                            onChange: function(value) {
-                                setAttributes({ cols_desktop: value });
-                            },
-                            min: 1,
-                            max: 6
-                        }),
+                            el(RangeControl, {
+                                label: i18n.__('Columns (Desktop)', 'google-reviews-plugin'),
+                                value: attributes.cols_desktop || 3,
+                                onChange: function(value) {
+                                    setAttributes({ cols_desktop: value });
+                                },
+                                min: 1,
+                                max: 6
+                            }),
                         el(RangeControl, {
                             label: i18n.__('Gap (px)', 'google-reviews-plugin'),
                             value: attributes.gap || 20,
@@ -649,14 +649,14 @@
                                     setAttributes({ dots: value });
                                 }
                             }),
-                            isProUser ? el('div', {},
-                                el(ToggleControl, {
-                                    label: i18n.__('Autoplay', 'google-reviews-plugin'),
-                                    checked: attributes.autoplay,
-                                    onChange: function(value) {
-                                        setAttributes({ autoplay: value });
-                                    }
-                                }),
+                        isProUser ? el('div', {},
+                            el(ToggleControl, {
+                                label: i18n.__('Autoplay', 'google-reviews-plugin'),
+                                checked: attributes.autoplay,
+                                onChange: function(value) {
+                                    setAttributes({ autoplay: value });
+                                }
+                            }),
                                 el(ToggleControl, {
                                     label: i18n.__('Loop', 'google-reviews-plugin'),
                                     checked: attributes.loop !== undefined ? attributes.loop : true,
@@ -664,24 +664,24 @@
                                         setAttributes({ loop: value });
                                     }
                                 }),
-                                el(RangeControl, {
-                                    label: i18n.__('Speed (ms)', 'google-reviews-plugin'),
-                                    value: attributes.speed,
-                                    onChange: function(value) {
-                                        setAttributes({ speed: value });
-                                    },
-                                    min: 1000,
-                                    max: 10000,
-                                    step: 500,
-                                    disabled: !attributes.autoplay
-                                }),
+                            el(RangeControl, {
+                                label: i18n.__('Speed (ms)', 'google-reviews-plugin'),
+                                value: attributes.speed,
+                                onChange: function(value) {
+                                    setAttributes({ speed: value });
+                                },
+                                min: 1000,
+                                max: 10000,
+                                step: 500,
+                                disabled: !attributes.autoplay
+                            }),
                                 el('div', { style: { marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #ddd' } },
                                     el('strong', { style: { display: 'block', marginBottom: '8px' } }, i18n.__('Arrow Styling', 'google-reviews-plugin')),
                                     el('div', { style: { marginBottom: '12px' } },
                                         el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Size (px)', 'google-reviews-plugin')),
                                         el(RangeControl, {
                                             value: attributes.arrow_size || 32,
-                                            onChange: function(value) {
+                                onChange: function(value) {
                                                 setAttributes({ arrow_size: value });
                                             },
                                             min: 20,
@@ -748,7 +748,7 @@
                                         el('label', { style: { display: 'block', marginBottom: '4px', fontSize: '12px' } }, i18n.__('Arrow Border Radius (%)', 'google-reviews-plugin')),
                                         el(RangeControl, {
                                             value: attributes.arrow_border_radius || 50,
-                                            onChange: function(value) {
+                                onChange: function(value) {
                                                 setAttributes({ arrow_border_radius: value });
                                             },
                                             min: 0,
@@ -849,7 +849,7 @@
                                         )
                                     )
                                 )
-                            ) : el('div', {
+                        ) : el('div', {
                             style: {
                                 background: '#f0f8ff',
                                 border: '1px solid #007cba',
@@ -1169,7 +1169,7 @@
                     )
                 ),
 
-                    el('div', { className: 'grp-gutenberg-block-editor' },
+                el('div', { className: 'grp-gutenberg-block-editor' },
                     el('div', { className: 'grp-block-header' },
                         el('h3', {}, i18n.__('Google Reviews', 'google-reviews-plugin')),
                         el('p', { className: 'grp-block-description' }, 

@@ -61,11 +61,29 @@ class GRP_Elementor_Widget extends \Elementor\Widget_Base {
     public function get_keywords() {
         return ['google', 'reviews', 'testimonials', 'ratings'];
     }
+
+    /**
+     * Styles loaded in editor and frontend for this widget.
+     *
+     * @return array<int, string>
+     */
+    public function get_style_depends() {
+        return array('grp-frontend', 'grp-elementor');
+    }
+
+    /**
+     * Scripts loaded in editor and frontend for this widget.
+     *
+     * @return array<int, string>
+     */
+    public function get_script_depends() {
+        return array('grp-frontend');
+    }
     
     /**
      * Register widget controls
      */
-    protected function _register_controls() {
+    protected function register_controls() {
         // Content Section
         $this->start_controls_section(
             'content_section',

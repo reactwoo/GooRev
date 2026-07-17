@@ -222,7 +222,7 @@ class GRP_License {
             'license_key' => $license_key,
             'site_url' => home_url(),
             'plugin_version' => GRP_PLUGIN_VERSION,
-            'plugin_slug' => 'goorev'
+            'plugin_slug' => REACTWOO_REVIEWS_SLUG
         ));
         
         if (is_wp_error($response)) {
@@ -238,7 +238,7 @@ class GRP_License {
                 'accessToken' => $response['accessToken'] ?? $response['access_token'] ?? '',
                 'refreshToken' => $response['refreshToken'] ?? $response['refresh_token'] ?? '',
                 'packageType' => $response['packageType'] ?? $response['package_type'] ?? '',
-                'pluginSlug' => $response['pluginSlug'] ?? $response['plugin_slug'] ?? 'goorev',
+                'pluginSlug' => $response['pluginSlug'] ?? $response['plugin_slug'] ?? REACTWOO_REVIEWS_SLUG,
                 'expires_at' => $response['expires_at'] ?? $response['expires_in'] ?? null,
                 'license_id' => $response['license']['id'] ?? $response['licenseId'] ?? null
             );
@@ -266,22 +266,17 @@ class GRP_License {
         // Get site domain
         $domain = parse_url(home_url(), PHP_URL_HOST);
         
-        // Build request body
-        $body = array(
-            'domain' => $domain,
-            'plugin' => 'goorev',
-            'plugin_version' => GRP_PLUGIN_VERSION
-        );
-        
+        $plugin_slug = defined('REACTWOO_REVIEWS_SLUG') ? REACTWOO_REVIEWS_SLUG : 'reactwoo-reviews';
+
         // SECURITY: Add HMAC signature for authentication
         $plugin_secret = defined('GRP_PLUGIN_SECRET') ? GRP_PLUGIN_SECRET : 'goorev-free-license-secret-key-2024';
         $timestamp = time();
-        $signature = hash_hmac('sha256', $domain . ':goorev:' . $timestamp, $plugin_secret);
+        $signature = hash_hmac('sha256', $domain . ':' . $plugin_slug . ':' . $timestamp, $plugin_secret);
         
         // Build request body with signature and timestamp (server expects them in body, not headers)
         $request_body = array(
             'domain' => $domain,
-            'plugin' => 'goorev',
+            'plugin' => $plugin_slug,
             'plugin_version' => GRP_PLUGIN_VERSION,
             'signature' => $signature,
             'timestamp' => $timestamp
@@ -293,7 +288,7 @@ class GRP_License {
             'timeout' => 15,
             'headers' => array(
                 'Content-Type' => 'application/json',
-                'User-Agent' => 'GooRev-Plugin/' . GRP_PLUGIN_VERSION
+                'User-Agent' => 'ReactWoo-Reviews/' . GRP_PLUGIN_VERSION
             )
         ));
         
@@ -341,7 +336,7 @@ class GRP_License {
         $response = $this->make_license_request('deactivate', array(
             'license_key' => $license_key,
             'site_url' => home_url(),
-            'plugin_slug' => 'goorev'
+            'plugin_slug' => REACTWOO_REVIEWS_SLUG
         ));
         
         // Always deactivate locally, even if remote request fails
@@ -367,7 +362,7 @@ class GRP_License {
         $response = $this->make_license_request('check', array(
             'license_key' => $license_key,
             'site_url' => home_url(),
-            'plugin_slug' => 'goorev'
+            'plugin_slug' => REACTWOO_REVIEWS_SLUG
         ));
         
         if (is_wp_error($response)) {
@@ -433,7 +428,7 @@ class GRP_License {
             'licenseKey' => $data['license_key'] ?? $data['licenseKey'] ?? '',
             'domain' => $domain,
             'pluginVersion' => $data['plugin_version'] ?? $data['pluginVersion'] ?? GRP_PLUGIN_VERSION,
-            'pluginSlug' => $data['plugin_slug'] ?? $data['pluginSlug'] ?? 'goorev'
+            'pluginSlug' => $data['plugin_slug'] ?? $data['pluginSlug'] ?? (defined('REACTWOO_REVIEWS_SLUG') ? REACTWOO_REVIEWS_SLUG : 'reactwoo-reviews')
         );
         
         $body = wp_json_encode($request_data);

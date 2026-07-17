@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "google-reviews/reviews",
+  "title": "Google Reviews",
+  "category": "widgets",
+  "icon": "star-filled",
+  "description": "Display Google Business reviews with customizable layouts and styles.",
+  "keywords": ["google", "reviews", "testimonials", "ratings"],
+  "textdomain": "google-reviews-plugin",
+  "supports": {
+    "html": false,
+    "align": ["wide", "full"]
+  }
+}

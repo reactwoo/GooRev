@@ -45,11 +45,25 @@ class GRP_Elementor_Review_Button_Widget extends \Elementor\Widget_Base {
     public function get_keywords() {
         return ['google', 'review', 'button', 'link'];
     }
+
+    /**
+     * @return array<int, string>
+     */
+    public function get_style_depends() {
+        return array('grp-frontend', 'grp-elementor', 'grp-review-widgets');
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function get_script_depends() {
+        return array('grp-review-widgets');
+    }
     
     /**
      * Register widget controls
      */
-    protected function _register_controls() {
+    protected function register_controls() {
         // Content Section
         $this->start_controls_section(
             'content_section',
